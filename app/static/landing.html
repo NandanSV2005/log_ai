@@ -237,6 +237,114 @@
       color: var(--text-muted);
       line-height: 1.5;
     }
+
+    /* How It Works Section */
+    .how-it-works-section {
+      margin-top: 5rem;
+      width: 100%;
+      text-align: center;
+    }
+    .section-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 0.75rem;
+      letter-spacing: 0.5px;
+    }
+    .section-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 2.5rem;
+    }
+    .pipeline-grid {
+      display: flex;
+      gap: 1.5rem;
+      width: 100%;
+      justify-content: space-between;
+    }
+    @media (max-width: 800px) {
+      .pipeline-grid {
+        flex-direction: column;
+      }
+    }
+    .pipeline-card {
+      flex: 1;
+      background: rgba(13, 19, 33, 0.9);
+      border: 1px solid var(--neon-cyan-border);
+      border-radius: 14px;
+      padding: 1.75rem 1.5rem;
+      text-align: left;
+      backdrop-filter: blur(16px);
+      position: relative;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s ease;
+    }
+    .pipeline-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 15px 35px rgba(0, 240, 255, 0.2);
+    }
+    .pipeline-num {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--neon-cyan);
+      background: var(--neon-cyan-bg);
+      border: 1px solid var(--neon-cyan-border);
+      padding: 4px 12px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-bottom: 1rem;
+      letter-spacing: 1px;
+    }
+    .pipeline-step-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.6rem;
+    }
+    .pipeline-step-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Landing Footer */
+    .landing-footer {
+      width: 100%;
+      border-top: 1px solid var(--border-color);
+      background: rgba(11, 19, 41, 0.95);
+      padding: 2.5rem 2rem;
+      margin-top: 5rem;
+    }
+    .footer-content {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+    .footer-brand {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .footer-brand strong {
+      color: var(--text-main);
+    }
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+    .footer-links a:hover {
+      color: var(--neon-cyan);
+    }
   </style>
 </head>
 <body>
@@ -303,7 +411,47 @@
           <div class="feature-desc">Real-time Leaflet IP threat mapping, full-text NLP search filtering, and 1-click CSV incident export.</div>
         </div>
       </div>
+
+      <!-- How It Works Section -->
+      <section class="how-it-works-section">
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-subtitle">Automated, end-to-end security telemetry pipeline from ingestion to response</p>
+        
+        <div class="pipeline-grid">
+          <div class="pipeline-card">
+            <span class="pipeline-num">STEP 01</span>
+            <h3 class="pipeline-step-title">1. Ingest</h3>
+            <p class="pipeline-step-desc">Multi-vendor log support for Syslog, AWS CloudWatch, Cisco ASA, Fortinet, pfSense, and raw text streams with zero-loss raw payload retention.</p>
+          </div>
+          <div class="pipeline-card">
+            <span class="pipeline-num">STEP 02</span>
+            <h3 class="pipeline-step-title">2. Analyze</h3>
+            <p class="pipeline-step-desc">Explainable AI &amp; Isolation Forests detect threats, score anomaly risks, and build natural language diagnostic evidence chains.</p>
+          </div>
+          <div class="pipeline-card">
+            <span class="pipeline-num">STEP 03</span>
+            <h3 class="pipeline-step-title">3. Act</h3>
+            <p class="pipeline-step-desc">Real-time SOC Dashboard streams live threat velocity, Leaflet IP attack maps, Merkle chain forensic audits, and automated mitigation.</p>
+          </div>
+        </div>
+      </section>
     </main>
+
+    <!-- Footer -->
+    <footer class="landing-footer">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <strong>LOG AI Platform</strong> &copy; 2026 LOG AI Security Inc. All rights reserved.
+        </div>
+        <div class="footer-links">
+          <a href="#">Documentation</a>
+          <a href="#">API Reference</a>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">Contact SOC Team</a>
+        </div>
+      </div>
+    </footer>
   </div>
 
   <script>

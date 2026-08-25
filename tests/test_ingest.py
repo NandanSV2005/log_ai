@@ -153,3 +153,36 @@ async def test_ingest_rate_limit_exceeded(client: AsyncClient, auth_headers: dic
     assert 202 in status_codes
     assert 429 in status_codes
     limiter.reset()
+
+@pytest.mark.asyncio
+async def test_ingest_file_upload(client: AsyncClient, temp_storage_dir: Path, auth_headers: dict):
+    file_content = (
+        "2026-08-25 19:00:00 [INFO] System startup complete\n"
+        "2026-08-25 19:00:01 [WARN] High memory usage detected from 198.51.100.99\n"
+    ).encode("utf-8")
+
+    files = {"file": ("test_log.txt", file_content, "text/plain")}
+    response = await client.post(
+        "/api/v1/ingest/file",
+        files=files,
+        headers=auth_headers,
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert data["filename"] == "test_log.txt"
+    assert data["events_processed"] == 2
+    assert data["bytes_received"] == len(file_content)
+    assert "ingestion_id" in data
+    assert "payload_hash" in data
+    assert "merkle_root" in data
+
+@pytest.mark.asyncio
+async def test_ingest_file_upload_unauthorized(client: AsyncClient):
+    files = {"file": ("sample.log", b"test log payload", "text/plain")}
+    response = await client.post(
+        "/api/v1/ingest/file",
+        files=files,
+    )
+    assert response.status_code == 401
+

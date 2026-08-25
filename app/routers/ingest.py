@@ -1,12 +1,16 @@
 import uuid
 import datetime
 from typing import Optional
-from fastapi import APIRouter, Request, Query, HTTPException, status, Depends
+from fastapi import APIRouter, Request, Query, HTTPException, status, Depends, UploadFile, File
 from pydantic import BaseModel, Field
 
 from app.config import settings
 from app.storage.raw_writer import raw_storage_manager
+from app.storage.normalized_writer import normalized_storage_manager
 from app.parsers.base import detect_log_format
+from app.parsers.dynamic_parser import DynamicParser
+from app.detection.anomaly_engine import anomaly_engine
+from app.xai.explainer import xai_explainer
 from app.services.queue import queue_manager, IngestionTask
 from app.audit.hash_chain import audit_merkle_tree
 from app.routers.auth import get_current_user
@@ -27,6 +31,16 @@ class IngestResponse(BaseModel):
     payload_hash: str = Field(..., description="SHA-256 hash of incoming raw payload")
     merkle_root: str = Field(..., description="Current cryptographic Merkle tree root hash")
     raw_storage_file: str = Field(..., description="Path to persisted raw compressed payload file")
+
+class FileIngestResponse(BaseModel):
+    ingestion_id: str = Field(..., description="Unique forensic identifier for the ingestion request")
+    status: str = Field("success", description="File ingestion processing status")
+    filename: str = Field(..., description="Name of the uploaded file")
+    events_processed: int = Field(..., description="Number of log events parsed and normalized")
+    bytes_received: int = Field(..., description="Size of uploaded file in bytes")
+    payload_hash: str = Field(..., description="SHA-256 hash of uploaded file payload")
+    merkle_root: str = Field(..., description="Current cryptographic Merkle tree root hash")
+    timestamp: str = Field(..., description="UTC ISO-8601 timestamp")
 
 @router.post(
     "/ingest",
@@ -111,3 +125,65 @@ async def ingest_logs(
         merkle_root=merkle_root,
         raw_storage_file=raw_file_path.name,
     )
+
+@router.post(
+    "/ingest/file",
+    status_code=status.HTTP_200_OK,
+    response_model=FileIngestResponse,
+    summary="Ingest manual log file upload",
+    description=(
+        "Accepts a manual log file upload (.txt, .log), reads each line as a raw log event, "
+        "and processes all events through the AI anomaly detection and OCSF normalization pipeline."
+    ),
+)
+async def ingest_log_file(
+    file: UploadFile = File(...),
+    current_user=Depends(get_current_user),
+):
+    contents = await file.read()
+    if not contents:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Empty file upload",
+        )
+
+    raw_str = contents.decode("utf-8", errors="replace")
+    ingestion_id = uuid.uuid4().hex
+    now = datetime.datetime.now(datetime.timezone.utc)
+
+    # 1. Write raw payload to storage for zero-loss forensics
+    raw_file_path = await raw_storage_manager.write_raw_payload(
+        ingestion_id=ingestion_id,
+        raw_data=contents,
+        content_type=file.content_type or "text/plain",
+        detected_format="text",
+        client_host="file_upload",
+    )
+
+    payload_hash = audit_merkle_tree.hash_payload(contents)
+    merkle_root = audit_merkle_tree.get_root_hash()
+
+    # 2. Process file line by line through Dynamic Parser, Anomaly Engine, XAI & Normalized Storage
+    dynamic_parser = DynamicParser()
+    unified_events = dynamic_parser.parse(raw_str)
+
+    enriched_events = anomaly_engine.evaluate_events(unified_events)
+    for event in enriched_events:
+        event.xai_explanation = xai_explainer.generate_explanation(event)
+
+    await normalized_storage_manager.write_normalized_events(
+        ingestion_id=ingestion_id,
+        events=enriched_events,
+    )
+
+    return FileIngestResponse(
+        ingestion_id=ingestion_id,
+        status="success",
+        filename=file.filename or "uploaded.log",
+        events_processed=len(enriched_events),
+        bytes_received=len(contents),
+        payload_hash=payload_hash,
+        merkle_root=merkle_root,
+        timestamp=now.isoformat(),
+    )
+

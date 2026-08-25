@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupDownloadReport();
   setupNlpSearch();
   setupAttackSimulator();
+  setupFileUpload();
   setupLogout();
   fetchDashboardData();
   setInterval(fetchDashboardData, POLLING_INTERVAL_MS);
@@ -251,6 +252,60 @@ function setupAttackSimulator() {
         btn.innerHTML = originalHtml;
         btn.disabled = false;
       }, 1000);
+    }
+  });
+}
+
+/**
+ * Sets up manual log file upload event handler.
+ */
+function setupFileUpload() {
+  const btn = document.getElementById('upload-log-btn');
+  const input = document.getElementById('upload-log-input');
+  if (!btn || !input) return;
+
+  btn.addEventListener('click', () => {
+    input.click();
+  });
+
+  input.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    showToast(`Uploading ${file.name}...`, 'warning');
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/v1/ingest/file', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData,
+      });
+
+      if (res.status === 401) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+        return;
+      }
+
+      if (res.ok) {
+        const data = await res.json();
+        showToast(`Successfully processed ${data.events_processed || 0} events from ${file.name}`, 'warning');
+        await fetchDashboardData();
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        showToast(errData.detail || `Upload failed with status ${res.status}`, 'error');
+      }
+    } catch (err) {
+      console.error('Error uploading log file:', err);
+      showToast('Network error during file upload', 'error');
+    } finally {
+      input.value = '';
     }
   });
 }
