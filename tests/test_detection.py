@@ -63,19 +63,21 @@ def test_suricata_alert_scoring():
     assert "suricata_alert" in evaluated.anomaly_flags
 
 @pytest.mark.asyncio
-async def test_end_to_end_threat_scoring_pipeline(client: AsyncClient):
+async def test_end_to_end_threat_scoring_pipeline(client: AsyncClient, auth_headers: dict):
     payload = (
         "%ASA-4-106023: Deny tcp src outside:198.51.100.88/12345 dst inside:10.0.0.1/80\n"
         "%ASA-4-106023: Deny tcp src outside:198.51.100.88/12346 dst inside:10.0.0.1/80\n"
         "%ASA-4-106023: Deny tcp src outside:198.51.100.88/12347 dst inside:10.0.0.1/80\n"
     )
 
+    headers = {"Content-Type": "text/plain", **auth_headers}
     response = await client.post(
         "/api/v1/ingest",
         content=payload.encode("utf-8"),
-        headers={"Content-Type": "text/plain"},
+        headers=headers,
     )
     assert response.status_code == 202
+
 
     norm_files = []
     for _ in range(20):

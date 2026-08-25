@@ -75,15 +75,17 @@ def test_dynamic_parser_multiple_unstructured_lines():
     assert events[1].destination_ip == "192.168.1.1"
 
 @pytest.mark.asyncio
-async def test_end_to_end_normalized_storage(client: AsyncClient):
+async def test_end_to_end_normalized_storage(client: AsyncClient, auth_headers: dict):
     payload = "2026-08-25 19:25:00 [ERROR] Authentication failed for user admin from 192.168.1.88"
     
+    headers = {"Content-Type": "text/plain", **auth_headers}
     response = await client.post(
         "/api/v1/ingest",
         content=payload.encode("utf-8"),
-        headers={"Content-Type": "text/plain"},
+        headers=headers,
     )
     assert response.status_code == 202
+
     data = response.json()
     ingestion_id = data["ingestion_id"]
 

@@ -1,17 +1,15 @@
 import logging
-import secrets
 from pathlib import Path
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, Depends, HTTPException, status
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from slowapi.errors import RateLimitExceeded
 from slowapi import _rate_limit_exceeded_handler
 
 from app.config import settings
-from app.routers import ingest, dashboard
+from app.routers import ingest, dashboard, auth
 from app.services.queue import queue_manager
 
 logging.basicConfig(
@@ -59,32 +57,30 @@ async def add_security_headers(request: Request, call_next):
     return response
 
 # Include Routers
+app.include_router(auth.router)
 app.include_router(ingest.router)
 app.include_router(dashboard.router)
 
 static_dir = Path(__file__).parent / "static"
-security = HTTPBasic()
 
-def authenticate_user(credentials: HTTPBasicCredentials = Depends(security)):
-    current_username_bytes = credentials.username.encode("utf-8")
-    correct_username_bytes = settings.DASHBOARD_USER.encode("utf-8")
-    is_correct_username = secrets.compare_digest(current_username_bytes, correct_username_bytes)
+@app.get("/", response_class=FileResponse, tags=["SaaS Landing Page"])
+async def get_landing_page():
+    """Serves the SaaS Landing Page."""
+    return FileResponse(static_dir / "landing.html")
 
-    current_password_bytes = credentials.password.encode("utf-8")
-    correct_password_bytes = settings.DASHBOARD_PASS.encode("utf-8")
-    is_correct_password = secrets.compare_digest(current_password_bytes, correct_password_bytes)
+@app.get("/login", response_class=FileResponse, tags=["Authentication UI"])
+async def get_login_page():
+    """Serves the Login UI."""
+    return FileResponse(static_dir / "login.html")
 
-    if not (is_correct_username and is_correct_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Basic"},
-        )
-    return credentials.username
+@app.get("/register", response_class=FileResponse, tags=["Authentication UI"])
+async def get_register_page():
+    """Serves the Registration UI."""
+    return FileResponse(static_dir / "register.html")
 
-@app.get("/", response_class=FileResponse, tags=["Dashboard UI"])
-async def get_dashboard_ui(username: str = Depends(authenticate_user)):
-    """Serves the main SOC Dashboard frontend index.html protected by HTTP Basic Auth."""
+@app.get("/dashboard", response_class=FileResponse, tags=["Dashboard UI"])
+async def get_dashboard_ui():
+    """Serves the main SOC Dashboard frontend index.html."""
     return FileResponse(static_dir / "index.html")
 
 @app.get("/health", tags=["Health"])
@@ -104,4 +100,5 @@ async def get_metrics():
 # Mount Static Assets at root (must be after API routes to avoid path collisions)
 if static_dir.exists():
     app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
+
 

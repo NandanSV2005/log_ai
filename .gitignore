@@ -32,10 +32,12 @@ htmlcov/
 .hypothesis/
 
 # Data directories & Storage
+*.db
 data/raw/*
 !data/raw/.gitkeep
 data/normalized/*
 !data/normalized/.gitkeep
+
 
 # IDE & Editor
 .vscode/

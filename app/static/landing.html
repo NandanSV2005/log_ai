@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LOG AI — Intelligent Security Operations Center Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .hero-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 5rem 2rem;
+      max-width: 1000px;
+      margin: 0 auto;
+      flex: 1;
+    }
+    .hero-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--neon-cyan);
+      background: var(--neon-cyan-bg);
+      border: 1px solid var(--neon-cyan-border);
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 1.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .hero-title {
+      font-size: 3.2rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 1.25rem;
+      background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 720px;
+      margin-bottom: 2.5rem;
+      line-height: 1.6;
+    }
+    .cta-group {
+      display: flex;
+      gap: 1.25rem;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #070b14;
+      background: var(--neon-cyan);
+      padding: 12px 28px;
+      border-radius: 30px;
+      text-decoration: none;
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.4);
+      transition: all 0.25s ease;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 35px rgba(0, 240, 255, 0.6);
+    }
+    .btn-outline {
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      padding: 12px 28px;
+      border-radius: 30px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateY(-2px);
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 4rem;
+      width: 100%;
+      text-align: left;
+    }
+    @media (max-width: 900px) {
+      .features-grid { grid-template-columns: 1fr; }
+      .hero-title { font-size: 2.3rem; }
+    }
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 1.5rem;
+      backdrop-filter: blur(16px);
+    }
+    .feature-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+    }
+    .feature-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="navbar">
+      <div class="brand">
+        <div class="logo-shield">
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.2" fill="none">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            <path d="m9 12 2 2 4-4"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>LOG AI <span class="badge-tag">ENTERPRISE SOC</span></h1>
+          <p>Next-Gen Security Operations Platform</p>
+        </div>
+      </div>
+      <div class="nav-controls">
+        <a href="/login" class="btn-outline" style="padding: 6px 18px; font-size: 0.8rem;">Log In</a>
+        <a href="/register" class="btn-primary" style="padding: 6px 18px; font-size: 0.8rem;">Register</a>
+      </div>
+    </header>
+
+    <main class="hero-container">
+      <div class="hero-badge">
+        <span class="pulse-dot"></span> AI-POWERED LOG INGESTION &amp; THREAT INTELLIGENCE
+      </div>
+      <h1 class="hero-title">Zero-Loss Forensics meets Explainable AI Security</h1>
+      <p class="hero-subtitle">
+        LOG AI parses, normalizes, and audits security events in real-time across enterprise log vendors with cryptographic SHA-256 Merkle tree verification.
+      </p>
+      <div class="cta-group">
+        <a href="/register" class="btn-primary">Get Started Free</a>
+        <a href="/login" class="btn-outline">Open SOC Dashboard</a>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-title">🛡️ Explainable AI Threat Scoring</div>
+          <div class="feature-desc">Multi-stage heuristic &amp; feature anomaly detection delivering instant XAI explanations for security analysts.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-title">🔗 Merkle Tree Auditability</div>
+          <div class="feature-desc">Zero information loss with cryptographic SHA-256 Merkle hash chain audit logs for forensic immutability.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-title">🗺️ Geolocation &amp; Incident Reports</div>
+          <div class="feature-desc">Real-time Leaflet IP threat mapping, full-text NLP search filtering, and 1-click CSV incident export.</div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

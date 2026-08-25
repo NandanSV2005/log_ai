@@ -3,9 +3,9 @@ import io
 import csv
 from pathlib import Path
 from typing import Dict, Any, List
-from fastapi import APIRouter, Query, Response
-
+from fastapi import APIRouter, Query, Response, Depends
 from app.storage.normalized_writer import normalized_storage_manager
+from app.routers.auth import get_current_user
 
 router = APIRouter(prefix="/api/v1/dashboard", tags=["Dashboard"])
 
@@ -32,7 +32,10 @@ def _read_all_normalized_records() -> List[Dict[str, Any]]:
     return records
 
 @router.get("/events/recent", response_model=Dict[str, Any])
-async def get_recent_events(limit: int = Query(default=100, ge=1, le=1000)):
+async def get_recent_events(
+    limit: int = Query(default=100, ge=1, le=1000),
+    current_user=Depends(get_current_user),
+):
     """
     Returns the most recent normalized UnifiedEvent records (up to limit, default 100),
     including XAI explanations and Merkle audit hashes.
@@ -50,7 +53,7 @@ async def get_recent_events(limit: int = Query(default=100, ge=1, le=1000)):
     }
 
 @router.get("/stats", response_model=Dict[str, Any])
-async def get_dashboard_stats():
+async def get_dashboard_stats(current_user=Depends(get_current_user)):
     """
     Calculates and returns real-time aggregate dashboard statistics:
     - total_events_ingested
@@ -97,7 +100,7 @@ async def get_dashboard_stats():
     }
 
 @router.get("/export/csv")
-async def export_threat_report_csv():
+async def export_threat_report_csv(current_user=Depends(get_current_user)):
     """
     Compiles all ingested events where threat_level is HIGH or MEDIUM into CSV format.
     Columns: Timestamp, Source_IP, Threat_Level, Threat_Score, Parser, Merkle_Hash, XAI_Explanation
@@ -138,4 +141,5 @@ async def export_threat_report_csv():
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=threat_report.csv"},
     )
+
 

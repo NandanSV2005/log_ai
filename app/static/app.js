@@ -14,6 +14,20 @@ let currentSearchQuery = '';
 let currentEventsList = [];
 const expandedRowKeys = new Set();
 
+// Immediate authentication check
+const userToken = localStorage.getItem('token');
+if (!userToken) {
+  window.location.href = '/login';
+}
+
+function getAuthHeaders(extraHeaders = {}) {
+  const token = localStorage.getItem('token');
+  return {
+    'Authorization': `Bearer ${token}`,
+    ...extraHeaders
+  };
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   startClock();
   initChart();
@@ -22,9 +36,19 @@ document.addEventListener('DOMContentLoaded', () => {
   setupDownloadReport();
   setupNlpSearch();
   setupAttackSimulator();
+  setupLogout();
   fetchDashboardData();
   setInterval(fetchDashboardData, POLLING_INTERVAL_MS);
 });
+
+function setupLogout() {
+  const btn = document.getElementById('logout-btn');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    localStorage.removeItem('token');
+    window.location.href = '/login';
+  });
+}
 
 /**
  * Dark / Light Theme Toggle Manager
@@ -62,10 +86,32 @@ function setupDownloadReport() {
   const btn = document.getElementById('download-report-btn');
   if (!btn) return;
 
-  btn.addEventListener('click', () => {
-    window.location.href = '/api/v1/dashboard/export/csv';
+  btn.addEventListener('click', async () => {
+    try {
+      const res = await fetch('/api/v1/dashboard/export/csv', {
+        headers: getAuthHeaders()
+      });
+      if (res.status === 401) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+        return;
+      }
+      if (!res.ok) throw new Error('Download failed');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'threat_report.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      showToast('Failed to download threat report', 'error');
+    }
   });
 }
+
 
 /**
  * Natural Language Search Listener
@@ -178,9 +224,15 @@ function setupAttackSimulator() {
 
       const res = await fetch('/api/v1/ingest', {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
+        headers: getAuthHeaders({ 'Content-Type': 'text/plain' }),
         body: payload,
       });
+
+      if (res.status === 401) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+        return;
+      }
 
       if (res.ok) {
         // Allow brief moment for background worker loop, then immediately force UI refresh
@@ -346,7 +398,12 @@ async function fetchDashboardData() {
  * Fetches and updates aggregate stats metrics cards & Chart.js graph.
  */
 async function updateStats() {
-  const res = await fetch(API_STATS_URL);
+  const res = await fetch(API_STATS_URL, { headers: getAuthHeaders() });
+  if (res.status === 401) {
+    localStorage.removeItem('token');
+    window.location.href = '/login';
+    return;
+  }
   if (!res.ok) throw new Error(`Stats HTTP error ${res.status}`);
   const data = await res.json();
 
@@ -401,7 +458,12 @@ async function updateStats() {
  * Fetches and renders recent 100 normalized events stream.
  */
 async function updateEventsTable() {
-  const res = await fetch(API_RECENT_EVENTS_URL);
+  const res = await fetch(API_RECENT_EVENTS_URL, { headers: getAuthHeaders() });
+  if (res.status === 401) {
+    localStorage.removeItem('token');
+    window.location.href = '/login';
+    return;
+  }
   if (!res.ok) throw new Error(`Events HTTP error ${res.status}`);
   const data = await res.json();
 
@@ -409,6 +471,7 @@ async function updateEventsTable() {
   updateThreatMap(currentEventsList);
   renderFilteredEventsTable();
 }
+
 
 /**
  * Filters and renders visible table rows based on NLP search input.

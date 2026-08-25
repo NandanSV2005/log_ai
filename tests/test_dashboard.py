@@ -46,16 +46,37 @@ def test_xai_explainer_anomalous_event():
     assert "198.51.100.99" in explanation
 
 @pytest.mark.asyncio
-async def test_dashboard_recent_events_endpoint(client: AsyncClient):
+async def test_user_registration_and_login(client: AsyncClient):
+    # Test Register
+    reg_res = await client.post(
+        "/api/v1/auth/register",
+        json={"username": "newanalyst", "password": "SuperPassword123!"},
+    )
+    assert reg_res.status_code == 201
+    assert reg_res.json()["username"] == "newanalyst"
+
+    # Test Login
+    login_res = await client.post(
+        "/api/v1/auth/login",
+        json={"username": "newanalyst", "password": "SuperPassword123!"},
+    )
+    assert login_res.status_code == 200
+    token_data = login_res.json()
+    assert "access_token" in token_data
+    assert token_data["token_type"] == "bearer"
+
+@pytest.mark.asyncio
+async def test_dashboard_recent_events_endpoint(client: AsyncClient, auth_headers: dict):
     payload = (
         "%ASA-4-106023: Deny tcp src outside:198.51.100.44/12345 dst inside:10.0.0.1/80\n"
         "<134>1 2026-08-25T19:50:00Z webserver nginx 1234 - - User logged in from 192.168.1.50\n"
     )
 
+    headers = {"Content-Type": "text/plain", **auth_headers}
     response = await client.post(
         "/api/v1/ingest",
         content=payload.encode("utf-8"),
-        headers={"Content-Type": "text/plain"},
+        headers=headers,
     )
     assert response.status_code == 202
 
@@ -65,7 +86,7 @@ async def test_dashboard_recent_events_endpoint(client: AsyncClient):
             break
         await asyncio.sleep(0.05)
 
-    res = await client.get("/api/v1/dashboard/events/recent?limit=10")
+    res = await client.get("/api/v1/dashboard/events/recent?limit=10", headers=auth_headers)
     assert res.status_code == 200
     data = res.json()
 
@@ -79,16 +100,17 @@ async def test_dashboard_recent_events_endpoint(client: AsyncClient):
     assert len(first_event["xai_explanation"]) > 0
 
 @pytest.mark.asyncio
-async def test_dashboard_stats_endpoint(client: AsyncClient):
+async def test_dashboard_stats_endpoint(client: AsyncClient, auth_headers: dict):
     payload = (
         "devname=FG100D action=deny srcip=198.51.100.55 dstip=10.0.0.5 policyid=10\n"
         '{"event_type":"alert","src_ip":"198.51.100.66","dest_ip":"10.0.0.6","alert":{"signature":"ET MALWARE","severity":1}}\n'
     )
 
+    headers = {"Content-Type": "text/plain", **auth_headers}
     response = await client.post(
         "/api/v1/ingest",
         content=payload.encode("utf-8"),
-        headers={"Content-Type": "text/plain"},
+        headers=headers,
     )
     assert response.status_code == 202
 
@@ -98,7 +120,7 @@ async def test_dashboard_stats_endpoint(client: AsyncClient):
             break
         await asyncio.sleep(0.05)
 
-    res = await client.get("/api/v1/dashboard/stats")
+    res = await client.get("/api/v1/dashboard/stats", headers=auth_headers)
     assert res.status_code == 200
     stats = res.json()
 
@@ -110,17 +132,17 @@ async def test_dashboard_stats_endpoint(client: AsyncClient):
     assert "LOW" in stats["threat_level_counts"]
 
 @pytest.mark.asyncio
-async def test_root_dashboard_html_endpoint(client: AsyncClient):
-    # Unauthenticated request should be rejected with 401
-    unauth_res = await client.get("/")
-    assert unauth_res.status_code == 401
-    assert unauth_res.headers.get("www-authenticate") == "Basic"
-
-    # Authenticated request with correct credentials
-    res = await client.get("/", auth=("admin", "SuperSecretPassword!"))
+async def test_frontend_pages_and_security_headers(client: AsyncClient):
+    res = await client.get("/")
     assert res.status_code == 200
     assert "text/html" in res.headers.get("content-type", "").lower()
     assert "LOG AI" in res.text
+
+    login_res = await client.get("/login")
+    assert login_res.status_code == 200
+
+    dash_res = await client.get("/dashboard")
+    assert dash_res.status_code == 200
 
     # Assert Security Headers
     assert res.headers.get("x-content-type-options") == "nosniff"
@@ -130,12 +152,13 @@ async def test_root_dashboard_html_endpoint(client: AsyncClient):
     assert "default-src 'self'" in res.headers.get("content-security-policy", "")
 
 @pytest.mark.asyncio
-async def test_dashboard_csv_export_endpoint(client: AsyncClient):
+async def test_dashboard_csv_export_endpoint(client: AsyncClient, auth_headers: dict):
     payload = "%ASA-4-106023: Deny tcp src outside:198.51.100.99/54321 dst inside:10.0.0.1/80\n"
+    headers = {"Content-Type": "text/plain", **auth_headers}
     response = await client.post(
         "/api/v1/ingest",
         content=payload.encode("utf-8"),
-        headers={"Content-Type": "text/plain"},
+        headers=headers,
     )
     assert response.status_code == 202
 
@@ -145,9 +168,8 @@ async def test_dashboard_csv_export_endpoint(client: AsyncClient):
             break
         await asyncio.sleep(0.05)
 
-    res = await client.get("/api/v1/dashboard/export/csv")
+    res = await client.get("/api/v1/dashboard/export/csv", headers=auth_headers)
     assert res.status_code == 200
     assert "text/csv" in res.headers.get("content-type", "").lower()
     assert "threat_report.csv" in res.headers.get("content-disposition", "")
     assert "Timestamp,Source_IP,Threat_Level,Threat_Score" in res.text
-

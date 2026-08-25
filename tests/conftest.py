@@ -13,6 +13,8 @@ from app.routers import ingest
 from app.services.queue import queue_manager
 from app.detection.anomaly_engine import anomaly_engine
 
+from app.database import Base, engine
+
 @pytest.fixture
 def temp_storage_dir():
     temp_dir = tempfile.mkdtemp()
@@ -46,6 +48,13 @@ def temp_storage_dir():
         except Exception:
             break
     
+    # Recreate DB tables for isolation
+    try:
+        Base.metadata.drop_all(bind=engine)
+        Base.metadata.create_all(bind=engine)
+    except Exception:
+        pass
+
     yield temp_path
     
     # Cleanup
@@ -75,3 +84,17 @@ async def client(temp_storage_dir):
     ) as ac:
         yield ac
     await queue_manager.stop_workers()
+
+@pytest.fixture
+async def auth_headers(client: AsyncClient):
+    await client.post(
+        "/api/v1/auth/register",
+        json={"username": "testanalyst", "password": "TestPassword123!"},
+    )
+    resp = await client.post(
+        "/api/v1/auth/login",
+        json={"username": "testanalyst", "password": "TestPassword123!"},
+    )
+    token = resp.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+

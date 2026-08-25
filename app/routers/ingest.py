@@ -1,15 +1,15 @@
 import uuid
 import datetime
 from typing import Optional
-from fastapi import APIRouter, Request, Query, HTTPException, status
+from fastapi import APIRouter, Request, Query, HTTPException, status, Depends
 from pydantic import BaseModel, Field
 
 from app.config import settings
 from app.storage.raw_writer import raw_storage_manager
 from app.parsers.base import detect_log_format
 from app.services.queue import queue_manager, IngestionTask
-
 from app.audit.hash_chain import audit_merkle_tree
+from app.routers.auth import get_current_user
 
 from slowapi import Limiter
 from slowapi.util import get_remote_address
@@ -46,7 +46,9 @@ async def ingest_logs(
         None,
         description="Explicit format override (json, syslog, csv, text)",
     ),
+    current_user=Depends(get_current_user),
 ):
+
     # 1. Extract raw request body
     raw_body = await request.body()
     if not raw_body:
