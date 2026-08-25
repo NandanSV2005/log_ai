@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LOG AI — Threat Intelligence SOC Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Navbar Header -->
+    <header class="navbar">
+      <div class="brand">
+        <div class="logo-shield">
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            <path d="m9 12 2 2 4-4"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>LOG AI <span class="badge-tag">SOC CORE</span></h1>
+          <p>Zero-Loss Forensic Ingestion &bull; Explainable AI Threat Intelligence</p>
+        </div>
+      </div>
+      <div class="nav-controls">
+        <button id="simulate-attack-btn" class="btn-attack">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+          </svg>
+          <span>Simulate Brute Force Attack</span>
+        </button>
+        <div class="status-pill cyan-glow">
+          <span class="pulse-dot"></span>
+          <span id="connection-status">LIVE POLLING (2s)</span>
+        </div>
+        <div class="clock-badge" id="system-clock">--:--:-- UTC</div>
+      </div>
+    </header>
+
+    <!-- Main Dashboard Body -->
+    <main class="dashboard-body">
+      <!-- Row 1: KPI Metrics Cards Grid -->
+      <section class="kpi-grid">
+        <!-- Total Ingested Card -->
+        <div class="kpi-card card-total">
+          <div class="kpi-header">
+            <span class="kpi-title">TOTAL EVENTS INGESTED</span>
+            <div class="kpi-icon icon-cyan">
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+            </div>
+          </div>
+          <div class="kpi-value val-cyan" id="stat-total">0</div>
+          <div class="kpi-subtext">Zero Information Loss Audit Log</div>
+        </div>
+
+        <!-- High Threat Card (Neon Red) -->
+        <div class="kpi-card card-high">
+          <div class="kpi-header">
+            <span class="kpi-title">HIGH THREAT ALERTS</span>
+            <div class="kpi-icon icon-high">
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+            </div>
+          </div>
+          <div class="kpi-value val-high" id="stat-high">0</div>
+          <div class="kpi-subtext">Threat Score &ge; 70.0</div>
+        </div>
+
+        <!-- Medium Threat Card (Neon Amber) -->
+        <div class="kpi-card card-medium">
+          <div class="kpi-header">
+            <span class="kpi-title">MEDIUM THREAT ALERTS</span>
+            <div class="kpi-icon icon-medium">
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </div>
+          </div>
+          <div class="kpi-value val-medium" id="stat-medium">0</div>
+          <div class="kpi-subtext">Threat Score 35.0 &ndash; 69.9</div>
+        </div>
+
+        <!-- Low Threat Card (Neon Cyan) -->
+        <div class="kpi-card card-low">
+          <div class="kpi-header">
+            <span class="kpi-title">LOW THREAT / BENIGN</span>
+            <div class="kpi-icon icon-low">
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            </div>
+          </div>
+          <div class="kpi-value val-low" id="stat-low">0</div>
+          <div class="kpi-subtext">Normal Baseline Activity</div>
+        </div>
+      </section>
+
+      <!-- Row 2: Real-Time Chart & Vendor Breakdown -->
+      <section class="analytics-row">
+        <!-- Live Chart Card: Threat Velocity -->
+        <div class="chart-card">
+          <div class="card-title-bar">
+            <div class="chart-title">
+              <span class="chart-icon"></span>
+              <h3>THREAT VELOCITY (REAL-TIME STREAM)</h3>
+            </div>
+            <span class="chart-tag">LIVE STREAMING</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="threatVelocityChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Vendor Parser Distribution Card -->
+        <div class="vendor-card">
+          <div class="card-title-bar">
+            <div class="chart-title">
+              <h3>VENDOR PARSER BREAKDOWN</h3>
+            </div>
+            <span class="chart-tag">STAGE 1 & 2</span>
+          </div>
+          <div class="vendor-pills-container" id="vendor-breakdown-list">
+            <span class="v-pill-loading">Loading vendor parser distribution...</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Row 3: Event Stream Table Section -->
+      <section class="table-section">
+        <div class="table-header">
+          <div class="table-title">
+            <h2>REAL-TIME THREAT EVENT STREAM</h2>
+            <span class="sub-count" id="table-count-badge">Showing 0 latest events &bull; Click any row for raw evidence</span>
+          </div>
+          <div class="table-actions">
+            <span class="live-indicator"><span class="pulse-dot-small"></span> AUTO-REFRESHING</span>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 140px;">TIMESTAMP</th>
+                <th style="width: 130px;">SOURCE IP</th>
+                <th style="width: 140px;">VENDOR PARSER</th>
+                <th style="width: 130px;">THREAT LEVEL</th>
+                <th>EXPLAINABLE AI (XAI) INSIGHT</th>
+                <th style="width: 170px;">MERKLE AUDIT HASH</th>
+              </tr>
+            </thead>
+            <tbody id="event-stream-body">
+              <tr>
+                <td colspan="6" class="loading-cell">
+                  <div class="spinner"></div>
+                  <span>Connecting to Log AI Threat Engine Stream...</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
