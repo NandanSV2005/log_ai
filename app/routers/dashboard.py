@@ -1,7 +1,9 @@
 import json
+import io
+import csv
 from pathlib import Path
 from typing import Dict, Any, List
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Response
 
 from app.storage.normalized_writer import normalized_storage_manager
 
@@ -93,3 +95,47 @@ async def get_dashboard_stats():
         "threat_level_counts": threat_counts,
         "vendor_parser_counts": vendor_counts,
     }
+
+@router.get("/export/csv")
+async def export_threat_report_csv():
+    """
+    Compiles all ingested events where threat_level is HIGH or MEDIUM into CSV format.
+    Columns: Timestamp, Source_IP, Threat_Level, Threat_Score, Parser, Merkle_Hash, XAI_Explanation
+    """
+    all_records = _read_all_normalized_records()
+    high_med_records = [
+        r for r in all_records
+        if str(r.get("threat_level", "")).upper() in ("HIGH", "MEDIUM")
+    ]
+    high_med_records.sort(key=lambda r: str(r.get("timestamp", "")), reverse=True)
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        "Timestamp",
+        "Source_IP",
+        "Threat_Level",
+        "Threat_Score",
+        "Parser",
+        "Merkle_Hash",
+        "XAI_Explanation",
+    ])
+
+    for r in high_med_records:
+        writer.writerow([
+            r.get("timestamp", ""),
+            r.get("source_ip", "N/A"),
+            str(r.get("threat_level", "LOW")).upper(),
+            r.get("threat_score", 0.0),
+            r.get("event_type", "unstructured_log"),
+            r.get("raw_event_hash") or r.get("payload_hash") or "N/A",
+            r.get("xai_explanation", ""),
+        ])
+
+    csv_content = output.getvalue()
+    return Response(
+        content=csv_content,
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=threat_report.csv"},
+    )
+

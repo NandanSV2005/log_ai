@@ -128,3 +128,26 @@ async def test_root_dashboard_html_endpoint(client: AsyncClient):
     assert res.headers.get("x-xss-protection") == "1; mode=block"
     assert "max-age=31536000" in res.headers.get("strict-transport-security", "")
     assert "default-src 'self'" in res.headers.get("content-security-policy", "")
+
+@pytest.mark.asyncio
+async def test_dashboard_csv_export_endpoint(client: AsyncClient):
+    payload = "%ASA-4-106023: Deny tcp src outside:198.51.100.99/54321 dst inside:10.0.0.1/80\n"
+    response = await client.post(
+        "/api/v1/ingest",
+        content=payload.encode("utf-8"),
+        headers={"Content-Type": "text/plain"},
+    )
+    assert response.status_code == 202
+
+    # Poll until normalized files are written
+    for _ in range(20):
+        if list(normalized_storage_manager.storage_dir.glob("normalized_*.jsonl")):
+            break
+        await asyncio.sleep(0.05)
+
+    res = await client.get("/api/v1/dashboard/export/csv")
+    assert res.status_code == 200
+    assert "text/csv" in res.headers.get("content-type", "").lower()
+    assert "threat_report.csv" in res.headers.get("content-disposition", "")
+    assert "Timestamp,Source_IP,Threat_Level,Threat_Score" in res.text
+

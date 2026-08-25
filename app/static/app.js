@@ -8,15 +8,145 @@ const POLLING_INTERVAL_MS = 2000;
 const MAX_CHART_POINTS = 15;
 
 let threatVelocityChart = null;
+let threatMap = null;
+let threatMapMarkers = [];
+let currentSearchQuery = '';
+let currentEventsList = [];
 const expandedRowKeys = new Set();
 
 document.addEventListener('DOMContentLoaded', () => {
   startClock();
   initChart();
+  initThreatMap();
+  setupThemeToggle();
+  setupDownloadReport();
+  setupNlpSearch();
   setupAttackSimulator();
   fetchDashboardData();
   setInterval(fetchDashboardData, POLLING_INTERVAL_MS);
 });
+
+/**
+ * Dark / Light Theme Toggle Manager
+ */
+function setupThemeToggle() {
+  const btn = document.getElementById('theme-toggle-btn');
+  const icon = document.getElementById('theme-toggle-icon');
+  if (!btn || !icon) return;
+
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  if (savedTheme === 'light') {
+    document.body.classList.add('light-mode');
+    icon.textContent = '☀️';
+  } else {
+    document.body.classList.remove('light-mode');
+    icon.textContent = '🌙';
+  }
+
+  btn.addEventListener('click', () => {
+    const isLight = document.body.classList.toggle('light-mode');
+    if (isLight) {
+      icon.textContent = '☀️';
+      localStorage.setItem('theme', 'light');
+    } else {
+      icon.textContent = '🌙';
+      localStorage.setItem('theme', 'dark');
+    }
+  });
+}
+
+/**
+ * CSV Threat Report Download Handler
+ */
+function setupDownloadReport() {
+  const btn = document.getElementById('download-report-btn');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    window.location.href = '/api/v1/dashboard/export/csv';
+  });
+}
+
+/**
+ * Natural Language Search Listener
+ */
+function setupNlpSearch() {
+  const input = document.getElementById('nlp-search-input');
+  if (!input) return;
+
+  input.addEventListener('input', (e) => {
+    currentSearchQuery = (e.target.value || '').trim().toLowerCase();
+    renderFilteredEventsTable();
+  });
+}
+
+/**
+ * Leaflet.js Real-Time Geolocation Threat Map
+ */
+function initThreatMap() {
+  const mapEl = document.getElementById('threat-map');
+  if (!mapEl || typeof L === 'undefined') return;
+
+  try {
+    threatMap = L.map('threat-map').setView([20, 0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(threatMap);
+  } catch (err) {
+    console.error('Failed to initialize Leaflet threat map:', err);
+  }
+}
+
+/**
+ * Deterministic Lat/Lng generator based on IP string hashing
+ */
+function hashIpToLatLng(ipStr) {
+  if (!ipStr || ipStr === 'N/A') return [20, 0];
+  let hash = 0;
+  for (let i = 0; i < ipStr.length; i++) {
+    hash = (hash << 5) - hash + ipStr.charCodeAt(i);
+    hash |= 0;
+  }
+  const absHash = Math.abs(hash);
+  const lat = (absHash % 120) - 60; // -60 to 60 deg lat
+  const lng = ((absHash * 13) % 360) - 180; // -180 to 180 deg lng
+  return [lat, lng];
+}
+
+/**
+ * Plot markers on Leaflet map for HIGH threats
+ */
+function updateThreatMap(events) {
+  if (!threatMap || typeof L === 'undefined') return;
+
+  // Clear previous markers
+  threatMapMarkers.forEach(m => threatMap.removeLayer(m));
+  threatMapMarkers = [];
+
+  const highEvents = (events || []).filter(e => (e.threat_level || '').toUpperCase() === 'HIGH');
+
+  highEvents.forEach(evt => {
+    const ip = evt.source_ip || 'N/A';
+    const [lat, lng] = hashIpToLatLng(ip);
+
+    const marker = L.circleMarker([lat, lng], {
+      color: '#ff2a5f',
+      fillColor: '#ff2a5f',
+      fillOpacity: 0.8,
+      radius: 8
+    }).addTo(threatMap);
+
+    marker.bindPopup(`
+      <strong style="color: #ff2a5f;">HIGH THREAT DETECTED</strong><br/>
+      <strong>IP:</strong> ${escapeHtml(ip)}<br/>
+      <strong>Score:</strong> ${evt.threat_score || '70.0'}<br/>
+      <strong>Type:</strong> ${escapeHtml(evt.event_type || 'N/A')}
+    `);
+
+    threatMapMarkers.push(marker);
+  });
+}
 
 /**
  * Sets up the Attack Simulator button logic.
@@ -275,24 +405,54 @@ async function updateEventsTable() {
   if (!res.ok) throw new Error(`Events HTTP error ${res.status}`);
   const data = await res.json();
 
-  const events = data.events || [];
+  currentEventsList = data.events || [];
+  updateThreatMap(currentEventsList);
+  renderFilteredEventsTable();
+}
+
+/**
+ * Filters and renders visible table rows based on NLP search input.
+ */
+function renderFilteredEventsTable() {
   const tbody = document.getElementById('event-stream-body');
   const countBadge = document.getElementById('table-count-badge');
+  if (!tbody || !countBadge) return;
 
-  countBadge.textContent = `Showing ${events.length} latest events \u2022 Click any row for raw evidence`;
+  let filtered = currentEventsList;
+  if (currentSearchQuery) {
+    filtered = currentEventsList.filter(evt => {
+      const raw = (evt.original_event || '').toLowerCase();
+      const ip = (evt.source_ip || '').toLowerCase();
+      const type = (evt.event_type || '').toLowerCase();
+      const level = (evt.threat_level || '').toLowerCase();
+      const xai = (evt.xai_explanation || '').toLowerCase();
+      const fullJson = JSON.stringify(evt).toLowerCase();
+      return (
+        raw.includes(currentSearchQuery) ||
+        ip.includes(currentSearchQuery) ||
+        type.includes(currentSearchQuery) ||
+        level.includes(currentSearchQuery) ||
+        xai.includes(currentSearchQuery) ||
+        fullJson.includes(currentSearchQuery)
+      );
+    });
+  }
 
-  if (events.length === 0) {
+  const queryInfo = currentSearchQuery ? ` matching "${escapeHtml(currentSearchQuery)}"` : '';
+  countBadge.textContent = `Showing ${filtered.length} of ${currentEventsList.length} events${queryInfo} \u2022 Click row for raw evidence`;
+
+  if (filtered.length === 0) {
     tbody.innerHTML = `
       <tr>
         <td colspan="6" class="loading-cell">
-          <span>No ingested events found in normalized storage.</span>
+          <span>${currentSearchQuery ? 'No events matched your natural language query.' : 'No ingested events found in normalized storage.'}</span>
         </td>
       </tr>
     `;
     return;
   }
 
-  tbody.innerHTML = events.map((event, idx) => renderEventRow(event, idx)).join('');
+  tbody.innerHTML = filtered.map((event, idx) => renderEventRow(event, idx)).join('');
 }
 
 /**
@@ -429,3 +589,4 @@ function copyToClipboard(text) {
     alert(`Copied Merkle Audit Hash to clipboard:\n${text}`);
   }).catch(() => {});
 }
+

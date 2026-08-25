@@ -788,3 +788,187 @@ tr.detail-row > td {
   word-break: break-all;
 }
 
+/* Secondary Button (Download Threat Report) */
+.btn-secondary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--neon-cyan);
+  background: var(--neon-cyan-bg);
+  border: 1px solid var(--neon-cyan-border);
+  padding: 7px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+  transition: all 0.2s ease;
+  outline: none;
+  text-decoration: none;
+}
+
+.btn-secondary:hover {
+  background: rgba(0, 240, 255, 0.25);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active {
+  transform: translateY(0);
+}
+
+/* Theme Toggle Button */
+.btn-theme {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1.05rem;
+  outline: none;
+}
+
+.btn-theme:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: scale(1.05);
+}
+
+/* NLP Search Bar */
+.search-input {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 7px 14px;
+  border-radius: 20px;
+  outline: none;
+  width: 220px;
+  transition: all 0.2s ease;
+}
+
+.search-input:focus {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
+  width: 260px;
+}
+
+/* Geolocation Map Section */
+.map-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.map-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  backdrop-filter: blur(16px);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Light Mode Overrides */
+body.light-mode {
+  --bg-dark: #f8fafc;
+  --bg-slate: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+
+  --border-color: #cbd5e1;
+  --border-glow-cyan: rgba(14, 165, 233, 0.3);
+
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-dim: #64748b;
+
+  background-color: var(--bg-dark);
+  background-image: 
+    radial-gradient(at 15% 15%, rgba(14, 165, 233, 0.08) 0px, transparent 50%),
+    radial-gradient(at 85% 85%, rgba(225, 29, 72, 0.05) 0px, transparent 50%);
+  color: var(--text-main);
+}
+
+body.light-mode .navbar {
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom-color: var(--border-color);
+}
+
+body.light-mode .brand-text h1 {
+  color: #0f172a;
+}
+
+body.light-mode .kpi-card,
+body.light-mode .chart-card,
+body.light-mode .vendor-card,
+body.light-mode .map-card,
+body.light-mode .table-section {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+body.light-mode .chart-title h3,
+body.light-mode .table-title h2 {
+  color: #0f172a;
+}
+
+body.light-mode .data-table th {
+  background: #f1f5f9;
+  color: #475569;
+  border-bottom-color: #cbd5e1;
+}
+
+body.light-mode .data-table td {
+  border-bottom-color: #e2e8f0;
+}
+
+body.light-mode .ip-badge {
+  background: #f1f5f9;
+  color: #1e293b;
+  border-color: #cbd5e1;
+}
+
+body.light-mode .v-item {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+body.light-mode .clock-badge {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
+body.light-mode .search-input {
+  background: #ffffff;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+body.light-mode .btn-theme {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+body.light-mode .forensic-panel-container {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+body.light-mode .code-block {
+  background: #0f172a;
+  color: #f8fafc;
+}
+
+
