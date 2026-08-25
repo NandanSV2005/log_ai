@@ -9,6 +9,32 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <style>
+    body {
+      background-color: #0a0f1c;
+      background-image: 
+        linear-gradient(rgba(0, 240, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.06) 1px, transparent 1px),
+        radial-gradient(ellipse at 50% 20%, rgba(0, 240, 255, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 50%);
+      background-size: 40px 40px, 40px 40px, 100% 100%, 100% 100%;
+      background-position: 0 0, 0 0, center, center;
+      animation: cyberGridScroll 25s linear infinite;
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    @keyframes cyberGridScroll {
+      0% {
+        background-position: 0 0, 0 0, center, center;
+      }
+      100% {
+        background-position: 40px 40px, 40px 40px, center, center;
+      }
+    }
+
     .hero-container {
       display: flex;
       flex-direction: column;
@@ -39,12 +65,23 @@
       font-weight: 800;
       line-height: 1.2;
       margin-bottom: 1.25rem;
-      background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+      background: linear-gradient(135deg, #ffffff 0%, #00f0ff 25%, #a855f7 50%, #ff2a5f 75%, #ffffff 100%);
+      background-size: 200% auto;
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
-
+      animation: titleGradientShift 6s ease infinite alternate;
     }
+
+    @keyframes titleGradientShift {
+      0% {
+        background-position: 0% 50%;
+      }
+      100% {
+        background-position: 100% 50%;
+      }
+    }
+
     .hero-subtitle {
       font-size: 1.15rem;
       color: var(--text-muted);
@@ -91,6 +128,79 @@
       background: rgba(255, 255, 255, 0.12);
       transform: translateY(-2px);
     }
+
+    /* Terminal Simulation Styling */
+    .terminal-window {
+      width: 100%;
+      max-width: 820px;
+      margin-top: 2.5rem;
+      background: rgba(13, 19, 33, 0.95);
+      border: 1px solid var(--neon-cyan-border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 240, 255, 0.15);
+      text-align: left;
+      font-family: var(--font-mono);
+      backdrop-filter: blur(12px);
+    }
+    .terminal-header {
+      background: rgba(22, 32, 54, 0.9);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      position: relative;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .terminal-dots {
+      display: flex;
+      gap: 8px;
+    }
+    .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot-red { background-color: #ff5f56; }
+    .dot-yellow { background-color: #ffbd2e; }
+    .dot-green { background-color: #27c93f; }
+    .terminal-title {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      font-weight: 500;
+    }
+    .terminal-body {
+      padding: 1.25rem 1.5rem;
+      height: 180px;
+      overflow-y: auto;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: #e2e8f0;
+    }
+    .log-line {
+      margin-bottom: 4px;
+      word-break: break-all;
+    }
+    .log-info { color: var(--neon-cyan); }
+    .log-warn { color: var(--neon-amber); }
+    .log-alert { color: var(--neon-red); }
+    .log-xai { color: #c084fc; }
+    .log-ok { color: #4ade80; }
+    .terminal-cursor {
+      display: inline-block;
+      color: var(--neon-cyan);
+      font-weight: 700;
+      animation: blinkCursor 0.8s infinite;
+    }
+    @keyframes blinkCursor {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
     .features-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -109,6 +219,12 @@
       border-radius: 14px;
       padding: 1.5rem;
       backdrop-filter: blur(16px);
+      transition: all 0.3s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-10px);
+      border-color: var(--neon-cyan-border);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5), 0 0 25px rgba(0, 240, 255, 0.3);
     }
     .feature-title {
       font-size: 1rem;
@@ -157,6 +273,22 @@
         <a href="/login" class="btn-outline">Open SOC Dashboard</a>
       </div>
 
+      <!-- Live Terminal Simulation Window -->
+      <div class="terminal-window">
+        <div class="terminal-header">
+          <div class="terminal-dots">
+            <span class="dot dot-red"></span>
+            <span class="dot dot-yellow"></span>
+            <span class="dot dot-green"></span>
+          </div>
+          <div class="terminal-title">live_log_ingest.sh — LOG AI Pipeline Node #01</div>
+        </div>
+        <div class="terminal-body" id="terminal-body">
+          <div id="terminal-logs"></div>
+          <span class="terminal-cursor">█</span>
+        </div>
+      </div>
+
       <div class="features-grid">
         <div class="feature-card">
           <div class="feature-title">🛡️ Explainable AI Threat Scoring</div>
@@ -173,5 +305,61 @@
       </div>
     </main>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const terminalLogs = document.getElementById('terminal-logs');
+      const terminalBody = document.getElementById('terminal-body');
+      if (!terminalLogs || !terminalBody) return;
+
+      const logFeed = [
+        { type: 'info', text: '[INFO] Parsing Syslog stream (Vendor: AWS CloudWatch)... [OK]' },
+        { type: 'warn', text: '[WARN] Threat Detected: 198.51.100.99' },
+        { type: 'xai',  text: '[XAI] Analyzing payload... SQL injection pattern detected (Confidence: 98.7%)' },
+        { type: 'info', text: '[INFO] Normalizing event to OCSF Standard Schema...' },
+        { type: 'info', text: '[INFO] Merkle Tree Block #48291 anchored [HASH: 7f8a9e2c...]' },
+        { type: 'alert',text: '[ALERT] Auto-Mitigation Triggered: Quarantined host 198.51.100.99' },
+        { type: 'info', text: '[INFO] Ingesting Palo Alto Firewall logs... 12,450 events/sec' },
+        { type: 'ok',   text: '[OK] Cryptographic integrity verification passed (SHA-256)' }
+      ];
+
+      let lineIdx = 0;
+      let charIdx = 0;
+      let currentDiv = null;
+
+      function typeChar() {
+        if (lineIdx >= logFeed.length) {
+          setTimeout(() => {
+            terminalLogs.innerHTML = '';
+            lineIdx = 0;
+            charIdx = 0;
+            typeChar();
+          }, 2500);
+          return;
+        }
+
+        const msg = logFeed[lineIdx];
+        if (charIdx === 0) {
+          currentDiv = document.createElement('div');
+          currentDiv.className = `log-line log-${msg.type}`;
+          terminalLogs.appendChild(currentDiv);
+        }
+
+        currentDiv.textContent = msg.text.substring(0, charIdx + 1);
+        charIdx++;
+        terminalBody.scrollTop = terminalBody.scrollHeight;
+
+        if (charIdx < msg.text.length) {
+          setTimeout(typeChar, 12 + Math.random() * 18);
+        } else {
+          charIdx = 0;
+          lineIdx++;
+          setTimeout(typeChar, 450);
+        }
+      }
+
+      typeChar();
+    });
+  </script>
 </body>
 </html>
