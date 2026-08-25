@@ -1,0 +1,5 @@
+services:
+  - type: web
+    name: log-ai-soc
+    env: docker
+    plan: free
