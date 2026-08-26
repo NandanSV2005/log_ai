@@ -61,6 +61,51 @@ def test_suricata_alert_scoring():
     assert evaluated.threat_score >= 70.0
     assert evaluated.threat_level == "HIGH"
     assert "suricata_alert" in evaluated.anomaly_flags
+    assert evaluated.mitre_tactic == "T1059 - Command and Scripting Interpreter"
+
+def test_ml_ensemble_and_rules_engine():
+    from app.detection.engine import MLEnsembleEngine, IsolationForest, RandomForestClassifier
+    from app.defense.rules_engine import rules_engine
+
+    ensemble = MLEnsembleEngine()
+    assert ensemble.is_fitted
+    assert isinstance(ensemble.iso_forest, IsolationForest)
+    assert isinstance(ensemble.rf_classifier, RandomForestClassifier)
+
+    score = ensemble.compute_ensemble_score([10.0, 8.0, 1.0, 3.0, 3.0])
+    assert 0.0 <= score <= 100.0
+
+    event = UnifiedEvent(
+        timestamp="2026-08-25T19:30:00Z",
+        source_ip="198.51.100.99",
+        destination_ip="10.0.0.1",
+        event_type="ssh",
+        severity="Warning",
+        original_event="Failed password for invalid user root from 198.51.100.99",
+    )
+    flags, floor, mitre = rules_engine.evaluate(event, ip_deny_count=3)
+    assert "repeated_deny" in flags
+    assert floor >= 65.0
+    assert mitre == "T1110 - Brute Force"
+
+@pytest.mark.asyncio
+async def test_webhook_notifier(httpx_mock=None):
+    from app.defense.webhooks import WebhookNotifier
+    notifier = WebhookNotifier(webhook_url="https://example.com/webhook")
+    
+    event_data = {
+        "event_type": "cisco_asa:deny",
+        "threat_score": 88.5,
+        "threat_level": "HIGH",
+        "source_ip": "198.51.100.99",
+        "mitre_tactic": "T1110 - Brute Force",
+        "original_event": "Deny tcp src outside:198.51.100.99",
+    }
+    
+    # Test unconfigured webhook returns False
+    unconfigured = WebhookNotifier(webhook_url=None)
+    res_unconfigured = await unconfigured.trigger_high_threat_webhook(event_data)
+    assert res_unconfigured is False
 
 @pytest.mark.asyncio
 async def test_end_to_end_threat_scoring_pipeline(client: AsyncClient, auth_headers: dict):
@@ -97,3 +142,5 @@ async def test_end_to_end_threat_scoring_pipeline(client: AsyncClient, auth_head
     assert last["threat_score"] >= 65.0
     assert last["threat_level"] in ["MEDIUM", "HIGH"]
     assert "repeated_deny" in last["anomaly_flags"]
+    assert last.get("mitre_tactic") == "T1110 - Brute Force"
+

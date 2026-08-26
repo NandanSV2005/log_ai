@@ -172,4 +172,4 @@ async def test_dashboard_csv_export_endpoint(client: AsyncClient, auth_headers: 
     assert res.status_code == 200
     assert "text/csv" in res.headers.get("content-type", "").lower()
     assert "threat_report.csv" in res.headers.get("content-disposition", "")
-    assert "Timestamp,Source_IP,Threat_Level,Threat_Score" in res.text
+    assert "Timestamp,Source_IP,Threat_Level,Threat_Score,MITRE_Tactic" in res.text

@@ -103,7 +103,7 @@ async def get_dashboard_stats(current_user=Depends(get_current_user)):
 async def export_threat_report_csv(current_user=Depends(get_current_user)):
     """
     Compiles all ingested events where threat_level is HIGH or MEDIUM into CSV format.
-    Columns: Timestamp, Source_IP, Threat_Level, Threat_Score, Parser, Merkle_Hash, XAI_Explanation
+    Columns: Timestamp, Source_IP, Threat_Level, Threat_Score, MITRE_Tactic, Parser, Merkle_Hash, XAI_Explanation
     """
     all_records = _read_all_normalized_records()
     high_med_records = [
@@ -119,6 +119,7 @@ async def export_threat_report_csv(current_user=Depends(get_current_user)):
         "Source_IP",
         "Threat_Level",
         "Threat_Score",
+        "MITRE_Tactic",
         "Parser",
         "Merkle_Hash",
         "XAI_Explanation",
@@ -130,6 +131,7 @@ async def export_threat_report_csv(current_user=Depends(get_current_user)):
             r.get("source_ip", "N/A"),
             str(r.get("threat_level", "LOW")).upper(),
             r.get("threat_score", 0.0),
+            r.get("mitre_tactic") or "N/A",
             r.get("event_type", "unstructured_log"),
             r.get("raw_event_hash") or r.get("payload_hash") or "N/A",
             r.get("xai_explanation", ""),
@@ -141,5 +143,6 @@ async def export_threat_report_csv(current_user=Depends(get_current_user)):
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=threat_report.csv"},
     )
+
 
 

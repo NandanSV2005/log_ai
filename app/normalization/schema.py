@@ -47,6 +47,10 @@ class UnifiedEvent(BaseModel):
         default="",
         description="Plain-English XAI explanation of threat score and anomaly signals",
     )
+    mitre_tactic: Optional[str] = Field(
+        default=None,
+        description="Mapped MITRE ATT&CK framework tactic (e.g., T1110 - Brute Force)",
+    )
     original_event: str = Field(
         ...,
         description="Preserved raw log event payload string for forensic auditability",

@@ -1,0 +1,32 @@
+rules:
+  - id: R001
+    name: "Multiple Failed Logins / Repeated Deny"
+    description: "Detects multiple failed login attempts or repeated deny actions"
+    condition: "repeated_deny"
+    keywords: ["deny", "block", "failed password", "invalid user"]
+    mitre_tactic: "T1110 - Brute Force"
+    severity_floor: 65.0
+
+  - id: R002
+    name: "Suricata / Critical Security Alert"
+    description: "High-confidence Suricata IDS/IPS or critical alert"
+    condition: "suricata_alert"
+    keywords: ["suricata", "critical", "exploit", "sqli", "injection"]
+    mitre_tactic: "T1059 - Command and Scripting Interpreter"
+    severity_floor: 85.0
+
+  - id: R003
+    name: "External Source IP Activity"
+    description: "Activity originating from public/external IP addresses"
+    condition: "external_source"
+    keywords: []
+    mitre_tactic: "T1190 - Exploit Public-Facing Application"
+    severity_floor: 25.0
+
+  - id: R004
+    name: "Privilege Escalation Attempt"
+    description: "Unauthorized privilege escalation or root command execution"
+    condition: "privilege_escalation"
+    keywords: ["sudo", "root", "privilege", "unauthorized"]
+    mitre_tactic: "T1078 - Valid Accounts"
+    severity_floor: 75.0
