@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     # Ingestion Constraints
     MAX_PAYLOAD_BYTES: int = 50 * 1024 * 1024  # 50 MB
     
+    # Gemini LLM Integration
+    GEMINI_API_KEY: str = Field(default="")
+    
     model_config = {
         "env_file": ".env",
         "extra": "ignore",

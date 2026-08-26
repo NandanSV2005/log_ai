@@ -139,40 +139,47 @@ function appendCopilotMessage(text, sender) {
   container.scrollTop = container.scrollHeight;
 }
 
-function processCopilotQuery(query) {
-  const lower = query.toLowerCase();
-  const count = currentEventsList.length;
+async function processCopilotQuery(query) {
+  const container = document.getElementById('copilot-messages');
+  const typingDiv = document.createElement('div');
+  typingDiv.className = 'copilot-msg bot-msg';
+  typingDiv.id = 'copilot-typing-indicator';
+  typingDiv.innerHTML = `<div class="msg-bubble" style="display: flex; align-items: center; gap: 8px;"><span class="pulse-dot-small"></span> <span>Gemini LLM analyzing 50 recent log records...</span></div>`;
+  if (container) {
+    container.appendChild(typingDiv);
+    container.scrollTop = container.scrollHeight;
+  }
 
-  if (lower.includes('fix') || lower.includes('remediat') || lower.includes('how to')) {
-    appendCopilotMessage(
-      `I can help remediate active log anomalies! Click the <strong>🛡️ View Remediation Aid</strong> button on any row in the event stream table to view 3-step mitigation playbooks.<br/>` +
-      `<button class="copilot-action-btn" onclick="openRemediationModal(0)">⚡ View Top Incident Playbook</button>`,
-      'bot'
-    );
-  } else if (lower.includes('ssh') || lower.includes('brute')) {
-    const sshEvents = currentEventsList.filter(e => JSON.stringify(e).toLowerCase().includes('ssh'));
-    appendCopilotMessage(
-      `I found <strong>${sshEvents.length}</strong> events related to SSH Brute Force attempts in current telemetry. ` +
-      `Would you like me to mark them as Resolved?<br/>` +
-      `<button class="copilot-action-btn" onclick="bulkResolveCategory('ssh')">⚡ Resolve All SSH Incidents</button>`,
-      'bot'
-    );
-  } else if (lower.includes('port') || lower.includes('scan')) {
-    const scanEvents = currentEventsList.filter(e => JSON.stringify(e).toLowerCase().includes('port'));
-    appendCopilotMessage(
-      `I detected <strong>${scanEvents.length}</strong> events related to Port Scan anomalies (T1046). ` +
-      `Would you like me to resolve these alerts?<br/>` +
-      `<button class="copilot-action-btn" onclick="bulkResolveCategory('port')">📡 Resolve All Port Scan Incidents</button>`,
-      'bot'
-    );
-  } else if (lower.includes('resolve') || lower.includes('clear')) {
-    bulkResolveCategory('all');
-  } else {
-    appendCopilotMessage(
-      `I analyzed the active log stream for "<em>${escapeHtml(query)}</em>" and found <strong>${count}</strong> matching events. ` +
-      `Ensemble ML threat confidence rating remains verified with zero-loss Merkle audit hashes.`,
-      'bot'
-    );
+  try {
+    const res = await fetch('/api/v1/copilot/ask', {
+      method: 'POST',
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ question: query })
+    });
+
+    if (typingDiv) typingDiv.remove();
+
+    if (res.status === 401) {
+      sessionStorage.removeItem('token');
+      window.location.href = '/login';
+      return;
+    }
+
+    if (res.ok) {
+      const data = await res.json();
+      const formattedAnswer = (data.answer || 'No response generated.')
+        .replace(/\n/g, '<br/>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+      appendCopilotMessage(formattedAnswer, 'bot');
+    } else {
+      appendCopilotMessage('Failed to generate AI Copilot response.', 'bot');
+    }
+  } catch (err) {
+    if (typingDiv) typingDiv.remove();
+    console.error('Error querying AI Copilot endpoint:', err);
+    appendCopilotMessage('Network error communicating with AI Copilot.', 'bot');
   }
 }
 

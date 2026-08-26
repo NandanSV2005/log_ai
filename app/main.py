@@ -9,7 +9,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi import _rate_limit_exceeded_handler
 
 from app.config import settings
-from app.routers import ingest, dashboard, auth
+from app.routers import ingest, dashboard, auth, copilot
 from app.services.queue import queue_manager
 
 logging.basicConfig(
@@ -63,6 +63,7 @@ async def add_security_headers(request: Request, call_next):
 app.include_router(auth.router)
 app.include_router(ingest.router)
 app.include_router(dashboard.router)
+app.include_router(copilot.router)
 
 static_dir = Path(__file__).parent / "static"
 
