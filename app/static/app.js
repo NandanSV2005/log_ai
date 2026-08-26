@@ -49,8 +49,8 @@ function setupLogout() {
   const btn = document.getElementById('logout-btn');
   if (!btn) return;
   btn.addEventListener('click', () => {
-    sessionStorage.removeItem('token');
-    window.location.href = '/login';
+    sessionStorage.clear();
+    window.location.href = '/';
   });
 }
 
