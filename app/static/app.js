@@ -125,6 +125,28 @@ function processCopilotQuery(query) {
 
   const count = matched.length;
 
+  if (lower.includes('fix') || lower.includes('remediat') || lower.includes('mitigat') || lower.includes('playbook')) {
+    const highEvent = currentEventsList.find(e => (e.threat_level || '').toUpperCase() === 'HIGH') || currentEventsList[0];
+    if (highEvent) {
+      const ip = highEvent.source_ip || 'N/A';
+      const tactic = highEvent.mitre_tactic || 'Brute Force';
+      const steps = highEvent.remediation_steps && highEvent.remediation_steps.length > 0 ? highEvent.remediation_steps : [
+        "Temporarily block offending source IP address at perimeter firewall.",
+        "Enforce MFA and force password reset for targeted user accounts.",
+        "Inspect auth logs for password spray patterns and configure SSH fail2ban rate-limiting."
+      ];
+
+      const stepsHtml = steps.map((s, i) => `<li><strong>Step ${i + 1}:</strong> ${escapeHtml(s)}</li>`).join('');
+      appendCopilotMessage(
+        `🛡️ <strong>Dynamic Remediation Playbook</strong> for Target IP: <code>${escapeHtml(ip)}</code> (${escapeHtml(tactic)}):<br/>` +
+        `<ol style="margin-left: 1rem; margin-top: 0.4rem; font-size: 0.78rem;">${stepsHtml}</ol><br/>` +
+        `<button class="copilot-action-btn" onclick="openRemediationModal(0)">Inspect Interactive Playbook Aid</button>`,
+        'bot'
+      );
+      return;
+    }
+  }
+
   if (lower.includes('ssh') || lower.includes('brute')) {
     const sshEvents = currentEventsList.filter(e => JSON.stringify(e).toLowerCase().includes('ssh'));
     appendCopilotMessage(
@@ -151,6 +173,62 @@ function processCopilotQuery(query) {
     );
   }
 }
+
+let currentRemediationEventIndex = null;
+
+window.openRemediationModal = function(index) {
+  const modal = document.getElementById('remediation-modal');
+  if (!modal) return;
+  const targetIdx = (index !== undefined && index !== null) ? index : 0;
+  const event = currentEventsList[targetIdx];
+  if (!event) return;
+
+  currentRemediationEventIndex = targetIdx;
+  const ipBadge = document.getElementById('remed-ip-badge');
+  const tacticBadge = document.getElementById('remed-tactic-badge');
+  const checklistContainer = document.getElementById('remed-checklist-container');
+
+  const ip = event.source_ip || 'N/A';
+  const tactic = event.mitre_tactic || 'General Threat Mitigation';
+  const steps = event.remediation_steps && event.remediation_steps.length > 0 ? event.remediation_steps : [
+    "Temporarily block offending source IP address at perimeter firewall.",
+    "Enforce MFA and force password reset for targeted user accounts.",
+    "Inspect auth logs for password spray patterns and configure SSH fail2ban rate-limiting."
+  ];
+
+  if (ipBadge) ipBadge.textContent = `IP: ${ip}`;
+  if (tacticBadge) tacticBadge.textContent = `Tactic: ${tactic}`;
+
+  if (checklistContainer) {
+    checklistContainer.innerHTML = steps.map((step, i) => `
+      <li class="playbook-step-item">
+        <input type="checkbox" class="playbook-checkbox" id="step-check-${i}" />
+        <label for="step-check-${i}" class="playbook-step-text">
+          <strong>Step ${i + 1}:</strong> ${escapeHtml(step)}
+        </label>
+      </li>
+    `).join('');
+  }
+
+  modal.style.display = 'flex';
+};
+
+window.closeRemediationModal = function(e) {
+  const modal = document.getElementById('remediation-modal');
+  if (modal) modal.style.display = 'none';
+};
+
+window.markRemediationCompleted = function() {
+  if (currentRemediationEventIndex !== null && currentEventsList[currentRemediationEventIndex]) {
+    const evt = currentEventsList[currentRemediationEventIndex];
+    const hash = evt.raw_event_hash || evt.payload_hash || '';
+    if (hash) {
+      window.updateEventStatus(hash, 'Resolved');
+    }
+  }
+  closeRemediationModal();
+  showToast('Playbook marked completed & incident resolved!', 'warning');
+};
 
 window.bulkResolveCategory = async function(category) {
   let targetEvents = [];
@@ -1101,7 +1179,11 @@ function renderEventRow(event, index) {
       </td>
       <td>${statusSelectHtml}</td>
       <td>${mitreHtml}</td>
-      <td class="xai-explanation">${whyFlaggedHtml} ${escapeHtml(explanation)}</td>
+      <td class="xai-explanation">
+        ${whyFlaggedHtml}
+        <span>${escapeHtml(explanation)}</span>
+        <button class="btn-remediation" onclick="event.stopPropagation(); openRemediationModal(${index})">🛡️ View Remediation Aid</button>
+      </td>
       <td>
         <span class="merkle-hash" title="Click to copy Merkle Hash: ${escapeHtml(fullHash)}" onclick="event.stopPropagation(); copyToClipboard('${escapeHtml(fullHash)}')">
           ${escapeHtml(shortHash)}
@@ -1132,8 +1214,9 @@ function renderEventRow(event, index) {
                 <span class="col-tag tag-ocsf">ANALYTICS READY</span>
               </div>
               <div class="xai-banner-box">
-                <span class="xai-banner-title">EXPLAINABLE AI INSIGHT</span>
+                <span class="xai-banner-title">EXPLAINABLE AI INSIGHT & PLAYBOOK</span>
                 <div class="xai-banner-text">${escapeHtml(explanation)}</div>
+                <button class="btn-remediation" style="margin-top: 8px;" onclick="event.stopPropagation(); openRemediationModal(${index})">🛡️ View Remediation Aid</button>
               </div>
               <pre class="code-block json-code"><code>${escapeHtml(formattedJson)}</code></pre>
             </div>
@@ -1166,26 +1249,4 @@ function copyToClipboard(text) {
   }).catch(() => {});
 }
 
-
-function escapeHtml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-function escapeJs(str) {
-  if (!str) return '';
-  return String(str).replace(/'/g, "\\'");
-}
-
-function copyToClipboard(text) {
-  if (!text || text === 'N/A') return;
-  navigator.clipboard.writeText(text).then(() => {
-    alert(`Copied Merkle Audit Hash to clipboard:\n${text}`);
-  }).catch(() => {});
-}
 

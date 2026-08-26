@@ -422,6 +422,41 @@
     </div>
   </div>
 
+  <!-- Remediation Playbook Modal -->
+  <div class="remediation-modal-backdrop" id="remediation-modal" style="display: none;" onclick="closeRemediationModal(event)">
+    <div class="remediation-modal-card" onclick="event.stopPropagation();">
+      <div class="remediation-modal-header">
+        <div class="remediation-modal-title">
+          <span class="modal-icon">🛡️</span>
+          <div>
+            <h3>DYNAMIC REMEDIATION PLAYBOOK</h3>
+            <span class="modal-subtitle" id="remed-modal-subtitle">Targeted Threat Mitigation Aid</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="closeRemediationModal()">&times;</button>
+      </div>
+
+      <div class="remediation-modal-body">
+        <div class="remed-target-banner" id="remed-target-banner">
+          <span class="remed-badge" id="remed-ip-badge">IP: N/A</span>
+          <span class="remed-badge" id="remed-tactic-badge">Tactic: N/A</span>
+        </div>
+
+        <h4 class="playbook-section-heading">RECOMMENDED MITIGATION CHECKLIST:</h4>
+        <ul class="playbook-checklist" id="remed-checklist-container">
+          <!-- Steps inserted dynamically -->
+        </ul>
+      </div>
+
+      <div class="remediation-modal-footer">
+        <button class="btn-secondary" onclick="closeRemediationModal()">Dismiss</button>
+        <button class="btn-attack" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border-color: rgba(16, 185, 129, 0.4);" onclick="markRemediationCompleted()">
+          Mark Playbook Completed
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="/app.js"></script>
 </body>
 </html>

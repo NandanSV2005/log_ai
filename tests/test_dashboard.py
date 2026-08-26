@@ -97,6 +97,8 @@ async def test_dashboard_recent_events_endpoint(client: AsyncClient, auth_header
     first_event = data["events"][0]
     assert "xai_explanation" in first_event
     assert "raw_event_hash" in first_event
+    assert "remediation_steps" in first_event
+    assert isinstance(first_event["remediation_steps"], list)
     assert len(first_event["xai_explanation"]) > 0
 
 @pytest.mark.asyncio

@@ -26,15 +26,16 @@ class RulesEngine:
         except Exception:
             self.rules = []
 
-    def evaluate(self, event, ip_deny_count: int = 0) -> Tuple[List[str], float, Optional[str]]:
+    def evaluate(self, event, ip_deny_count: int = 0) -> Tuple[List[str], float, Optional[str], List[str]]:
         """
         Evaluates an event object against loaded YAML detection rules.
         Returns:
-            (triggered_flags, severity_floor, primary_mitre_tactic)
+            (triggered_flags, severity_floor, primary_mitre_tactic, remediation_steps)
         """
         flags: List[str] = []
         floor_score = 0.0
         mitre_tactics: List[str] = []
+        remediation_steps: List[str] = []
 
         evt_type = str(getattr(event, "event_type", "")).lower()
         severity = str(getattr(event, "severity", "")).upper()
@@ -82,8 +83,13 @@ class RulesEngine:
                 if tactic and tactic not in mitre_tactics:
                     mitre_tactics.append(tactic)
 
+                playbook = rule.get("remediation_playbook", [])
+                for step in playbook:
+                    if step not in remediation_steps:
+                        remediation_steps.append(step)
+
         primary_mitre = mitre_tactics[0] if mitre_tactics else None
-        return flags, floor_score, primary_mitre
+        return flags, floor_score, primary_mitre, remediation_steps
 
     @staticmethod
     def _is_private_ip(ip_str: str) -> bool:

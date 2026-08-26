@@ -270,7 +270,7 @@ class AnomalyEngine:
         self._update_rolling_window(event)
 
         ip_deny = self.ip_deny_counts.get(event.source_ip, 0) if event.source_ip else 0
-        rule_flags, rule_floor, mitre_tactic = rules_engine.evaluate(event, ip_deny_count=ip_deny)
+        rule_flags, rule_floor, mitre_tactic, remediation_steps = rules_engine.evaluate(event, ip_deny_count=ip_deny)
 
         features = self._extract_features(event)
         ml_score = self.ml_ensemble.compute_ensemble_score(features)
@@ -289,10 +289,18 @@ class AnomalyEngine:
         else:
             threat_level = "LOW"
 
+        if not remediation_steps:
+            remediation_steps = [
+                "Monitor source IP activity for anomaly threshold escalation.",
+                "Verify baseline OCSF schema normalization and audit cryptographic Merkle hash.",
+                "Maintain continuous real-time SOC telemetry surveillance."
+            ]
+
         event.threat_score = threat_score
         event.threat_level = threat_level
         event.anomaly_flags = rule_flags
         event.mitre_tactic = mitre_tactic
+        event.remediation_steps = remediation_steps
 
         return event
 

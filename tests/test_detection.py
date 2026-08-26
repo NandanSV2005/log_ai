@@ -62,6 +62,8 @@ def test_suricata_alert_scoring():
     assert evaluated.threat_level == "HIGH"
     assert "suricata_alert" in evaluated.anomaly_flags
     assert evaluated.mitre_tactic == "T1059 - Command and Scripting Interpreter"
+    assert isinstance(evaluated.remediation_steps, list)
+    assert len(evaluated.remediation_steps) >= 3
 
 def test_ml_ensemble_and_rules_engine():
     from app.detection.engine import MLEnsembleEngine, IsolationForest, RandomForestClassifier
@@ -83,10 +85,12 @@ def test_ml_ensemble_and_rules_engine():
         severity="Warning",
         original_event="Failed password for invalid user root from 198.51.100.99",
     )
-    flags, floor, mitre = rules_engine.evaluate(event, ip_deny_count=3)
+    flags, floor, mitre, steps = rules_engine.evaluate(event, ip_deny_count=3)
     assert "repeated_deny" in flags
     assert floor >= 65.0
     assert mitre == "T1110 - Brute Force"
+    assert isinstance(steps, list)
+    assert len(steps) >= 3
 
 @pytest.mark.asyncio
 async def test_webhook_notifier(httpx_mock=None):

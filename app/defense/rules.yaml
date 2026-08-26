@@ -6,6 +6,10 @@ rules:
     keywords: ["deny", "block", "failed password", "invalid user"]
     mitre_tactic: "T1110 - Brute Force"
     severity_floor: 65.0
+    remediation_playbook:
+      - "Temporarily block offending source IP address at perimeter firewall."
+      - "Enforce MFA and force password reset for targeted user accounts."
+      - "Inspect auth logs for password spray patterns and configure SSH fail2ban rate-limiting."
 
   - id: R002
     name: "Suricata / Critical Security Alert"
@@ -14,6 +18,10 @@ rules:
     keywords: ["suricata", "critical", "exploit", "sqli", "injection"]
     mitre_tactic: "T1059 - Command and Scripting Interpreter"
     severity_floor: 85.0
+    remediation_playbook:
+      - "Isolate affected target server from internal network segments immediately."
+      - "Inspect web application firewall (WAF) & IDS logs for SQLi or remote code execution payloads."
+      - "Apply emergency software patches and update IPS signature rule definitions."
 
   - id: R003
     name: "External Source IP Activity"
@@ -22,6 +30,10 @@ rules:
     keywords: []
     mitre_tactic: "T1190 - Exploit Public-Facing Application"
     severity_floor: 25.0
+    remediation_playbook:
+      - "Cross-reference source IP against threat intelligence feeds and GeoIP databases."
+      - "Audit perimeter firewall NAT policies and publicly exposed management ports."
+      - "Restrict access to trusted IP ranges or enforce mandatory VPN gateway access."
 
   - id: R004
     name: "Privilege Escalation Attempt"
@@ -30,3 +42,8 @@ rules:
     keywords: ["sudo", "root", "privilege", "unauthorized"]
     mitre_tactic: "T1078 - Valid Accounts"
     severity_floor: 75.0
+    remediation_playbook:
+      - "Revoke active session tokens and terminate shell processes for the affected user."
+      - "Audit /etc/sudoers file, SUID binary permissions, and user access control lists."
+      - "Run automated rootkit and malware diagnostic scan on target server host."
+

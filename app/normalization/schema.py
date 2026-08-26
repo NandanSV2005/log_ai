@@ -55,6 +55,10 @@ class UnifiedEvent(BaseModel):
         default="New",
         description="Incident status workflow state: New, Investigating, Resolved, or Dismissed",
     )
+    remediation_steps: list[str] = Field(
+        default_factory=list,
+        description="Actionable remediation playbook steps for threat mitigation",
+    )
     original_event: str = Field(
         ...,
         description="Preserved raw log event payload string for forensic auditability",
