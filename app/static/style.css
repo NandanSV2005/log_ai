@@ -777,23 +777,23 @@ tr.detail-row > td {
 }
 
 /* ==========================================================================
-   REDESIGNED LIGHT MODE: High-Contrast 'Lab' Theme (Deep Indigo & Vibrant Coral)
+   REDESIGNED LIGHT MODE: Pastel Periwinkle Theme (#eef2ff Background, #c7d2fe Borders, #312e81 Text)
    ========================================================================== */
 body.light-mode {
-  --bg-dark: #f4f4f5;
+  --bg-dark: #eef2ff;
   --bg-slate: #ffffff;
   --bg-card: #ffffff;
-  --bg-card-hover: #e4e4e7;
+  --bg-card-hover: #e0e7ff;
 
-  --border-color: #e4e4e7;
-  --border-glow-cyan: #d4d4d8;
+  --border-color: #c7d2fe;
+  --border-glow-cyan: #a5b4fc;
 
-  --text-main: #18181b;
-  --text-muted: #52525b;
-  --text-dim: #71717a;
+  --text-main: #312e81;
+  --text-muted: #4338ca;
+  --text-dim: #64748b;
 
-  /* Lab Light Mode Accent Palette */
-  --neon-mint: #312e81; /* Deep Indigo primary in light mode */
+  /* Pastel Light Mode Accent Palette */
+  --neon-mint: #312e81;
   --neon-mint-bg: rgba(49, 46, 129, 0.08);
   --neon-mint-border: rgba(49, 46, 129, 0.25);
 
@@ -801,7 +801,7 @@ body.light-mode {
   --neon-violet-bg: rgba(67, 56, 202, 0.08);
   --neon-violet-border: rgba(67, 56, 202, 0.25);
 
-  --neon-red: #f43f5e; /* Vibrant Coral */
+  --neon-red: #f43f5e;
   --neon-red-bg: rgba(244, 63, 94, 0.08);
   --neon-red-border: rgba(244, 63, 94, 0.25);
 
@@ -819,7 +819,7 @@ body.light-mode {
 
 body.light-mode .navbar {
   background: #ffffff;
-  border-bottom-color: var(--border-color);
+  border-bottom-color: #c7d2fe;
 }
 
 body.light-mode .logo-shield {
@@ -828,7 +828,7 @@ body.light-mode .logo-shield {
 }
 
 body.light-mode .brand-text h1 {
-  color: #18181b;
+  color: #312e81;
 }
 
 body.light-mode .kpi-card,
@@ -840,17 +840,17 @@ body.light-mode .ops-toolbar,
 body.light-mode .pipeline-card,
 body.light-mode .intel-card {
   background: #ffffff;
-  border-color: #e4e4e7;
+  border-color: #c7d2fe;
 }
 
 body.light-mode .data-table th {
-  background: #f4f4f5;
-  color: #52525b;
-  border-bottom-color: #e4e4e7;
+  background: #eef2ff;
+  color: #312e81;
+  border-bottom-color: #c7d2fe;
 }
 
 body.light-mode .data-table td {
-  border-bottom-color: #e4e4e7;
+  border-bottom-color: #c7d2fe;
 }
 
 body.light-mode .v-item,
@@ -863,9 +863,9 @@ body.light-mode .roi-item,
 body.light-mode .status-select,
 body.light-mode .playbook-step-item,
 body.light-mode .remed-badge {
-  background: #f4f4f5;
-  border-color: #e4e4e7;
-  color: #18181b;
+  background: #f8fafc;
+  border-color: #c7d2fe;
+  color: #312e81;
 }
 
 body.light-mode .gauge-circle {
@@ -894,16 +894,16 @@ body.light-mode .p-step.completed .p-step-num {
 }
 
 body.light-mode .p-step-title {
-  color: #18181b;
+  color: #312e81;
   font-weight: 700;
 }
 
 body.light-mode .p-step-sub {
-  color: #52525b;
+  color: #4338ca;
 }
 
 body.light-mode .pipeline-title h3 {
-  color: #18181b;
+  color: #312e81;
 }
 
 body.light-mode .pipeline-status {
@@ -913,9 +913,13 @@ body.light-mode .pipeline-status {
 }
 
 body.light-mode .btn-secondary {
-  background: #e4e4e7;
-  border-color: #d4d4d8;
-  color: #18181b;
+  background: #e0e7ff;
+  border-color: #c7d2fe;
+  color: #312e81;
+}
+
+body.light-mode .btn-secondary:hover {
+  background: #c7d2fe;
 }
 
 body.light-mode .btn-secondary:hover {
