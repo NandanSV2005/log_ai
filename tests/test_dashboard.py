@@ -173,3 +173,63 @@ async def test_dashboard_csv_export_endpoint(client: AsyncClient, auth_headers: 
     assert "text/csv" in res.headers.get("content-type", "").lower()
     assert "threat_report.csv" in res.headers.get("content-disposition", "")
     assert "Timestamp,Source_IP,Threat_Level,Threat_Score,MITRE_Tactic" in res.text
+
+@pytest.mark.asyncio
+async def test_update_event_status_success(client: AsyncClient, auth_headers: dict):
+    payload = "<134>1 2026-08-26T12:00:00Z auth-server sshd 5000 - - Failed password for root from 198.51.100.99 port 54320 ssh2\n"
+    headers = {"Content-Type": "text/plain", **auth_headers}
+    ingest_res = await client.post("/api/v1/ingest", content=payload.encode("utf-8"), headers=headers)
+    assert ingest_res.status_code == 202
+
+    for _ in range(20):
+        if list(normalized_storage_manager.storage_dir.glob("normalized_*.jsonl")):
+            break
+        await asyncio.sleep(0.05)
+
+    recent_res = await client.get("/api/v1/dashboard/events/recent?limit=5", headers=auth_headers)
+    assert recent_res.status_code == 200
+    events = recent_res.json().get("events", [])
+    assert len(events) > 0
+
+    target_event = events[0]
+    event_id = target_event.get("raw_event_hash") or target_event.get("payload_hash")
+    assert event_id is not None
+
+    # Test PATCH status to Investigating
+    patch_res = await client.patch(
+        f"/api/v1/dashboard/event/{event_id}/status",
+        json={"status": "Investigating"},
+        headers=auth_headers,
+    )
+    assert patch_res.status_code == 200
+    assert patch_res.json()["updated_status"] == "Investigating"
+
+    # Test PATCH status to Resolved
+    patch_res_2 = await client.patch(
+        f"/api/v1/dashboard/event/{event_id}/status",
+        json={"status": "Resolved"},
+        headers=auth_headers,
+    )
+    assert patch_res_2.status_code == 200
+    assert patch_res_2.json()["updated_status"] == "Resolved"
+
+@pytest.mark.asyncio
+async def test_update_event_status_invalid_status(client: AsyncClient, auth_headers: dict):
+    res = await client.patch(
+        "/api/v1/dashboard/event/some_hash/status",
+        json={"status": "InvalidStatusChoice"},
+        headers=auth_headers,
+    )
+    assert res.status_code == 400
+    assert "Invalid status" in res.json()["detail"]
+
+@pytest.mark.asyncio
+async def test_update_event_status_not_found(client: AsyncClient, auth_headers: dict):
+    res = await client.patch(
+        "/api/v1/dashboard/event/non_existent_hash_99999999/status",
+        json={"status": "Resolved"},
+        headers=auth_headers,
+    )
+    assert res.status_code == 404
+    assert "not found" in res.json()["detail"]
+

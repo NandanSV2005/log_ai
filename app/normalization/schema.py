@@ -51,6 +51,10 @@ class UnifiedEvent(BaseModel):
         default=None,
         description="Mapped MITRE ATT&CK framework tactic (e.g., T1110 - Brute Force)",
     )
+    status: str = Field(
+        default="New",
+        description="Incident status workflow state: New, Investigating, Resolved, or Dismissed",
+    )
     original_event: str = Field(
         ...,
         description="Preserved raw log event payload string for forensic auditability",

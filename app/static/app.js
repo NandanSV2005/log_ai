@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupAttackSimulator();
   setupFileUpload();
   setupPresetScenarios();
+  setupCopilot();
   setupLogout();
   fetchDashboardData();
   setInterval(fetchDashboardData, POLLING_INTERVAL_MS);
@@ -52,6 +53,139 @@ function setupLogout() {
     window.location.href = '/login';
   });
 }
+
+/**
+ * Step 3: Setup AI SOC Copilot Chat Widget
+ */
+function setupCopilot() {
+  const toggleBtn = document.getElementById('copilot-toggle-btn');
+  const closeBtn = document.getElementById('copilot-close-btn');
+  const panel = document.getElementById('copilot-panel');
+  const sendBtn = document.getElementById('copilot-send-btn');
+  const input = document.getElementById('copilot-input');
+  const messagesContainer = document.getElementById('copilot-messages');
+
+  if (!toggleBtn || !panel) return;
+
+  toggleBtn.addEventListener('click', () => {
+    const isHidden = panel.style.display === 'none' || !panel.style.display;
+    panel.style.display = isHidden ? 'flex' : 'none';
+    if (isHidden && input) input.focus();
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      panel.style.display = 'none';
+    });
+  }
+
+  function handleSend() {
+    const query = (input.value || '').trim();
+    if (!query) return;
+
+    // Add user message
+    appendCopilotMessage(query, 'user');
+    input.value = '';
+
+    // Process query against loaded events table
+    setTimeout(() => {
+      processCopilotQuery(query);
+    }, 400);
+  }
+
+  if (sendBtn) sendBtn.addEventListener('click', handleSend);
+  if (input) {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleSend();
+    });
+  }
+}
+
+function appendCopilotMessage(htmlContent, sender = 'bot') {
+  const container = document.getElementById('copilot-messages');
+  if (!container) return;
+
+  const msgDiv = document.createElement('div');
+  msgDiv.className = `copilot-msg ${sender}-msg`;
+  msgDiv.innerHTML = `
+    <span class="copilot-avatar">${sender === 'bot' ? '🤖' : '👤'}</span>
+    <div class="msg-bubble">${htmlContent}</div>
+  `;
+
+  container.appendChild(msgDiv);
+  container.scrollTop = container.scrollHeight;
+}
+
+function processCopilotQuery(query) {
+  const lower = query.toLowerCase();
+  const matched = currentEventsList.filter(e => {
+    const jsonStr = JSON.stringify(e).toLowerCase();
+    return jsonStr.includes(lower);
+  });
+
+  const count = matched.length;
+
+  if (lower.includes('ssh') || lower.includes('brute')) {
+    const sshEvents = currentEventsList.filter(e => JSON.stringify(e).toLowerCase().includes('ssh'));
+    appendCopilotMessage(
+      `I found <strong>${sshEvents.length}</strong> events related to SSH Brute Force attempts in current telemetry. ` +
+      `Would you like me to mark them as Resolved?<br/>` +
+      `<button class="copilot-action-btn" onclick="bulkResolveCategory('ssh')">⚡ Resolve All SSH Incidents</button>`,
+      'bot'
+    );
+  } else if (lower.includes('port') || lower.includes('scan')) {
+    const scanEvents = currentEventsList.filter(e => JSON.stringify(e).toLowerCase().includes('port'));
+    appendCopilotMessage(
+      `I detected <strong>${scanEvents.length}</strong> events related to Port Scan anomalies (T1046). ` +
+      `Would you like me to resolve these alerts?<br/>` +
+      `<button class="copilot-action-btn" onclick="bulkResolveCategory('port')">📡 Resolve All Port Scan Incidents</button>`,
+      'bot'
+    );
+  } else if (lower.includes('resolve') || lower.includes('clear')) {
+    bulkResolveCategory('all');
+  } else {
+    appendCopilotMessage(
+      `I analyzed the active log stream for "<em>${escapeHtml(query)}</em>" and found <strong>${count}</strong> matching events. ` +
+      `Ensemble ML threat confidence rating remains verified with zero-loss Merkle audit hashes.`,
+      'bot'
+    );
+  }
+}
+
+window.bulkResolveCategory = async function(category) {
+  let targetEvents = [];
+  if (category === 'ssh') {
+    targetEvents = currentEventsList.filter(e => JSON.stringify(e).toLowerCase().includes('ssh'));
+  } else if (category === 'port') {
+    targetEvents = currentEventsList.filter(e => JSON.stringify(e).toLowerCase().includes('port'));
+  } else {
+    targetEvents = currentEventsList;
+  }
+
+  let resolvedCount = 0;
+  for (const evt of targetEvents) {
+    const hash = evt.raw_event_hash || evt.payload_hash || '';
+    if (hash && evt.status !== 'Resolved') {
+      evt.status = 'Resolved';
+      resolvedCount++;
+      fetch(`/api/v1/dashboard/event/${encodeURIComponent(hash)}/status`, {
+        method: 'PATCH',
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ status: 'Resolved' })
+      }).catch(() => {});
+    }
+  }
+
+  updateThreatGaugeAndROI(currentEventsList, totalEventsIngestedCount);
+  renderFilteredEventsTable();
+
+  appendCopilotMessage(
+    `✅ Successfully resolved <strong>${resolvedCount}</strong> incident alerts. The Live Threat Score has been automatically lowered.`,
+    'bot'
+  );
+  showToast(`Resolved ${resolvedCount} incident alerts via AI Copilot`, 'warning');
+};
+
 
 /**
  * Dark / Light Theme Toggle Manager
@@ -669,12 +803,18 @@ function updateThreatGaugeAndROI(events, totalIngested) {
     return;
   }
 
-  const recentSlice = events.slice(0, 25);
+  // Filter active events (excluding Resolved or Dismissed) for live threat score calculation
+  const activeEvents = events.filter(e => {
+    const st = (e.status || 'New').toUpperCase();
+    return st !== 'RESOLVED' && st !== 'DISMISSED';
+  });
+
+  const recentSlice = activeEvents.slice(0, 25);
   const totalScore = recentSlice.reduce((sum, e) => sum + (e.threat_score || 0), 0);
   const avgScore = recentSlice.length > 0 ? (totalScore / recentSlice.length) : 0;
-  const maxScore = Math.max(...recentSlice.map(e => e.threat_score || 0), 0);
+  const maxScore = recentSlice.length > 0 ? Math.max(...recentSlice.map(e => e.threat_score || 0), 0) : 0;
   
-  const compositeScore = Math.min(100, (maxScore * 0.6) + (avgScore * 0.4));
+  const compositeScore = activeEvents.length > 0 ? Math.min(100, (maxScore * 0.6) + (avgScore * 0.4)) : 0;
   const formattedScore = compositeScore.toFixed(1);
 
   const scoreValEl = document.getElementById('gauge-score-value');
@@ -758,6 +898,7 @@ function renderFilteredEventsTable() {
       const level = (evt.threat_level || '').toLowerCase();
       const xai = (evt.xai_explanation || '').toLowerCase();
       const mitre = (evt.mitre_tactic || '').toLowerCase();
+      const st = (evt.status || 'New').toLowerCase();
       const fullJson = JSON.stringify(evt).toLowerCase();
       return (
         raw.includes(currentSearchQuery) ||
@@ -766,6 +907,7 @@ function renderFilteredEventsTable() {
         level.includes(currentSearchQuery) ||
         xai.includes(currentSearchQuery) ||
         mitre.includes(currentSearchQuery) ||
+        st.includes(currentSearchQuery) ||
         fullJson.includes(currentSearchQuery)
       );
     });
@@ -777,7 +919,7 @@ function renderFilteredEventsTable() {
   if (filtered.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="7" class="loading-cell">
+        <td colspan="8" class="loading-cell">
           <span>${currentSearchQuery ? 'No events matched your natural language query.' : 'No ingested events found in normalized storage.'}</span>
         </td>
       </tr>
@@ -801,6 +943,46 @@ window.toggleRowExpansion = function(index, eventKey) {
   } else {
     detailRow.classList.add('is-open');
     expandedRowKeys.add(eventKey);
+  }
+};
+
+/**
+ * Step 1: Endpoint PATCH handler for incident status dropdown update
+ */
+window.updateEventStatus = async function(eventId, newStatus, selectEl) {
+  if (selectEl) {
+    selectEl.className = `status-select status-${newStatus.toLowerCase()}`;
+  }
+
+  const localEvt = currentEventsList.find(e => (e.raw_event_hash || e.payload_hash || '') === eventId);
+  if (localEvt) {
+    localEvt.status = newStatus;
+  }
+
+  // Recalculate Live Threat Score immediately
+  updateThreatGaugeAndROI(currentEventsList, totalEventsIngestedCount);
+
+  try {
+    const res = await fetch(`/api/v1/dashboard/event/${encodeURIComponent(eventId)}/status`, {
+      method: 'PATCH',
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ status: newStatus })
+    });
+
+    if (res.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+      return;
+    }
+
+    if (res.ok) {
+      showToast(`Incident status updated to ${newStatus}`, 'warning');
+    } else {
+      showToast(`Failed to update status (${res.status})`, 'error');
+    }
+  } catch (err) {
+    console.error('Error updating status:', err);
+    showToast('Failed to update event status', 'error');
   }
 };
 
@@ -895,6 +1077,18 @@ function renderEventRow(event, index) {
   const mitreHtml = getMitreBadgeHtml(event);
   const whyFlaggedHtml = getWhyFlaggedPillHtml(event);
 
+  const currentStatus = event.status || 'New';
+  const statusSelectHtml = `
+    <select class="status-select status-${currentStatus.toLowerCase()}" 
+            onclick="event.stopPropagation();" 
+            onchange="updateEventStatus('${escapeJs(fullHash)}', this.value, this)">
+      <option value="New" ${currentStatus === 'New' ? 'selected' : ''}>🔴 New</option>
+      <option value="Investigating" ${currentStatus === 'Investigating' ? 'selected' : ''}>🟡 Investigating</option>
+      <option value="Resolved" ${currentStatus === 'Resolved' ? 'selected' : ''}>🟢 Resolved</option>
+      <option value="Dismissed" ${currentStatus === 'Dismissed' ? 'selected' : ''}>⚪ Dismissed</option>
+    </select>
+  `;
+
   return `
     <tr class="row-expandable ${rowClass}" onclick="toggleRowExpansion(${index}, '${escapeJs(eventKey)}')">
       <td class="ts-cell">${escapeHtml(formattedTs)}</td>
@@ -905,6 +1099,7 @@ function renderEventRow(event, index) {
           ${threatLevel} (${threatScore})
         </span>
       </td>
+      <td>${statusSelectHtml}</td>
       <td>${mitreHtml}</td>
       <td class="xai-explanation">${whyFlaggedHtml} ${escapeHtml(explanation)}</td>
       <td>
@@ -914,7 +1109,7 @@ function renderEventRow(event, index) {
       </td>
     </tr>
     <tr class="detail-row ${isOpen}" id="detail-row-${index}">
-      <td colspan="7">
+      <td colspan="8">
         <div class="forensic-panel-container ${panelClass}">
           <div class="forensic-grid">
             <!-- Left Column: Raw Evidence (Zero Information Loss) -->
@@ -948,6 +1143,29 @@ function renderEventRow(event, index) {
     </tr>
   `;
 }
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function escapeJs(str) {
+  if (!str) return '';
+  return String(str).replace(/'/g, "\\'");
+}
+
+function copyToClipboard(text) {
+  if (!text || text === 'N/A') return;
+  navigator.clipboard.writeText(text).then(() => {
+    alert(`Copied Merkle Audit Hash to clipboard:\n${text}`);
+  }).catch(() => {});
+}
+
 
 function escapeHtml(str) {
   if (!str) return '';

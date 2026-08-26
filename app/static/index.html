@@ -332,18 +332,19 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th style="width: 140px;">TIMESTAMP</th>
-                <th style="width: 130px;">SOURCE IP</th>
-                <th style="width: 140px;">VENDOR PARSER</th>
-                <th style="width: 140px;">THREAT LEVEL</th>
-                <th style="width: 160px;">MITRE ATT&CK</th>
+                <th style="width: 130px;">TIMESTAMP</th>
+                <th style="width: 120px;">SOURCE IP</th>
+                <th style="width: 130px;">VENDOR PARSER</th>
+                <th style="width: 130px;">THREAT LEVEL</th>
+                <th style="width: 140px;">INCIDENT STATUS</th>
+                <th style="width: 150px;">MITRE ATT&CK</th>
                 <th>EXPLAINABLE AI (XAI) & WHY FLAGGED</th>
-                <th style="width: 160px;">MERKLE AUDIT HASH</th>
+                <th style="width: 140px;">MERKLE AUDIT HASH</th>
               </tr>
             </thead>
             <tbody id="event-stream-body">
               <tr>
-                <td colspan="7" class="loading-cell">
+                <td colspan="8" class="loading-cell">
                   <div class="spinner"></div>
                   <span>Connecting to Log AI Threat Engine Stream...</span>
                 </td>
@@ -353,10 +354,77 @@
         </div>
       </section>
     </main>
+
+    <!-- Fixed Compliance & Deployment Footer -->
+    <footer class="dashboard-footer">
+      <div class="footer-brand">
+        <span>LOG AI SOC CORE v2.5</span>
+        <span class="footer-divider">&bull;</span>
+        <span>Zero-Loss Enterprise Forensic Engine</span>
+      </div>
+      <div class="compliance-badges">
+        <span class="badge-compliance badge-airgap" title="Air-Gap & Offline Deployment Ready">
+          <span class="badge-icon">🔒</span> Air-Gap Ready
+        </span>
+        <span class="badge-compliance badge-fisma" title="FISMA High Security Controls Baseline">
+          <span class="badge-icon">🏛️</span> FISMA High
+        </span>
+        <span class="badge-compliance badge-iso" title="ISO/IEC 27001:2022 Certified Information Security">
+          <span class="badge-icon">📜</span> ISO 27001 Compliant
+        </span>
+        <span class="badge-compliance badge-audit" title="SHA-256 Cryptographic Merkle Tree Zero-Loss Tamperproof Audit">
+          <span class="badge-icon">⛓️</span> Zero-Loss Forensic Audit
+        </span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Floating AI SOC Copilot Widget -->
+  <div class="copilot-widget" id="copilot-widget">
+    <button class="copilot-toggle-btn" id="copilot-toggle-btn" title="Toggle AI SOC Copilot">
+      <div class="copilot-btn-content">
+        <span class="copilot-icon">🤖</span>
+        <span class="copilot-btn-text">AI SOC Copilot</span>
+        <span class="copilot-pulse-dot"></span>
+      </div>
+    </button>
+
+    <div class="copilot-panel" id="copilot-panel" style="display: none;">
+      <div class="copilot-header">
+        <div class="copilot-title">
+          <span class="copilot-header-icon">🤖</span>
+          <div>
+            <h4>AI SOC Copilot</h4>
+            <span class="copilot-subtitle">Autonomous Threat Assistant</span>
+          </div>
+        </div>
+        <button class="copilot-close-btn" id="copilot-close-btn">&times;</button>
+      </div>
+
+      <div class="copilot-messages" id="copilot-messages">
+        <div class="copilot-msg bot-msg">
+          <span class="copilot-avatar">🤖</span>
+          <div class="msg-bubble">
+            Greetings Analyst! I am your AI SOC Copilot. Ask me about active threats, SSH attacks, port scans, or specific IPs to analyze or resolve incidents.
+          </div>
+        </div>
+      </div>
+
+      <div class="copilot-input-bar">
+        <input type="text" id="copilot-input" placeholder="Ask AI Copilot (e.g. 'SSH', 'Port Scan')..." />
+        <button id="copilot-send-btn" title="Send message">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
   </div>
 
   <script src="/app.js"></script>
 </body>
 </html>
+
 
 

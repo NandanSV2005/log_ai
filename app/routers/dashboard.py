@@ -3,7 +3,8 @@ import io
 import csv
 from pathlib import Path
 from typing import Dict, Any, List
-from fastapi import APIRouter, Query, Response, Depends
+from fastapi import APIRouter, Query, Response, Depends, HTTPException, status
+from pydantic import BaseModel, Field
 from app.storage.normalized_writer import normalized_storage_manager
 from app.routers.auth import get_current_user
 
@@ -143,6 +144,84 @@ async def export_threat_report_csv(current_user=Depends(get_current_user)):
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=threat_report.csv"},
     )
+
+class StatusUpdateRequest(BaseModel):
+    status: str = Field(..., description="New incident status: New, Investigating, Resolved, or Dismissed")
+
+ALLOWED_STATUSES = {"New", "Investigating", "Resolved", "Dismissed"}
+
+@router.patch("/event/{event_id}/status", response_model=Dict[str, Any])
+async def update_event_status(
+    event_id: str,
+    body: StatusUpdateRequest,
+    current_user=Depends(get_current_user),
+):
+    """
+    Updates the incident status field of a specific normalized event.
+    Allowed values: New, Investigating, Resolved, Dismissed
+    """
+    if body.status not in ALLOWED_STATUSES:
+        from fastapi import HTTPException, status
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid status '{body.status}'. Allowed values: New, Investigating, Resolved, Dismissed",
+        )
+
+    storage_dir = normalized_storage_manager.storage_dir
+    if not storage_dir.exists():
+        from fastapi import HTTPException, status
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Event with ID '{event_id}' not found",
+        )
+
+    jsonl_files = list(storage_dir.glob("normalized_*.jsonl"))
+    found = False
+    updated_event = None
+
+    for file_path in jsonl_files:
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+
+            modified = False
+            new_lines = []
+            for line in lines:
+                line_str = line.strip()
+                if line_str:
+                    record = json.loads(line_str)
+                    raw_hash = record.get("raw_event_hash") or record.get("payload_hash") or ""
+                    # Match against raw_event_hash, payload_hash, or event_id string
+                    if raw_hash == event_id or record.get("event_id") == event_id or (raw_hash and event_id in raw_hash):
+                        record["status"] = body.status
+                        updated_event = record
+                        modified = True
+                        found = True
+                    new_lines.append(json.dumps(record) + "\n")
+                else:
+                    new_lines.append(line)
+
+            if modified:
+                with open(file_path, "w", encoding="utf-8") as f:
+                    f.writelines(new_lines)
+                break
+        except Exception:
+            continue
+
+    if not found:
+        from fastapi import HTTPException, status
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Event with ID '{event_id}' not found",
+        )
+
+    return {
+        "status": "success",
+        "event_id": event_id,
+        "updated_status": body.status,
+        "event": updated_event,
+    }
+
 
 
 
