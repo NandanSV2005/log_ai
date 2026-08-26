@@ -53,6 +53,32 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Standalone Header Navbar (Landing, Login, Register) */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: var(--bg-slate);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+}
+
+.nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 /* Layout & Left-Hand Sidebar Navigation */
 .app-layout {
   display: flex;
