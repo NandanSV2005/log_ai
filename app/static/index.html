@@ -14,7 +14,7 @@
 </head>
 <body>
   <div class="app-container">
-    <!-- Top Navbar Header -->
+    <!-- Top Navbar Header (Decluttered) -->
     <header class="navbar">
       <div class="brand">
         <div class="logo-shield">
@@ -30,29 +30,6 @@
       </div>
       <div class="nav-controls">
         <input type="text" id="nlp-search-input" placeholder="🔍 Natural Language Search..." class="search-input" />
-        <button id="download-report-btn" class="btn-secondary" title="Export HIGH & MEDIUM Threat Events to CSV">
-          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          <span>Download Threat Report</span>
-        </button>
-        <button id="simulate-attack-btn" class="btn-attack">
-          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
-          </svg>
-          <span>Simulate Brute Force Attack</span>
-        </button>
-        <input type="file" id="upload-log-input" accept=".txt,.log" style="display: none;" />
-        <button id="upload-log-btn" class="btn-secondary" title="Upload manual .LOG or .TXT log file">
-          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="17 8 12 3 7 8"></polyline>
-            <line x1="12" y1="3" x2="12" y2="15"></line>
-          </svg>
-          <span>Upload .LOG File</span>
-        </button>
         <button id="theme-toggle-btn" class="btn-theme" title="Toggle Light/Dark Theme">
           <span id="theme-toggle-icon">🌙</span>
         </button>
@@ -60,7 +37,6 @@
           Log Out
         </button>
         <div class="status-pill cyan-glow">
-
           <span class="pulse-dot"></span>
           <span id="connection-status">LIVE POLLING (2s)</span>
         </div>
@@ -70,6 +46,111 @@
 
     <!-- Main Dashboard Body -->
     <main class="dashboard-body">
+
+      <!-- Operations & Ingestion Toolbar Panel -->
+      <section class="ops-toolbar">
+        <div class="ops-toolbar-group">
+          <span class="ops-toolbar-label">QUICK ACTIONS</span>
+          <input type="file" id="upload-log-input" accept=".txt,.log" style="display: none;" />
+          <button id="upload-log-btn" class="btn-secondary" title="Upload manual .LOG or .TXT log file">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <span>Upload .LOG File</span>
+          </button>
+          <button id="simulate-attack-btn" class="btn-attack">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+            </svg>
+            <span>Simulate Brute Force Attack</span>
+          </button>
+          <button id="download-report-btn" class="btn-secondary" title="Export HIGH & MEDIUM Threat Events to CSV">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Download Threat Report</span>
+          </button>
+        </div>
+
+        <div class="ops-toolbar-divider"></div>
+
+        <div class="ops-toolbar-group">
+          <span class="ops-toolbar-label">PRESET DEMO SCENARIOS</span>
+          <div class="preset-btn-group">
+            <button class="preset-btn" id="scenario-ssh-btn" title="Simulate SSH Brute Force (T1110)">
+              <span class="preset-icon">⚡</span>
+              <span>Scenario A: SSH Brute Force (T1110)</span>
+            </button>
+            <button class="preset-btn" id="scenario-portscan-btn" title="Simulate Port Scan Anomaly (T1046)">
+              <span class="preset-icon">📡</span>
+              <span>Scenario B: Port Scan Anomaly (T1046)</span>
+            </button>
+            <button class="preset-btn" id="scenario-normal-btn" title="Simulate Normal Benign Traffic">
+              <span class="preset-icon">🛡️</span>
+              <span>Scenario C: Normal Benign Traffic</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Live Pipeline Progress Indicator -->
+      <section class="pipeline-section">
+        <div class="pipeline-card">
+          <div class="pipeline-header">
+            <div class="pipeline-title">
+              <span class="pulse-dot-small"></span>
+              <h3>ZERO-LOSS FORENSIC INGESTION PIPELINE</h3>
+            </div>
+            <span class="pipeline-status" id="pipeline-status-badge">READY &bull; IDLE STREAM</span>
+          </div>
+          <div class="pipeline-steps">
+            <div class="p-step active" id="p-step-1">
+              <div class="p-step-num">1</div>
+              <div class="p-step-text">
+                <span class="p-step-title">Ingest</span>
+                <span class="p-step-sub">Raw Syslog / JSON / Text</span>
+              </div>
+            </div>
+            <div class="p-step-arrow">➔</div>
+            <div class="p-step" id="p-step-2">
+              <div class="p-step-num">2</div>
+              <div class="p-step-text">
+                <span class="p-step-title">Normalize & Hash</span>
+                <span class="p-step-sub">OCSF & Merkle Tree</span>
+              </div>
+            </div>
+            <div class="p-step-arrow">➔</div>
+            <div class="p-step" id="p-step-3">
+              <div class="p-step-num">3</div>
+              <div class="p-step-text">
+                <span class="p-step-title">ML Ensemble</span>
+                <span class="p-step-sub">Isolation Forest & Rules</span>
+              </div>
+            </div>
+            <div class="p-step-arrow">➔</div>
+            <div class="p-step" id="p-step-4">
+              <div class="p-step-num">4</div>
+              <div class="p-step-text">
+                <span class="p-step-title">MITRE Mapping</span>
+                <span class="p-step-sub">Tactic & Technique</span>
+              </div>
+            </div>
+            <div class="p-step-arrow">➔</div>
+            <div class="p-step" id="p-step-5">
+              <div class="p-step-num">5</div>
+              <div class="p-step-text">
+                <span class="p-step-title">XAI Explanation</span>
+                <span class="p-step-sub">Forensic Audit Summary</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Row 1: KPI Metrics Cards Grid -->
       <section class="kpi-grid">
         <!-- Total Ingested Card -->
@@ -131,6 +212,63 @@
           </div>
           <div class="kpi-value val-low" id="stat-low">0</div>
           <div class="kpi-subtext">Normal Baseline Activity</div>
+        </div>
+      </section>
+
+      <!-- Operational Intelligence Row: Threat Gauge & ROI Panel -->
+      <section class="ops-intel-row">
+        <!-- Live Threat Gauge & Composite Score Card -->
+        <div class="intel-card threat-gauge-card">
+          <div class="card-title-bar">
+            <div class="chart-title">
+              <span class="chart-icon icon-threat-fire">🔥</span>
+              <h3>LIVE THREAT LEVEL & COMPOSITE SCORE</h3>
+            </div>
+            <span class="chart-tag" id="gauge-risk-badge">SYSTEM NOMINAL</span>
+          </div>
+          <div class="gauge-body">
+            <div class="gauge-display">
+              <div class="gauge-circle" id="gauge-circle">
+                <span class="gauge-number" id="gauge-score-value">0.0</span>
+                <span class="gauge-max">/ 100</span>
+              </div>
+            </div>
+            <div class="gauge-meta">
+              <div class="gauge-level-text" id="gauge-level-text">LOW RISK LEVEL</div>
+              <div class="gauge-bar-container">
+                <div class="gauge-bar-fill" id="gauge-bar-fill" style="width: 0%;"></div>
+              </div>
+              <span class="gauge-subtext" id="gauge-subtext">Calculated from weighted real-time event ensemble stream</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quantifiable Operational Security ROI Panel -->
+        <div class="intel-card roi-panel-card">
+          <div class="card-title-bar">
+            <div class="chart-title">
+              <span class="chart-icon icon-roi">📊</span>
+              <h3>OPERATIONAL SECURITY ROI & EFFICIENCY</h3>
+            </div>
+            <span class="chart-tag">AUTOMATED FORENSICS</span>
+          </div>
+          <div class="roi-metrics-grid">
+            <div class="roi-item">
+              <div class="roi-value" id="roi-hours-saved">0.0<span class="roi-unit">hrs</span></div>
+              <div class="roi-label">Analyst Hours Saved</div>
+              <div class="roi-sub">Automated XAI Insight Generation</div>
+            </div>
+            <div class="roi-item">
+              <div class="roi-value" id="roi-noise-mitigated">0.0<span class="roi-unit">%</span></div>
+              <div class="roi-label">False Positive Noise Suppressed</div>
+              <div class="roi-sub">ML Ensemble Severity Filtering</div>
+            </div>
+            <div class="roi-item">
+              <div class="roi-value val-cyan">&lt; 1<span class="roi-unit">ms</span></div>
+              <div class="roi-label">Forensic Verification Speed</div>
+              <div class="roi-sub">Cryptographic Merkle Leaf Hash</div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -197,14 +335,15 @@
                 <th style="width: 140px;">TIMESTAMP</th>
                 <th style="width: 130px;">SOURCE IP</th>
                 <th style="width: 140px;">VENDOR PARSER</th>
-                <th style="width: 130px;">THREAT LEVEL</th>
-                <th>EXPLAINABLE AI (XAI) INSIGHT</th>
-                <th style="width: 170px;">MERKLE AUDIT HASH</th>
+                <th style="width: 140px;">THREAT LEVEL</th>
+                <th style="width: 160px;">MITRE ATT&CK</th>
+                <th>EXPLAINABLE AI (XAI) & WHY FLAGGED</th>
+                <th style="width: 160px;">MERKLE AUDIT HASH</th>
               </tr>
             </thead>
             <tbody id="event-stream-body">
               <tr>
-                <td colspan="6" class="loading-cell">
+                <td colspan="7" class="loading-cell">
                   <div class="spinner"></div>
                   <span>Connecting to Log AI Threat Engine Stream...</span>
                 </td>
@@ -219,4 +358,5 @@
   <script src="/app.js"></script>
 </body>
 </html>
+
 

@@ -12,6 +12,7 @@ let threatMap = null;
 let threatMapMarkers = [];
 let currentSearchQuery = '';
 let currentEventsList = [];
+let totalEventsIngestedCount = 0;
 const expandedRowKeys = new Set();
 
 // Immediate authentication check
@@ -37,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupNlpSearch();
   setupAttackSimulator();
   setupFileUpload();
+  setupPresetScenarios();
   setupLogout();
   fetchDashboardData();
   setInterval(fetchDashboardData, POLLING_INTERVAL_MS);
@@ -113,7 +115,6 @@ function setupDownloadReport() {
   });
 }
 
-
 /**
  * Natural Language Search Listener
  */
@@ -125,6 +126,134 @@ function setupNlpSearch() {
     currentSearchQuery = (e.target.value || '').trim().toLowerCase();
     renderFilteredEventsTable();
   });
+}
+
+/**
+ * Step 2: Setup Preset Demo Scenario Buttons
+ */
+function setupPresetScenarios() {
+  const sshBtn = document.getElementById('scenario-ssh-btn');
+  const portscanBtn = document.getElementById('scenario-portscan-btn');
+  const normalBtn = document.getElementById('scenario-normal-btn');
+
+  if (sshBtn) {
+    sshBtn.addEventListener('click', () => runPresetScenario('ssh_brute_force'));
+  }
+  if (portscanBtn) {
+    portscanBtn.addEventListener('click', () => runPresetScenario('port_scan'));
+  }
+  if (normalBtn) {
+    normalBtn.addEventListener('click', () => runPresetScenario('normal_traffic'));
+  }
+}
+
+async function runPresetScenario(scenarioType) {
+  triggerPipelineProgress();
+  const nowIso = new Date().toISOString();
+  let payload = '';
+
+  if (scenarioType === 'ssh_brute_force') {
+    const lines = [];
+    const attackerIp = '198.51.100.99';
+    for (let i = 0; i < 10; i++) {
+      lines.push(`<134>1 ${nowIso} auth-server sshd ${5000 + i} - - Failed password for root from ${attackerIp} port ${54320 + i} ssh2`);
+    }
+    payload = lines.join('\n');
+    showToast('Executing Scenario A: SSH Brute Force (Mitre T1110)', 'warning');
+  } else if (scenarioType === 'port_scan') {
+    const lines = [];
+    const attackerIp = '203.0.113.45';
+    const targetPorts = [21, 22, 23, 25, 80, 443, 3306, 3389, 8080, 8443];
+    targetPorts.forEach((port, idx) => {
+      lines.push(`<134>1 ${nowIso} firewall iptables ${6000 + idx} - - SRC=${attackerIp} DST=10.0.0.1 PROTO=TCP DPT=${port} SYN port scan alert`);
+    });
+    payload = lines.join('\n');
+    showToast('Executing Scenario B: Port Scan Anomaly (Mitre T1046)', 'warning');
+  } else if (scenarioType === 'normal_traffic') {
+    const lines = [
+      `10.0.0.15 - - [26/Aug/2026:12:00:00 +0000] "GET /index.html HTTP/1.1" 200 1234`,
+      `10.0.0.18 - - [26/Aug/2026:12:00:01 +0000] "GET /static/style.css HTTP/1.1" 200 4567`,
+      `<134>1 ${nowIso} auth-server sshd 5100 - - Accepted publickey for admin from 10.0.0.5 port 51234 ssh2`,
+      `10.0.0.22 - - [26/Aug/2026:12:00:03 +0000] "GET /api/v1/health HTTP/1.1" 200 89`,
+      `10.0.0.15 - - [26/Aug/2026:12:00:05 +0000] "GET /dashboard HTTP/1.1" 200 8901`
+    ];
+    payload = lines.join('\n');
+    showToast('Executing Scenario C: Normal Benign Traffic', 'warning');
+  }
+
+  try {
+    const res = await fetch('/api/v1/ingest', {
+      method: 'POST',
+      headers: getAuthHeaders({ 'Content-Type': 'text/plain' }),
+      body: payload,
+    });
+
+    if (res.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+      return;
+    }
+
+    if (res.ok) {
+      await new Promise(r => setTimeout(r, 200));
+      await fetchDashboardData();
+    } else {
+      showToast(`Ingestion status: ${res.status}`, 'error');
+    }
+  } catch (err) {
+    console.error('Error running preset scenario:', err);
+    showToast('Failed to trigger scenario ingestion', 'error');
+  }
+}
+
+/**
+ * Step 3: Pipeline Progress Visual Stepper
+ */
+function triggerPipelineProgress() {
+  const badge = document.getElementById('pipeline-status-badge');
+  const steps = [1, 2, 3, 4, 5];
+  
+  if (badge) {
+    badge.textContent = 'PROCESSING INGESTION PIPELINE...';
+    badge.style.borderColor = 'var(--neon-cyan)';
+    badge.style.color = 'var(--neon-cyan)';
+  }
+
+  steps.forEach(s => {
+    const el = document.getElementById(`p-step-${s}`);
+    if (el) el.className = 'p-step';
+  });
+
+  let current = 1;
+  const interval = setInterval(() => {
+    if (current > 5) {
+      clearInterval(interval);
+      if (badge) {
+        badge.textContent = 'PIPELINE COMPLETE \u2022 IDLE STREAM';
+      }
+      setTimeout(() => {
+        steps.forEach(s => {
+          const el = document.getElementById(`p-step-${s}`);
+          if (el) el.className = (s === 1) ? 'p-step active' : 'p-step';
+        });
+        if (badge) badge.textContent = 'READY \u2022 IDLE STREAM';
+      }, 2500);
+      return;
+    }
+
+    for (let i = 1; i <= 5; i++) {
+      const el = document.getElementById(`p-step-${i}`);
+      if (!el) continue;
+      if (i < current) {
+        el.className = 'p-step completed';
+      } else if (i === current) {
+        el.className = 'p-step active';
+      } else {
+        el.className = 'p-step';
+      }
+    }
+    current++;
+  }, 300);
 }
 
 /**
@@ -203,6 +332,7 @@ function setupAttackSimulator() {
   if (!btn) return;
 
   btn.addEventListener('click', async () => {
+    triggerPipelineProgress();
     btn.disabled = true;
     const originalHtml = btn.innerHTML;
     btn.innerHTML = `
@@ -236,7 +366,6 @@ function setupAttackSimulator() {
       }
 
       if (res.ok) {
-        // Allow brief moment for background worker loop, then immediately force UI refresh
         await new Promise(r => setTimeout(r, 150));
         await fetchDashboardData();
       } else if (res.status === 429) {
@@ -272,6 +401,7 @@ function setupFileUpload() {
     const file = e.target.files[0];
     if (!file) return;
 
+    triggerPipelineProgress();
     showToast(`Uploading ${file.name}...`, 'warning');
 
     const formData = new FormData();
@@ -463,6 +593,7 @@ async function updateStats() {
   const data = await res.json();
 
   const totalEvents = data.total_events_ingested || 0;
+  totalEventsIngestedCount = totalEvents;
   const threatCounts = data.threat_level_counts || {};
   const highCount = threatCounts.HIGH || 0;
   const medCount = threatCounts.MEDIUM || 0;
@@ -524,9 +655,91 @@ async function updateEventsTable() {
 
   currentEventsList = data.events || [];
   updateThreatMap(currentEventsList);
+  updateThreatGaugeAndROI(currentEventsList, totalEventsIngestedCount);
   renderFilteredEventsTable();
 }
 
+/**
+ * Steps 3 & 4: Updates Live Threat Gauge and ROI Panel Metrics
+ */
+function updateThreatGaugeAndROI(events, totalIngested) {
+  if (!events || events.length === 0) {
+    const scoreValEl = document.getElementById('gauge-score-value');
+    if (scoreValEl) scoreValEl.textContent = '0.0';
+    return;
+  }
+
+  const recentSlice = events.slice(0, 25);
+  const totalScore = recentSlice.reduce((sum, e) => sum + (e.threat_score || 0), 0);
+  const avgScore = recentSlice.length > 0 ? (totalScore / recentSlice.length) : 0;
+  const maxScore = Math.max(...recentSlice.map(e => e.threat_score || 0), 0);
+  
+  const compositeScore = Math.min(100, (maxScore * 0.6) + (avgScore * 0.4));
+  const formattedScore = compositeScore.toFixed(1);
+
+  const scoreValEl = document.getElementById('gauge-score-value');
+  const levelTextEl = document.getElementById('gauge-level-text');
+  const riskBadgeEl = document.getElementById('gauge-risk-badge');
+  const barFillEl = document.getElementById('gauge-bar-fill');
+  const circleEl = document.getElementById('gauge-circle');
+
+  if (scoreValEl) scoreValEl.textContent = formattedScore;
+  if (barFillEl) barFillEl.style.width = `${Math.min(100, compositeScore)}%`;
+
+  if (circleEl) circleEl.className = 'gauge-circle';
+
+  if (compositeScore >= 70) {
+    if (levelTextEl) {
+      levelTextEl.textContent = 'CRITICAL THREAT ACTIVE';
+      levelTextEl.className = 'gauge-level-text text-high';
+    }
+    if (riskBadgeEl) {
+      riskBadgeEl.textContent = 'HIGH RISK';
+      riskBadgeEl.style.background = 'var(--neon-red-bg)';
+      riskBadgeEl.style.color = 'var(--neon-red)';
+      riskBadgeEl.style.borderColor = 'var(--neon-red-border)';
+    }
+    if (circleEl) circleEl.classList.add('gauge-high');
+  } else if (compositeScore >= 35) {
+    if (levelTextEl) {
+      levelTextEl.textContent = 'ELEVATED ANOMALY LEVEL';
+      levelTextEl.className = 'gauge-level-text text-medium';
+    }
+    if (riskBadgeEl) {
+      riskBadgeEl.textContent = 'ELEVATED RISK';
+      riskBadgeEl.style.background = 'var(--neon-amber-bg)';
+      riskBadgeEl.style.color = 'var(--neon-amber)';
+      riskBadgeEl.style.borderColor = 'var(--neon-amber-border)';
+    }
+    if (circleEl) circleEl.classList.add('gauge-medium');
+  } else {
+    if (levelTextEl) {
+      levelTextEl.textContent = 'SYSTEM NOMINAL';
+      levelTextEl.className = 'gauge-level-text';
+    }
+    if (riskBadgeEl) {
+      riskBadgeEl.textContent = 'NOMINAL';
+      riskBadgeEl.style.background = 'var(--neon-cyan-bg)';
+      riskBadgeEl.style.color = 'var(--neon-cyan)';
+      riskBadgeEl.style.borderColor = 'var(--neon-cyan-border)';
+    }
+  }
+
+  // Update Operational Security ROI Metrics
+  const total = totalIngested || events.length;
+  const highCount = events.filter(e => (e.threat_level || '').toUpperCase() === 'HIGH').length;
+  const medCount = events.filter(e => (e.threat_level || '').toUpperCase() === 'MEDIUM').length;
+  const lowCount = events.filter(e => (e.threat_level || '').toUpperCase() === 'LOW').length;
+
+  const hoursSaved = (highCount * 0.5 + medCount * 0.25 + lowCount * 0.1 + (total * 0.05)).toFixed(1);
+  const noiseMitigated = total > 0 ? ((lowCount / total) * 100).toFixed(1) : '0.0';
+
+  const hoursSavedEl = document.getElementById('roi-hours-saved');
+  const noiseEl = document.getElementById('roi-noise-mitigated');
+
+  if (hoursSavedEl) hoursSavedEl.innerHTML = `${hoursSaved}<span class="roi-unit">hrs</span>`;
+  if (noiseEl) noiseEl.innerHTML = `${noiseMitigated}<span class="roi-unit">%</span>`;
+}
 
 /**
  * Filters and renders visible table rows based on NLP search input.
@@ -544,6 +757,7 @@ function renderFilteredEventsTable() {
       const type = (evt.event_type || '').toLowerCase();
       const level = (evt.threat_level || '').toLowerCase();
       const xai = (evt.xai_explanation || '').toLowerCase();
+      const mitre = (evt.mitre_tactic || '').toLowerCase();
       const fullJson = JSON.stringify(evt).toLowerCase();
       return (
         raw.includes(currentSearchQuery) ||
@@ -551,6 +765,7 @@ function renderFilteredEventsTable() {
         type.includes(currentSearchQuery) ||
         level.includes(currentSearchQuery) ||
         xai.includes(currentSearchQuery) ||
+        mitre.includes(currentSearchQuery) ||
         fullJson.includes(currentSearchQuery)
       );
     });
@@ -562,7 +777,7 @@ function renderFilteredEventsTable() {
   if (filtered.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="6" class="loading-cell">
+        <td colspan="7" class="loading-cell">
           <span>${currentSearchQuery ? 'No events matched your natural language query.' : 'No ingested events found in normalized storage.'}</span>
         </td>
       </tr>
@@ -588,6 +803,51 @@ window.toggleRowExpansion = function(index, eventKey) {
     expandedRowKeys.add(eventKey);
   }
 };
+
+/**
+ * Step 5: Generates distinct MITRE ATT&CK Tactic Badge
+ */
+function getMitreBadgeHtml(event) {
+  let tactic = event.mitre_tactic || '';
+  if (!tactic) {
+    const raw = (event.original_event || '').toLowerCase();
+    const type = (event.event_type || '').toLowerCase();
+    const flags = (event.anomaly_flags || []).join(' ').toLowerCase();
+
+    if (raw.includes('failed password') || raw.includes('sshd') || flags.includes('repeated') || type.includes('auth')) {
+      tactic = 'T1110 - Brute Force';
+    } else if (raw.includes('syn') || raw.includes('port scan') || type.includes('firewall') || flags.includes('scan')) {
+      tactic = 'T1046 - Network Discovery';
+    } else if (raw.includes('suricata') || raw.includes('exploit') || raw.includes('script')) {
+      tactic = 'T1059 - Command Interpreter';
+    } else if (raw.includes('sudo') || raw.includes('root') || flags.includes('privilege')) {
+      tactic = 'T1078 - Valid Accounts';
+    } else {
+      tactic = 'T1000 - General Audit';
+    }
+  }
+
+  return `<span class="badge-mitre">🛡️ ${escapeHtml(tactic)}</span>`;
+}
+
+/**
+ * Step 5: Generates inline "Why Flagged" summary pill
+ */
+function getWhyFlaggedPillHtml(event) {
+  const score = event.threat_score || 0;
+  const flags = event.anomaly_flags || [];
+  let summary = '';
+
+  if (score >= 70) {
+    summary = flags.length > 0 ? `High Entropy & ${flags[0]}` : 'High Severity Anomaly';
+  } else if (score >= 35) {
+    summary = flags.length > 0 ? flags[0] : 'Elevated Anomaly Score';
+  } else {
+    summary = 'Normal Baseline Activity';
+  }
+
+  return `<span class="why-flagged-pill">Why Flagged: ${escapeHtml(summary)}</span>`;
+}
 
 /**
  * Renders a primary UnifiedEvent row and its expandable side-by-side forensic detail row.
@@ -629,9 +889,11 @@ function renderEventRow(event, index) {
   const rawPayload = event.original_event || '';
   const formattedJson = JSON.stringify(event, null, 2);
 
-  // Unique event key for expansion state retention
   const eventKey = `${fullHash}_${index}`;
   const isOpen = expandedRowKeys.has(eventKey) ? 'is-open' : '';
+
+  const mitreHtml = getMitreBadgeHtml(event);
+  const whyFlaggedHtml = getWhyFlaggedPillHtml(event);
 
   return `
     <tr class="row-expandable ${rowClass}" onclick="toggleRowExpansion(${index}, '${escapeJs(eventKey)}')">
@@ -643,7 +905,8 @@ function renderEventRow(event, index) {
           ${threatLevel} (${threatScore})
         </span>
       </td>
-      <td class="xai-explanation">${escapeHtml(explanation)}</td>
+      <td>${mitreHtml}</td>
+      <td class="xai-explanation">${whyFlaggedHtml} ${escapeHtml(explanation)}</td>
       <td>
         <span class="merkle-hash" title="Click to copy Merkle Hash: ${escapeHtml(fullHash)}" onclick="event.stopPropagation(); copyToClipboard('${escapeHtml(fullHash)}')">
           ${escapeHtml(shortHash)}
@@ -651,7 +914,7 @@ function renderEventRow(event, index) {
       </td>
     </tr>
     <tr class="detail-row ${isOpen}" id="detail-row-${index}">
-      <td colspan="6">
+      <td colspan="7">
         <div class="forensic-panel-container ${panelClass}">
           <div class="forensic-grid">
             <!-- Left Column: Raw Evidence (Zero Information Loss) -->

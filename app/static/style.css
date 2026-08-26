@@ -971,4 +971,415 @@ body.light-mode .code-block {
   color: #f8fafc;
 }
 
+/* ==========================================================================
+   PHASE 2: OPERATIONS TOOLBAR, PIPELINE, THREAT GAUGE & ROI PANEL STYLES
+   ========================================================================== */
+
+/* Operations & Ingestion Toolbar */
+.ops-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  background: rgba(11, 19, 41, 0.75);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 1rem 1.5rem;
+  backdrop-filter: blur(16px);
+  flex-wrap: wrap;
+}
+
+.ops-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ops-toolbar-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--neon-cyan);
+  text-transform: uppercase;
+  margin-right: 0.25rem;
+}
+
+.ops-toolbar-divider {
+  width: 1px;
+  height: 32px;
+  background: var(--border-color);
+}
+
+.preset-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.preset-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  padding: 7px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.preset-btn:hover {
+  background: var(--neon-cyan-bg);
+  border-color: var(--neon-cyan-border);
+  color: var(--neon-cyan);
+  transform: translateY(-1px);
+}
+
+.preset-icon {
+  font-size: 0.85rem;
+}
+
+/* Live Pipeline Progress Indicator */
+.pipeline-section {
+  width: 100%;
+}
+
+.pipeline-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  backdrop-filter: blur(16px);
+}
+
+.pipeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.1rem;
+}
+
+.pipeline-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.pipeline-title h3 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--text-main);
+}
+
+.pipeline-status {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--neon-cyan);
+  background: var(--neon-cyan-bg);
+  border: 1px solid var(--neon-cyan-border);
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.pipeline-steps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.p-step {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  padding: 10px 14px;
+  border-radius: 10px;
+  flex: 1;
+  min-width: 160px;
+  transition: all 0.3s ease;
+}
+
+.p-step.active {
+  background: var(--neon-cyan-bg);
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+}
+
+.p-step.completed {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.p-step-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+.p-step.active .p-step-num {
+  background: var(--neon-cyan);
+  color: #070b14;
+}
+
+.p-step.completed .p-step-num {
+  background: #10b981;
+  color: #070b14;
+}
+
+.p-step-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.p-step-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.p-step-sub {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.p-step-arrow {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  padding: 0 2px;
+}
+
+/* Operational Intelligence Row: Threat Gauge & ROI Panel */
+.ops-intel-row {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 1024px) {
+  .ops-intel-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.intel-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  backdrop-filter: blur(16px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.icon-threat-fire {
+  color: var(--neon-red);
+}
+
+.icon-roi {
+  color: var(--neon-cyan);
+}
+
+/* Threat Gauge Body */
+.gauge-body {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 0.75rem;
+}
+
+.gauge-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gauge-circle {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 4px solid var(--neon-cyan);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 240, 255, 0.05);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+  transition: all 0.4s ease;
+}
+
+.gauge-circle.gauge-high {
+  border-color: var(--neon-red);
+  background: rgba(255, 42, 95, 0.08);
+  box-shadow: 0 0 20px rgba(255, 42, 95, 0.3);
+}
+
+.gauge-circle.gauge-medium {
+  border-color: var(--neon-amber);
+  background: rgba(255, 183, 3, 0.08);
+  box-shadow: 0 0 20px rgba(255, 183, 3, 0.3);
+}
+
+.gauge-number {
+  font-family: var(--font-mono);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1;
+}
+
+.gauge-max {
+  font-size: 0.65rem;
+  color: var(--text-dim);
+}
+
+.gauge-meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.gauge-level-text {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--neon-cyan);
+}
+
+.gauge-level-text.text-high { color: var(--neon-red); }
+.gauge-level-text.text-medium { color: var(--neon-amber); }
+
+.gauge-bar-container {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.gauge-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-amber), var(--neon-red));
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.gauge-subtext {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* ROI Panel Metrics Grid */
+.roi-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .roi-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.roi-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.roi-value {
+  font-family: var(--font-mono);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--neon-cyan);
+}
+
+.roi-unit {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 2px;
+}
+
+.roi-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.roi-sub {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+/* MITRE Badges & Inline Why Flagged Pills */
+.badge-mitre {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  white-space: nowrap;
+}
+
+.why-flagged-pill {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  padding: 2px 7px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  margin-right: 6px;
+}
+
+body.light-mode .ops-toolbar,
+body.light-mode .pipeline-card,
+body.light-mode .intel-card {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+body.light-mode .preset-btn,
+body.light-mode .p-step,
+body.light-mode .roi-item {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+
 
