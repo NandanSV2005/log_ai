@@ -45,7 +45,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Security Headers Middleware
+# Security Headers & Strict Anti-Caching Middleware
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
@@ -54,6 +54,9 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     response.headers["Content-Security-Policy"] = "default-src 'self' 'unsafe-inline' 'unsafe-eval' https:;"
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
     return response
 
 # Include Routers
@@ -63,25 +66,31 @@ app.include_router(dashboard.router)
 
 static_dir = Path(__file__).parent / "static"
 
+CACHE_PREVENTION_HEADERS = {
+    "Cache-Control": "no-cache, no-store, must-revalidate",
+    "Pragma": "no-cache",
+    "Expires": "0",
+}
+
 @app.get("/", response_class=FileResponse, tags=["SaaS Landing Page"])
 async def get_landing_page():
     """Serves the SaaS Landing Page."""
-    return FileResponse(static_dir / "landing.html")
+    return FileResponse(static_dir / "landing.html", headers=CACHE_PREVENTION_HEADERS)
 
 @app.get("/login", response_class=FileResponse, tags=["Authentication UI"])
 async def get_login_page():
     """Serves the Login UI."""
-    return FileResponse(static_dir / "login.html")
+    return FileResponse(static_dir / "login.html", headers=CACHE_PREVENTION_HEADERS)
 
 @app.get("/register", response_class=FileResponse, tags=["Authentication UI"])
 async def get_register_page():
     """Serves the Registration UI."""
-    return FileResponse(static_dir / "register.html")
+    return FileResponse(static_dir / "register.html", headers=CACHE_PREVENTION_HEADERS)
 
 @app.get("/dashboard", response_class=FileResponse, tags=["Dashboard UI"])
 async def get_dashboard_ui():
     """Serves the main SOC Dashboard frontend index.html."""
-    return FileResponse(static_dir / "index.html")
+    return FileResponse(static_dir / "index.html", headers=CACHE_PREVENTION_HEADERS)
 
 @app.get("/health", tags=["Health"])
 async def health_check():

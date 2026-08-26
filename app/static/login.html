@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LOG AI — Log In to SOC Platform</title>
+  <title>LOG AI | Enterprise SOC</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -163,7 +164,7 @@
 
         const data = await res.json();
         if (res.ok && data.access_token) {
-          localStorage.setItem('token', data.access_token);
+          sessionStorage.setItem('token', data.access_token);
           window.location.href = '/dashboard';
         } else {
           errBox.textContent = data.detail || 'Authentication failed. Invalid username or password.';

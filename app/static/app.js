@@ -16,13 +16,13 @@ let totalEventsIngestedCount = 0;
 const expandedRowKeys = new Set();
 
 // Immediate authentication check
-const userToken = localStorage.getItem('token');
+const userToken = sessionStorage.getItem('token');
 if (!userToken) {
   window.location.href = '/login';
 }
 
 function getAuthHeaders(extraHeaders = {}) {
-  const token = localStorage.getItem('token');
+  const token = sessionStorage.getItem('token');
   return {
     'Authorization': `Bearer ${token}`,
     ...extraHeaders
@@ -49,7 +49,7 @@ function setupLogout() {
   const btn = document.getElementById('logout-btn');
   if (!btn) return;
   btn.addEventListener('click', () => {
-    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
     window.location.href = '/login';
   });
 }
@@ -273,7 +273,7 @@ function setupThemeToggle() {
   const icon = document.getElementById('theme-toggle-icon');
   if (!btn || !icon) return;
 
-  const savedTheme = localStorage.getItem('theme') || 'dark';
+  const savedTheme = sessionStorage.getItem('theme') || 'dark';
   if (savedTheme === 'light') {
     document.body.classList.add('light-mode');
     icon.textContent = '☀️';
@@ -286,10 +286,10 @@ function setupThemeToggle() {
     const isLight = document.body.classList.toggle('light-mode');
     if (isLight) {
       icon.textContent = '☀️';
-      localStorage.setItem('theme', 'light');
+      sessionStorage.setItem('theme', 'light');
     } else {
       icon.textContent = '🌙';
-      localStorage.setItem('theme', 'dark');
+      sessionStorage.setItem('theme', 'dark');
     }
   });
 }
@@ -307,7 +307,7 @@ function setupDownloadReport() {
         headers: getAuthHeaders()
       });
       if (res.status === 401) {
-        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
         window.location.href = '/login';
         return;
       }
@@ -401,7 +401,7 @@ async function runPresetScenario(scenarioType) {
     });
 
     if (res.status === 401) {
-      localStorage.removeItem('token');
+      sessionStorage.removeItem('token');
       window.location.href = '/login';
       return;
     }
@@ -572,7 +572,7 @@ function setupAttackSimulator() {
       });
 
       if (res.status === 401) {
-        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
         window.location.href = '/login';
         return;
       }
@@ -620,7 +620,7 @@ function setupFileUpload() {
     formData.append('file', file);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const res = await fetch('/api/v1/ingest/file', {
         method: 'POST',
         headers: {
@@ -630,7 +630,7 @@ function setupFileUpload() {
       });
 
       if (res.status === 401) {
-        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
         window.location.href = '/login';
         return;
       }
@@ -797,7 +797,7 @@ async function fetchDashboardData() {
 async function updateStats() {
   const res = await fetch(API_STATS_URL, { headers: getAuthHeaders() });
   if (res.status === 401) {
-    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
     window.location.href = '/login';
     return;
   }
@@ -858,7 +858,7 @@ async function updateStats() {
 async function updateEventsTable() {
   const res = await fetch(API_RECENT_EVENTS_URL, { headers: getAuthHeaders() });
   if (res.status === 401) {
-    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
     window.location.href = '/login';
     return;
   }
@@ -995,10 +995,14 @@ function renderFilteredEventsTable() {
   countBadge.textContent = `Showing ${filtered.length} of ${currentEventsList.length} events${queryInfo} \u2022 Click row for raw evidence`;
 
   if (filtered.length === 0) {
+    const emptyMsg = currentSearchQuery 
+      ? `No events matched your natural language query: "<em>${escapeHtml(currentSearchQuery)}</em>"` 
+      : 'System Secure. No anomalies detected. Upload a .LOG file or run a simulation to begin analysis.';
     tbody.innerHTML = `
-      <tr>
-        <td colspan="8" class="loading-cell">
-          <span>${currentSearchQuery ? 'No events matched your natural language query.' : 'No ingested events found in normalized storage.'}</span>
+      <tr class="empty-state-row">
+        <td colspan="8" style="text-align: center; padding: 3rem 1.5rem; color: var(--text-muted);">
+          <div style="font-size: 1.6rem; margin-bottom: 0.5rem;">🛡️</div>
+          <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.25rem;">${emptyMsg}</div>
         </td>
       </tr>
     `;
@@ -1048,7 +1052,7 @@ window.updateEventStatus = async function(eventId, newStatus, selectEl) {
     });
 
     if (res.status === 401) {
-      localStorage.removeItem('token');
+      sessionStorage.removeItem('token');
       window.location.href = '/login';
       return;
     }

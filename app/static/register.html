@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LOG AI — User Registration</title>
+  <title>LOG AI | Enterprise SOC</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -177,11 +178,23 @@
 
         const data = await res.json();
         if (res.ok) {
-          succBox.textContent = 'Account created successfully! Redirecting to login...';
+          succBox.textContent = 'Account created! Logging in automatically...';
           succBox.style.display = 'block';
-          setTimeout(() => {
+
+          // Automatic second fetch to login endpoint
+          const loginRes = await fetch('/api/v1/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+          });
+          const loginData = await loginRes.json();
+
+          if (loginRes.ok && loginData.access_token) {
+            sessionStorage.setItem('token', loginData.access_token);
+            window.location.href = '/dashboard';
+          } else {
             window.location.href = '/login';
-          }, 1500);
+          }
         } else {
           errBox.textContent = data.detail || 'Registration failed.';
           errBox.style.display = 'block';
