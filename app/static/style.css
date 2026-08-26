@@ -868,6 +868,50 @@ body.light-mode .remed-badge {
   color: #18181b;
 }
 
+body.light-mode .gauge-circle {
+  background: #0a0a0a;
+  border-color: #312e81;
+}
+
+body.light-mode .gauge-number,
+body.light-mode .gauge-max {
+  color: #ffffff !important;
+}
+
+body.light-mode .p-step-num {
+  background: #18181b;
+  color: #ffffff !important;
+}
+
+body.light-mode .p-step.active .p-step-num {
+  background: #312e81;
+  color: #ffffff !important;
+}
+
+body.light-mode .p-step.completed .p-step-num {
+  background: #4338ca;
+  color: #ffffff !important;
+}
+
+body.light-mode .p-step-title {
+  color: #18181b;
+  font-weight: 700;
+}
+
+body.light-mode .p-step-sub {
+  color: #52525b;
+}
+
+body.light-mode .pipeline-title h3 {
+  color: #18181b;
+}
+
+body.light-mode .pipeline-status {
+  color: #312e81;
+  background: rgba(49, 46, 129, 0.12);
+  border-color: rgba(49, 46, 129, 0.3);
+}
+
 body.light-mode .btn-secondary {
   background: #e4e4e7;
   border-color: #d4d4d8;
