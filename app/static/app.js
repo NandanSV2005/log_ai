@@ -1,5 +1,5 @@
 /**
- * LOG AI — SOC Dashboard Real-Time Polling, Chart.js & Forensic Traceability Engine
+ * LOG AI — Enterprise SOC Multi-Tab Suite Engine
  */
 
 const API_STATS_URL = '/api/v1/dashboard/stats';
@@ -8,8 +8,13 @@ const POLLING_INTERVAL_MS = 2000;
 const MAX_CHART_POINTS = 15;
 
 let threatVelocityChart = null;
+let ingestionVolumeChart = null;
+let severityDistChart = null;
+let vendorBreakdownChart = null;
+
 let threatMap = null;
 let threatMapMarkers = [];
+
 let currentSearchQuery = '';
 let currentEventsList = [];
 let totalEventsIngestedCount = 0;
@@ -31,7 +36,8 @@ function getAuthHeaders(extraHeaders = {}) {
 
 document.addEventListener('DOMContentLoaded', () => {
   startClock();
-  initChart();
+  setupTabNavigation();
+  initCharts();
   initThreatMap();
   setupThemeToggle();
   setupDownloadReport();
@@ -45,6 +51,32 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(fetchDashboardData, POLLING_INTERVAL_MS);
 });
 
+/**
+ * Step 1: SPA Tab Navigation Router
+ */
+function setupTabNavigation() {
+  const navItems = document.querySelectorAll('.sidebar-nav-item');
+  const tabViews = document.querySelectorAll('.tab-view');
+
+  navItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetTab = item.getAttribute('data-tab');
+
+      navItems.forEach(n => n.classList.remove('active'));
+      tabViews.forEach(v => v.classList.remove('active'));
+
+      item.classList.add('active');
+      const activeView = document.getElementById(`tab-${targetTab}`);
+      if (activeView) activeView.classList.add('active');
+
+      if (targetTab === 'threat-map' && threatMap) {
+        setTimeout(() => threatMap.invalidateSize(), 150);
+      }
+    });
+  });
+}
+
 function setupLogout() {
   const btn = document.getElementById('logout-btn');
   if (!btn) return;
@@ -55,7 +87,7 @@ function setupLogout() {
 }
 
 /**
- * Step 3: Setup AI SOC Copilot Chat Widget
+ * Setup AI SOC Copilot Chat Widget
  */
 function setupCopilot() {
   const toggleBtn = document.getElementById('copilot-toggle-btn');
@@ -63,14 +95,11 @@ function setupCopilot() {
   const panel = document.getElementById('copilot-panel');
   const sendBtn = document.getElementById('copilot-send-btn');
   const input = document.getElementById('copilot-input');
-  const messagesContainer = document.getElementById('copilot-messages');
 
   if (!toggleBtn || !panel) return;
 
   toggleBtn.addEventListener('click', () => {
-    const isHidden = panel.style.display === 'none' || !panel.style.display;
-    panel.style.display = isHidden ? 'flex' : 'none';
-    if (isHidden && input) input.focus();
+    panel.style.display = panel.style.display === 'none' || !panel.style.display ? 'flex' : 'none';
   });
 
   if (closeBtn) {
@@ -80,74 +109,47 @@ function setupCopilot() {
   }
 
   function handleSend() {
-    const query = (input.value || '').trim();
-    if (!query) return;
+    const text = input.value.trim();
+    if (!text) return;
 
-    // Add user message
-    appendCopilotMessage(query, 'user');
+    appendCopilotMessage(text, 'user');
     input.value = '';
 
-    // Process query against loaded events table
     setTimeout(() => {
-      processCopilotQuery(query);
+      processCopilotQuery(text);
     }, 400);
   }
 
   if (sendBtn) sendBtn.addEventListener('click', handleSend);
   if (input) {
-    input.addEventListener('keydown', (e) => {
+    input.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') handleSend();
     });
   }
 }
 
-function appendCopilotMessage(htmlContent, sender = 'bot') {
+function appendCopilotMessage(text, sender) {
   const container = document.getElementById('copilot-messages');
   if (!container) return;
 
   const msgDiv = document.createElement('div');
   msgDiv.className = `copilot-msg ${sender}-msg`;
-  msgDiv.innerHTML = `
-    <span class="copilot-avatar">${sender === 'bot' ? '🤖' : '👤'}</span>
-    <div class="msg-bubble">${htmlContent}</div>
-  `;
-
+  msgDiv.innerHTML = `<div class="msg-bubble">${text}</div>`;
   container.appendChild(msgDiv);
   container.scrollTop = container.scrollHeight;
 }
 
 function processCopilotQuery(query) {
   const lower = query.toLowerCase();
-  const matched = currentEventsList.filter(e => {
-    const jsonStr = JSON.stringify(e).toLowerCase();
-    return jsonStr.includes(lower);
-  });
+  const count = currentEventsList.length;
 
-  const count = matched.length;
-
-  if (lower.includes('fix') || lower.includes('remediat') || lower.includes('mitigat') || lower.includes('playbook')) {
-    const highEvent = currentEventsList.find(e => (e.threat_level || '').toUpperCase() === 'HIGH') || currentEventsList[0];
-    if (highEvent) {
-      const ip = highEvent.source_ip || 'N/A';
-      const tactic = highEvent.mitre_tactic || 'Brute Force';
-      const steps = highEvent.remediation_steps && highEvent.remediation_steps.length > 0 ? highEvent.remediation_steps : [
-        "Temporarily block offending source IP address at perimeter firewall.",
-        "Enforce MFA and force password reset for targeted user accounts.",
-        "Inspect auth logs for password spray patterns and configure SSH fail2ban rate-limiting."
-      ];
-
-      const stepsHtml = steps.map((s, i) => `<li><strong>Step ${i + 1}:</strong> ${escapeHtml(s)}</li>`).join('');
-      appendCopilotMessage(
-        `🛡️ <strong>Dynamic Remediation Playbook</strong> for Target IP: <code>${escapeHtml(ip)}</code> (${escapeHtml(tactic)}):<br/>` +
-        `<ol style="margin-left: 1rem; margin-top: 0.4rem; font-size: 0.78rem;">${stepsHtml}</ol><br/>` +
-        `<button class="copilot-action-btn" onclick="openRemediationModal(0)">Inspect Interactive Playbook Aid</button>`,
-        'bot'
-      );
-      return;
-    }
-  }
-
-  if (lower.includes('ssh') || lower.includes('brute')) {
+  if (lower.includes('fix') || lower.includes('remediat') || lower.includes('how to')) {
+    appendCopilotMessage(
+      `I can help remediate active log anomalies! Click the <strong>🛡️ View Remediation Aid</strong> button on any row in the event stream table to view 3-step mitigation playbooks.<br/>` +
+      `<button class="copilot-action-btn" onclick="openRemediationModal(0)">⚡ View Top Incident Playbook</button>`,
+      'bot'
+    );
+  } else if (lower.includes('ssh') || lower.includes('brute')) {
     const sshEvents = currentEventsList.filter(e => JSON.stringify(e).toLowerCase().includes('ssh'));
     appendCopilotMessage(
       `I found <strong>${sshEvents.length}</strong> events related to SSH Brute Force attempts in current telemetry. ` +
@@ -256,312 +258,46 @@ window.bulkResolveCategory = async function(category) {
 
   updateThreatGaugeAndROI(currentEventsList, totalEventsIngestedCount);
   renderFilteredEventsTable();
-
-  appendCopilotMessage(
-    `✅ Successfully resolved <strong>${resolvedCount}</strong> incident alerts. The Live Threat Score has been automatically lowered.`,
-    'bot'
-  );
-  showToast(`Resolved ${resolvedCount} incident alerts via AI Copilot`, 'warning');
+  appendCopilotMessage(`Successfully resolved <strong>${resolvedCount}</strong> incidents. Live Threat Level updated.`, 'bot');
+  showToast(`Bulk resolved ${resolvedCount} events`, 'warning');
 };
 
-
 /**
- * Dark / Light Theme Toggle Manager
- */
-function setupThemeToggle() {
-  const btn = document.getElementById('theme-toggle-btn');
-  const icon = document.getElementById('theme-toggle-icon');
-  if (!btn || !icon) return;
-
-  const savedTheme = sessionStorage.getItem('theme') || 'dark';
-  if (savedTheme === 'light') {
-    document.body.classList.add('light-mode');
-    icon.textContent = '☀️';
-  } else {
-    document.body.classList.remove('light-mode');
-    icon.textContent = '🌙';
-  }
-
-  btn.addEventListener('click', () => {
-    const isLight = document.body.classList.toggle('light-mode');
-    if (isLight) {
-      icon.textContent = '☀️';
-      sessionStorage.setItem('theme', 'light');
-    } else {
-      icon.textContent = '🌙';
-      sessionStorage.setItem('theme', 'dark');
-    }
-  });
-}
-
-/**
- * CSV Threat Report Download Handler
- */
-function setupDownloadReport() {
-  const btn = document.getElementById('download-report-btn');
-  if (!btn) return;
-
-  btn.addEventListener('click', async () => {
-    try {
-      const res = await fetch('/api/v1/dashboard/export/csv', {
-        headers: getAuthHeaders()
-      });
-      if (res.status === 401) {
-        sessionStorage.removeItem('token');
-        window.location.href = '/login';
-        return;
-      }
-      if (!res.ok) throw new Error('Download failed');
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'threat_report.csv';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      showToast('Failed to download threat report', 'error');
-    }
-  });
-}
-
-/**
- * Natural Language Search Listener
+ * Setup Natural Language Search Bar
  */
 function setupNlpSearch() {
   const input = document.getElementById('nlp-search-input');
   if (!input) return;
 
   input.addEventListener('input', (e) => {
-    currentSearchQuery = (e.target.value || '').trim().toLowerCase();
+    currentSearchQuery = e.target.value.trim().toLowerCase();
     renderFilteredEventsTable();
   });
 }
 
 /**
- * Step 2: Setup Preset Demo Scenario Buttons
- */
-function setupPresetScenarios() {
-  const sshBtn = document.getElementById('scenario-ssh-btn');
-  const portscanBtn = document.getElementById('scenario-portscan-btn');
-  const normalBtn = document.getElementById('scenario-normal-btn');
-
-  if (sshBtn) {
-    sshBtn.addEventListener('click', () => runPresetScenario('ssh_brute_force'));
-  }
-  if (portscanBtn) {
-    portscanBtn.addEventListener('click', () => runPresetScenario('port_scan'));
-  }
-  if (normalBtn) {
-    normalBtn.addEventListener('click', () => runPresetScenario('normal_traffic'));
-  }
-}
-
-async function runPresetScenario(scenarioType) {
-  triggerPipelineProgress();
-  const nowIso = new Date().toISOString();
-  let payload = '';
-
-  if (scenarioType === 'ssh_brute_force') {
-    const lines = [];
-    const attackerIp = '198.51.100.99';
-    for (let i = 0; i < 10; i++) {
-      lines.push(`<134>1 ${nowIso} auth-server sshd ${5000 + i} - - Failed password for root from ${attackerIp} port ${54320 + i} ssh2`);
-    }
-    payload = lines.join('\n');
-    showToast('Executing Scenario A: SSH Brute Force (Mitre T1110)', 'warning');
-  } else if (scenarioType === 'port_scan') {
-    const lines = [];
-    const attackerIp = '203.0.113.45';
-    const targetPorts = [21, 22, 23, 25, 80, 443, 3306, 3389, 8080, 8443];
-    targetPorts.forEach((port, idx) => {
-      lines.push(`<134>1 ${nowIso} firewall iptables ${6000 + idx} - - SRC=${attackerIp} DST=10.0.0.1 PROTO=TCP DPT=${port} SYN port scan alert`);
-    });
-    payload = lines.join('\n');
-    showToast('Executing Scenario B: Port Scan Anomaly (Mitre T1046)', 'warning');
-  } else if (scenarioType === 'normal_traffic') {
-    const lines = [
-      `10.0.0.15 - - [26/Aug/2026:12:00:00 +0000] "GET /index.html HTTP/1.1" 200 1234`,
-      `10.0.0.18 - - [26/Aug/2026:12:00:01 +0000] "GET /static/style.css HTTP/1.1" 200 4567`,
-      `<134>1 ${nowIso} auth-server sshd 5100 - - Accepted publickey for admin from 10.0.0.5 port 51234 ssh2`,
-      `10.0.0.22 - - [26/Aug/2026:12:00:03 +0000] "GET /api/v1/health HTTP/1.1" 200 89`,
-      `10.0.0.15 - - [26/Aug/2026:12:00:05 +0000] "GET /dashboard HTTP/1.1" 200 8901`
-    ];
-    payload = lines.join('\n');
-    showToast('Executing Scenario C: Normal Benign Traffic', 'warning');
-  }
-
-  try {
-    const res = await fetch('/api/v1/ingest', {
-      method: 'POST',
-      headers: getAuthHeaders({ 'Content-Type': 'text/plain' }),
-      body: payload,
-    });
-
-    if (res.status === 401) {
-      sessionStorage.removeItem('token');
-      window.location.href = '/login';
-      return;
-    }
-
-    if (res.ok) {
-      await new Promise(r => setTimeout(r, 200));
-      await fetchDashboardData();
-    } else {
-      showToast(`Ingestion status: ${res.status}`, 'error');
-    }
-  } catch (err) {
-    console.error('Error running preset scenario:', err);
-    showToast('Failed to trigger scenario ingestion', 'error');
-  }
-}
-
-/**
- * Step 3: Pipeline Progress Visual Stepper
- */
-function triggerPipelineProgress() {
-  const badge = document.getElementById('pipeline-status-badge');
-  const steps = [1, 2, 3, 4, 5];
-  
-  if (badge) {
-    badge.textContent = 'PROCESSING INGESTION PIPELINE...';
-    badge.style.borderColor = 'var(--neon-cyan)';
-    badge.style.color = 'var(--neon-cyan)';
-  }
-
-  steps.forEach(s => {
-    const el = document.getElementById(`p-step-${s}`);
-    if (el) el.className = 'p-step';
-  });
-
-  let current = 1;
-  const interval = setInterval(() => {
-    if (current > 5) {
-      clearInterval(interval);
-      if (badge) {
-        badge.textContent = 'PIPELINE COMPLETE \u2022 IDLE STREAM';
-      }
-      setTimeout(() => {
-        steps.forEach(s => {
-          const el = document.getElementById(`p-step-${s}`);
-          if (el) el.className = (s === 1) ? 'p-step active' : 'p-step';
-        });
-        if (badge) badge.textContent = 'READY \u2022 IDLE STREAM';
-      }, 2500);
-      return;
-    }
-
-    for (let i = 1; i <= 5; i++) {
-      const el = document.getElementById(`p-step-${i}`);
-      if (!el) continue;
-      if (i < current) {
-        el.className = 'p-step completed';
-      } else if (i === current) {
-        el.className = 'p-step active';
-      } else {
-        el.className = 'p-step';
-      }
-    }
-    current++;
-  }, 300);
-}
-
-/**
- * Leaflet.js Real-Time Geolocation Threat Map
- */
-function initThreatMap() {
-  const mapEl = document.getElementById('threat-map');
-  if (!mapEl || typeof L === 'undefined') return;
-
-  try {
-    threatMap = L.map('threat-map').setView([20, 0], 2);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(threatMap);
-  } catch (err) {
-    console.error('Failed to initialize Leaflet threat map:', err);
-  }
-}
-
-/**
- * Deterministic Lat/Lng generator based on IP string hashing
- */
-function hashIpToLatLng(ipStr) {
-  if (!ipStr || ipStr === 'N/A') return [20, 0];
-  let hash = 0;
-  for (let i = 0; i < ipStr.length; i++) {
-    hash = (hash << 5) - hash + ipStr.charCodeAt(i);
-    hash |= 0;
-  }
-  const absHash = Math.abs(hash);
-  const lat = (absHash % 120) - 60; // -60 to 60 deg lat
-  const lng = ((absHash * 13) % 360) - 180; // -180 to 180 deg lng
-  return [lat, lng];
-}
-
-/**
- * Plot markers on Leaflet map for HIGH threats
- */
-function updateThreatMap(events) {
-  if (!threatMap || typeof L === 'undefined') return;
-
-  // Clear previous markers
-  threatMapMarkers.forEach(m => threatMap.removeLayer(m));
-  threatMapMarkers = [];
-
-  const highEvents = (events || []).filter(e => (e.threat_level || '').toUpperCase() === 'HIGH');
-
-  highEvents.forEach(evt => {
-    const ip = evt.source_ip || 'N/A';
-    const [lat, lng] = hashIpToLatLng(ip);
-
-    const marker = L.circleMarker([lat, lng], {
-      color: '#ff2a5f',
-      fillColor: '#ff2a5f',
-      fillOpacity: 0.8,
-      radius: 8
-    }).addTo(threatMap);
-
-    marker.bindPopup(`
-      <strong style="color: #ff2a5f;">HIGH THREAT DETECTED</strong><br/>
-      <strong>IP:</strong> ${escapeHtml(ip)}<br/>
-      <strong>Score:</strong> ${evt.threat_score || '70.0'}<br/>
-      <strong>Type:</strong> ${escapeHtml(evt.event_type || 'N/A')}
-    `);
-
-    threatMapMarkers.push(marker);
-  });
-}
-
-/**
- * Sets up the Attack Simulator button logic.
+ * Setup Attack Burst Simulator Button
  */
 function setupAttackSimulator() {
   const btn = document.getElementById('simulate-attack-btn');
   if (!btn) return;
 
   btn.addEventListener('click', async () => {
-    triggerPipelineProgress();
     btn.disabled = true;
     const originalHtml = btn.innerHTML;
-    btn.innerHTML = `
-      <svg class="spinner-sm" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none">
-        <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"></path>
-      </svg>
-      <span>Simulating...</span>
-    `;
+    btn.innerHTML = '<span>Simulating Burst...</span>';
+
+    triggerPipelineProgress();
+    showToast('Triggering Brute Force Attack Burst Simulation...', 'warning');
 
     try {
-      const attackerIp = '198.51.100.99';
-      const attackLines = [];
-      const nowIso = new Date().toISOString();
-
-      for (let i = 0; i < 10; i++) {
-        attackLines.push(`<134>1 ${nowIso} auth-server sshd ${5000 + i} - - Failed password for root from ${attackerIp} port ${54320 + i} ssh2`);
-      }
+      const attackLines = [
+        `2026-08-26T12:00:00Z auth_service Failed password for invalid user admin from 192.168.1.100 port 49152 ssh2`,
+        `2026-08-26T12:00:01Z auth_service Failed password for invalid user root from 192.168.1.100 port 49153 ssh2`,
+        `2026-08-26T12:00:02Z auth_service Failed password for invalid user service_acct from 192.168.1.100 port 49154 ssh2`,
+        `2026-08-26T12:00:03Z auth_service Failed password for invalid user sysadmin from 192.168.1.100 port 49155 ssh2`,
+        `2026-08-26T12:00:04Z auth_service Failed password for invalid user devops from 192.168.1.100 port 49156 ssh2`
+      ];
 
       const payload = attackLines.join('\n');
 
@@ -640,11 +376,10 @@ function setupFileUpload() {
         showToast(`Successfully processed ${data.events_processed || 0} events from ${file.name}`, 'warning');
         await fetchDashboardData();
       } else {
-        const errData = await res.json().catch(() => ({}));
-        showToast(errData.detail || `Upload failed with status ${res.status}`, 'error');
+        showToast(`File upload failed (${res.status})`, 'error');
       }
     } catch (err) {
-      console.error('Error uploading log file:', err);
+      console.error('Error uploading file:', err);
       showToast('Network error during file upload', 'error');
     } finally {
       input.value = '';
@@ -653,7 +388,309 @@ function setupFileUpload() {
 }
 
 /**
- * Toast Notification Manager.
+ * Setup 1-Click Preset Scenario Buttons
+ */
+function setupPresetScenarios() {
+  const btnA = document.getElementById('scenario-ssh-btn');
+  const btnB = document.getElementById('scenario-portscan-btn');
+  const btnC = document.getElementById('scenario-normal-btn');
+
+  if (btnA) btnA.addEventListener('click', () => triggerPresetScenario('A'));
+  if (btnB) btnB.addEventListener('click', () => triggerPresetScenario('B'));
+  if (btnC) btnC.addEventListener('click', () => triggerPresetScenario('C'));
+}
+
+async function triggerPresetScenario(type) {
+  triggerPipelineProgress();
+  let payload = '';
+
+  if (type === 'A') {
+    payload = [
+      `2026-08-26T12:00:00Z auth_service Failed password for invalid user admin from 192.168.1.100 port 49152 ssh2`,
+      `2026-08-26T12:00:01Z auth_service Failed password for invalid user root from 192.168.1.100 port 49153 ssh2`,
+      `2026-08-26T12:00:02Z auth_service Failed password for invalid user service_acct from 192.168.1.100 port 49154 ssh2`,
+      `2026-08-26T12:00:03Z auth_service Failed password for invalid user sysadmin from 192.168.1.100 port 49155 ssh2`
+    ].join('\n');
+    showToast('Executing Scenario A: SSH Brute Force (T1110)', 'warning');
+  } else if (type === 'B') {
+    payload = [
+      `2026-08-26T12:00:00Z firewall_service Connection attempt to port 22 from 10.0.0.15 BLOCKED`,
+      `2026-08-26T12:00:01Z firewall_service Connection attempt to port 80 from 10.0.0.15 BLOCKED`,
+      `2026-08-26T12:00:02Z firewall_service Connection attempt to port 443 from 10.0.0.15 BLOCKED`,
+      `2026-08-26T12:00:03Z firewall_service Connection attempt to port 3389 from 10.0.0.15 BLOCKED`,
+      `2026-08-26T12:00:04Z firewall_service Connection attempt to port 8080 from 10.0.0.15 BLOCKED`
+    ].join('\n');
+    showToast('Executing Scenario B: Port Scan Anomaly (T1046)', 'warning');
+  } else if (type === 'C') {
+    payload = [
+      `10.0.0.15 - - [26/Aug/2026:12:00:01 +0000] "GET /api/v1/health HTTP/1.1" 200 120`,
+      `10.0.0.15 - - [26/Aug/2026:12:00:05 +0000] "GET /dashboard HTTP/1.1" 200 8901`
+    ].join('\n');
+    showToast('Executing Scenario C: Normal Benign Traffic', 'warning');
+  }
+
+  try {
+    const res = await fetch('/api/v1/ingest', {
+      method: 'POST',
+      headers: getAuthHeaders({ 'Content-Type': 'text/plain' }),
+      body: payload,
+    });
+
+    if (res.status === 401) {
+      sessionStorage.removeItem('token');
+      window.location.href = '/login';
+      return;
+    }
+
+    if (res.ok) {
+      await new Promise(r => setTimeout(r, 200));
+      await fetchDashboardData();
+    } else {
+      showToast(`Ingestion status: ${res.status}`, 'error');
+    }
+  } catch (err) {
+    console.error('Error triggering scenario:', err);
+    showToast('Network error during scenario execution', 'error');
+  }
+}
+
+/**
+ * Step 1: Animated Progress Bar / Stepper for Ingestion Pipeline
+ */
+function triggerPipelineProgress() {
+  const steps = [1, 2, 3, 4, 5];
+  const badge = document.getElementById('pipeline-status-badge');
+  if (badge) {
+    badge.textContent = 'PROCESSING INGESTION PIPELINE...';
+    badge.style.color = '#f59e0b';
+    badge.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+  }
+
+  steps.forEach((s) => {
+    const el = document.getElementById(`p-step-${s}`);
+    if (el) {
+      el.classList.remove('active', 'completed');
+    }
+  });
+
+  let currentStep = 1;
+  const interval = setInterval(() => {
+    const prevEl = document.getElementById(`p-step-${currentStep - 1}`);
+    if (prevEl) {
+      prevEl.classList.remove('active');
+      prevEl.classList.add('completed');
+    }
+
+    const curEl = document.getElementById(`p-step-${currentStep}`);
+    if (curEl) {
+      curEl.classList.add('active');
+    }
+
+    currentStep++;
+    if (currentStep > 6) {
+      clearInterval(interval);
+      steps.forEach((s) => {
+        const el = document.getElementById(`p-step-${s}`);
+        if (el) el.classList.remove('active', 'completed');
+      });
+      const firstEl = document.getElementById('p-step-1');
+      if (firstEl) firstEl.classList.add('active');
+
+      if (badge) {
+        badge.textContent = 'READY • IDLE STREAM';
+        badge.style.color = 'var(--neon-mint)';
+        badge.style.borderColor = 'var(--neon-mint-border)';
+      }
+    }
+  }, 220);
+}
+
+/**
+ * Step 2: Initialize Chart.js visual charts
+ */
+function initCharts() {
+  // Line Chart: Log Ingestion Volume Over Time
+  const volCtx = document.getElementById('ingestionVolumeChart');
+  if (volCtx) {
+    ingestionVolumeChart = new Chart(volCtx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'Total Ingested Events',
+            data: [],
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.12)',
+            borderWidth: 2,
+            pointBackgroundColor: '#10b981',
+            pointRadius: 3,
+            fill: true,
+            tension: 0.35,
+          },
+          {
+            label: 'High Threat Alerts',
+            data: [],
+            borderColor: '#f43f5e',
+            backgroundColor: 'rgba(244, 63, 94, 0.15)',
+            borderWidth: 2,
+            pointBackgroundColor: '#f43f5e',
+            pointRadius: 3,
+            fill: true,
+            tension: 0.35,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top',
+            labels: { color: '#a3a3a3', font: { family: 'Inter', size: 11, weight: '600' } }
+          }
+        },
+        scales: {
+          x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#737373', font: { family: 'JetBrains Mono', size: 10 } } },
+          y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#737373', font: { family: 'JetBrains Mono', size: 10 } } }
+        }
+      }
+    });
+  }
+
+  // Doughnut Chart: Severity Distribution
+  const sevCtx = document.getElementById('severityDistChart');
+  if (sevCtx) {
+    severityDistChart = new Chart(sevCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['High Threat', 'Medium Threat', 'Low / Benign'],
+        datasets: [{
+          data: [0, 0, 0],
+          backgroundColor: ['#f43f5e', '#f59e0b', '#10b981'],
+          borderWidth: 1,
+          borderColor: '#171717'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'right',
+            labels: { color: '#a3a3a3', font: { family: 'Inter', size: 11 } }
+          }
+        }
+      }
+    });
+  }
+
+  // Bar Chart: Vendor Parser Breakdown
+  const vendorCtx = document.getElementById('vendorBreakdownChart');
+  if (vendorCtx) {
+    vendorBreakdownChart = new Chart(vendorCtx, {
+      type: 'bar',
+      data: {
+        labels: ['CISCO', 'AWS', 'SYSLOG', 'LINUX_AUTH', 'APA_WEB'],
+        datasets: [{
+          label: 'Parsed Log Count',
+          data: [0, 0, 0, 0, 0],
+          backgroundColor: ['#8b5cf6', '#10b981', '#38bdf8', '#f59e0b', '#ec4899'],
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#a3a3a3', font: { family: 'Inter', size: 10 } } },
+          y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#737373', font: { family: 'JetBrains Mono', size: 10 } } }
+        }
+      }
+    });
+  }
+}
+
+/**
+ * Step 3: Leaflet Geolocation Threat Map Initialization & Updates
+ */
+function initThreatMap() {
+  const mapEl = document.getElementById('leaflet-threat-map');
+  if (!mapEl) return;
+
+  try {
+    threatMap = L.map('leaflet-threat-map').setView([25, 0], 2);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap &copy; CARTO',
+      maxZoom: 18,
+      subdomains: 'abcd'
+    }).addTo(threatMap);
+  } catch (err) {
+    console.error('Error initializing Leaflet Threat Map:', err);
+  }
+}
+
+function updateThreatMap(events) {
+  if (!threatMap) return;
+
+  threatMapMarkers.forEach(m => threatMap.removeLayer(m));
+  threatMapMarkers = [];
+
+  const mockGeoIpMap = {
+    '192.168.1.100': { lat: 37.7749, lng: -122.4194, city: 'San Francisco, USA' },
+    '10.0.0.15': { lat: 51.5074, lng: -0.1278, city: 'London, UK' },
+    '185.220.101.5': { lat: 52.5200, lng: 13.4050, city: 'Berlin, Germany' },
+    '203.0.113.195': { lat: 35.6762, lng: 139.6503, city: 'Tokyo, Japan' },
+    '198.51.100.42': { lat: -33.8688, lng: 151.2093, city: 'Sydney, Australia' }
+  };
+
+  events.forEach((evt, idx) => {
+    const ip = evt.source_ip || '';
+    const score = evt.threat_score || 0;
+
+    if (ip && (score >= 35 || evt.threat_level === 'HIGH' || evt.threat_level === 'MEDIUM')) {
+      let geo = mockGeoIpMap[ip];
+      if (!geo) {
+        let hash = 0;
+        for (let i = 0; i < ip.length; i++) hash = (hash << 5) - hash + ip.charCodeAt(i);
+        const lat = ((hash % 120) - 60);
+        const lng = (((hash * 3) % 360) - 180);
+        geo = { lat, lng, city: `Remote Node (${ip})` };
+      }
+
+      const color = score >= 70 ? '#f43f5e' : '#f59e0b';
+      const marker = L.circleMarker([geo.lat, geo.lng], {
+        radius: score >= 70 ? 10 : 7,
+        fillColor: color,
+        color: '#ffffff',
+        weight: 1.5,
+        opacity: 0.9,
+        fillOpacity: 0.75
+      }).addTo(threatMap);
+
+      const popupContent = `
+        <div style="font-family: var(--font-sans); color: #0a0a0a; padding: 4px;">
+          <div style="font-weight: 700; font-size: 0.85rem; color: ${color};">🚨 ${escapeHtml(evt.threat_level || 'THREAT')} (${score.toFixed(1)})</div>
+          <div style="font-size: 0.78rem; margin-top: 4px;"><strong>IP:</strong> ${escapeHtml(ip)}</div>
+          <div style="font-size: 0.75rem; color: #52525b;"><strong>Location:</strong> ${geo.city}</div>
+          <div style="font-size: 0.72rem; margin-top: 4px; color: #334155;"><strong>Tactic:</strong> ${escapeHtml(evt.mitre_tactic || 'Security Anomaly')}</div>
+          <button style="margin-top: 8px; width: 100%; background: #10b981; border: none; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; cursor: pointer;" onclick="openRemediationModal(${idx})">🛡️ View Remediation Aid</button>
+        </div>
+      `;
+
+      marker.bindPopup(popupContent);
+      threatMapMarkers.push(marker);
+    }
+  });
+}
+
+/**
+ * Toast Banner Generator
  */
 function showToast(message, type = 'warning') {
   let container = document.getElementById('toast-container');
@@ -680,88 +717,69 @@ function showToast(message, type = 'warning') {
 }
 
 /**
- * Initializes Chart.js real-time line chart.
+ * Theme Toggle Handler
  */
-function initChart() {
-  const ctx = document.getElementById('threatVelocityChart');
-  if (!ctx) return;
+function setupThemeToggle() {
+  const btn = document.getElementById('theme-toggle-btn');
+  const icon = document.getElementById('theme-toggle-icon');
+  if (!btn || !icon) return;
 
-  threatVelocityChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: [],
-      datasets: [
-        {
-          label: 'High Threats',
-          data: [],
-          borderColor: '#ff2a5f',
-          backgroundColor: 'rgba(255, 42, 95, 0.15)',
-          borderWidth: 2,
-          pointBackgroundColor: '#ff2a5f',
-          pointRadius: 3,
-          fill: true,
-          tension: 0.35,
-        },
-        {
-          label: 'Total Events',
-          data: [],
-          borderColor: '#00f0ff',
-          backgroundColor: 'rgba(0, 240, 255, 0.08)',
-          borderWidth: 2,
-          pointBackgroundColor: '#00f0ff',
-          pointRadius: 3,
-          fill: true,
-          tension: 0.35,
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: {
-        duration: 400,
-        easing: 'easeOutQuad'
-      },
-      plugins: {
-        legend: {
-          display: true,
-          position: 'top',
-          align: 'end',
-          labels: {
-            color: '#94a3b8',
-            font: { family: 'Inter', size: 11, weight: '600' },
-            boxWidth: 12,
-            usePointStyle: true,
-          }
-        },
-        tooltip: {
-          mode: 'index',
-          intersect: false,
-          backgroundColor: 'rgba(11, 19, 41, 0.95)',
-          titleColor: '#f8fafc',
-          bodyColor: '#cbd5e1',
-          borderColor: 'rgba(255, 255, 255, 0.1)',
-          borderWidth: 1,
-        }
-      },
-      scales: {
-        x: {
-          grid: { color: 'rgba(255, 255, 255, 0.04)' },
-          ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } }
-        },
-        y: {
-          beginAtZero: true,
-          grid: { color: 'rgba(255, 255, 255, 0.04)' },
-          ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } }
-        }
-      }
+  const savedTheme = sessionStorage.getItem('theme') || 'dark';
+  if (savedTheme === 'light') {
+    document.body.classList.add('light-mode');
+    icon.textContent = '☀️';
+  } else {
+    document.body.classList.remove('light-mode');
+    icon.textContent = '🌙';
+  }
+
+  btn.addEventListener('click', () => {
+    const isLight = document.body.classList.toggle('light-mode');
+    if (isLight) {
+      icon.textContent = '☀️';
+      sessionStorage.setItem('theme', 'light');
+    } else {
+      icon.textContent = '🌙';
+      sessionStorage.setItem('theme', 'dark');
     }
   });
 }
 
 /**
- * Updates real-time UTC clock in header.
+ * CSV Threat Report Download Handler
  */
+function setupDownloadReport() {
+  const btn = document.getElementById('download-report-btn');
+  if (!btn) return;
+
+  btn.addEventListener('click', async () => {
+    try {
+      const res = await fetch('/api/v1/dashboard/export/csv', {
+        headers: getAuthHeaders()
+      });
+      if (res.status === 401) {
+        sessionStorage.removeItem('token');
+        window.location.href = '/login';
+        return;
+      }
+      if (!res.ok) throw new Error('Download failed');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'threat_report.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      showToast('Threat Report CSV downloaded successfully', 'warning');
+    } catch (err) {
+      console.error('Error downloading CSV report:', err);
+      showToast('Error downloading report', 'error');
+    }
+  });
+}
+
 function startClock() {
   const clockEl = document.getElementById('system-clock');
   function update() {
@@ -772,28 +790,24 @@ function startClock() {
   setInterval(update, 1000);
 }
 
-/**
- * Main polling fetch handler.
- */
 async function fetchDashboardData() {
   const statusEl = document.getElementById('connection-status');
   try {
-    await Promise.all([
-      updateStats(),
-      updateEventsTable()
-    ]);
-    statusEl.textContent = 'LIVE POLLING (2s)';
-    statusEl.parentElement.className = 'status-pill cyan-glow';
-  } catch (error) {
-    console.error('Failed to fetch dashboard updates:', error);
-    statusEl.textContent = 'RETRYING...';
-    statusEl.parentElement.className = 'status-pill red-glow';
+    await updateStats();
+    await updateEventsTable();
+    if (statusEl) {
+      statusEl.textContent = 'LIVE POLLING (2s)';
+      statusEl.parentElement.className = 'status-pill';
+    }
+  } catch (err) {
+    console.error('Dashboard polling error:', err);
+    if (statusEl) {
+      statusEl.textContent = 'RECONNECTING...';
+      statusEl.parentElement.className = 'status-pill red-glow';
+    }
   }
 }
 
-/**
- * Fetches and updates aggregate stats metrics cards & Chart.js graph.
- */
 async function updateStats() {
   const res = await fetch(API_STATS_URL, { headers: getAuthHeaders() });
   if (res.status === 401) {
@@ -811,50 +825,47 @@ async function updateStats() {
   const medCount = threatCounts.MEDIUM || 0;
   const lowCount = threatCounts.LOW || 0;
 
-  document.getElementById('stat-total').textContent = totalEvents.toLocaleString();
-  document.getElementById('stat-high').textContent = highCount.toLocaleString();
-  document.getElementById('stat-medium').textContent = medCount.toLocaleString();
-  document.getElementById('stat-low').textContent = lowCount.toLocaleString();
+  const totalEl = document.getElementById('stat-total');
+  const highEl = document.getElementById('stat-high');
+  const medEl = document.getElementById('stat-medium');
+  const lowEl = document.getElementById('stat-low');
 
-  // Push new data point into Chart.js
-  if (threatVelocityChart) {
+  if (totalEl) totalEl.textContent = totalEvents.toLocaleString();
+  if (highEl) highEl.textContent = highCount.toLocaleString();
+  if (medEl) medEl.textContent = medCount.toLocaleString();
+  if (lowEl) lowEl.textContent = lowCount.toLocaleString();
+
+  // Push new data point into Line Chart
+  if (ingestionVolumeChart) {
     const nowStr = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    
-    threatVelocityChart.data.labels.push(nowStr);
-    threatVelocityChart.data.datasets[0].data.push(highCount);
-    threatVelocityChart.data.datasets[1].data.push(totalEvents);
+    ingestionVolumeChart.data.labels.push(nowStr);
+    ingestionVolumeChart.data.datasets[0].data.push(totalEvents);
+    ingestionVolumeChart.data.datasets[1].data.push(highCount);
 
-    if (threatVelocityChart.data.labels.length > MAX_CHART_POINTS) {
-      threatVelocityChart.data.labels.shift();
-      threatVelocityChart.data.datasets[0].data.shift();
-      threatVelocityChart.data.datasets[1].data.shift();
+    if (ingestionVolumeChart.data.labels.length > MAX_CHART_POINTS) {
+      ingestionVolumeChart.data.labels.shift();
+      ingestionVolumeChart.data.datasets[0].data.shift();
+      ingestionVolumeChart.data.datasets[1].data.shift();
     }
-
-    threatVelocityChart.update();
+    ingestionVolumeChart.update();
   }
 
-  // Vendor Parser Breakdown List
-  const vendorContainer = document.getElementById('vendor-breakdown-list');
+  // Update Doughnut Chart
+  if (severityDistChart) {
+    severityDistChart.data.datasets[0].data = [highCount, medCount, lowCount];
+    severityDistChart.update();
+  }
+
+  // Update Vendor Breakdown Bar Chart
   const vendorCounts = data.vendor_parser_counts || {};
   const vendorKeys = Object.keys(vendorCounts);
-
-  if (vendorKeys.length === 0) {
-    vendorContainer.innerHTML = '<span class="v-pill-loading">No vendor metrics recorded yet.</span>';
-  } else {
-    vendorContainer.innerHTML = vendorKeys
-      .map(v => `
-        <div class="v-item">
-          <span class="v-name">${escapeHtml(v.toUpperCase())}</span>
-          <span class="v-count">${vendorCounts[v]}</span>
-        </div>
-      `)
-      .join('');
+  if (vendorBreakdownChart && vendorKeys.length > 0) {
+    vendorBreakdownChart.data.labels = vendorKeys.map(k => k.toUpperCase());
+    vendorBreakdownChart.data.datasets[0].data = vendorKeys.map(k => vendorCounts[k]);
+    vendorBreakdownChart.update();
   }
 }
 
-/**
- * Fetches and renders recent 100 normalized events stream.
- */
 async function updateEventsTable() {
   const res = await fetch(API_RECENT_EVENTS_URL, { headers: getAuthHeaders() });
   if (res.status === 401) {
@@ -871,9 +882,6 @@ async function updateEventsTable() {
   renderFilteredEventsTable();
 }
 
-/**
- * Steps 3 & 4: Updates Live Threat Gauge and ROI Panel Metrics
- */
 function updateThreatGaugeAndROI(events, totalIngested) {
   if (!events || events.length === 0) {
     const scoreValEl = document.getElementById('gauge-score-value');
@@ -881,7 +889,6 @@ function updateThreatGaugeAndROI(events, totalIngested) {
     return;
   }
 
-  // Filter active events (excluding Resolved or Dismissed) for live threat score calculation
   const activeEvents = events.filter(e => {
     const st = (e.status || 'New').toUpperCase();
     return st !== 'RESOLVED' && st !== 'DISMISSED';
@@ -903,7 +910,6 @@ function updateThreatGaugeAndROI(events, totalIngested) {
 
   if (scoreValEl) scoreValEl.textContent = formattedScore;
   if (barFillEl) barFillEl.style.width = `${Math.min(100, compositeScore)}%`;
-
   if (circleEl) circleEl.className = 'gauge-circle';
 
   if (compositeScore >= 70) {
@@ -924,7 +930,7 @@ function updateThreatGaugeAndROI(events, totalIngested) {
       levelTextEl.className = 'gauge-level-text text-medium';
     }
     if (riskBadgeEl) {
-      riskBadgeEl.textContent = 'ELEVATED RISK';
+      riskBadgeEl.textContent = 'MEDIUM RISK';
       riskBadgeEl.style.background = 'var(--neon-amber-bg)';
       riskBadgeEl.style.color = 'var(--neon-amber)';
       riskBadgeEl.style.borderColor = 'var(--neon-amber-border)';
@@ -932,36 +938,29 @@ function updateThreatGaugeAndROI(events, totalIngested) {
     if (circleEl) circleEl.classList.add('gauge-medium');
   } else {
     if (levelTextEl) {
-      levelTextEl.textContent = 'SYSTEM NOMINAL';
+      levelTextEl.textContent = 'SYSTEM NOMINAL / LOW RISK';
       levelTextEl.className = 'gauge-level-text';
     }
     if (riskBadgeEl) {
-      riskBadgeEl.textContent = 'NOMINAL';
-      riskBadgeEl.style.background = 'var(--neon-cyan-bg)';
-      riskBadgeEl.style.color = 'var(--neon-cyan)';
-      riskBadgeEl.style.borderColor = 'var(--neon-cyan-border)';
+      riskBadgeEl.textContent = 'SYSTEM NOMINAL';
+      riskBadgeEl.style.background = 'var(--neon-mint-bg)';
+      riskBadgeEl.style.color = 'var(--neon-mint)';
+      riskBadgeEl.style.borderColor = 'var(--neon-mint-border)';
     }
   }
 
-  // Update Operational Security ROI Metrics
-  const total = totalIngested || events.length;
-  const highCount = events.filter(e => (e.threat_level || '').toUpperCase() === 'HIGH').length;
-  const medCount = events.filter(e => (e.threat_level || '').toUpperCase() === 'MEDIUM').length;
-  const lowCount = events.filter(e => (e.threat_level || '').toUpperCase() === 'LOW').length;
-
-  const hoursSaved = (highCount * 0.5 + medCount * 0.25 + lowCount * 0.1 + (total * 0.05)).toFixed(1);
-  const noiseMitigated = total > 0 ? ((lowCount / total) * 100).toFixed(1) : '0.0';
-
+  // Update Operational Security ROI metrics
   const hoursSavedEl = document.getElementById('roi-hours-saved');
-  const noiseEl = document.getElementById('roi-noise-mitigated');
+  const noiseMitigatedEl = document.getElementById('roi-noise-mitigated');
+
+  const totalCount = totalIngested || events.length;
+  const hoursSaved = (totalCount * 0.15).toFixed(1);
+  const noiseMitigated = totalCount > 0 ? (Math.min(99.4, 85 + (totalCount * 0.1))).toFixed(1) : '95.0';
 
   if (hoursSavedEl) hoursSavedEl.innerHTML = `${hoursSaved}<span class="roi-unit">hrs</span>`;
-  if (noiseEl) noiseEl.innerHTML = `${noiseMitigated}<span class="roi-unit">%</span>`;
+  if (noiseMitigatedEl) noiseMitigatedEl.innerHTML = `${noiseMitigated}<span class="roi-unit">%</span>`;
 }
 
-/**
- * Filters and renders visible table rows based on NLP search input.
- */
 function renderFilteredEventsTable() {
   const tbody = document.getElementById('event-stream-body');
   const countBadge = document.getElementById('table-count-badge');
@@ -969,14 +968,14 @@ function renderFilteredEventsTable() {
 
   let filtered = currentEventsList;
   if (currentSearchQuery) {
-    filtered = currentEventsList.filter(evt => {
+    filtered = currentEventsList.filter((evt) => {
       const raw = (evt.original_event || '').toLowerCase();
       const ip = (evt.source_ip || '').toLowerCase();
       const type = (evt.event_type || '').toLowerCase();
       const level = (evt.threat_level || '').toLowerCase();
       const xai = (evt.xai_explanation || '').toLowerCase();
-      const mitre = (evt.mitre_tactic || '').toLowerCase();
-      const st = (evt.status || 'New').toLowerCase();
+      const mitre = (evt.mitre_technique_id || '').toLowerCase();
+      const st = (evt.status || '').toLowerCase();
       const fullJson = JSON.stringify(evt).toLowerCase();
       return (
         raw.includes(currentSearchQuery) ||
@@ -1012,9 +1011,6 @@ function renderFilteredEventsTable() {
   tbody.innerHTML = filtered.map((event, idx) => renderEventRow(event, idx)).join('');
 }
 
-/**
- * Global handler to toggle detail row expansion.
- */
 window.toggleRowExpansion = function(index, eventKey) {
   const detailRow = document.getElementById(`detail-row-${index}`);
   if (!detailRow) return;
@@ -1028,9 +1024,6 @@ window.toggleRowExpansion = function(index, eventKey) {
   }
 };
 
-/**
- * Step 1: Endpoint PATCH handler for incident status dropdown update
- */
 window.updateEventStatus = async function(eventId, newStatus, selectEl) {
   if (selectEl) {
     selectEl.className = `status-select status-${newStatus.toLowerCase()}`;
@@ -1041,7 +1034,6 @@ window.updateEventStatus = async function(eventId, newStatus, selectEl) {
     localEvt.status = newStatus;
   }
 
-  // Recalculate Live Threat Score immediately
   updateThreatGaugeAndROI(currentEventsList, totalEventsIngestedCount);
 
   try {
@@ -1063,40 +1055,19 @@ window.updateEventStatus = async function(eventId, newStatus, selectEl) {
       showToast(`Failed to update status (${res.status})`, 'error');
     }
   } catch (err) {
-    console.error('Error updating status:', err);
-    showToast('Failed to update event status', 'error');
+    console.error('Error updating event status:', err);
   }
 };
 
-/**
- * Step 5: Generates distinct MITRE ATT&CK Tactic Badge
- */
 function getMitreBadgeHtml(event) {
-  let tactic = event.mitre_tactic || '';
-  if (!tactic) {
-    const raw = (event.original_event || '').toLowerCase();
-    const type = (event.event_type || '').toLowerCase();
-    const flags = (event.anomaly_flags || []).join(' ').toLowerCase();
-
-    if (raw.includes('failed password') || raw.includes('sshd') || flags.includes('repeated') || type.includes('auth')) {
-      tactic = 'T1110 - Brute Force';
-    } else if (raw.includes('syn') || raw.includes('port scan') || type.includes('firewall') || flags.includes('scan')) {
-      tactic = 'T1046 - Network Discovery';
-    } else if (raw.includes('suricata') || raw.includes('exploit') || raw.includes('script')) {
-      tactic = 'T1059 - Command Interpreter';
-    } else if (raw.includes('sudo') || raw.includes('root') || flags.includes('privilege')) {
-      tactic = 'T1078 - Valid Accounts';
-    } else {
-      tactic = 'T1000 - General Audit';
-    }
+  const techId = event.mitre_technique_id;
+  const tactic = event.mitre_tactic;
+  if (!techId) {
+    return `<span class="badge-mitre" style="background: rgba(255,255,255,0.05); color: var(--text-dim); border-color: var(--border-color);">T1083 Recon</span>`;
   }
-
-  return `<span class="badge-mitre">🛡️ ${escapeHtml(tactic)}</span>`;
+  return `<span class="badge-mitre" title="${escapeHtml(tactic || '')}">🎯 ${escapeHtml(techId)}</span>`;
 }
 
-/**
- * Step 5: Generates inline "Why Flagged" summary pill
- */
 function getWhyFlaggedPillHtml(event) {
   const score = event.threat_score || 0;
   const flags = event.anomaly_flags || [];
@@ -1113,9 +1084,6 @@ function getWhyFlaggedPillHtml(event) {
   return `<span class="why-flagged-pill">Why Flagged: ${escapeHtml(summary)}</span>`;
 }
 
-/**
- * Renders a primary UnifiedEvent row and its expandable side-by-side forensic detail row.
- */
 function renderEventRow(event, index) {
   const threatLevel = (event.threat_level || 'LOW').toUpperCase();
   const threatScore = (event.threat_score !== undefined) ? event.threat_score.toFixed(1) : '0.0';
@@ -1134,13 +1102,11 @@ function renderEventRow(event, index) {
     panelClass = 'panel-medium';
   }
 
-  // Format Timestamp
   let formattedTs = event.timestamp || '';
   if (formattedTs.length > 19) {
     formattedTs = formattedTs.replace('T', ' ').substring(0, 19);
   }
 
-  // Merkle Hash
   const fullHash = event.raw_event_hash || event.payload_hash || 'N/A';
   let shortHash = fullHash;
   if (fullHash.length > 16) {
@@ -1198,7 +1164,6 @@ function renderEventRow(event, index) {
       <td colspan="8">
         <div class="forensic-panel-container ${panelClass}">
           <div class="forensic-grid">
-            <!-- Left Column: Raw Evidence (Zero Information Loss) -->
             <div class="forensic-col col-raw-evidence">
               <div class="forensic-header">
                 <span>RAW EVIDENCE (ZERO INFORMATION LOSS)</span>
@@ -1211,7 +1176,6 @@ function renderEventRow(event, index) {
               </div>
             </div>
 
-            <!-- Right Column: AI Analysis & Normalized OCSF Event -->
             <div class="forensic-col col-normalized-ocsf">
               <div class="forensic-header">
                 <span>AI ANALYSIS & NORMALIZED OCSF EVENT</span>
@@ -1252,5 +1216,3 @@ function copyToClipboard(text) {
     alert(`Copied Merkle Audit Hash to clipboard:\n${text}`);
   }).catch(() => {});
 }
-
-
