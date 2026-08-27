@@ -1,318 +1,235 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LOG AI | Enterprise SOC</title>
-  <link rel="icon"
-    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230a0a0a'/><path d='M50 20 L25 30 L25 55 C25 70 35 85 50 90 C65 85 75 70 75 55 L75 30 Z' fill='%2310b981'/></svg>">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
-    rel="stylesheet">
+  <title>LOG AI | Enterprise Security Operations Center</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23090d16'/><path d='M50 20 L25 30 L25 55 C25 70 35 85 50 90 C65 85 75 70 75 55 L75 30 Z' fill='%230284c7'/></svg>">
+  <!-- Vendor Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <link rel="stylesheet" href="/style.css">
+  <!-- Air-Gapped Self-Hosted CSS & Fonts -->
+  <link rel="stylesheet" href="/style.css?v=6">
 </head>
-
-<body style="background: #0a0a0a;">
+<body style="background: var(--bg-dark);">
   <div class="app-layout" style="display: flex; flex-direction: column; min-height: 100vh;">
 
     <!-- 1. STICKY TOP HEADER -->
-    <header
-      style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: #0a0a0a; border-bottom: 1px solid #262626; position: sticky; top: 0; z-index: 1000;">
+    <header style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: #060911; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 1000;">
       <div class="brand" style="display: flex; align-items: center; gap: 1rem;">
-        <div class="logo-shield"
-          style="width: 32px; height: 32px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #10b981;">
-          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.2" fill="none">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-            <path d="m9 12 2 2 4-4"></path>
-          </svg>
+        <div class="logo-shield" style="width: 34px; height: 34px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--accent-hover);">
+          <img src="/vendor/icons/shield.svg" alt="" width="20" height="20" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
         </div>
         <div>
-          <h1
-            style="color: white; font-size: 1.1rem; margin: 0; font-weight: 800; display: flex; align-items: center; gap: 8px;">
-            LOG AI <span
-              style="background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; border: 1px solid rgba(16, 185, 129, 0.35);">ENTERPRISE
-              SOC</span></h1>
+          <h1 style="color: white; font-size: 1.1rem; margin: 0; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+            LOG AI <span class="font-mono" style="background: var(--accent-bg); color: var(--accent-hover); padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; border: 1px solid var(--accent-border);">ENTERPRISE SOC</span>
+          </h1>
         </div>
       </div>
 
       <div style="display: flex; align-items: center; gap: 1.25rem;">
-        <input type="text" id="nlp-search-input" placeholder="🔍 Search events, IPs..."
-          style="padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid #262626; background: #171717; color: white; width: 250px; font-size: 0.85rem;">
-        <div class="status-pill"
-          style="display: flex; align-items: center; gap: 0.5rem; color: #10b981; font-size: 0.75rem; font-weight: bold; background: rgba(16, 185, 129, 0.1); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(16,185,129,0.3);">
-          <span class="pulse-dot"
-            style="width:6px; height:6px; background:#10b981; border-radius:50%; display:inline-block;"></span><span
-            id="connection-status">LIVE POLLING</span>
+        <div style="position: relative;">
+          <input type="text" id="nlp-search-input" placeholder="Search telemetry, IPs, hashes..." aria-label="Search telemetry data"
+            style="padding: 0.5rem 1rem 0.5rem 2.2rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-slate); color: white; width: 280px; font-size: 0.85rem;">
+          <img src="/vendor/icons/database.svg" alt="" width="14" height="14" style="position: absolute; left: 10px; top: 11px; opacity: 0.5;">
         </div>
-        <div id="system-clock"
-          style="color: #a3a3a3; font-size: 0.75rem; font-family: monospace; border: 1px solid #262626; padding: 4px 8px; border-radius: 4px;">
-          --:--:-- UTC</div>
-        <button id="theme-toggle-btn"
-          style="background: transparent; border: 1px solid #262626; color: white; padding: 0.4rem 0.6rem; border-radius: 6px; cursor: pointer;">🌙</button>
-        <button id="logout-btn"
-          style="background: transparent; border: 1px solid #262626; color: white; padding: 0.4rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">Log
-          Out</button>
+        <div class="status-pill font-mono" style="display: flex; align-items: center; gap: 0.5rem; color: var(--severity-low); font-size: 0.75rem; font-weight: bold; background: var(--severity-low-bg); padding: 4px 10px; border-radius: 20px; border: 1px solid var(--severity-low-border);">
+          <span class="pulse-dot" style="width:6px; height:6px; background:var(--severity-low); border-radius:50%; display:inline-block;"></span>
+          <span id="connection-status">LIVE POLLING</span>
+        </div>
+        <div id="system-clock" class="font-mono" style="color: var(--text-muted); font-size: 0.75rem; border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px;">
+          --:--:-- UTC
+        </div>
+        <button id="theme-toggle-btn" aria-label="Toggle Theme" style="background: transparent; border: 1px solid var(--border-color); color: white; padding: 0.4rem 0.6rem; border-radius: 6px; cursor: pointer;">
+          <span id="theme-toggle-icon">🌙</span>
+        </button>
+        <button id="logout-btn" aria-label="Log Out of SOC" style="background: transparent; border: 1px solid var(--border-color); color: white; padding: 0.4rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+          Log Out
+        </button>
       </div>
     </header>
 
-    <!-- 2. HORIZONTAL TAB BAR -->
-    <nav id="tab-bar"
-      style="display: flex; gap: 2rem; background: #0a0a0a; padding: 0 2rem; border-bottom: 1px solid #262626; position: sticky; top: 69px; z-index: 999;">
-      <button class="tab-btn active" data-tab="executive"
-        style="background: none; border: none; padding: 1rem 0; cursor: pointer; color: #10b981; border-bottom: 2px solid #10b981; font-weight: 600; font-size: 0.9rem; font-family: inherit;">🛡️
-        Executive Command</button>
-      <button class="tab-btn" data-tab="analytics"
-        style="background: none; border: none; padding: 1rem 0; cursor: pointer; color: #a3a3a3; font-weight: 600; font-size: 0.9rem; font-family: inherit;">📊
-        System Analytics</button>
-      <button class="tab-btn" data-tab="threat-map"
-        style="background: none; border: none; padding: 1rem 0; cursor: pointer; color: #a3a3a3; font-weight: 600; font-size: 0.9rem; font-family: inherit;">🗺️
-        Threat Map</button>
-      <button class="tab-btn" data-tab="forensics"
-        style="background: none; border: none; padding: 1rem 0; cursor: pointer; color: #a3a3a3; font-weight: 600; font-size: 0.9rem; font-family: inherit;">🔬
-        Forensics & Rule Studio</button>
+    <!-- 2. WORKFLOW-BASED TAB NAVIGATION BAR (PART 1) -->
+    <nav id="tab-bar" aria-label="SOC Navigation Tabs" style="display: flex; gap: 2rem; background: #060911; padding: 0 2rem; border-bottom: 1px solid var(--border-color); position: sticky; top: 69px; z-index: 999;">
+      <button class="tab-btn active" data-tab="executive" aria-label="Command View" style="background: none; border: none; padding: 1rem 0; cursor: pointer; color: var(--accent-hover); border-bottom: 2px solid var(--accent-hover); font-weight: 600; font-size: 0.9rem; font-family: inherit; display: inline-flex; align-items: center; gap: 6px;">
+        <img src="/vendor/icons/shield.svg" alt="" width="16" height="16" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
+        Command
+      </button>
+      <button class="tab-btn" data-tab="threat-map" aria-label="Threat Map View" style="background: none; border: none; padding: 1rem 0; cursor: pointer; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; font-family: inherit; display: inline-flex; align-items: center; gap: 6px;">
+        <img src="/vendor/icons/activity.svg" alt="" width="16" height="16" style="filter: invert(60%);">
+        Threat Map
+      </button>
+      <button class="tab-btn" data-tab="analytics" aria-label="System Analytics View" style="background: none; border: none; padding: 1rem 0; cursor: pointer; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; font-family: inherit; display: inline-flex; align-items: center; gap: 6px;">
+        <img src="/vendor/icons/cpu.svg" alt="" width="16" height="16" style="filter: invert(60%);">
+        System Analytics
+      </button>
+      <button class="tab-btn" data-tab="forensics" aria-label="Forensics Studio View" style="background: none; border: none; padding: 1rem 0; cursor: pointer; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; font-family: inherit; display: inline-flex; align-items: center; gap: 6px;">
+        <img src="/vendor/icons/lock.svg" alt="" width="16" height="16" style="filter: invert(60%);">
+        Forensics &amp; Rule Studio
+      </button>
     </nav>
 
-    <!-- 3. MAIN CONTENT AREA (FULL WIDTH) -->
+    <!-- 3. MAIN CONTENT AREA -->
     <main class="main-content" style="flex: 1; padding: 2rem; max-width: 1600px; margin: 0 auto; width: 100%;">
 
-      <!-- TAB 1: EXECUTIVE COMMAND -->
+      <!-- TAB 1: COMMAND VIEW (DEFAULT VIEW) -->
       <div id="tab-executive" class="tab-view active">
-        <section class="ops-toolbar">
+        
+        <!-- PART 2: TOP KPI HEADER (4 COMPUTED STAT CARDS ABOVE THE FOLD) -->
+        <section aria-label="Key Performance Indicators" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 2rem;">
+          <div style="background: var(--bg-slate); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; display: flex; flex-direction: column; gap: 6px;">
+            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+              <img src="/vendor/icons/cpu.svg" alt="" width="14" height="14">
+              MTTD (Mean Time to Detect)
+            </div>
+            <div id="stat-mttd" class="font-mono" style="font-size: 1.8rem; font-weight: 800; color: var(--accent-hover);">&lt; 15 ms</div>
+            <div style="font-size: 0.75rem; color: var(--text-dim);">Real-time stream pipeline latency</div>
+          </div>
+
+          <div style="background: var(--bg-slate); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; display: flex; flex-direction: column; gap: 6px;">
+            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+              <img src="/vendor/icons/check-circle.svg" alt="" width="14" height="14">
+              MTTR (Mean Time to Resolve)
+            </div>
+            <div id="stat-mttr" class="font-mono" style="font-size: 1.8rem; font-weight: 800; color: var(--severity-low);">4.2 m</div>
+            <div style="font-size: 0.75rem; color: var(--text-dim);">Avg resolution across resolved incidents</div>
+          </div>
+
+          <div style="background: var(--bg-slate); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; display: flex; flex-direction: column; gap: 6px;">
+            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+              <img src="/vendor/icons/alert-triangle.svg" alt="" width="14" height="14">
+              Active Incidents
+            </div>
+            <div id="stat-active-incidents" class="font-mono" style="font-size: 1.8rem; font-weight: 800; color: var(--severity-high);">0 Active</div>
+            <div style="font-size: 0.75rem; color: var(--text-dim);">Correlated source IP incident clusters</div>
+          </div>
+
+          <div style="background: var(--bg-slate); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; display: flex; flex-direction: column; gap: 6px;">
+            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+              <img src="/vendor/icons/database.svg" alt="" width="14" height="14">
+              Ingestion Rate &amp; Volume
+            </div>
+            <div id="stat-ingestion-rate" class="font-mono" style="font-size: 1.8rem; font-weight: 800; color: #ffffff;">0 evt/s</div>
+            <div id="stat-total-volume" style="font-size: 0.75rem; color: var(--text-dim);">Total 0 events parsed</div>
+          </div>
+        </section>
+
+        <!-- OPERATIONS TOOLBAR -->
+        <section class="ops-toolbar" style="margin-bottom: 2rem;">
           <div class="ops-toolbar-group">
-            <span class="ops-toolbar-label">QUICK ACTIONS</span>
+            <span class="ops-toolbar-label font-mono">QUICK ACTIONS</span>
             <input type="file" id="upload-log-input" accept=".txt,.log" style="display: none;" />
-            <button id="upload-log-btn" class="btn-secondary" title="Upload manual .LOG or .TXT log file">
-              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-              </svg>
+            <button id="upload-log-btn" class="btn-secondary" title="Upload manual .LOG or .TXT file" aria-label="Upload LOG file">
+              <img src="/vendor/icons/database.svg" alt="" width="14" height="14">
               <span>Upload .LOG File</span>
             </button>
-            <button id="simulate-attack-btn" class="btn-attack">
-              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
-              </svg>
+            <button id="simulate-attack-btn" class="btn-attack" aria-label="Simulate Brute Force Attack">
+              <img src="/vendor/icons/alert-triangle.svg" alt="" width="14" height="14">
               <span>Simulate Brute Force Attack</span>
             </button>
-            <button id="download-report-btn" class="btn-secondary" title="Export HIGH & MEDIUM Threat Events to CSV">
-              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-              <span>Download Threat Report</span>
+            <button id="download-report-btn" class="btn-secondary" title="Download CSV Report" aria-label="Export CSV Report">
+              <img src="/vendor/icons/arrow-right.svg" alt="" width="14" height="14">
+              <span>Export CSV Report</span>
             </button>
           </div>
-          <div class="ops-toolbar-divider"></div>
+
           <div class="ops-toolbar-group">
-            <span class="ops-toolbar-label">PRESET DEMO SCENARIOS</span>
-            <div class="preset-btn-group">
-              <button class="preset-btn" id="scenario-ssh-btn" title="Simulate SSH Brute Force (T1110)"><span
-                  class="preset-icon">⚡</span><span>Scenario A: SSH Brute Force</span></button>
-              <button class="preset-btn" id="scenario-portscan-btn" title="Simulate Port Scan Anomaly (T1046)"><span
-                  class="preset-icon">📡</span><span>Scenario B: Port Scan Anomaly</span></button>
-              <button class="preset-btn" id="scenario-normal-btn" title="Simulate Normal Benign Traffic"><span
-                  class="preset-icon">🛡️</span><span>Scenario C: Normal Traffic</span></button>
+            <span class="ops-toolbar-label font-mono">PRESET SCENARIOS</span>
+            <button id="scenario-ssh-btn" class="btn-preset btn-preset-high" aria-label="SSH Brute Force Scenario">
+              SSH Spray (T1110)
+            </button>
+            <button id="scenario-portscan-btn" class="btn-preset btn-preset-med" aria-label="Port Scan Scenario">
+              Port Scan (T1046)
+            </button>
+            <button id="scenario-normal-btn" class="btn-preset btn-preset-low" aria-label="Normal Baseline Traffic Scenario">
+              Normal Traffic
+            </button>
+          </div>
+        </section>
+
+        <!-- ZERO-LOSS INGESTION PIPELINE STATUS -->
+        <section class="pipeline-track-card" style="margin-bottom: 2rem;">
+          <div class="pipeline-track-header">
+            <span class="pipeline-track-title">ZERO-LOSS REAL-TIME TELEMETRY PIPELINE</span>
+            <span id="pipeline-status-badge" class="pipeline-track-badge font-mono">READY &bull; IDLE STREAM</span>
+          </div>
+          <div class="pipeline-steps-wrapper">
+            <div class="pipeline-step-node active" id="p-step-1">
+              <div class="step-node-num">01</div>
+              <div class="step-node-label">Stream Ingest</div>
+            </div>
+            <div class="pipeline-step-connector"></div>
+            <div class="pipeline-step-node" id="p-step-2">
+              <div class="step-node-num">02</div>
+              <div class="step-node-label">Merkle Hashing</div>
+            </div>
+            <div class="pipeline-step-connector"></div>
+            <div class="pipeline-step-node" id="p-step-3">
+              <div class="step-node-num">03</div>
+              <div class="step-node-label">Vendor Parsing</div>
+            </div>
+            <div class="pipeline-step-connector"></div>
+            <div class="pipeline-step-node" id="p-step-4">
+              <div class="step-node-num">04</div>
+              <div class="step-node-label">ML &amp; Rule Engine</div>
+            </div>
+            <div class="pipeline-step-connector"></div>
+            <div class="pipeline-step-node" id="p-step-5">
+              <div class="step-node-num">05</div>
+              <div class="step-node-label">Correlation &amp; XAI</div>
             </div>
           </div>
         </section>
 
-        <!-- Live Pipeline Progress Indicator -->
-        <section class="pipeline-section">
-          <div class="pipeline-card">
-            <div class="pipeline-header">
-              <div class="pipeline-title">
-                <span class="pulse-dot-small"></span>
-                <h3>ZERO-LOSS FORENSIC INGESTION PIPELINE</h3>
-              </div>
-              <span class="pipeline-status" id="pipeline-status-badge">READY &bull; IDLE STREAM</span>
-            </div>
-            <div class="pipeline-steps">
-              <div class="p-step active" id="p-step-1">
-                <div class="p-step-num">1</div>
-                <div class="p-step-text"><span class="p-step-title">Ingest</span><span class="p-step-sub">Raw Syslog /
-                    JSON / Text</span></div>
-              </div>
-              <div class="p-step-arrow">➔</div>
-              <div class="p-step" id="p-step-2">
-                <div class="p-step-num">2</div>
-                <div class="p-step-text"><span class="p-step-title">Normalize & Hash</span><span class="p-step-sub">OCSF
-                    & Merkle Tree</span></div>
-              </div>
-              <div class="p-step-arrow">➔</div>
-              <div class="p-step" id="p-step-3">
-                <div class="p-step-num">3</div>
-                <div class="p-step-text"><span class="p-step-title">ML Ensemble</span><span class="p-step-sub">Isolation
-                    Forest & Rules</span></div>
-              </div>
-              <div class="p-step-arrow">➔</div>
-              <div class="p-step" id="p-step-4">
-                <div class="p-step-num">4</div>
-                <div class="p-step-text"><span class="p-step-title">MITRE Mapping</span><span class="p-step-sub">Tactic
-                    & Technique</span></div>
-              </div>
-              <div class="p-step-arrow">➔</div>
-              <div class="p-step" id="p-step-5">
-                <div class="p-step-num">5</div>
-                <div class="p-step-text"><span class="p-step-title">XAI Explanation</span><span
-                    class="p-step-sub">Forensic Audit Summary</span></div>
-              </div>
+        <!-- INCIDENT-FIRST HERO VIEW (PART 1) -->
+        <section aria-label="Correlated Active Incidents Section" style="margin-bottom: 2rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+            <h2 style="font-size: 1.1rem; font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 8px;">
+              <img src="/vendor/icons/git-branch.svg" alt="" width="18" height="18" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
+              Correlated Security Incidents
+            </h2>
+            <span id="incidents-count-badge" class="font-mono" style="font-size: 0.78rem; color: var(--text-muted); background: var(--bg-slate); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 4px;">
+              0 Correlated Incidents
+            </span>
+          </div>
+
+          <div id="incidents-grid-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 1.25rem;">
+            <div style="grid-column: 1 / -1; background: var(--bg-slate); border: 1px solid var(--border-color); border-radius: 8px; padding: 2.5rem; text-align: center; color: var(--text-muted);">
+              <img src="/vendor/icons/check-circle.svg" alt="" width="28" height="28" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg); margin-bottom: 0.5rem;">
+              <div style="font-size: 0.95rem; font-weight: 700; color: #ffffff;">No Active Incidents</div>
+              <div style="font-size: 0.82rem; margin-top: 4px;">All telemetry nominal. Trigger a simulation or upload logs to analyze incident clusters.</div>
             </div>
           </div>
         </section>
 
-        <!-- KPI Metrics Cards Grid -->
-        <section class="kpi-grid">
-          <div class="kpi-card card-total">
-            <div class="kpi-header">
-              <span class="kpi-title">TOTAL EVENTS INGESTED</span>
-              <div class="kpi-icon icon-cyan">
-                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
-                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                </svg>
-              </div>
-            </div>
-            <div class="kpi-value val-cyan" id="stat-total">0</div>
-            <div class="kpi-subtext">Zero Information Loss Audit Log</div>
+        <!-- TELEMETRY EVENT STREAM TABLE -->
+        <section class="panel-card">
+          <div class="panel-header">
+            <h2 class="panel-title">
+              <img src="/vendor/icons/database.svg" alt="" width="18" height="18">
+              Live Telemetry Event Stream &amp; Merkle Audit Trail
+            </h2>
+            <span id="table-count-badge" class="table-subtitle font-mono">Showing 0 of 0 events</span>
           </div>
-          <div class="kpi-card card-high">
-            <div class="kpi-header">
-              <span class="kpi-title">HIGH THREAT ALERTS</span>
-              <div class="kpi-icon icon-high">
-                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
-                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
-                  <line x1="12" y1="9" x2="12" y2="13"></line>
-                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                </svg>
-              </div>
-            </div>
-            <div class="kpi-value val-high" id="stat-high">0</div>
-            <div class="kpi-subtext">Threat Score &ge; 70.0</div>
-          </div>
-          <div class="kpi-card card-medium">
-            <div class="kpi-header">
-              <span class="kpi-title">MEDIUM THREAT ALERTS</span>
-              <div class="kpi-icon icon-medium">
-                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="8" x2="12" y2="12"></line>
-                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
-              </div>
-            </div>
-            <div class="kpi-value val-medium" id="stat-medium">0</div>
-            <div class="kpi-subtext">Threat Score 35.0 &ndash; 69.9</div>
-          </div>
-          <div class="kpi-card card-low">
-            <div class="kpi-header">
-              <span class="kpi-title">LOW THREAT / BENIGN</span>
-              <div class="kpi-icon icon-low">
-                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                </svg>
-              </div>
-            </div>
-            <div class="kpi-value val-low" id="stat-low">0</div>
-            <div class="kpi-subtext">Normal Baseline Activity</div>
-          </div>
-        </section>
-
-        <!-- Threat Gauge & ROI Panel -->
-        <section class="ops-intel-row">
-          <div class="intel-card threat-gauge-card">
-            <div class="card-title-bar">
-              <div class="chart-title">
-                <span class="chart-icon icon-threat-fire">🔥</span>
-                <h3>LIVE THREAT LEVEL & COMPOSITE SCORE</h3>
-              </div>
-              <span class="chart-tag" id="gauge-risk-badge">SYSTEM NOMINAL</span>
-            </div>
-            <div class="gauge-body">
-              <div class="gauge-display">
-                <div class="gauge-circle" id="gauge-circle">
-                  <span class="gauge-number" id="gauge-score-value">0.0</span>
-                  <span class="gauge-max">/ 100</span>
-                </div>
-              </div>
-              <div class="gauge-meta">
-                <div class="gauge-level-text" id="gauge-level-text">LOW RISK LEVEL</div>
-                <div class="gauge-bar-container">
-                  <div class="gauge-bar-fill" id="gauge-bar-fill" style="width: 0%;"></div>
-                </div>
-                <span class="gauge-subtext" id="gauge-subtext">Calculated from weighted real-time event ensemble
-                  stream</span>
-              </div>
-            </div>
-          </div>
-          <div class="intel-card roi-panel-card">
-            <div class="card-title-bar">
-              <div class="chart-title">
-                <span class="chart-icon icon-roi">📊</span>
-                <h3>OPERATIONAL SECURITY ROI & EFFICIENCY</h3>
-              </div>
-              <span class="chart-tag">AUTOMATED FORENSICS</span>
-            </div>
-            <div class="roi-metrics-grid">
-              <div class="roi-item">
-                <div class="roi-value" id="roi-hours-saved">0.0<span class="roi-unit">hrs</span></div>
-                <div class="roi-label">Analyst Hours Saved</div>
-                <div class="roi-sub">Automated XAI Insight Generation</div>
-              </div>
-              <div class="roi-item">
-                <div class="roi-value" id="roi-noise-mitigated">0.0<span class="roi-unit">%</span></div>
-                <div class="roi-label">False Positive Noise Suppressed</div>
-                <div class="roi-sub">ML Ensemble Severity Filtering</div>
-              </div>
-              <div class="roi-item">
-                <div class="roi-value val-cyan">&lt; 1<span class="roi-unit">ms</span></div>
-                <div class="roi-label">Forensic Verification Speed</div>
-                <div class="roi-sub">Cryptographic Merkle Leaf Hash</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Real-Time Threat Event Stream Table -->
-        <section class="table-section">
-          <div class="table-header">
-            <div class="table-title">
-              <h2>REAL-TIME THREAT EVENT STREAM</h2>
-              <span class="sub-count" id="table-count-badge">Showing 0 latest events &bull; Click any row for raw
-                evidence</span>
-            </div>
-            <div class="table-actions">
-              <span class="live-indicator"><span class="pulse-dot-small"></span> AUTO-REFRESHING</span>
-            </div>
-          </div>
-          <div class="table-wrapper">
-            <table class="data-table">
+          <div class="table-responsive">
+            <table class="event-table">
               <thead>
                 <tr>
-                  <th style="width: 130px;">TIMESTAMP</th>
-                  <th style="width: 120px;">SOURCE IP</th>
-                  <th style="width: 130px;">VENDOR PARSER</th>
-                  <th style="width: 130px;">THREAT LEVEL</th>
-                  <th style="width: 140px;">INCIDENT STATUS</th>
-                  <th style="width: 150px;">MITRE ATT&CK</th>
-                  <th>EXPLAINABLE AI (XAI) & WHY FLAGGED</th>
-                  <th style="width: 140px;">MERKLE AUDIT HASH</th>
+                  <th>TIMESTAMP (UTC)</th>
+                  <th>SOURCE IP</th>
+                  <th>VENDOR / EVENT</th>
+                  <th>THREAT SCORE</th>
+                  <th>STATUS</th>
+                  <th>MITRE TACTIC</th>
+                  <th>XAI EXPLANATION</th>
+                  <th>MERKLE HASH</th>
                 </tr>
               </thead>
               <tbody id="event-stream-body">
-                <tr>
-                  <td colspan="8" class="loading-cell">
-                    <div class="spinner"></div><span>Connecting to Log AI Threat Engine Stream...</span>
+                <tr class="empty-state-row">
+                  <td colspan="8" style="text-align: center; padding: 3rem 1.5rem; color: var(--text-muted);">
+                    System Secure. No anomalies detected. Upload a .LOG file or run a simulation to begin analysis.
                   </td>
                 </tr>
               </tbody>
@@ -321,198 +238,196 @@
         </section>
       </div>
 
-      <!-- TAB 2: SYSTEM ANALYTICS -->
-      <div id="tab-analytics" class="tab-view" style="display: none;">
-        <section class="analytics-tab-header">
-          <h2>SYSTEM ANALYTICS & THREAT TELEMETRY</h2>
-          <p>Real-time statistical breakdown of ingested log streams, severity ratios, and vendor parsers.</p>
-        </section>
-        <section class="analytics-grid">
-          <div class="chart-card chart-card-large">
-            <div class="card-title-bar">
-              <div class="chart-title"><span class="chart-icon">📈</span>
-                <h3>LOG INGESTION VOLUME OVER TIME (EVENTS/SEC)</h3>
-              </div>
-              <span class="chart-tag">REAL-TIME STREAM</span>
-            </div>
-            <div class="chart-container" style="height: 260px;"><canvas id="ingestionVolumeChart"></canvas></div>
+      <!-- TAB 2: THREAT MAP VIEW -->
+      <div id="tab-threat-map" class="tab-view">
+        <section class="panel-card">
+          <div class="panel-header">
+            <h2 class="panel-title">
+              <img src="/vendor/icons/activity.svg" alt="" width="18" height="18">
+              Global Geolocation Threat Vector Map
+            </h2>
           </div>
-          <div class="analytics-sub-grid">
-            <div class="chart-card">
-              <div class="card-title-bar">
-                <div class="chart-title"><span class="chart-icon">🍩</span>
-                  <h3>SEVERITY DISTRIBUTION</h3>
-                </div>
-                <span class="chart-tag">ENSEMBLE SCORES</span>
-              </div>
-              <div class="chart-container" style="height: 220px;"><canvas id="severityDistChart"></canvas></div>
+          <div id="leaflet-threat-map" style="height: 520px; width: 100%; border-radius: 8px; background: #060911;"></div>
+        </section>
+      </div>
+
+      <!-- TAB 3: SYSTEM ANALYTICS VIEW -->
+      <div id="tab-analytics" class="tab-view">
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+          <section class="panel-card">
+            <div class="panel-header">
+              <h2 class="panel-title">
+                <img src="/vendor/icons/activity.svg" alt="" width="18" height="18">
+                Ingestion Throughput Velocity
+              </h2>
             </div>
-            <div class="chart-card">
-              <div class="card-title-bar">
-                <div class="chart-title"><span class="chart-icon">📊</span>
-                  <h3>VENDOR PARSER BREAKDOWN</h3>
-                </div>
-                <span class="chart-tag">DYNAMIC STAGE 1 & 2</span>
-              </div>
-              <div class="chart-container" style="height: 220px;"><canvas id="vendorBreakdownChart"></canvas></div>
+            <div style="height: 280px;">
+              <canvas id="ingestionVolumeChart"></canvas>
             </div>
+          </section>
+
+          <section class="panel-card">
+            <div class="panel-header">
+              <h2 class="panel-title">
+                <img src="/vendor/icons/alert-triangle.svg" alt="" width="18" height="18">
+                Severity Rating Distribution
+              </h2>
+            </div>
+            <div style="height: 280px;">
+              <canvas id="severityDistChart"></canvas>
+            </div>
+          </section>
+        </div>
+
+        <section class="panel-card">
+          <div class="panel-header">
+            <h2 class="panel-title">
+              <img src="/vendor/icons/database.svg" alt="" width="18" height="18">
+              Multi-Vendor Log Parsing Breakdown
+            </h2>
+          </div>
+          <div style="height: 240px;">
+            <canvas id="vendorBreakdownChart"></canvas>
           </div>
         </section>
       </div>
 
-      <!-- TAB 3: THREAT MAP -->
-      <div id="tab-threat-map" class="tab-view" style="display: none;">
-        <section class="analytics-tab-header">
-          <h2>GEOLOCATION THREAT MAP</h2>
-          <p>Real-time geographic visualization of high-threat origin IPs and attack vectors.</p>
-        </section>
-        <section class="map-section">
-          <div class="map-card">
-            <div class="card-title-bar">
-              <div class="chart-title"><span class="chart-icon">🌐</span>
-                <h3>WORLDWIDE ATTACK VECTOR HEATMAP (HIGH THREAT ORIGINS)</h3>
-              </div>
-              <span class="chart-tag">DARK LEAFLET MAP</span>
+      <!-- TAB 4: FORENSICS & RULE STUDIO VIEW -->
+      <div id="tab-forensics" class="tab-view">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+          <section class="panel-card">
+            <div class="panel-header">
+              <h2 class="panel-title">
+                <img src="/vendor/icons/lock.svg" alt="" width="18" height="18">
+                Web Crypto SHA-256 Merkle Verifier
+              </h2>
             </div>
-            <div id="leaflet-threat-map" style="height: 560px; width: 100%; border-radius: 8px; z-index: 1;"></div>
-          </div>
-        </section>
-      </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Verify event payload integrity directly in your browser using the native Web Crypto API (<code class="font-mono" style="color: var(--accent-hover);">crypto.subtle.digest</code>).
+            </p>
+            <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
+              <input type="text" id="merkle-verify-input" placeholder="Paste event Merkle SHA-256 hash..." class="font-mono"
+                style="flex: 1; padding: 0.6rem 1rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-slate); color: white; font-size: 0.85rem;">
+              <button onclick="runMerkleVerification()" class="btn-primary" aria-label="Verify Merkle Hash">Verify Hash</button>
+            </div>
+            <div id="merkle-result-box" style="display: none; background: #060911; border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem;"></div>
+          </section>
 
-      <!-- TAB 4: FORENSICS & RULE STUDIO -->
-      <div id="tab-forensics" class="tab-view" style="display: none;">
-        <section class="analytics-tab-header">
-          <h2>FORENSICS & HEURISTIC RULE STUDIO</h2>
-          <p>Verify zero-loss SHA-256 Merkle hashes in-browser and test custom YAML detection rules in real-time.</p>
-        </section>
-        <section
-          style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; margin-top: 1.5rem;">
-          <!-- Merkle Verifier -->
-          <div style="background: #171717; padding: 1.5rem; border-radius: 8px; border: 1px solid #262626;">
-            <h3 style="color: #ffffff; margin-bottom: 0.5rem; font-size: 1rem;">🔒 In-Browser Merkle Hash Verifier</h3>
-            <p style="color: #a3a3a3; font-size: 0.85rem; margin-bottom: 1.5rem;">Compute SHA-256 digests locally via
-              Web Crypto API to verify payload integrity.</p>
-            <input type="text" id="merkle-verify-input" placeholder="Enter Event Merkle Hash..."
-              style="width: 100%; padding: 0.8rem; margin-bottom: 1rem; background: #0a0a0a; border: 1px solid #262626; color: white; border-radius: 4px; font-family: monospace;">
-            <button onclick="runMerkleVerification()"
-              style="background: transparent; color: white; border: 1px solid #404040; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background 0.2s;"
-              onmouseover="this.style.background='#262626'" onmouseout="this.style.background='transparent'">Verify
-              Integrity</button>
-            <div id="merkle-result-box"
-              style="display: none; margin-top: 1rem; padding: 1rem; background: #0a0a0a; border-radius: 6px; border: 1px solid #262626; font-size: 0.85rem;">
+          <section class="panel-card">
+            <div class="panel-header">
+              <h2 class="panel-title">
+                <img src="/vendor/icons/cpu.svg" alt="" width="18" height="18">
+                YAML Heuristic Rule Sandbox
+              </h2>
             </div>
-          </div>
-
-          <!-- YAML Sandbox -->
-          <div style="background: #171717; padding: 1.5rem; border-radius: 8px; border: 1px solid #262626;">
-            <h3 style="color: #ffffff; margin-bottom: 0.5rem; font-size: 1rem;">⚡ Heuristic YAML Sandbox</h3>
-            <p style="color: #a3a3a3; font-size: 0.85rem; margin-bottom: 1.5rem;">Test custom detection rules against
-              the active telemetry buffer.</p>
-            <textarea id="rule-sandbox-editor" rows="8"
-              style="width: 100%; padding: 1rem; background: #0a0a0a; color: #10b981; border: 1px solid #262626; border-radius: 4px; margin-bottom: 1rem; font-family: monospace; resize: vertical;">rule_id: CUSTOM_01
-description: Detect High Entropy Port Scans
-keywords:
-  - deny
-  - failed password
-min_score: 35.0
-remediation_playbook:
-  - Temporarily block offending source IP at perimeter firewall.</textarea>
-            <button id="btn-test-rule" onclick="testRuleInSandbox()"
-              style="background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.4); padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 600; transition: background 0.2s;"
-              onmouseover="this.style.background='rgba(244, 63, 94, 0.25)'"
-              onmouseout="this.style.background='rgba(244, 63, 94, 0.15)'">Test Rule Against Buffer</button>
-            <div id="rule-sandbox-result"
-              style="display: none; margin-top: 1rem; padding: 1rem; background: #0a0a0a; border-radius: 6px; border: 1px solid #262626; font-size: 0.85rem;">
-            </div>
-          </div>
-        </section>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Test custom threat detection rules against active stream memory buffer.
+            </p>
+            <textarea id="rule-sandbox-editor" class="font-mono" rows="6" style="width: 100%; padding: 0.8rem; border-radius: 6px; border: 1px solid var(--border-color); background: #060911; color: var(--accent-hover); font-size: 0.82rem; margin-bottom: 1rem;">
+id: CUSTOM_RULE_01
+name: Rapid Failed SSH Password Spray
+severity: HIGH
+conditions:
+  event_type: "linux_auth"
+  action: "deny"
+  threshold_count: 3
+            </textarea>
+            <button id="btn-test-rule" onclick="testRuleInSandbox()" class="btn-primary" aria-label="Test Rule in Sandbox">Test Rule Against Buffer</button>
+            <div id="rule-sandbox-result" style="display: none; margin-top: 1rem; background: #060911; border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem;"></div>
+          </section>
+        </div>
       </div>
     </main>
-  </div>
 
-  <!-- Footer -->
-  <footer class="dashboard-footer"
-    style="padding: 1rem 2rem; background: #0a0a0a; border-top: 1px solid #262626; display: flex; justify-content: space-between; align-items: center;">
-    <div class="footer-brand" style="color: #a3a3a3; font-size: 0.8rem;">
-      <span>LOG AI SOC CORE v2.5</span>
-      <span class="footer-divider" style="margin: 0 8px;">&bull;</span>
-      <span>Zero-Loss Enterprise Forensic Engine</span>
-    </div>
-    <div class="compliance-badges" style="display: flex; gap: 10px;">
-      <span class="badge-compliance badge-airgap"
-        style="font-size: 0.7rem; border: 1px solid #262626; padding: 4px 8px; border-radius: 4px; color: #a3a3a3;">🔒
-        Air-Gap Ready</span>
-      <span class="badge-compliance badge-fisma"
-        style="font-size: 0.7rem; border: 1px solid #262626; padding: 4px 8px; border-radius: 4px; color: #a3a3a3;">🏛️
-        FISMA High</span>
-      <span class="badge-compliance badge-iso"
-        style="font-size: 0.7rem; border: 1px solid #262626; padding: 4px 8px; border-radius: 4px; color: #a3a3a3;">📜
-        ISO 27001 Compliant</span>
-    </div>
-  </footer>
+    <!-- INCIDENT DETAIL DRILL-IN MODAL / PANEL (PART 1) -->
+    <div id="incident-detail-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 2000; align-items: center; justify-content: center; padding: 2rem;">
+      <div style="background: var(--bg-slate); border: 1px solid var(--border-color); border-radius: 12px; width: 100%; max-width: 900px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.5);">
+        <div style="background: #060911; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="/vendor/icons/git-branch.svg" alt="" width="20" height="20" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
+            <div>
+              <h3 id="inc-detail-id" class="font-mono" style="color: #ffffff; font-size: 1rem; margin: 0; font-weight: 700;">INCIDENT DRILL-IN</h3>
+              <span id="inc-detail-ip" class="font-mono" style="color: var(--accent-hover); font-size: 0.8rem;">IP: 0.0.0.0</span>
+            </div>
+          </div>
+          <button onclick="closeIncidentDetail()" aria-label="Close Incident Detail Modal" style="background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; padding: 0 6px;">&times;</button>
+        </div>
 
-  <!-- FLOATING AI COPILOT WIDGET -->
-  <div id="copilot-widget" style="position: fixed; bottom: 30px; right: 30px; z-index: 9999;">
-    <button id="copilot-toggle"
-      style="background: #10b981; color: #000; padding: 12px 20px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">🤖
-      AI SOC Copilot</button>
-    <div id="copilot-panel"
-      style="display: none; position: absolute; bottom: 60px; right: 0; width: 350px; height: 450px; background: #171717; border: 1px solid #262626; border-radius: 12px; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-      <div
-        style="background: #0a0a0a; padding: 12px; border-bottom: 1px solid #262626; display: flex; justify-content: space-between; align-items: center;">
-        <strong style="color: #fff;">🤖 Gemini AI Assistant</strong>
-        <button id="copilot-close" style="background: none; border: none; color: #a3a3a3; cursor: pointer;">✕</button>
-      </div>
-      <div id="copilot-messages"
-        style="flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
-        <div
-          style="background: #0a0a0a; border: 1px solid #262626; padding: 8px 12px; border-radius: 8px; color: #e5e5e5; font-size: 0.85rem; align-self: flex-start; max-width: 85%;">
-          Hello! I am your Gemini-powered SOC analyst. How can I help?</div>
-      </div>
-      <div style="display: flex; padding: 10px; border-top: 1px solid #262626; background: #0a0a0a;">
-        <input type="text" id="copilot-input" placeholder="Ask about recent threats..."
-          style="flex: 1; padding: 8px; border-radius: 4px; border: 1px solid #262626; background: #171717; color: white; font-size: 0.85rem; outline: none;">
-        <button id="copilot-send"
-          style="background: #10b981; color: #000; border: none; padding: 8px 12px; margin-left: 8px; border-radius: 4px; font-weight: bold; cursor: pointer;">Send</button>
-      </div>
-    </div>
-  </div>
+        <div style="padding: 1.5rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 1.5rem;">
+          <!-- Header Stat Cards & Status Control -->
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; background: #060911; padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+            <div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">EVENT COUNT</div>
+              <div id="inc-detail-count" class="font-mono" style="font-size: 1.2rem; font-weight: 700; color: #ffffff;">0 events</div>
+            </div>
+            <div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">MAX THREAT SCORE</div>
+              <div id="inc-detail-score" class="font-mono" style="font-size: 1.2rem; font-weight: 700; color: var(--severity-high);">0.0</div>
+            </div>
+            <div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">SEVERITY LEVEL</div>
+              <div id="inc-detail-level" class="font-mono" style="font-size: 1.2rem; font-weight: 700; color: var(--severity-high);">HIGH</div>
+            </div>
+            <div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px;">INCIDENT STATUS</div>
+              <select id="inc-detail-status-select" aria-label="Incident Status Control" style="background: var(--bg-slate); border: 1px solid var(--border-color); color: #ffffff; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; width: 100%;">
+                <option value="New">🔴 New</option>
+                <option value="Investigating">🟡 Investigating</option>
+                <option value="Resolved">🟢 Resolved</option>
+                <option value="Dismissed">⚪ Dismissed</option>
+              </select>
+            </div>
+          </div>
 
-  <!-- Remediation Playbook Modal -->
-  <div class="modal-backdrop" id="remediation-modal" style="display: none;">
-    <div class="remediation-modal-card">
-      <div class="modal-header">
-        <div class="modal-title-group">
-          <span class="modal-icon">🛡️</span>
+          <!-- MITRE Tactic Sequence -->
           <div>
-            <h3>DYNAMIC REMEDIATION PLAYBOOK</h3>
-            <p>Actionable Incident Response Steps</p>
+            <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem;">MITRE ATT&amp;CK TACTIC KILL-CHAIN SEQUENCE</div>
+            <div id="inc-detail-mitre-seq" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+          </div>
+
+          <!-- Member Events Table with XAI Attributions -->
+          <div>
+            <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem;">CORRELATED MEMBER EVENTS &amp; XAI ATTRIBUTION</div>
+            <div class="table-responsive" style="border: 1px solid var(--border-color); border-radius: 6px;">
+              <table class="event-table" style="font-size: 0.8rem;">
+                <thead>
+                  <tr>
+                    <th>TIMESTAMP</th>
+                    <th>PAYLOAD / EVENT</th>
+                    <th>THREAT SCORE</th>
+                    <th>XAI FEATURE ATTRIBUTION</th>
+                    <th>MERKLE HASH</th>
+                  </tr>
+                </thead>
+                <tbody id="inc-detail-events-body"></tbody>
+              </table>
+            </div>
           </div>
         </div>
-        <button class="modal-close-btn" onclick="closeRemediationModal()">✕</button>
       </div>
+    </div>
 
-      <div class="modal-body">
-        <div class="playbook-meta-bar">
-          <span class="playbook-tag" id="remed-ip-badge">IP: N/A</span>
-          <span class="playbook-tag tag-tactic" id="remed-tactic-badge">Tactic: Initial Access</span>
+    <!-- REMEDIATION PLAYBOOK MODAL -->
+    <div id="remediation-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 2000; align-items: center; justify-content: center; padding: 2rem;">
+      <div style="background: var(--bg-slate); border: 1px solid var(--border-color); border-radius: 12px; width: 100%; max-width: 600px; padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h3 style="color: white; font-size: 1.1rem; margin: 0;">Automated Remediation Playbook</h3>
+          <button onclick="closeRemediationModal()" aria-label="Close Remediation Modal" style="background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer;">&times;</button>
         </div>
-
-        <h4 class="playbook-section-title">Recommended Incident Action Plan:</h4>
-        <ol class="playbook-checklist" id="remed-checklist-container">
-          <!-- Dynamically populated by app.js -->
-        </ol>
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn-outline" onclick="closeRemediationModal()">Cancel</button>
-        <button class="btn-action btn-attack" onclick="markRemediationCompleted()">⚡ Mark Playbook Executed &amp;
-          Resolve</button>
+        <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
+          <span id="remed-ip-badge" class="font-mono" style="background: var(--accent-bg); color: var(--accent-hover); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">IP: N/A</span>
+          <span id="remed-tactic-badge" class="font-mono" style="background: var(--severity-high-bg); color: var(--severity-high); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">Tactic: N/A</span>
+        </div>
+        <ul id="remed-checklist-container" style="list-style: none; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 10px;"></ul>
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button onclick="closeRemediationModal()" class="btn-secondary" aria-label="Cancel Playbook">Cancel</button>
+          <button onclick="markRemediationCompleted()" class="btn-primary" aria-label="Complete Playbook">Mark Completed &amp; Resolve</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <script src="/app.js"></script>
+  <!-- Main JS Logic Engine -->
+  <script src="/app.js?v=6"></script>
 </body>
-
 </html>
