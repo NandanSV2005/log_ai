@@ -1,47 +1,119 @@
+/* AIR-GAPPED SELF-HOSTED FONTS */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/vendor/fonts/inter-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/vendor/fonts/inter-semibold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/vendor/fonts/inter-bold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/vendor/fonts/jetbrains-mono-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/vendor/fonts/jetbrains-mono-bold.woff2') format('woff2');
+}
+
 :root {
-  --bg-dark: #0a0a0a;
-  --bg-slate: #171717;
-  --bg-card: #171717;
-  --bg-card-hover: #262626;
+  /* Dark-Mode-First Near-Black Base Palette */
+  --bg-dark: #090d16;
+  --bg-slate: #111827;
+  --bg-card: #111827;
+  --bg-card-hover: #1f293d;
 
-  --border-color: #262626;
-  --border-glow-cyan: #404040;
+  --border-color: #1f293d;
+  --border-glow-cyan: rgba(56, 189, 248, 0.4);
 
-  --text-main: #e5e5e5;
-  --text-muted: #a3a3a3;
-  --text-dim: #737373;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
 
-  /* Obsidian Dark Mode Accent Palette */
+  /* ONE Calm Signature Accent Color for Non-Semantic UI */
+  --accent-primary: #0284c7;
+  --accent-hover: #38bdf8;
+  --accent-bg: rgba(2, 132, 199, 0.12);
+  --accent-border: rgba(56, 189, 248, 0.3);
+
+  /* Legacy Neon Accents mapped cleanly to Signature Accent */
+  --neon-cyan: #38bdf8;
+  --neon-cyan-bg: rgba(2, 132, 199, 0.12);
+  --neon-cyan-border: rgba(56, 189, 248, 0.3);
   --neon-mint: #10b981;
   --neon-mint-bg: rgba(16, 185, 129, 0.12);
   --neon-mint-border: rgba(16, 185, 129, 0.35);
+  --neon-violet: #0284c7;
+  --neon-violet-bg: rgba(2, 132, 199, 0.12);
+  --neon-violet-border: rgba(56, 189, 248, 0.3);
+  --neon-purple: #0284c7;
 
-  --neon-violet: #8b5cf6;
-  --neon-violet-bg: rgba(139, 92, 246, 0.12);
-  --neon-violet-border: rgba(139, 92, 246, 0.35);
+  /* Strict Severity Signaling Palette (USED ONLY FOR SEVERITY, NEVER DECORATIVELY) */
+  --severity-high: #ef4444;
+  --severity-high-bg: rgba(239, 68, 68, 0.12);
+  --severity-high-border: rgba(239, 68, 68, 0.35);
+  --neon-red: #ef4444;
+  --neon-red-bg: rgba(239, 68, 68, 0.12);
+  --neon-red-border: rgba(239, 68, 68, 0.35);
 
-  --neon-red: #f43f5e;
-  --neon-red-bg: rgba(244, 63, 94, 0.12);
-  --neon-red-border: rgba(244, 63, 94, 0.35);
-
+  --severity-medium: #f59e0b;
+  --severity-medium-bg: rgba(245, 158, 11, 0.12);
+  --severity-medium-border: rgba(245, 158, 11, 0.35);
   --neon-amber: #f59e0b;
   --neon-amber-bg: rgba(245, 158, 11, 0.12);
   --neon-amber-border: rgba(245, 158, 11, 0.35);
 
-  --neon-cyan: #10b981; /* Electric Mint primary */
-  --neon-cyan-bg: rgba(16, 185, 129, 0.12);
-  --neon-cyan-border: rgba(16, 185, 129, 0.35);
+  --severity-low: #10b981;
+  --severity-low-bg: rgba(16, 185, 129, 0.12);
+  --severity-low-border: rgba(16, 185, 129, 0.35);
 
-  --neon-purple: #8b5cf6;
-
-  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  /* Self-Hosted Typography Tokens */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+/* Accessibility Focus States */
+:focus-visible {
+  outline: 2px solid var(--accent-hover);
+  outline-offset: 2px;
+}
+
+/* Typography Rule Classes */
+.font-mono, .mono-data, .ip-code, .hash-code, .timestamp-code, .score-code {
+  font-family: var(--font-mono) !important;
+}
+
+.font-sans, .prose-label {
+  font-family: var(--font-sans) !important;
 }
 
 body {
