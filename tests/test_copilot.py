@@ -82,7 +82,7 @@ def test_copilot_fallback_distinct_question_intents(auth_headers):
 
 def test_copilot_model_tagging_live_vs_fallback(auth_headers, monkeypatch):
     """
-    Verifies that the 'model' metadata field correctly reports 'gemini-1.5-flash' when the live
+    Verifies that the 'model' metadata field correctly reports 'gemini-2.0-flash' when the live
     API succeeds and 'rule-assisted-soc-engine' when the fallback fires.
     """
     # 1. Fallback model check (no API key)
@@ -94,16 +94,15 @@ def test_copilot_model_tagging_live_vs_fallback(auth_headers, monkeypatch):
     assert res_fallback.status_code == 200
     assert res_fallback.json()["model"] == "rule-assisted-soc-engine"
 
-    # 2. Live API model mock check
+    # 2. Live API model mock check with google.genai
     monkeypatch.setenv("GEMINI_API_KEY", "mock_key_12345")
 
-    mock_gen_model = MagicMock()
+    mock_client = MagicMock()
     mock_response = MagicMock()
-    mock_response.text = "Mocked Gemini Response from Live LLM Model."
-    mock_gen_model.generate_content.return_value = mock_response
+    mock_response.text = "Mocked Gemini 2.0 Flash Response."
+    mock_client.models.generate_content.return_value = mock_response
 
-    with patch("google.generativeai.configure") as mock_conf, \
-         patch("google.generativeai.GenerativeModel", return_value=mock_gen_model):
+    with patch("google.genai.Client", return_value=mock_client):
         res_live = client.post(
             "/api/v1/copilot/ask",
             headers=auth_headers,
@@ -111,5 +110,28 @@ def test_copilot_model_tagging_live_vs_fallback(auth_headers, monkeypatch):
         )
         assert res_live.status_code == 200
         data_live = res_live.json()
-        assert data_live["answer"] == "Mocked Gemini Response from Live LLM Model."
-        assert data_live["model"] == "gemini-1.5-flash"
+        assert data_live["answer"] == "Mocked Gemini 2.0 Flash Response."
+        assert data_live["model"] == "gemini-2.0-flash"
+
+
+def test_copilot_error_logging_diagnostics(auth_headers, monkeypatch, caplog):
+    """
+    Verifies that explicit error diagnostics (status code & message) are logged when Gemini API fails.
+    """
+    monkeypatch.setenv("GEMINI_API_KEY", "invalid_key_trigger_error")
+
+    mock_client = MagicMock()
+    err = Exception("404 models/gemini-invalid-model not found")
+    setattr(err, "code", 404)
+    mock_client.models.generate_content.side_effect = err
+
+    with patch("google.genai.Client", return_value=mock_client):
+        with caplog.at_level("ERROR"):
+            res = client.post(
+                "/api/v1/copilot/ask",
+                headers=auth_headers,
+                json={"question": "Check status"}
+            )
+            assert res.status_code == 200
+            assert res.json()["model"] == "rule-assisted-soc-engine"
+            assert "Gemini API call failed for model 'gemini-2.0-flash' [Status: 404]" in caplog.text

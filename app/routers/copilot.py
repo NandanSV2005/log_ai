@@ -16,7 +16,7 @@ load_dotenv()
 logger = logging.getLogger("log_ai.copilot")
 router = APIRouter(prefix="/api/v1/copilot", tags=["AI Copilot"])
 
-GEMINI_MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+GEMINI_MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
 
 class CopilotAskRequest(BaseModel):
     question: str = Field(..., description="User question for the AI SOC Copilot")
@@ -28,9 +28,9 @@ async def ask_copilot(
 ):
     """
     POST /api/v1/copilot/ask
-    Retrieves recent normalized events and queries Google Gemini LLM API.
+    Retrieves recent normalized events and queries Google Gemini LLM API (gemini-2.0-flash).
     If GEMINI_API_KEY is missing or the call fails, falls back to a question-aware
-    rule-assisted SOC analysis engine.
+    rule-assisted SOC analysis engine with explicit error logging.
     """
     question = payload.question.strip()
     if not question:
@@ -60,20 +60,32 @@ async def ask_copilot(
     # Gemini API Key resolution
     api_key = os.getenv("GEMINI_API_KEY") or getattr(settings, "GEMINI_API_KEY", "") or ""
 
-    if api_key:
+    if not api_key:
+        logger.info("No GEMINI_API_KEY configured in environment or settings. Using Rule-Assisted SOC Engine fallback.")
+    else:
         try:
-            import google.generativeai as genai
-            genai.configure(api_key=api_key)
-
-            model = genai.GenerativeModel(GEMINI_MODEL_NAME)
+            answer_text = None
             prompt = (
                 "You are an elite SOC Analyst.\n"
                 f"Here are the recent security logs:\n{logs_str}\n\n"
                 f"Answer the user's question concisely and professionally:\n{question}"
             )
 
-            response = model.generate_content(prompt)
-            answer_text = response.text if response and hasattr(response, 'text') else None
+            try:
+                from google import genai
+                client = genai.Client(api_key=api_key)
+                response = client.models.generate_content(
+                    model=GEMINI_MODEL_NAME,
+                    contents=prompt,
+                )
+                answer_text = response.text if response and hasattr(response, 'text') else None
+            except ImportError:
+                import google.generativeai as genai_legacy
+                genai_legacy.configure(api_key=api_key)
+                model = genai_legacy.GenerativeModel(GEMINI_MODEL_NAME)
+                response = model.generate_content(prompt)
+                answer_text = response.text if response and hasattr(response, 'text') else None
+
             if answer_text:
                 return {
                     "answer": answer_text,
@@ -81,8 +93,14 @@ async def ask_copilot(
                     "model": GEMINI_MODEL_NAME,
                     "logs_analyzed": len(recent_50)
                 }
+            else:
+                logger.warning(f"Gemini API model '{GEMINI_MODEL_NAME}' returned empty text response.")
         except Exception as e:
-            logger.warning(f"Gemini API call exception: {e}")
+            status_code = getattr(e, "code", getattr(e, "status_code", "UNKNOWN"))
+            logger.error(
+                f"Gemini API call failed for model '{GEMINI_MODEL_NAME}' [Status: {status_code}]: {type(e).__name__} - {str(e)}",
+                exc_info=True
+            )
 
     # Fallback to question-aware Rule-Assisted SOC Engine
     fallback_answer = _evaluate_copilot_fallback(question, recent_50)
