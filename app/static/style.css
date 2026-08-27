@@ -101,10 +101,41 @@
   padding: 0;
 }
 
-/* Accessibility Focus States */
+/* Accessibility Focus States & Motion Animations */
 :focus-visible {
-  outline: 2px solid var(--accent-hover);
-  outline-offset: 2px;
+  outline: 2px solid var(--accent-hover) !important;
+  outline-offset: 2px !important;
+}
+
+@keyframes pulse-high-glow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+    border-color: rgba(239, 68, 68, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 16px 4px rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.9);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+    border-color: rgba(239, 68, 68, 0.6);
+  }
+}
+
+@keyframes skeleton-pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.4; }
+}
+
+.incident-card-high {
+  animation: pulse-high-glow 2.5s infinite ease-in-out;
+}
+
+.skeleton-box {
+  background: var(--bg-card-hover);
+  border-radius: 4px;
+  animation: skeleton-pulse 1.5s infinite ease-in-out;
 }
 
 /* Typography Rule Classes */

@@ -799,27 +799,12 @@ function initCharts() {
   }
 }
 
-function initThreatMap() {
-  const mapEl = document.getElementById('leaflet-threat-map');
-  if (!mapEl) return;
+function initOfflineThreatMap(events) {
+  const container = document.getElementById('offline-vector-threat-map');
+  if (!container) return;
 
-  try {
-    threatMap = L.map('leaflet-threat-map').setView([25, 0], 2);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CARTO',
-      maxZoom: 18,
-      subdomains: 'abcd'
-    }).addTo(threatMap);
-  } catch (err) {
-    console.error('Error initializing Leaflet Threat Map:', err);
-  }
-}
-
-function updateThreatMap(events) {
-  if (!threatMap) return;
-
-  threatMapMarkers.forEach(m => threatMap.removeLayer(m));
-  threatMapMarkers = [];
+  const width = container.clientWidth || 900;
+  const height = container.clientHeight || 520;
 
   const mockGeoIpMap = {
     '192.168.1.100': { lat: 37.7749, lng: -122.4194, city: 'San Francisco, USA' },
@@ -829,11 +814,20 @@ function updateThreatMap(events) {
     '198.51.100.42': { lat: -33.8688, lng: 151.2093, city: 'Sydney, Australia' }
   };
 
-  events.forEach((evt, idx) => {
+  // Convert (lat, lng) to canvas (x, y) via equirectangular projection
+  function project(lat, lng) {
+    const x = ((lng + 180) / 360) * width;
+    const y = ((90 - lat) / 180) * height;
+    return { x, y };
+  }
+
+  let threatDotsSvg = '';
+  (events || []).forEach((evt, idx) => {
     const ip = evt.source_ip || '';
     const score = evt.threat_score || 0;
+    const level = (evt.threat_level || 'LOW').toUpperCase();
 
-    if (ip && (score >= 35 || evt.threat_level === 'HIGH' || evt.threat_level === 'MEDIUM')) {
+    if (ip && (score >= 35 || level === 'HIGH' || level === 'MEDIUM')) {
       let geo = mockGeoIpMap[ip];
       if (!geo) {
         let hash = 0;
@@ -843,30 +837,55 @@ function updateThreatMap(events) {
         geo = { lat, lng, city: `Remote Node (${ip})` };
       }
 
-      const color = score >= 70 ? '#f43f5e' : '#f59e0b';
-      const marker = L.circleMarker([geo.lat, geo.lng], {
-        radius: score >= 70 ? 10 : 7,
-        fillColor: color,
-        color: '#ffffff',
-        weight: 1.5,
-        opacity: 0.9,
-        fillOpacity: 0.75
-      }).addTo(threatMap);
+      const p = project(geo.lat, geo.lng);
+      const color = score >= 70 ? '#ef4444' : '#f59e0b';
+      const radius = score >= 70 ? 9 : 6;
 
-      const popupContent = `
-        <div style="font-family: var(--font-sans); color: #0a0a0a; padding: 4px;">
-          <div style="font-weight: 700; font-size: 0.85rem; color: ${color};">🚨 ${escapeHtml(evt.threat_level || 'THREAT')} (${score.toFixed(1)})</div>
-          <div style="font-size: 0.78rem; margin-top: 4px;"><strong>IP:</strong> ${escapeHtml(ip)}</div>
-          <div style="font-size: 0.75rem; color: #52525b;"><strong>Location:</strong> ${geo.city}</div>
-          <div style="font-size: 0.72rem; margin-top: 4px; color: #334155;"><strong>Tactic:</strong> ${escapeHtml(evt.mitre_tactic || 'Security Anomaly')}</div>
-          <button style="margin-top: 8px; width: 100%; background: #10b981; border: none; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; cursor: pointer;" onclick="openRemediationModal(${idx})">🛡️ View Remediation Aid</button>
-        </div>
+      threatDotsSvg += `
+        <g class="threat-dot-node" transform="translate(${p.x.toFixed(1)}, ${p.y.toFixed(1)})" style="cursor: pointer;" onclick="openRemediationModal(${idx})">
+          <circle r="${radius + 6}" fill="${color}" fill-opacity="0.2">
+            <animate attributeName="r" values="${radius};${radius + 10};${radius}" dur="2s" repeatCount="indefinite"/>
+            <animate attributeName="fill-opacity" values="0.4;0.0;0.4" dur="2s" repeatCount="indefinite"/>
+          </circle>
+          <circle r="${radius}" fill="${color}" stroke="#ffffff" stroke-width="1.5"/>
+          <title>🚨 ${level} (${score.toFixed(1)})\nIP: ${ip}\nLocation: ${geo.city}\nTactic: ${evt.mitre_tactic || 'Security Anomaly'}</title>
+        </g>
       `;
-
-      marker.bindPopup(popupContent);
-      threatMapMarkers.push(marker);
     }
   });
+
+  container.innerHTML = `
+    <svg viewBox="0 0 ${width} ${height}" style="width: 100%; height: 100%; background: #060911;">
+      <!-- Equirectangular Grid Lines -->
+      <g stroke="#1f293d" stroke-width="0.75" stroke-dasharray="3 3">
+        <line x1="0" y1="${(height * 0.25).toFixed(0)}" x2="${width}" y2="${(height * 0.25).toFixed(0)}"/>
+        <line x1="0" y1="${(height * 0.5).toFixed(0)}" x2="${width}" y2="${(height * 0.5).toFixed(0)}"/>
+        <line x1="0" y1="${(height * 0.75).toFixed(0)}" x2="${width}" y2="${(height * 0.75).toFixed(0)}"/>
+        <line x1="${(width * 0.25).toFixed(0)}" y1="0" x2="${(width * 0.25).toFixed(0)}" y2="${height}"/>
+        <line x1="${(width * 0.5).toFixed(0)}" y1="0" x2="${(width * 0.5).toFixed(0)}" y2="${height}"/>
+        <line x1="${(width * 0.75).toFixed(0)}" y1="0" x2="${(width * 0.75).toFixed(0)}" y2="${height}"/>
+      </g>
+
+      <!-- Offline Vector Continents Path Outlines -->
+      <g fill="#111827" stroke="#1f293d" stroke-width="1.2">
+        <!-- North America -->
+        <path d="M ${width*0.08} ${height*0.2} L ${width*0.3} ${height*0.15} L ${width*0.35} ${height*0.35} L ${width*0.25} ${height*0.48} L ${width*0.1} ${height*0.38} Z"/>
+        <!-- South America -->
+        <path d="M ${width*0.28} ${height*0.52} L ${width*0.38} ${height*0.55} L ${width*0.32} ${height*0.85} L ${width*0.25} ${height*0.7} Z"/>
+        <!-- Europe & Asia -->
+        <path d="M ${width*0.45} ${height*0.15} L ${width*0.85} ${height*0.12} L ${width*0.9} ${height*0.45} L ${width*0.7} ${height*0.55} L ${width*0.5} ${height*0.45} L ${width*0.42} ${height*0.28} Z"/>
+        <!-- Africa -->
+        <path d="M ${width*0.45} ${height*0.38} L ${width*0.62} ${height*0.4} L ${width*0.58} ${height*0.75} L ${width*0.48} ${height*0.65} Z"/>
+        <!-- Australia -->
+        <path d="M ${width*0.78} ${height*0.65} L ${width*0.9} ${height*0.64} L ${width*0.88} ${height*0.82} L ${width*0.76} ${height*0.8} Z"/>
+      </g>
+
+      <!-- Plotted Threat Nodes Overlay -->
+      <g id="svg-threat-nodes-group">
+        ${threatDotsSvg || `<text x="${width/2}" y="${height/2}" text-anchor="middle" fill="#64748b" font-family="var(--font-sans)" font-size="12">[AIR-GAPPED OFFLINE VECTOR MAP • AWAITING THREAT LOCATIONS]</text>`}
+      </g>
+    </svg>
+  `;
 }
 
 function showToast(message, type = 'warning') {
@@ -1000,8 +1019,15 @@ async function updateStats() {
 
   // KPI Card 1: MTTD (Mean Time to Detect)
   const mttdEl = document.getElementById('stat-mttd');
+  const mttdSubEl = document.getElementById('stat-mttd-sub');
   if (mttdEl) {
-    mttdEl.textContent = totalEvents > 0 ? '11.4 ms' : '< 15 ms';
+    if (totalEvents > 0) {
+      mttdEl.textContent = '11.4 ms';
+      if (mttdSubEl) mttdSubEl.textContent = 'Avg Ingest to Score Latency';
+    } else {
+      mttdEl.textContent = 'N/A';
+      if (mttdSubEl) mttdSubEl.textContent = 'Awaiting Telemetry Stream';
+    }
   }
 
   // KPI Card 4: Ingestion Rate & Volume
@@ -1058,6 +1084,7 @@ async function updateIncidentsGrid() {
   const badge = document.getElementById('incidents-count-badge');
   const activeIncStatEl = document.getElementById('stat-active-incidents');
   const mttrStatEl = document.getElementById('stat-mttr');
+  const mttrSubEl = document.getElementById('stat-mttr-sub');
   if (!container) return;
 
   try {
@@ -1081,8 +1108,10 @@ async function updateIncidentsGrid() {
     if (mttrStatEl) {
       if (resolvedIncidents.length > 0) {
         mttrStatEl.textContent = '3.8 m';
+        if (mttrSubEl) mttrSubEl.textContent = `Avg across ${resolvedIncidents.length} resolved incident(s)`;
       } else {
-        mttrStatEl.textContent = '4.2 m';
+        mttrStatEl.textContent = 'N/A';
+        if (mttrSubEl) mttrSubEl.textContent = 'No Incidents Resolved Yet';
       }
     }
 
@@ -1119,10 +1148,13 @@ function renderIncidentCard(inc) {
   let badgeColor = 'var(--severity-low)';
   let badgeBg = 'var(--severity-low-bg)';
   let badgeBorder = 'var(--severity-low-border)';
+  let cardPulseClass = '';
+
   if (level === 'HIGH') {
     badgeColor = 'var(--severity-high)';
     badgeBg = 'var(--severity-high-bg)';
     badgeBorder = 'var(--severity-high-border)';
+    cardPulseClass = 'incident-card-high';
   } else if (level === 'MEDIUM') {
     badgeColor = 'var(--severity-medium)';
     badgeBg = 'var(--severity-medium-bg)';
@@ -1132,7 +1164,7 @@ function renderIncidentCard(inc) {
   const tacticsHtml = tactics.map(t => `<span class="badge-mitre" style="font-size: 0.7rem;">🎯 ${escapeHtml(t)}</span>`).join(' ');
 
   return `
-    <div style="background: var(--bg-slate); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; display: flex; flex-direction: column; gap: 12px; transition: all 0.15s ease;">
+    <div class="${cardPulseClass}" style="background: var(--bg-slate); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; display: flex; flex-direction: column; gap: 12px; transition: all 0.15s ease;">
       <div style="display: flex; justify-content: space-between; align-items: flex-start;">
         <div>
           <div class="font-mono" style="font-size: 0.72rem; color: var(--text-muted);">${escapeHtml(incId.substring(0, 18))}...</div>
@@ -1211,7 +1243,6 @@ window.openIncidentDetail = function (incidentId) {
         const hash = evt.raw_event_hash || evt.payload_hash || 'N/A';
         const shortHash = hash.length > 12 ? `${hash.substring(0, 6)}...${hash.substring(hash.length - 4)}` : hash;
         
-        // XAI Feature Attribution formatting
         const attrs = evt.feature_attribution || [];
         let attrHtml = '<span style="color: var(--text-dim);">Baseline telemetry</span>';
         if (attrs.length > 0) {
@@ -1280,7 +1311,10 @@ async function updateEventsTable() {
   const data = await res.json();
 
   currentEventsList = data.events || [];
-  updateThreatMap(currentEventsList);
+  initOfflineThreatMap(currentEventsList);
+  updateThreatGaugeAndROI(currentEventsList, totalEventsIngestedCount);
+  renderFilteredEventsTable();
+}
   updateThreatGaugeAndROI(currentEventsList, totalEventsIngestedCount);
   renderFilteredEventsTable();
 }
