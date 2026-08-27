@@ -1,11 +1,11 @@
-from typing import List
+from typing import List, Dict, Any
 from app.normalization.schema import UnifiedEvent
 
 class XAIExplainer:
     """
     Explainable AI (XAI) Engine:
-    Translates numeric threat scores, threat levels, and anomaly flags into
-    human-readable, plain-English security insights for forensic analysis and UI dashboards.
+    Translates quantitative ML feature attribution Z-scores and rule-engine triggers
+    into plain-English, actionable security insights for forensic analysis.
     """
 
     FLAG_DESCRIPTIONS = {
@@ -16,41 +16,40 @@ class XAIExplainer:
 
     def generate_explanation(self, event: UnifiedEvent) -> str:
         """
-        Generates a clear, plain-English summary based on threat score, threat level, and anomaly flags.
+        Generates a clear, plain-English summary stating top driving ML features (with Z-scores/multipliers)
+        and clearly separates rule-based triggers into a distinct section.
         """
         score = event.threat_score
         level = event.threat_level.upper()
         flags = event.anomaly_flags or []
+        attributions: List[Dict[str, Any]] = getattr(event, "feature_attribution", []) or []
 
         # Benign / Low Risk Event
-        if score < 35.0 and not flags:
+        if score < 35.0 and not flags and not any(a.get("z_score", 0) >= 2.0 for a in attributions):
             return (
                 f"Normal event activity (Score: {score:.1f}) with LOW threat level. "
                 "No security anomalies detected."
             )
 
-        # Anomalous / Elevated Risk Event
+        # ML Feature Attribution Section
         level_phrase = f"{level.capitalize()} threat (Score: {score:.1f}) detected"
+        attr_phrases = []
+        for attr in attributions:
+            desc = attr.get("description")
+            z = attr.get("z_score", 0.0)
+            if desc and z >= 1.0:
+                attr_phrases.append(desc)
 
-        reasons: List[str] = []
-        for flag in flags:
-            if flag in self.FLAG_DESCRIPTIONS:
-                reasons.append(self.FLAG_DESCRIPTIONS[flag])
+        if attr_phrases:
+            if len(attr_phrases) == 1:
+                attr_str = attr_phrases[0]
             else:
-                reasons.append(flag.replace("_", " "))
-
-        if reasons:
-            if len(reasons) == 1:
-                reason_str = reasons[0]
-            elif len(reasons) == 2:
-                reason_str = f"{reasons[0]} and {reasons[1]}"
-            else:
-                reason_str = f"{', '.join(reasons[:-1])}, and {reasons[-1]}"
-            explanation = f"{level_phrase} due to {reason_str}"
+                attr_str = f"{attr_phrases[0]} and {attr_phrases[1]}"
+            ml_summary = f"{level_phrase} — elevated primarily due to {attr_str}"
         else:
-            explanation = f"{level_phrase} based on anomalous behavioral patterns"
+            ml_summary = f"{level_phrase} based on statistical behavioral anomaly patterns"
 
-        # Context details (Source IP, Destination IP, Event Type)
+        # Context details (Source IP, Target IP, Event Type)
         context_parts = []
         if event.source_ip:
             context_parts.append(f"from source IP {event.source_ip}")
@@ -60,10 +59,20 @@ class XAIExplainer:
             context_parts.append(f"via [{event.event_type}]")
 
         if context_parts:
-            explanation += f" {' '.join(context_parts)}"
+            ml_summary += f" {' '.join(context_parts)}"
+        ml_summary += "."
 
-        explanation += "."
-        return explanation
+        # Separate Rule-Based Triggers Section
+        if flags:
+            rule_descriptions = []
+            for flag in flags:
+                desc = self.FLAG_DESCRIPTIONS.get(flag, flag.replace("_", " "))
+                rule_descriptions.append(f"{desc} [{flag}]")
+            
+            rule_str = ", ".join(rule_descriptions)
+            ml_summary += f" Rule Triggers: {rule_str}."
+
+        return ml_summary
 
 # Global singleton XAI explainer instance
 xai_explainer = XAIExplainer()

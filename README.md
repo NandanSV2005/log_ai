@@ -13,9 +13,10 @@
   - **Rate Limiting**: Built-in `slowapi` rate limiter (`5 requests/sec`) on log ingestion (`/api/v1/ingest`) with client-side 429 toast alerts.
   - **Strict HTTP Security Headers**: Automatic `X-Content-Type-Options`, `Strict-Transport-Security`, `X-Frame-Options`, and `CSP` headers.
 
-- 🤖 **AI Anomaly Detection & Explainable AI (XAI)**:
-  - Multi-stage threat scoring pipeline combining heuristics and feature anomaly metrics.
-  - Generates human-readable Explainable AI (XAI) threat insights for every ingested security event.
+- 🤖 **Genuine ML Feature Attribution & Explainable AI (XAI)**:
+  - **Pure-NumPy ML Ensemble**: Combines IsolationForest (unsupervised anomaly detection) and RandomForestClassifier (supervised threat matching).
+  - **Z-Score Feature Attribution**: Evaluates event feature vectors against learned baseline normal means ($\boldsymbol{\mu}$) and standard deviations ($\boldsymbol{\sigma}$) across 5 telemetry dimensions (`ip_freq`, `ip_deny`, `action_code`, `sev_code`, `hour`).
+  - **Dynamic XAI Explanations**: Highlights exact top-contributing features (e.g., *"Threat score (78.5) elevated primarily due to source IP request frequency (7.1x baseline) and off-hours access (03:14 local)"*).
 
 - 🔗 **Cryptographic Merkle Auditability (Zero-Loss Forensics)**:
   - Immediate raw payload persistence before parsing for zero-loss forensics.
@@ -35,12 +36,13 @@
 
 ---
 
-## 🛠️ Technology Stack
+## 🔬 ML Architecture, Training Dataset & Model Persistence
 
-- **Core Engine & API**: Python 3.11+, FastAPI, Uvicorn
-- **Rate Limiting & Security**: SlowAPI, Python `secrets`, Custom Security Middleware
-- **Frontend & UI**: HTML5, Vanilla CSS, Vanilla JavaScript, Chart.js, Leaflet.js
-- **Containerization & Testing**: Docker, PyTest, PyTest-AsyncIO, HTTPX
+- **Ensemble Engine**: Built deliberately as a lightweight, pure-Python & NumPy ensemble (IsolationForest + RandomForest) to eliminate C-DLL native binary dependencies (`scikit-learn`, `C++ CRT`) for constrained/air-gapped SOC container deployments.
+- **Training Dataset**: Trained on a 600-sample programmatically generated synthetic dataset:
+  - **400 Normal Baseline Samples**: Low IP request frequency ($\mu=2.1$), zero/rare denials, business-hour access (08:00–18:00), and informational severity.
+  - **200 Threat Vectors**: Brute-force sprays (high request/deny counts up to 35 reqs), off-hours probes (01:00–05:00 access), and critical vulnerability exploits.
+- **Model Persistence**: Baseline feature statistics ($\boldsymbol{\mu}$, $\boldsymbol{\sigma}$) and model configurations persist to `data/models/ml_baseline.json`, ensuring fast cold starts without re-training.
 
 ---
 

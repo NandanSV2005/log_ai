@@ -1,13 +1,21 @@
+import os
+import json
 import math
 import random
 import datetime
+import logging
+from pathlib import Path
 from collections import Counter
 from typing import List, Dict, Any, Optional, Tuple
 import numpy as np
 
 from app.normalization.schema import UnifiedEvent
 from app.defense.rules_engine import rules_engine
-from app.defense.webhooks import webhook_notifier
+
+logger = logging.getLogger("log_ai.engine")
+
+MODEL_SAVE_PATH = Path("data/models/ml_baseline.json")
+FEATURE_NAMES = ["ip_freq", "ip_deny", "action_code", "sev_code", "hour"]
 
 class IsolationTreeNode:
     def __init__(self, left=None, right=None, split_feature=None, split_value=None, size: int = 0):
@@ -194,45 +202,132 @@ class RandomForestClassifier:
             probas.append([1.0 - p1, p1])
         return np.array(probas)
 
+
+def generate_synthetic_training_data(n_samples: int = 600) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Programmatically generates a varied synthetic dataset of telemetry features.
+    Features: [ip_freq, ip_deny, action_code, sev_code, hour]
+    - 400 Normal baseline sessions
+    - 200 Attack / Anomaly sessions (brute force, off-hours probes, critical exploits)
+    Returns: (X_all, y_all, X_normal)
+    """
+    np.random.seed(42)
+    random.seed(42)
+
+    n_normal = int(n_samples * 2 / 3)  # 400
+    n_threat = n_samples - n_normal    # 200
+
+    # 1. Normal baseline samples (400)
+    normal_freq = np.random.uniform(1.0, 4.0, size=n_normal)
+    normal_deny = np.random.choice([0.0, 1.0], size=n_normal, p=[0.95, 0.05])
+    normal_action = np.random.choice([0.0, 0.5], size=n_normal, p=[0.85, 0.15])
+    normal_sev = np.random.choice([0.0, 1.0], size=n_normal, p=[0.85, 0.15])
+    normal_hour = np.random.uniform(8.0, 18.0, size=n_normal)  # Business hours
+
+    X_normal = np.column_stack([normal_freq, normal_deny, normal_action, normal_sev, normal_hour])
+
+    # 2. Threat samples (200)
+    # Brute force (80)
+    bf_freq = np.random.uniform(10.0, 35.0, size=80)
+    bf_deny = np.random.uniform(5.0, 30.0, size=80)
+    bf_action = np.ones(80)
+    bf_sev = np.random.choice([2.0, 3.0], size=80)
+    bf_hour = np.random.uniform(0.0, 23.0, size=80)
+
+    # Off-hours probes (60)
+    oh_freq = np.random.uniform(5.0, 15.0, size=60)
+    oh_deny = np.random.uniform(3.0, 10.0, size=60)
+    oh_action = np.ones(60)
+    oh_sev = np.full(60, 2.0)
+    oh_hour = np.random.uniform(1.0, 5.0, size=60)  # 01:00 to 05:00
+
+    # Critical severity exploits (60)
+    ex_freq = np.random.uniform(3.0, 12.0, size=60)
+    ex_deny = np.random.uniform(1.0, 6.0, size=60)
+    ex_action = np.ones(60)
+    ex_sev = np.full(60, 3.0)  # Critical
+    ex_hour = np.random.uniform(0.0, 23.0, size=60)
+
+    X_threat = np.vstack([
+        np.column_stack([bf_freq, bf_deny, bf_action, bf_sev, bf_hour]),
+        np.column_stack([oh_freq, oh_deny, oh_action, oh_sev, oh_hour]),
+        np.column_stack([ex_freq, ex_deny, ex_action, ex_sev, ex_hour])
+    ])
+
+    X_all = np.vstack([X_normal, X_threat])
+    y_all = np.array([0] * n_normal + [1] * n_threat, dtype=int)
+
+    return X_all, y_all, X_normal
+
+
 class MLEnsembleEngine:
     """
     Weighted ML Ensemble Engine combining:
     - IsolationForest: Unsupervised outlier & anomaly scoring.
     - RandomForestClassifier: Supervised known-threat pattern matching.
-    Calculates unified threat scores (0.0 to 100.0).
+    Includes feature baseline z-score attribution and disk persistence.
     """
     def __init__(self, n_estimators: int = 20):
         self.n_estimators = n_estimators
         self.iso_forest = IsolationForest(n_estimators=n_estimators, random_state=42)
         self.rf_classifier = RandomForestClassifier(n_estimators=n_estimators, random_state=42)
         self.is_fitted = False
+
+        self.feature_means: List[float] = [2.1, 0.05, 0.08, 0.15, 13.0]
+        self.feature_stds: List[float] = [0.8, 0.2, 0.2, 0.35, 2.8]
+
         self._init_baseline_models()
 
     def _init_baseline_models(self):
-        normal_samples = [
-            [1.0, 0.0, 0.0, 0.0, 10.0],
-            [2.0, 0.0, 0.0, 0.0, 14.0],
-            [1.0, 0.0, 0.5, 0.0, 9.0],
-            [3.0, 0.0, 0.0, 1.0, 11.0],
-            [2.0, 0.0, 0.0, 0.0, 16.0],
-            [1.0, 0.0, 0.0, 0.0, 22.0],
-            [4.0, 0.0, 0.0, 0.0, 15.0],
-            [2.0, 0.0, 0.0, 1.0, 8.0],
-        ]
-        threat_samples = [
-            [10.0, 8.0, 1.0, 3.0, 3.0],
-            [15.0, 12.0, 1.0, 2.0, 2.0],
-            [8.0, 5.0, 1.0, 3.0, 4.0],
-            [20.0, 18.0, 1.0, 3.0, 1.0],
-            [5.0, 4.0, 1.0, 2.0, 23.0],
-            [12.0, 10.0, 1.0, 3.0, 0.0],
-        ]
-        X_train = np.array(normal_samples + threat_samples, dtype=float)
-        y_train = np.array([0]*len(normal_samples) + [1]*len(threat_samples), dtype=int)
+        """
+        Loads baseline parameters from data/models/ml_baseline.json if persisted;
+        otherwise fits models on 600-sample synthetic dataset and saves parameters to disk.
+        """
+        if MODEL_SAVE_PATH.exists():
+            try:
+                with open(MODEL_SAVE_PATH, "r") as f:
+                    data = json.load(f)
+                self.feature_means = data.get("feature_means", self.feature_means)
+                self.feature_stds = data.get("feature_stds", self.feature_stds)
+                self.is_fitted = True
+                logger.info(
+                    "Loaded persisted ML baseline parameters from %s (synthetic n=%d)",
+                    MODEL_SAVE_PATH,
+                    data.get("synthetic_samples", 600)
+                )
+            except Exception as e:
+                logger.warning("Failed to load model from %s (%s). Re-training...", MODEL_SAVE_PATH, e)
+                self._train_and_persist_models()
+        else:
+            self._train_and_persist_models()
 
-        self.iso_forest.fit(X_train)
-        self.rf_classifier.fit(X_train, y_train)
+    def _train_and_persist_models(self):
+        """Generates synthetic dataset (n=600), fits ensemble, computes baseline means/stds, and persists to disk."""
+        X_all, y_all, X_normal = generate_synthetic_training_data(n_samples=600)
+
+        self.iso_forest.fit(X_all)
+        self.rf_classifier.fit(X_all, y_all)
+
+        self.feature_means = [float(m) for m in np.mean(X_normal, axis=0)]
+        self.feature_stds = [float(max(s, 0.01)) for s in np.std(X_normal, axis=0)]
         self.is_fitted = True
+
+        MODEL_SAVE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        model_payload = {
+            "version": "1.0",
+            "synthetic_samples": len(X_all),
+            "feature_names": FEATURE_NAMES,
+            "feature_means": self.feature_means,
+            "feature_stds": self.feature_stds,
+            "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        }
+
+        try:
+            with open(MODEL_SAVE_PATH, "w") as f:
+                json.dump(model_payload, f, indent=2)
+            logger.info("Fitted and persisted ML ensemble baseline to %s", MODEL_SAVE_PATH)
+        except Exception as e:
+            logger.warning("Could not persist model state to disk: %s", e)
 
     def compute_ensemble_score(self, feature_vector: List[float]) -> float:
         X = np.array([feature_vector], dtype=float)
@@ -246,10 +341,61 @@ class MLEnsembleEngine:
         except Exception:
             return 15.0
 
+    def explain_features(self, feature_vector: List[float]) -> List[Dict[str, Any]]:
+        """
+        Computes feature Z-score deviations from learned normal baseline:
+        z_i = |x_i - mean_i| / std_i
+        Ranks top 1-2 features contributing to score anomaly.
+        """
+        attributions = []
+
+        for idx, (val, name, mean, std) in enumerate(zip(feature_vector, FEATURE_NAMES, self.feature_means, self.feature_stds)):
+            diff = val - mean
+            z_score = abs(diff) / max(std, 0.01)
+
+            # Generate descriptive phrase and multiplier
+            if name == "ip_freq":
+                ratio = val / max(mean, 1.0)
+                desc = f"source IP request frequency ({ratio:.1f}x baseline: {int(val)} reqs)"
+            elif name == "ip_deny":
+                desc = f"source IP denial count ({int(val)} failed/denied attempts)"
+            elif name == "action_code":
+                desc = "denied access action flag" if val >= 0.8 else "permitted action"
+            elif name == "sev_code":
+                sev_label = "critical" if val >= 3.0 else "high/error" if val >= 2.0 else "warn"
+                desc = f"{sev_label} severity level ({int(val)})"
+            elif name == "hour":
+                hr_int = int(val) % 24
+                desc = f"off-hours access ({hr_int:02d}:00 local)"
+            else:
+                desc = f"{name} anomaly ({val:.1f})"
+
+            attributions.append({
+                "feature": name,
+                "z_score": round(float(z_score), 2),
+                "value": float(val),
+                "baseline_mean": round(float(mean), 2),
+                "multiplier": round(float(val / max(mean, 1.0)), 1),
+                "description": desc,
+            })
+
+        # Sort features by Z-score descending
+        attributions.sort(key=lambda a: a["z_score"], reverse=True)
+
+        # Return top 2 primary anomalous contributors (or top 1 if only 1 is anomalous)
+        top_attributions = [a for a in attributions if a["z_score"] >= 1.2]
+        if not top_attributions:
+            top_attributions = attributions[:1]
+        else:
+            top_attributions = top_attributions[:2]
+
+        return top_attributions
+
+
 class AnomalyEngine:
     """
     Enterprise Threat Detection Engine:
-    - ML Ensemble: IsolationForest + RandomForestClassifier weighted threat scoring.
+    - ML Ensemble: IsolationForest + RandomForestClassifier weighted threat scoring with Z-score feature attribution.
     - Rules Engine: YAML-driven heuristic rules with MITRE ATT&CK tactic mappings.
     - Webhook Integration: Triggers notifications on HIGH threat alerts.
     """
@@ -274,6 +420,7 @@ class AnomalyEngine:
 
         features = self._extract_features(event)
         ml_score = self.ml_ensemble.compute_ensemble_score(features)
+        feature_attribution = self.ml_ensemble.explain_features(features)
 
         if rule_flags:
             threat_score = min(100.0, rule_floor + (0.35 * ml_score))
@@ -299,8 +446,13 @@ class AnomalyEngine:
         event.threat_score = threat_score
         event.threat_level = threat_level
         event.anomaly_flags = rule_flags
+        event.feature_attribution = feature_attribution
         event.mitre_tactic = mitre_tactic
         event.remediation_steps = remediation_steps
+
+        # Import XAI explainer dynamically to avoid circular dependencies
+        from app.xai.explainer import xai_explainer
+        event.xai_explanation = xai_explainer.generate_explanation(event)
 
         return event
 
