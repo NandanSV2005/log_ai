@@ -185,7 +185,7 @@ async function processCopilotQuery(query) {
 
 let currentRemediationEventIndex = null;
 
-window.openRemediationModal = function(index) {
+window.openRemediationModal = function (index) {
   const modal = document.getElementById('remediation-modal');
   if (!modal) return;
   const targetIdx = (index !== undefined && index !== null) ? index : 0;
@@ -222,12 +222,12 @@ window.openRemediationModal = function(index) {
   modal.style.display = 'flex';
 };
 
-window.closeRemediationModal = function(e) {
+window.closeRemediationModal = function (e) {
   const modal = document.getElementById('remediation-modal');
   if (modal) modal.style.display = 'none';
 };
 
-window.markRemediationCompleted = function() {
+window.markRemediationCompleted = function () {
   if (currentRemediationEventIndex !== null && currentEventsList[currentRemediationEventIndex]) {
     const evt = currentEventsList[currentRemediationEventIndex];
     const hash = evt.raw_event_hash || evt.payload_hash || '';
@@ -239,7 +239,7 @@ window.markRemediationCompleted = function() {
   showToast('Playbook marked completed & incident resolved!', 'warning');
 };
 
-window.bulkResolveCategory = async function(category) {
+window.bulkResolveCategory = async function (category) {
   let targetEvents = [];
   if (category === 'ssh') {
     targetEvents = currentEventsList.filter(e => JSON.stringify(e).toLowerCase().includes('ssh'));
@@ -259,7 +259,7 @@ window.bulkResolveCategory = async function(category) {
         method: 'PATCH',
         headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ status: 'Resolved' })
-      }).catch(() => {});
+      }).catch(() => { });
     }
   }
 
@@ -905,7 +905,7 @@ function updateThreatGaugeAndROI(events, totalIngested) {
   const totalScore = recentSlice.reduce((sum, e) => sum + (e.threat_score || 0), 0);
   const avgScore = recentSlice.length > 0 ? (totalScore / recentSlice.length) : 0;
   const maxScore = recentSlice.length > 0 ? Math.max(...recentSlice.map(e => e.threat_score || 0), 0) : 0;
-  
+
   const compositeScore = activeEvents.length > 0 ? Math.min(100, (maxScore * 0.6) + (avgScore * 0.4)) : 0;
   const formattedScore = compositeScore.toFixed(1);
 
@@ -1001,8 +1001,8 @@ function renderFilteredEventsTable() {
   countBadge.textContent = `Showing ${filtered.length} of ${currentEventsList.length} events${queryInfo} \u2022 Click row for raw evidence`;
 
   if (filtered.length === 0) {
-    const emptyMsg = currentSearchQuery 
-      ? `No events matched your natural language query: "<em>${escapeHtml(currentSearchQuery)}</em>"` 
+    const emptyMsg = currentSearchQuery
+      ? `No events matched your natural language query: "<em>${escapeHtml(currentSearchQuery)}</em>"`
       : 'System Secure. No anomalies detected. Upload a .LOG file or run a simulation to begin analysis.';
     tbody.innerHTML = `
       <tr class="empty-state-row">
@@ -1018,7 +1018,7 @@ function renderFilteredEventsTable() {
   tbody.innerHTML = filtered.map((event, idx) => renderEventRow(event, idx)).join('');
 }
 
-window.toggleRowExpansion = function(index, eventKey) {
+window.toggleRowExpansion = function (index, eventKey) {
   const detailRow = document.getElementById(`detail-row-${index}`);
   if (!detailRow) return;
 
@@ -1031,7 +1031,7 @@ window.toggleRowExpansion = function(index, eventKey) {
   }
 };
 
-window.updateEventStatus = async function(eventId, newStatus, selectEl) {
+window.updateEventStatus = async function (eventId, newStatus, selectEl) {
   if (selectEl) {
     selectEl.className = `status-select status-${newStatus.toLowerCase()}`;
   }
@@ -1221,5 +1221,64 @@ function copyToClipboard(text) {
   if (!text || text === 'N/A') return;
   navigator.clipboard.writeText(text).then(() => {
     alert(`Copied Merkle Audit Hash to clipboard:\n${text}`);
-  }).catch(() => {});
+  }).catch(() => { });
 }
+// AI COPILOT LOGIC
+document.addEventListener('DOMContentLoaded', () => {
+  const toggle = document.getElementById('copilot-toggle');
+  const panel = document.getElementById('copilot-panel');
+  const closeBtn = document.getElementById('copilot-close');
+  const sendBtn = document.getElementById('copilot-send');
+  const input = document.getElementById('copilot-input');
+  const messages = document.getElementById('copilot-messages');
+
+  if (toggle && panel) {
+    toggle.addEventListener('click', () => panel.style.display = 'flex');
+    closeBtn.addEventListener('click', () => panel.style.display = 'none');
+
+    const appendMsg = (text, isUser) => {
+      const msg = document.createElement('div');
+      msg.style.padding = '8px 12px';
+      msg.style.borderRadius = '8px';
+      msg.style.fontSize = '0.85rem';
+      msg.style.maxWidth = '85%';
+      msg.style.marginTop = '4px';
+      if (isUser) {
+        msg.style.background = '#10b981';
+        msg.style.color = '#000';
+        msg.style.alignSelf = 'flex-end';
+        msg.style.fontWeight = 'bold';
+      } else {
+        msg.style.background = '#0a0a0a';
+        msg.style.border = '1px solid #262626';
+        msg.style.color = '#e5e5e5';
+        msg.style.alignSelf = 'flex-start';
+      }
+      msg.innerHTML = text.replace(/\n/g, '<br/>');
+      messages.appendChild(msg);
+      messages.scrollTop = messages.scrollHeight;
+    };
+
+    sendBtn.addEventListener('click', async () => {
+      const query = input.value.trim();
+      if (!query) return;
+      appendMsg(query, true);
+      input.value = '';
+      appendMsg('Analyzing telemetry...', false);
+
+      try {
+        const res = await fetch('/api/v1/copilot/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: query })
+        });
+        const data = await res.json();
+        messages.lastChild.remove();
+        appendMsg(data.answer || "No response generated.", false);
+      } catch (err) {
+        messages.lastChild.remove();
+        appendMsg("Error reaching Gemini AI backend.", false);
+      }
+    });
+  }
+});
