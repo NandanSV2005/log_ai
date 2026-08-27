@@ -1315,9 +1315,6 @@ async function updateEventsTable() {
   updateThreatGaugeAndROI(currentEventsList, totalEventsIngestedCount);
   renderFilteredEventsTable();
 }
-  updateThreatGaugeAndROI(currentEventsList, totalEventsIngestedCount);
-  renderFilteredEventsTable();
-}
 
 function updateThreatGaugeAndROI(events, totalIngested) {
   if (!events || events.length === 0) {
