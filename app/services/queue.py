@@ -12,6 +12,7 @@ from app.parsers.text_parser import TextLogParser
 from app.parsers.dynamic_parser import DynamicParser
 from app.storage.normalized_writer import normalized_storage_manager
 from app.detection.anomaly_engine import anomaly_engine
+from app.detection.correlation import incident_engine
 from app.xai.explainer import xai_explainer
 
 logger = logging.getLogger("log_ai.queue")
@@ -109,9 +110,10 @@ class LogIngestQueueManager:
             # 2. Enrich events with Anomaly Detection & Threat Scoring (ML + Rules)
             enriched_events = anomaly_engine.evaluate_events(unified_events)
 
-            # 3. Enrich events with Explainable AI (XAI) plain-English summaries
+            # 3. Enrich events with Explainable AI (XAI) & correlate into Incidents
             for event in enriched_events:
                 event.xai_explanation = xai_explainer.generate_explanation(event)
+                incident_engine.process_event(event)
 
             # 4. Persist enriched UnifiedEvents to separate analytics JSONL storage
             await normalized_storage_manager.write_normalized_events(

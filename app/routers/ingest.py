@@ -10,6 +10,7 @@ from app.storage.normalized_writer import normalized_storage_manager
 from app.parsers.base import detect_log_format
 from app.parsers.dynamic_parser import DynamicParser
 from app.detection.anomaly_engine import anomaly_engine
+from app.detection.correlation import incident_engine
 from app.xai.explainer import xai_explainer
 from app.services.queue import queue_manager, IngestionTask
 from app.audit.hash_chain import audit_merkle_tree
@@ -170,6 +171,7 @@ async def ingest_log_file(
     enriched_events = anomaly_engine.evaluate_events(unified_events)
     for event in enriched_events:
         event.xai_explanation = xai_explainer.generate_explanation(event)
+        incident_engine.process_event(event)
 
     await normalized_storage_manager.write_normalized_events(
         ingestion_id=ingestion_id,

@@ -6,6 +6,8 @@ from typing import Dict, Any, List
 from fastapi import APIRouter, Query, Response, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from app.storage.normalized_writer import normalized_storage_manager
+from app.normalization.schema import UnifiedEvent
+from app.detection.correlation import incident_engine
 from app.routers.auth import get_current_user
 
 router = APIRouter(prefix="/api/v1/dashboard", tags=["Dashboard"])
@@ -221,6 +223,129 @@ async def update_event_status(
         "updated_status": body.status,
         "event": updated_event,
     }
+
+
+def _ensure_incidents_hydrated():
+    """If incident_engine has no active tracking state, hydrate from stored JSONL events."""
+    if not incident_engine.incidents:
+        all_records = _read_all_normalized_records()
+        all_records.sort(key=lambda r: str(r.get("timestamp", "")))
+        for record in all_records:
+            try:
+                event = UnifiedEvent(**record)
+                incident_engine.process_event(event)
+            except Exception:
+                continue
+
+
+@router.get("/incidents", response_model=Dict[str, Any])
+async def get_incidents(
+    limit: int = Query(default=50, ge=1, le=500),
+    current_user=Depends(get_current_user),
+):
+    """
+    Returns aggregated incident clusters sorted by max_threat_score descending.
+    """
+    _ensure_incidents_hydrated()
+    incidents = incident_engine.get_incidents(limit=limit)
+    return {
+        "count": len(incidents),
+        "total_available": len(incident_engine.incidents),
+        "incidents": incidents,
+    }
+
+
+@router.get("/incidents/{incident_id}", response_model=Dict[str, Any])
+async def get_incident_detail(
+    incident_id: str,
+    current_user=Depends(get_current_user),
+):
+    """
+    Returns full details for a specific Incident including all correlated member events.
+    """
+    _ensure_incidents_hydrated()
+    incident = incident_engine.get_incident_by_id(incident_id)
+    if not incident:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Incident with ID '{incident_id}' not found",
+        )
+
+    member_hashes = set(incident.event_hashes)
+    all_records = _read_all_normalized_records()
+    member_events = [
+        r for r in all_records
+        if (r.get("raw_event_hash") in member_hashes or r.get("payload_hash") in member_hashes)
+    ]
+    member_events.sort(key=lambda r: str(r.get("timestamp", "")), reverse=True)
+
+    return {
+        "incident": incident.to_dict(),
+        "events": member_events,
+    }
+
+
+@router.patch("/incidents/{incident_id}/status", response_model=Dict[str, Any])
+async def update_incident_status(
+    incident_id: str,
+    body: StatusUpdateRequest,
+    current_user=Depends(get_current_user),
+):
+    """
+    Updates the workflow status of an incident and all its member events.
+    Allowed values: New, Investigating, Resolved, Dismissed
+    """
+    if body.status not in ALLOWED_STATUSES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid status '{body.status}'. Allowed values: New, Investigating, Resolved, Dismissed",
+        )
+
+    _ensure_incidents_hydrated()
+    incident = incident_engine.get_incident_by_id(incident_id)
+    if not incident:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Incident with ID '{incident_id}' not found",
+        )
+
+    incident_engine.update_incident_status(incident_id, body.status)
+
+    member_hashes = set(incident.event_hashes)
+    storage_dir = normalized_storage_manager.storage_dir
+    if storage_dir.exists():
+        for file_path in storage_dir.glob("normalized_*.jsonl"):
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    lines = f.readlines()
+
+                modified = False
+                new_lines = []
+                for line in lines:
+                    line_str = line.strip()
+                    if line_str:
+                        record = json.loads(line_str)
+                        raw_hash = record.get("raw_event_hash") or record.get("payload_hash") or ""
+                        if raw_hash in member_hashes:
+                            record["status"] = body.status
+                            modified = True
+                        new_lines.append(json.dumps(record) + "\n")
+                    else:
+                        new_lines.append(line)
+
+                if modified:
+                    with open(file_path, "w", encoding="utf-8") as f:
+                        f.writelines(new_lines)
+            except Exception:
+                continue
+
+    return {
+        "status": "success",
+        "incident_id": incident_id,
+        "updated_status": body.status,
+        "incident": incident.to_dict(),
+    }
+
 
 
 
