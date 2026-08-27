@@ -16,7 +16,7 @@ load_dotenv()
 logger = logging.getLogger("log_ai.copilot")
 router = APIRouter(prefix="/api/v1/copilot", tags=["AI Copilot"])
 
-GEMINI_MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+GEMINI_MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
 
 class CopilotAskRequest(BaseModel):
     question: str = Field(..., description="User question for the AI SOC Copilot")
@@ -28,7 +28,7 @@ async def ask_copilot(
 ):
     """
     POST /api/v1/copilot/ask
-    Retrieves recent normalized events and queries Google Gemini LLM API (gemini-2.0-flash).
+    Retrieves recent normalized events and queries Google Gemini LLM API (gemini-3.6-flash).
     If GEMINI_API_KEY is missing or the call fails, falls back to a question-aware
     rule-assisted SOC analysis engine with explicit error logging.
     """
@@ -58,7 +58,7 @@ async def ask_copilot(
     logs_str = "\n".join(logs_summary_lines) if logs_summary_lines else "No recent anomaly logs in storage."
 
     # Gemini API Key resolution
-    api_key = os.getenv("GEMINI_API_KEY") or getattr(settings, "GEMINI_API_KEY", "") or ""
+    api_key = os.getenv("GEMINI_API_KEY", "").strip()
 
     if not api_key:
         logger.info("No GEMINI_API_KEY configured in environment or settings. Using Rule-Assisted SOC Engine fallback.")
