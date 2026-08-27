@@ -87,6 +87,7 @@ def test_copilot_model_tagging_live_vs_fallback(auth_headers, monkeypatch):
     API succeeds and 'rule-assisted-soc-engine' when the fallback fires.
     """
     # 1. Fallback model check (no API key)
+    monkeypatch.setenv("GEMINI_API_KEY", "")
     res_fallback = client.post(
         "/api/v1/copilot/ask",
         headers=auth_headers,

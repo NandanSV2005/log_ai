@@ -3,3 +3,18 @@ services:
     name: log-ai-soc
     env: docker
     plan: free
+    envVars:
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: DASHBOARD_PASS
+        sync: false
+      - key: DASHBOARD_USER
+        value: admin
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.6-flash
+      - key: ENVIRONMENT
+        value: production
+      - key: STRICT_SECRETS
+        value: "true"

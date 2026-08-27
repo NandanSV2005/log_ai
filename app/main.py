@@ -20,6 +20,8 @@ logger = logging.getLogger("log_ai")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logger.info("Validating application security configuration...")
+    settings.validate_secrets_on_startup()
     logger.info("Initializing Log Ingestion Engine background workers...")
     await queue_manager.start_workers(concurrency=settings.WORKER_CONCURRENCY)
     yield

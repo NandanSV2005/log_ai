@@ -8,11 +8,15 @@ from sqlalchemy.orm import Session
 import bcrypt
 from jose import JWTError, jwt
 
+from app.config import settings
 from app.database import get_db, User
 
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "super-secret-log-ai-jwt-token-key-2026")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
+
+def get_secret_key() -> str:
+    """Dynamically retrieves the JWT signing secret key from settings."""
+    return settings.get_jwt_secret()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
@@ -45,7 +49,8 @@ def create_access_token(data: dict, expires_delta: Optional[datetime.timedelta] 
     else:
         expire = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    secret_key = get_secret_key()
+    encoded_jwt = jwt.encode(to_encode, secret_key, algorithm=ALGORITHM)
     return encoded_jwt
 
 async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
@@ -54,8 +59,9 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         detail="Could not validate authentication credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    secret_key = get_secret_key()
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, secret_key, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception

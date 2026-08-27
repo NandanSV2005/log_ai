@@ -9,7 +9,7 @@
 ## 🚀 Key Features
 
 - 🛡️ **Enterprise Security Hardening**:
-  - **HTTP Basic Authentication**: Protected SOC dashboard UI (`admin` / `SuperSecretPassword!`) using timing-attack resistant `secrets.compare_digest`.
+  - **Environment-Driven Authentication**: Password and JWT security managed via strict environment variables (`DASHBOARD_PASS`, `JWT_SECRET_KEY`).
   - **Rate Limiting**: Built-in `slowapi` rate limiter (`5 requests/sec`) on log ingestion (`/api/v1/ingest`) with client-side 429 toast alerts.
   - **Strict HTTP Security Headers**: Automatic `X-Content-Type-Options`, `Strict-Transport-Security`, `X-Frame-Options`, and `CSP` headers.
 
@@ -44,6 +44,29 @@
 
 ---
 
+## 🔑 Environment Variables & Security Configuration
+
+Create a `.env` file in the root directory (or configure environment variables in your deployment dashboard):
+
+```env
+# Production Secret Configuration (REQUIRED in production / strict mode)
+JWT_SECRET_KEY=your_secure_random_jwt_signing_secret_here
+DASHBOARD_PASS=your_secure_admin_password_here
+DASHBOARD_USER=admin
+
+# AI SOC Copilot Integration
+GEMINI_API_KEY=your_google_gemini_api_key_here
+GEMINI_MODEL=gemini-3.6-flash
+
+# Security Control Flags
+ENVIRONMENT=production   # 'production' or 'development'
+STRICT_SECRETS=true      # Set 'true' to force startup failure if secrets are missing
+```
+
+> **Note on Local Development**: If `DASHBOARD_PASS` or `JWT_SECRET_KEY` are not set in a local development environment (`ENVIRONMENT=development`), LOG AI automatically generates cryptographically secure, session-unique random keys via `secrets.token_urlsafe()` and logs them at startup. In production or strict mode (`STRICT_SECRETS=true`), missing secret variables will cause an immediate startup failure (`RuntimeError`).
+
+---
+
 ## 🐳 Getting Started (Docker)
 
 To build and launch LOG AI inside a lightweight production Docker container:
@@ -52,8 +75,12 @@ To build and launch LOG AI inside a lightweight production Docker container:
 # 1. Build the Docker image
 docker build -t log-ai:latest .
 
-# 2. Run the container on port 8000
-docker run -p 8000:8000 log-ai:latest
+# 2. Run the container with environment secrets
+docker run -p 8000:8000 \
+  -e JWT_SECRET_KEY="your_secure_jwt_secret" \
+  -e DASHBOARD_PASS="your_secure_admin_password" \
+  -e GEMINI_API_KEY="your_gemini_api_key" \
+  log-ai:latest
 ```
 
 Open your browser at [http://localhost:8000](http://localhost:8000).
@@ -76,26 +103,18 @@ source .venv/bin/activate  # On Windows: .\.venv\Scripts\activate
 # 3. Install requirements
 pip install -r requirements.txt
 
-# 4. Start the server via Uvicorn
+# 4. Copy and edit environment template
+cp .env.example .env  # Configure your secret keys
+
+# 5. Start the server via Uvicorn
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 ---
 
-## 🔑 Security & Authentication Credentials
-
-The SOC Dashboard interface (`/`) is protected by **HTTP Basic Authentication**.
-
-| Credential | Value |
-| :--- | :--- |
-| **Username** | `admin` |
-| **Password** | `SuperSecretPassword!` |
-
----
-
 ## 🧪 Running the Test Suite
 
-Run the full automated pytest suite (100% pass rate across 36 tests):
+Run the full automated pytest suite:
 
 ```bash
 pytest -v
