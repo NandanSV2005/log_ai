@@ -941,49 +941,49 @@
             <g transform="translate(260, 20)">
               <rect id="node-root-rect" x="0" y="0" width="280" height="45" rx="8" fill="url(#normalGrad)" stroke="#38bdf8" stroke-width="1.5"/>
               <text x="140" y="18" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="var(--font-sans)" font-weight="700">MERKLE ROOT HASH (SHA-256)</text>
-              <text id="node-root-val" class="font-mono" x="140" y="34" text-anchor="middle" fill="#38bdf8" font-size="11" font-weight="700">5e884898da28047151d0e56f8dc62927</text>
+              <text id="node-root-val" class="font-mono" x="140" y="34" text-anchor="middle" fill="#38bdf8" font-size="11" font-weight="700">cc84083289fa2d5ddc8b553944fe2ad0</text>
             </g>
 
             <!-- Parent Hash Left (H_12) -->
             <g transform="translate(150, 135)">
               <rect id="node-h12-rect" x="0" y="0" width="200" height="40" rx="6" fill="#111827" stroke="#1f293d" stroke-width="1.5"/>
               <text x="100" y="16" text-anchor="middle" fill="#64748b" font-size="9" font-family="var(--font-sans)">BRANCH HASH H(1+2)</text>
-              <text id="node-h12-val" class="font-mono" x="100" y="30" text-anchor="middle" fill="#f8fafc" font-size="10">9f8a4b2c1d3e4f5a</text>
+              <text id="node-h12-val" class="font-mono" x="100" y="30" text-anchor="middle" fill="#f8fafc" font-size="10">e8d175a184bb7ece</text>
             </g>
 
             <!-- Parent Hash Right (H_34) -->
             <g transform="translate(450, 135)">
               <rect x="0" y="0" width="200" height="40" rx="6" fill="#111827" stroke="#1f293d" stroke-width="1.5"/>
               <text x="100" y="16" text-anchor="middle" fill="#64748b" font-size="9" font-family="var(--font-sans)">BRANCH HASH H(3+4)</text>
-              <text class="font-mono" x="100" y="30" text-anchor="middle" fill="#f8fafc" font-size="10">4d3c2b1a9e8f7a6b</text>
+              <text class="font-mono" x="100" y="30" text-anchor="middle" fill="#f8fafc" font-size="10">1a04cf844155f7c2</text>
             </g>
 
             <!-- Leaf 1 -->
             <g transform="translate(60, 235)">
               <rect x="0" y="0" width="140" height="45" rx="6" fill="#111827" stroke="#1f293d" stroke-width="1"/>
               <text x="70" y="16" text-anchor="middle" fill="#64748b" font-size="9" font-family="var(--font-sans)">LEAF 1: LOG #101</text>
-              <text class="font-mono" x="70" y="32" text-anchor="middle" fill="#10b981" font-size="9.5">e3b0c442...</text>
+              <text class="font-mono" x="70" y="32" text-anchor="middle" fill="#10b981" font-size="9.5">5085c4d2...</text>
             </g>
 
             <!-- Leaf 2 (TAMPERABLE TARGET) -->
             <g transform="translate(220, 235)">
               <rect id="node-l2-rect" x="0" y="0" width="140" height="45" rx="6" fill="#111827" stroke="#1f293d" stroke-width="1"/>
               <text id="node-l2-label" x="70" y="16" text-anchor="middle" fill="#64748b" font-size="9" font-family="var(--font-sans)">LEAF 2: LOG #102</text>
-              <text id="node-l2-val" class="font-mono" x="70" y="32" text-anchor="middle" fill="#10b981" font-size="9.5">8f434346...</text>
+              <text id="node-l2-val" class="font-mono" x="70" y="32" text-anchor="middle" fill="#10b981" font-size="9.5">71979c04...</text>
             </g>
 
             <!-- Leaf 3 -->
             <g transform="translate(440, 235)">
               <rect x="0" y="0" width="140" height="45" rx="6" fill="#111827" stroke="#1f293d" stroke-width="1"/>
               <text x="70" y="16" text-anchor="middle" fill="#64748b" font-size="9" font-family="var(--font-sans)">LEAF 3: LOG #103</text>
-              <text class="font-mono" x="70" y="32" text-anchor="middle" fill="#10b981" font-size="9.5">7c6a9121...</text>
+              <text class="font-mono" x="70" y="32" text-anchor="middle" fill="#10b981" font-size="9.5">3e226bf1...</text>
             </g>
 
             <!-- Leaf 4 -->
             <g transform="translate(600, 235)">
               <rect x="0" y="0" width="140" height="45" rx="6" fill="#111827" stroke="#1f293d" stroke-width="1"/>
               <text x="70" y="16" text-anchor="middle" fill="#64748b" font-size="9" font-family="var(--font-sans)">LEAF 4: LOG #104</text>
-              <text class="font-mono" x="70" y="32" text-anchor="middle" fill="#10b981" font-size="9.5">1a8d052b...</text>
+              <text class="font-mono" x="70" y="32" text-anchor="middle" fill="#10b981" font-size="9.5">0a2110a9...</text>
             </g>
 
             <!-- Status Indicator Text -->
@@ -1078,7 +1078,7 @@
           </p>
           <div class="code-box-header">REAL CODEBASE EXECUTION SAMPLE</div>
           <pre id="step-code" class="sample-code-pre">Raw Payload: %ASA-4-106023: Deny tcp src outside:192.168.1.100/54321 dst inside:10.0.0.50/80 by access-group "outside_acl"
-SHA-256 Leaf Digest: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</pre>
+SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a537bf</pre>
         </div>
       </section>
 
@@ -1377,14 +1377,14 @@ SHA-256 Leaf Digest: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b785
           nodeL2Label.setAttribute('fill', '#64748b');
           nodeL2Label.textContent = 'LEAF 2: LOG #102';
           nodeL2Val.setAttribute('fill', '#10b981');
-          nodeL2Val.textContent = '8f434346...';
+          nodeL2Val.textContent = '71979c04...';
 
           linkLeftL2.setAttribute('stroke', '#0284c7');
           linkLeftL2.setAttribute('stroke-width', '2');
 
           nodeH12Rect.setAttribute('stroke', '#1f293d');
           nodeH12Val.setAttribute('fill', '#f8fafc');
-          nodeH12Val.textContent = '9f8a4b2c1d3e4f5a';
+          nodeH12Val.textContent = 'e8d175a184bb7ece';
 
           linkRootLeft.setAttribute('stroke', '#0284c7');
           linkRootLeft.setAttribute('stroke-width', '2');
@@ -1392,7 +1392,7 @@ SHA-256 Leaf Digest: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b785
           nodeRootRect.setAttribute('fill', 'url(#normalGrad)');
           nodeRootRect.setAttribute('stroke', '#38bdf8');
           nodeRootVal.setAttribute('fill', '#38bdf8');
-          nodeRootVal.textContent = '5e884898da28047151d0e56f8dc62927';
+          nodeRootVal.textContent = 'cc84083289fa2d5ddc8b553944fe2ad0';
 
           statusText.setAttribute('fill', '#10b981');
           statusText.textContent = '[STATE: VERIFIED - Cryptographic Merkle Root Hash Matches Baseline]';
@@ -1409,7 +1409,7 @@ SHA-256 Leaf Digest: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b785
           module: "app/storage/raw_writer.py",
           title: "Stage 1: Raw Wire-Capture & SHA-256 Leaf Hashing",
           desc: "Raw log payloads are captured byte-for-byte at the network edge and immediately hashed with SHA-256 before any parsing occurs, establishing an unbroken forensic chain of custody with zero information loss.",
-          code: 'Raw Payload: %ASA-4-106023: Deny tcp src outside:192.168.1.100/54321 dst inside:10.0.0.50/80 by access-group "outside_acl"\nSHA-256 Leaf Digest: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+          code: 'Raw Payload: %ASA-4-106023: Deny tcp src outside:192.168.1.100/54321 dst inside:10.0.0.50/80 by access-group "outside_acl"\nSHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a537bf'
         },
         {
           num: "02",
@@ -1425,7 +1425,7 @@ SHA-256 Leaf Digest: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b785
           module: "app/normalization/schema.py",
           title: "Stage 3: OCSF-Aligned UnifiedEvent Schema",
           desc: "Standardizes raw vendor fields into a strictly typed UnifiedEvent dataclass with normalized timestamps, standardized severity mappings, and raw evidence hash references.",
-          code: '{\n  "event_id": "evt_cisco_9a4f21",\n  "timestamp": "2026-08-28T07:15:00.000Z",\n  "source_ip": "192.168.1.100",\n  "destination_ip": "10.0.0.50",\n  "severity": "Warning",\n  "event_type": "cisco_asa:deny:outside_acl",\n  "raw_event_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"\n}'
+          code: '{\n  "event_id": "evt_cisco_9a4f21",\n  "timestamp": "2026-08-28T07:15:00.000Z",\n  "source_ip": "192.168.1.100",\n  "destination_ip": "10.0.0.50",\n  "severity": "Warning",\n  "event_type": "cisco_asa:deny:outside_acl",\n  "raw_event_hash": "f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a537bf"\n}'
         },
         {
           num: "04",
