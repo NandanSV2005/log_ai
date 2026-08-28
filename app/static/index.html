@@ -41,15 +41,15 @@
         <div id="system-clock" class="font-mono" style="color: var(--text-muted); font-size: 0.75rem; border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px;">
           --:--:-- UTC
         </div>
-        <label id="airgap-toggle-label" class="airgap-toggle-container" title="Force Copilot to execute using local rule engine with zero cloud dependency" style="display: flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); cursor: pointer; border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 6px; background: var(--bg-slate);">
-          <input type="checkbox" id="airgap-toggle-checkbox" aria-label="Toggle Air-Gapped Mode" style="accent-color: var(--accent-hover); cursor: pointer;">
+        <label id="airgap-toggle-label" class="airgap-toggle-container" title="Force Copilot to execute using local rule engine with zero cloud dependency" tabindex="0">
+          <input type="checkbox" id="airgap-toggle-checkbox" class="airgap-toggle-checkbox" role="switch" aria-checked="false" aria-label="Toggle Air-Gapped Mode" style="position: absolute; opacity: 0; width: 0; height: 0;">
+          <span class="airgap-switch-track">
+            <span class="airgap-switch-thumb"></span>
+          </span>
           <img src="/vendor/icons/lock.svg" alt="" width="12" height="12">
           <span id="airgap-toggle-text">Air-Gapped Mode</span>
         </label>
-        <button id="theme-toggle-btn" aria-label="Toggle Dark and Light Mode" style="background: transparent; border: 1px solid var(--border-color); color: white; padding: 0.4rem 0.6rem; border-radius: 6px; cursor: pointer;">
-          <span id="theme-toggle-icon" style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">DARK</span>
-        </button>
-        <button id="logout-btn" aria-label="Log Out of SOC Session" style="background: transparent; border: 1px solid var(--border-color); color: white; padding: 0.4rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+        <button id="logout-btn" class="btn-outline" aria-label="Log Out of SOC Session">
           Log Out
         </button>
       </div>
@@ -319,7 +319,7 @@
               <input type="text" id="merkle-verify-input" placeholder="Paste event Merkle SHA-256 hash..." aria-label="Merkle Hash to verify" class="font-mono"
                 style="flex: 1; padding: 0.6rem 1rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-slate); color: white; font-size: 0.85rem;">
               <button onclick="runMerkleVerification()" class="btn-primary" aria-label="Execute Web Crypto Merkle Hash Verification">Verify Hash</button>
-              <button onclick="simulateTamperingInDashboard(document.getElementById('merkle-verify-input').value)" class="btn-outline" aria-label="Simulate Log Tampering on Hash" style="border-color: var(--severity-high-border); color: var(--severity-high);"><img src="/vendor/icons/alert-triangle.svg" width="14" height="14"> Simulate Tampering</button>
+              <button onclick="simulateTamperingInDashboard(document.getElementById('merkle-verify-input').value)" class="btn-danger" aria-label="Simulate Log Tampering on Hash"><img src="/vendor/icons/alert-triangle.svg" width="14" height="14"> Simulate Tampering</button>
             </div>
             <div id="merkle-result-box" style="display: none; background: #060911; border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem;"></div>
           </section>

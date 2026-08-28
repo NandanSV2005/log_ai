@@ -44,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
   setupTabNavigation();
   initCharts();
   initThreatMap();
-  setupThemeToggle();
   setupAirGappedToggle();
   setupDownloadReport();
   setupNlpSearch();
@@ -869,8 +868,8 @@ function initOfflineThreatMap(events) {
         <line x1="${(width * 0.75).toFixed(0)}" y1="0" x2="${(width * 0.75).toFixed(0)}" y2="${height}"/>
       </g>
 
-      <!-- Offline Vector Continents Path Outlines -->
-      <g fill="#111827" stroke="#1f293d" stroke-width="1.2">
+      <!-- Offline Vector Continents Path Outlines with Signature Accent Fill & Subtle Labels -->
+      <g fill="rgba(2, 132, 199, 0.12)" stroke="rgba(56, 189, 248, 0.35)" stroke-width="1.5">
         <!-- North America -->
         <path d="M ${width*0.08} ${height*0.2} L ${width*0.3} ${height*0.15} L ${width*0.35} ${height*0.35} L ${width*0.25} ${height*0.48} L ${width*0.1} ${height*0.38} Z"/>
         <!-- South America -->
@@ -879,8 +878,18 @@ function initOfflineThreatMap(events) {
         <path d="M ${width*0.45} ${height*0.15} L ${width*0.85} ${height*0.12} L ${width*0.9} ${height*0.45} L ${width*0.7} ${height*0.55} L ${width*0.5} ${height*0.45} L ${width*0.42} ${height*0.28} Z"/>
         <!-- Africa -->
         <path d="M ${width*0.45} ${height*0.38} L ${width*0.62} ${height*0.4} L ${width*0.58} ${height*0.75} L ${width*0.48} ${height*0.65} Z"/>
-        <!-- Australia -->
+        <!-- Oceania -->
         <path d="M ${width*0.78} ${height*0.65} L ${width*0.9} ${height*0.64} L ${width*0.88} ${height*0.82} L ${width*0.76} ${height*0.8} Z"/>
+      </g>
+
+      <!-- Small-Caps Muted Continent Labels -->
+      <g fill="#64748b" font-size="10" font-family="var(--font-sans)" font-weight="700" letter-spacing="1">
+        <text x="${width*0.22}" y="${height*0.3}" text-anchor="middle">NORTH AMERICA</text>
+        <text x="${width*0.31}" y="${height*0.65}" text-anchor="middle">SOUTH AMERICA</text>
+        <text x="${width*0.52}" y="${height*0.22}" text-anchor="middle">EUROPE</text>
+        <text x="${width*0.72}" y="${height*0.28}" text-anchor="middle">ASIA</text>
+        <text x="${width*0.53}" y="${height*0.55}" text-anchor="middle">AFRICA</text>
+        <text x="${width*0.83}" y="${height*0.73}" text-anchor="middle">OCEANIA</text>
       </g>
 
       <!-- Plotted Threat Nodes Overlay -->
@@ -915,50 +924,36 @@ function showToast(message, type = 'warning') {
   }, 3500);
 }
 
-function setupThemeToggle() {
-  const btn = document.getElementById('theme-toggle-btn');
-  const icon = document.getElementById('theme-toggle-icon');
-  if (!btn || !icon) return;
-
-  const savedTheme = sessionStorage.getItem('theme') || 'dark';
-  if (savedTheme === 'light') {
-    document.body.classList.add('light-mode');
-    icon.textContent = 'LIGHT';
-  } else {
-    document.body.classList.remove('light-mode');
-    icon.textContent = 'DARK';
-  }
-
-  btn.addEventListener('click', () => {
-    const isLight = document.body.classList.toggle('light-mode');
-    if (isLight) {
-      icon.textContent = 'LIGHT';
-      sessionStorage.setItem('theme', 'light');
-    } else {
-      icon.textContent = 'DARK';
-      sessionStorage.setItem('theme', 'dark');
-    }
-  });
-}
-
 function setupAirGappedToggle() {
   const cb = document.getElementById('airgap-toggle-checkbox');
+  const label = document.getElementById('airgap-toggle-label');
   if (!cb) return;
 
-  cb.addEventListener('change', (e) => {
-    isAirGappedMode = e.target.checked;
+  const updateState = () => {
+    isAirGappedMode = cb.checked;
+    cb.setAttribute('aria-checked', isAirGappedMode ? 'true' : 'false');
     showToast(`Air-Gapped Mode ${isAirGappedMode ? 'ENABLED (Local Engine Forced)' : 'DISABLED (Cloud AI Active)'}`, 'warning');
-    const label = document.getElementById('airgap-toggle-label');
     if (label) {
       if (isAirGappedMode) {
         label.style.borderColor = 'var(--accent-hover)';
-        label.style.background = 'rgba(2, 132, 199, 0.15)';
+        label.style.color = '#ffffff';
       } else {
         label.style.borderColor = 'var(--border-color)';
-        label.style.background = 'var(--bg-slate)';
+        label.style.color = 'var(--text-muted)';
       }
     }
-  });
+  };
+
+  cb.addEventListener('change', updateState);
+  if (label) {
+    label.addEventListener('keydown', (e) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        cb.checked = !cb.checked;
+        updateState();
+      }
+    });
+  }
 }
 
 window.toggleEventXAIExplain = function (index) {
@@ -1689,7 +1684,7 @@ function renderEventRow(event, index) {
               <div class="merkle-audit-badge">
                 <span>SHA-256 Merkle Leaf Hash:</span>
                 <span class="merkle-hash-text">${escapeHtml(fullHash)}</span>
-                <button class="btn-outline" onclick="event.stopPropagation(); simulateTamperingInDashboard('${escapeJs(fullHash)}')" style="font-size: 0.7rem; padding: 2px 8px; margin-top: 6px; color: var(--severity-high); border-color: var(--severity-high-border);"><img src="/vendor/icons/alert-triangle.svg" width="10" height="10" style="vertical-align: middle; margin-right: 3px;">Simulate Tampering</button>
+                <button class="btn-danger" onclick="event.stopPropagation(); simulateTamperingInDashboard('${escapeJs(fullHash)}')" style="font-size: 0.7rem; padding: 2px 8px; margin-top: 6px;"><img src="/vendor/icons/alert-triangle.svg" width="10" height="10" style="vertical-align: middle; margin-right: 3px;">Simulate Tampering</button>
               </div>
             </div>
 
