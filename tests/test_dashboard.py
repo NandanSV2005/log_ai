@@ -249,4 +249,15 @@ async def test_simulate_tampering_endpoint(client: AsyncClient, auth_headers: di
     assert data["original_hash"] != data["tampered_hash"]
     assert "MUTATED" in data["tampered_payload"]
 
+@pytest.mark.asyncio
+async def test_reset_dashboard_data_endpoint(client: AsyncClient, auth_headers: dict):
+    res = await client.post(
+        "/api/v1/dashboard/admin/reset-data",
+        headers=auth_headers
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "success"
+    assert "telemetry storage file(s)" in data["message"]
+
 

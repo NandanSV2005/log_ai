@@ -126,35 +126,69 @@
           </div>
         </section>
 
-        <!-- OPERATIONS TOOLBAR -->
-        <section class="ops-toolbar" aria-label="SOC Operations Toolbar" style="margin-bottom: 2rem;">
-          <div class="ops-toolbar-group">
-            <span class="ops-toolbar-label font-mono">QUICK ACTIONS</span>
-            <input type="file" id="upload-log-input" accept=".txt,.log" aria-label="Log file input picker" style="display: none;" />
-            <button id="upload-log-btn" class="btn-secondary" title="Upload manual .LOG or .TXT file" aria-label="Upload LOG File to pipeline">
-              <img src="/vendor/icons/database.svg" alt="" width="14" height="14">
-              <span>Upload .LOG File</span>
-            </button>
-            <button id="simulate-attack-btn" class="btn-attack" aria-label="Simulate Brute Force Attack Burst">
-              <img src="/vendor/icons/alert-triangle.svg" alt="" width="14" height="14">
-              <span>Simulate Brute Force Attack</span>
-            </button>
-            <button id="download-report-btn" class="btn-secondary" title="Download CSV Report" aria-label="Export CSV Threat Report">
-              <img src="/vendor/icons/arrow-right.svg" alt="" width="14" height="14">
-              <span>Export CSV Report</span>
-            </button>
+        <!-- DEDICATED SOVEREIGN SERVER LOG UPLOAD & ANALYSIS PANEL -->
+        <section class="panel-card feature-accent-forensics" aria-label="Sovereign Server Log Upload and Analysis Engine" style="margin-bottom: 2rem;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
+            <div>
+              <h2 style="font-size: 1.1rem; font-weight: 800; color: #ffffff; margin: 0; display: flex; align-items: center; gap: 8px;">
+                <img src="/vendor/icons/database.svg" alt="" width="20" height="20" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
+                Sovereign Server Log Upload &amp; Analysis Engine
+              </h2>
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0;">
+                Ingest raw multi-vendor server logs (.log, .txt, .csv) for instant zero-loss Merkle hashing, AI threat scoring, and OCSF normalization.
+              </p>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <span style="font-size: 0.75rem; color: var(--text-dim); font-weight: 600;">Presets:</span>
+              <button id="scenario-ssh-btn" class="btn-outline" style="font-size: 0.72rem; padding: 4px 10px;" aria-label="Trigger SSH Brute Force Scenario">SSH Spray</button>
+              <button id="scenario-portscan-btn" class="btn-outline" style="font-size: 0.72rem; padding: 4px 10px;" aria-label="Trigger Port Scan Scenario">Port Scan</button>
+              <button id="scenario-normal-btn" class="btn-outline" style="font-size: 0.72rem; padding: 4px 10px;" aria-label="Trigger Normal Baseline Scenario">Normal Baseline</button>
+              <button id="reset-data-btn" class="btn-danger" style="font-size: 0.72rem; padding: 4px 10px;" aria-label="Clear All SOC Telemetry Data"><img src="/vendor/icons/alert-triangle.svg" width="12" height="12"> Clear All Data</button>
+            </div>
           </div>
 
-          <div class="ops-toolbar-group">
-            <span class="ops-toolbar-label font-mono">PRESET SCENARIOS</span>
-            <button id="scenario-ssh-btn" class="btn-preset btn-preset-high" aria-label="Trigger SSH Brute Force Scenario">
-              SSH Spray (T1110)
-            </button>
-            <button id="scenario-portscan-btn" class="btn-preset btn-preset-med" aria-label="Trigger Port Scan Scenario">
-              Port Scan (T1046)
-            </button>
-            <button id="scenario-normal-btn" class="btn-preset btn-preset-low" aria-label="Trigger Normal Traffic Baseline Scenario">
-              Normal Traffic
+          <!-- Drag and Drop Zone Container -->
+          <div id="log-upload-dropzone" style="border: 2px dashed var(--border-color); border-radius: 8px; padding: 2rem; text-align: center; background: #060911; transition: all 0.2s ease-in-out; cursor: pointer;">
+            <input type="file" id="upload-log-input" accept=".log,.txt,.csv" aria-label="Log file selection input" style="display: none;" />
+            
+            <div id="dropzone-prompt-wrapper">
+              <div style="margin-bottom: 0.5rem;">
+                <img src="/vendor/icons/database.svg" alt="" width="36" height="36" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg); opacity: 0.8;">
+              </div>
+              <div style="font-size: 0.95rem; font-weight: 700; color: #ffffff; margin-bottom: 4px;">
+                Drag &amp; drop server log files here, or <span id="browse-files-trigger" style="color: var(--accent-hover); text-decoration: underline; cursor: pointer;">browse</span>
+              </div>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">
+                Supported formats: <code>.log</code>, <code>.txt</code>, <code>.csv</code> (Syslog, Cisco ASA, Fortinet, Suricata, pfSense, Unstructured Text)
+              </div>
+            </div>
+
+            <!-- Selected File Confirmation Box -->
+            <div id="dropzone-selected-box" style="display: none; background: rgba(2, 132, 199, 0.1); border: 1px solid var(--accent-border); border-radius: 6px; padding: 14px; margin-top: 4px;">
+              <div style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                <img src="/vendor/icons/check-circle.svg" width="18" height="18" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
+                <span style="font-size: 0.88rem; color: #ffffff; font-weight: 700;">Selected File:</span>
+                <code id="selected-filename-display" class="font-mono" style="color: var(--accent-hover); background: var(--bg-slate); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border-color); font-size: 0.85rem;">filename.log</code>
+                <span id="selected-filesize-display" class="font-mono" style="font-size: 0.75rem; color: var(--text-muted);">(0 KB)</span>
+                <button id="change-file-btn" class="btn-outline" style="font-size: 0.72rem; padding: 2px 8px; margin-left: 6px;">Change File</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button id="simulate-attack-btn" class="btn-attack" aria-label="Simulate Brute Force Attack Burst" style="padding: 0.45rem 0.9rem; font-size: 0.78rem;">
+                <img src="/vendor/icons/alert-triangle.svg" alt="" width="14" height="14">
+                <span>Simulate Brute Force Attack</span>
+              </button>
+              <button id="download-report-btn" class="btn-secondary" title="Download CSV Report" aria-label="Export CSV Threat Report" style="padding: 0.45rem 0.9rem; font-size: 0.78rem;">
+                <img src="/vendor/icons/arrow-right.svg" alt="" width="14" height="14">
+                <span>Export CSV Report</span>
+              </button>
+            </div>
+
+            <button id="analyze-logs-btn" class="btn-primary" disabled style="padding: 0.6rem 1.6rem; font-size: 0.88rem; font-weight: 700; opacity: 0.4; cursor: not-allowed;">
+              Analyze Logs &rarr;
             </button>
           </div>
         </section>
@@ -452,6 +486,26 @@ conditions:
         <div style="display: flex; justify-content: flex-end; gap: 10px;">
           <button onclick="closeRemediationModal()" class="btn-secondary" aria-label="Cancel Playbook Execution">Cancel</button>
           <button onclick="markRemediationCompleted()" class="btn-primary" aria-label="Mark Playbook Completed and Resolve Incident">Mark Completed &amp; Resolve</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLEAR ALL DATA CONFIRMATION MODAL -->
+    <div id="reset-data-modal" role="dialog" aria-label="Clear All SOC Telemetry Data Modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 2000; align-items: center; justify-content: center; padding: 2rem;">
+      <div style="background: var(--bg-slate); border: 1px solid var(--border-color); border-radius: 12px; width: 100%; max-width: 520px; padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h3 style="color: #ef4444; font-size: 1.1rem; margin: 0; display: flex; align-items: center; gap: 8px;">
+            <img src="/vendor/icons/alert-triangle.svg" width="20" height="20" style="filter: invert(36%) sepia(85%) saturate(2200%) hue-rotate(345deg);">
+            Confirm SOC Data Reset
+          </h3>
+          <button onclick="closeResetDataModal()" aria-label="Close Reset Confirmation Modal" style="background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer;">&times;</button>
+        </div>
+        <p style="font-size: 0.88rem; color: #e5e5e5; line-height: 1.5; margin-bottom: 1.25rem;">
+          Are you sure you want to clear all normalized telemetry events and active incident trackers? This will reset all dashboard KPIs to zero and clear recent event streams while preserving raw forensic audit logs.
+        </p>
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button onclick="closeResetDataModal()" class="btn-secondary" aria-label="Cancel Data Reset">Cancel</button>
+          <button onclick="confirmResetData()" class="btn-danger" aria-label="Confirm Clear All SOC Data">Clear All Data</button>
         </div>
       </div>
     </div>

@@ -545,56 +545,199 @@ function setupAttackSimulator() {
   });
 }
 
+let pendingUploadFile = null;
+
 function setupFileUpload() {
-  const btn = document.getElementById('upload-log-btn');
+  const dropzone = document.getElementById('log-upload-dropzone');
   const input = document.getElementById('upload-log-input');
-  if (!btn || !input) return;
+  const browseTrigger = document.getElementById('browse-files-trigger');
+  const changeFileBtn = document.getElementById('change-file-btn');
+  const analyzeBtn = document.getElementById('analyze-logs-btn');
+  const promptWrapper = document.getElementById('dropzone-prompt-wrapper');
+  const selectedBox = document.getElementById('dropzone-selected-box');
+  const filenameDisplay = document.getElementById('selected-filename-display');
+  const filesizeDisplay = document.getElementById('selected-filesize-display');
+  const resetBtn = document.getElementById('reset-data-btn');
 
-  btn.addEventListener('click', () => {
-    input.click();
-  });
+  if (!dropzone || !input) return;
 
-  input.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    triggerPipelineProgress();
-    showToast(`Uploading ${file.name}...`, 'warning');
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const token = sessionStorage.getItem('token');
-      const res = await fetch('/api/v1/ingest/file', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData,
-      });
-
-      if (res.status === 401) {
-        sessionStorage.removeItem('token');
-        window.location.href = '/login';
-        return;
-      }
-
-      if (res.ok) {
-        const data = await res.json();
-        showToast(`Successfully processed ${data.events_processed || 0} events from ${file.name}`, 'warning');
-        await fetchDashboardData();
-      } else {
-        showToast(`File upload failed (${res.status})`, 'error');
-      }
-    } catch (err) {
-      console.error('Error uploading file:', err);
-      showToast('Network error during file upload', 'error');
-    } finally {
+  function setSelectedFile(file) {
+    if (!file) {
+      pendingUploadFile = null;
       input.value = '';
+      if (promptWrapper) promptWrapper.style.display = 'block';
+      if (selectedBox) selectedBox.style.display = 'none';
+      if (analyzeBtn) {
+        analyzeBtn.disabled = true;
+        analyzeBtn.style.opacity = '0.4';
+        analyzeBtn.style.cursor = 'not-allowed';
+      }
+      return;
+    }
+
+    pendingUploadFile = file;
+    const sizeKb = (file.size / 1024).toFixed(1);
+    if (filenameDisplay) filenameDisplay.textContent = file.name;
+    if (filesizeDisplay) filesizeDisplay.textContent = `(${sizeKb} KB)`;
+    if (promptWrapper) promptWrapper.style.display = 'none';
+    if (selectedBox) selectedBox.style.display = 'block';
+    if (analyzeBtn) {
+      analyzeBtn.disabled = false;
+      analyzeBtn.style.opacity = '1.0';
+      analyzeBtn.style.cursor = 'pointer';
+    }
+  }
+
+  // Click to browse
+  dropzone.addEventListener('click', (e) => {
+    if (e.target === changeFileBtn || (changeFileBtn && changeFileBtn.contains(e.target))) {
+      e.stopPropagation();
+      input.click();
+      return;
+    }
+    if (!pendingUploadFile) {
+      input.click();
     }
   });
+
+  if (browseTrigger) {
+    browseTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      input.click();
+    });
+  }
+
+  if (changeFileBtn) {
+    changeFileBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      input.click();
+    });
+  }
+
+  input.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  });
+
+  // Drag and Drop Event Handlers
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropzone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.style.borderColor = 'var(--accent-hover)';
+      dropzone.style.background = 'rgba(2, 132, 199, 0.08)';
+    });
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropzone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.style.borderColor = 'var(--border-color)';
+      dropzone.style.background = '#060911';
+    });
+  });
+
+  dropzone.addEventListener('drop', (e) => {
+    const dt = e.dataTransfer;
+    if (dt && dt.files && dt.files[0]) {
+      setSelectedFile(dt.files[0]);
+    }
+  });
+
+  // Execute Upload & Analysis when Analyze Logs button clicked
+  if (analyzeBtn) {
+    analyzeBtn.addEventListener('click', async () => {
+      if (!pendingUploadFile) return;
+
+      const file = pendingUploadFile;
+      analyzeBtn.disabled = true;
+      analyzeBtn.innerHTML = '<span>Analyzing Log Telemetry...</span>';
+
+      triggerPipelineProgress();
+      showToast(`Ingesting & analyzing ${file.name}...`, 'warning');
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const token = sessionStorage.getItem('token');
+        const res = await fetch('/api/v1/ingest/file', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData,
+        });
+
+        if (res.status === 401) {
+          sessionStorage.removeItem('token');
+          window.location.href = '/login';
+          return;
+        }
+
+        if (res.ok) {
+          const data = await res.json();
+          showToast(`Ingestion complete! Parsed ${data.events_processed || 0} events from ${file.name}`, 'warning');
+          setSelectedFile(null);
+          await fetchDashboardData();
+        } else {
+          showToast(`File upload failed (${res.status})`, 'error');
+        }
+      } catch (err) {
+        console.error('Error analyzing log file:', err);
+        showToast('Network error during file upload', 'error');
+      } finally {
+        analyzeBtn.innerHTML = 'Analyze Logs &rarr;';
+      }
+    });
+  }
+
+  // Clear Data Button Handler
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      const modal = document.getElementById('reset-data-modal');
+      if (modal) modal.style.display = 'flex';
+    });
+  }
 }
+
+window.closeResetDataModal = function () {
+  const modal = document.getElementById('reset-data-modal');
+  if (modal) modal.style.display = 'none';
+};
+
+window.confirmResetData = async function () {
+  closeResetDataModal();
+  showToast('Resetting all normalized SOC telemetry and active incidents...', 'warning');
+
+  try {
+    const res = await fetch('/api/v1/dashboard/admin/reset-data', {
+      method: 'POST',
+      headers: getAuthHeaders()
+    });
+
+    if (res.status === 401) {
+      sessionStorage.removeItem('token');
+      window.location.href = '/login';
+      return;
+    }
+
+    if (res.ok) {
+      const data = await res.json();
+      showToast(data.message || 'All SOC data reset successfully', 'warning');
+      currentEventsList = [];
+      currentIncidentsList = [];
+      await fetchDashboardData();
+    } else {
+      showToast(`Data reset failed (${res.status})`, 'error');
+    }
+  } catch (err) {
+    console.error('Error executing data reset:', err);
+    showToast('Network error during data reset', 'error');
+  }
+};
 
 function setupPresetScenarios() {
   const btnA = document.getElementById('scenario-ssh-btn');

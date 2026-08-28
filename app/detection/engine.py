@@ -507,4 +507,10 @@ class AnomalyEngine:
 
         return [ip_freq, ip_deny, action_code, sev_code, hour]
 
+    def reset(self):
+        """Resets all in-memory IP counters and state."""
+        self.history.clear()
+        self.ip_deny_counts.clear()
+        self.ip_event_counts.clear()
+
 anomaly_engine = AnomalyEngine()

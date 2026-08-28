@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 from app.storage.normalized_writer import normalized_storage_manager
 from app.normalization.schema import UnifiedEvent
 from app.detection.correlation import incident_engine
+from app.detection.engine import anomaly_engine
 from app.routers.auth import get_current_user
 from app.services.geoip import geoip_resolver
 
@@ -17,6 +18,31 @@ router = APIRouter(prefix="/api/v1/dashboard", tags=["Dashboard"])
 async def lookup_geoip(ip: str, current_user=Depends(get_current_user)):
     """Offline GeoIP resolution endpoint."""
     return geoip_resolver.lookup(ip)
+
+@router.post("/admin/reset-data")
+async def reset_dashboard_data(current_user=Depends(get_current_user)):
+    """
+    Clears all normalized JSONL event files and resets in-memory Incident Engine and Anomaly Engine state.
+    Preserves raw compliance audit log files in data/raw/ for forensic auditability.
+    """
+    storage_dir = normalized_storage_manager.storage_dir
+    deleted_files = 0
+    if storage_dir.exists():
+        for file_path in storage_dir.glob("normalized_*.jsonl"):
+            try:
+                file_path.unlink()
+                deleted_files += 1
+            except Exception:
+                pass
+    
+    incident_engine.clear()
+    anomaly_engine.reset()
+
+    return {
+        "status": "success",
+        "message": f"Cleared {deleted_files} telemetry storage file(s) and reset active SOC incident state.",
+        "deleted_files": deleted_files,
+    }
 
 def _read_all_normalized_records() -> List[Dict[str, Any]]:
     """Reads all normalized event dictionaries across JSONL files in storage_dir."""
