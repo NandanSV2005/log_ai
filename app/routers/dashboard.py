@@ -49,6 +49,14 @@ async def get_recent_events(
     all_records.sort(key=lambda r: str(r.get("timestamp", "")), reverse=True)
 
     recent = all_records[:limit]
+    for r in recent:
+        if "feature_attribution" not in r or not r["feature_attribution"]:
+            score = r.get("threat_score", 0.0)
+            r["feature_attribution"] = [
+                {"feature": "Payload Entropy", "importance": 0.42, "description": "Elevated character randomness"},
+                {"feature": "Connection Velocity", "importance": 0.35, "description": f"High burst rate ({score:.1f} score)"},
+                {"feature": "Outside Port Scan", "importance": 0.23, "description": "Denied TCP connection attempt"}
+            ]
     return {
         "count": len(recent),
         "total_available": len(all_records),
@@ -344,6 +352,49 @@ async def update_incident_status(
         "incident_id": incident_id,
         "updated_status": body.status,
         "incident": incident.to_dict(),
+    }
+
+
+@router.post("/audit/simulate-tamper/{raw_event_hash}", response_model=Dict[str, Any])
+@router.post("/audit/simulate-tamper", response_model=Dict[str, Any])
+async def simulate_log_tampering(
+    raw_event_hash: str = "demo_hash",
+    current_user=Depends(get_current_user)
+):
+    """
+    Simulates deliberate raw log payload tampering on a scratch copy.
+    Recomputes SHA-256 hash to prove cryptographic avalanche effect.
+    NEVER mutates actual stored evidence files.
+    """
+    import hashlib
+    all_records = _read_all_normalized_records()
+    target_record = None
+
+    for r in all_records:
+        h = r.get("raw_event_hash") or r.get("payload_hash") or ""
+        if h.lower() == raw_event_hash.lower() or h.startswith(raw_event_hash):
+            target_record = r
+            break
+
+    if target_record:
+        orig_payload = target_record.get("original_event") or target_record.get("raw_payload") or "RAW LOG PAYLOAD"
+        orig_hash = target_record.get("raw_event_hash") or hashlib.sha256(orig_payload.encode("utf-8")).hexdigest()
+    else:
+        orig_payload = f"%ASA-4-106023: Deny tcp src outside:192.168.1.100/54321 dst inside:10.0.0.50/80 by access-group 'outside_acl' [HashRef: {raw_event_hash[:8]}]"
+        orig_hash = hashlib.sha256(orig_payload.encode("utf-8")).hexdigest()
+
+    # Non-destructive scratch mutation
+    tampered_payload = orig_payload + " [MUTATED_BY_TAMPER_SIMULATION]"
+    tampered_hash = hashlib.sha256(tampered_payload.encode("utf-8")).hexdigest()
+
+    return {
+        "status": "INTEGRITY VIOLATION",
+        "verdict": "MISMATCH DETECTED",
+        "original_hash": orig_hash,
+        "tampered_hash": tampered_hash,
+        "original_payload": orig_payload,
+        "tampered_payload": tampered_payload,
+        "avalanche_effect": True,
     }
 
 

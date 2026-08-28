@@ -20,6 +20,7 @@ GEMINI_MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
 
 class CopilotAskRequest(BaseModel):
     question: str = Field(..., description="User question for the AI SOC Copilot")
+    force_offline: bool = Field(default=False, description="Force air-gapped mode (skip Gemini API call)")
 
 @router.post("/ask", response_model=Dict[str, Any])
 async def ask_copilot(
@@ -29,7 +30,7 @@ async def ask_copilot(
     """
     POST /api/v1/copilot/ask
     Retrieves recent normalized events and queries Google Gemini LLM API (gemini-3.6-flash).
-    If GEMINI_API_KEY is missing or the call fails, falls back to a question-aware
+    If force_offline is True or GEMINI_API_KEY is missing or the call fails, falls back to a question-aware
     rule-assisted SOC analysis engine with explicit error logging.
     """
     question = payload.question.strip()
@@ -43,6 +44,17 @@ async def ask_copilot(
     all_records = _read_all_normalized_records()
     all_records.sort(key=lambda r: str(r.get("timestamp", "")), reverse=True)
     recent_50 = all_records[:50]
+
+    if payload.force_offline:
+        logger.info("Air-Gapped Mode active (force_offline=True). Skipping Gemini API call and using Rule-Assisted SOC Engine fallback.")
+        fallback_answer = _evaluate_copilot_fallback(question, recent_50)
+        return {
+            "answer": fallback_answer,
+            "status": "success",
+            "model": "rule-assisted-soc-engine",
+            "logs_analyzed": len(recent_50),
+            "force_offline": True,
+        }
 
     # Summarize events for prompt
     logs_summary_lines = []

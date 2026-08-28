@@ -235,3 +235,18 @@ async def test_update_event_status_not_found(client: AsyncClient, auth_headers: 
     assert res.status_code == 404
     assert "not found" in res.json()["detail"]
 
+
+@pytest.mark.asyncio
+async def test_simulate_tampering_endpoint(client: AsyncClient, auth_headers: dict):
+    res = await client.post(
+        "/api/v1/dashboard/audit/simulate-tamper/demo_hash_12345",
+        headers=auth_headers
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["verdict"] == "MISMATCH DETECTED"
+    assert data["status"] == "INTEGRITY VIOLATION"
+    assert data["original_hash"] != data["tampered_hash"]
+    assert "MUTATED" in data["tampered_payload"]
+
+

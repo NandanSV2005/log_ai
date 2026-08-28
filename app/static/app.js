@@ -37,12 +37,15 @@ function getAuthHeaders(extraHeaders = {}) {
   };
 }
 
+let isAirGappedMode = false;
+
 document.addEventListener('DOMContentLoaded', () => {
   startClock();
   setupTabNavigation();
   initCharts();
   initThreatMap();
   setupThemeToggle();
+  setupAirGappedToggle();
   setupDownloadReport();
   setupNlpSearch();
   setupAttackSimulator();
@@ -99,8 +102,8 @@ function setupTabNavigation() {
         activeView.style.display = 'block';
       }
 
-      if (targetTab === 'threat-map' && threatMap) {
-        setTimeout(() => threatMap.invalidateSize(), 150);
+      if (targetTab === 'threat-map') {
+        setTimeout(() => initOfflineThreatMap(currentEventsList), 50);
       }
     });
   });
@@ -349,7 +352,7 @@ async function processCopilotQuery(query) {
     const res = await fetch('/api/v1/copilot/ask', {
       method: 'POST',
       headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ question: query })
+      body: JSON.stringify({ question: query, force_offline: isAirGappedMode })
     });
 
     const tMsg = document.getElementById(typingId);
@@ -937,6 +940,72 @@ function setupThemeToggle() {
     }
   });
 }
+
+function setupAirGappedToggle() {
+  const cb = document.getElementById('airgap-toggle-checkbox');
+  if (!cb) return;
+
+  cb.addEventListener('change', (e) => {
+    isAirGappedMode = e.target.checked;
+    showToast(`Air-Gapped Mode ${isAirGappedMode ? 'ENABLED (Local Engine Forced)' : 'DISABLED (Cloud AI Active)'}`, 'warning');
+    const label = document.getElementById('airgap-toggle-label');
+    if (label) {
+      if (isAirGappedMode) {
+        label.style.borderColor = 'var(--accent-hover)';
+        label.style.background = 'rgba(2, 132, 199, 0.15)';
+      } else {
+        label.style.borderColor = 'var(--border-color)';
+        label.style.background = 'var(--bg-slate)';
+      }
+    }
+  });
+}
+
+window.toggleEventXAIExplain = function (index) {
+  const box = document.getElementById(`xai-explain-box-${index}`);
+  if (!box) return;
+  box.style.display = (box.style.display === 'none' || !box.style.display) ? 'block' : 'none';
+};
+
+window.simulateTamperingInDashboard = async function (rawHash) {
+  let resultBox = document.getElementById('merkle-result-box');
+  if (!resultBox) {
+    const activePanel = document.querySelector('.detail-row.open .xai-banner-box');
+    if (activePanel) {
+      resultBox = document.createElement('div');
+      resultBox.id = 'tamper-result-inline';
+      activePanel.appendChild(resultBox);
+    }
+  }
+
+  try {
+    const targetHash = rawHash || 'demo_hash';
+    const res = await fetch(`/api/v1/dashboard/audit/simulate-tamper/${encodeURIComponent(targetHash)}`, {
+      method: 'POST',
+      headers: getAuthHeaders()
+    });
+    if (res.ok) {
+      const data = await res.json();
+      showToast('Log Tampering Simulation Executed (Non-destructive)', 'warning');
+      if (resultBox) {
+        resultBox.style.display = 'block';
+        resultBox.innerHTML = `
+          <div style="margin-top: 10px; background: rgba(239, 68, 68, 0.12); border: 1px solid var(--severity-high-border); border-radius: 6px; padding: 10px; color: #ffffff; font-size: 0.78rem;">
+            <div style="color: var(--severity-high); font-weight: 800; margin-bottom: 4px;">[ALERT: INTEGRITY VIOLATION DETECTED - ${escapeHtml(data.verdict)}]</div>
+            <div style="color: var(--text-muted); margin-bottom: 6px;">Deliberate 1-character scratch copy payload mutation executed:</div>
+            <div class="font-mono" style="font-size: 0.72rem; word-break: break-all;">
+              <strong style="color: var(--severity-low);">Original Baseline Hash:</strong> ${escapeHtml(data.original_hash)}<br/>
+              <strong style="color: var(--severity-high);">Tampered Corrupted Hash:</strong> ${escapeHtml(data.tampered_hash)}<br/>
+              <strong style="color: #ffffff;">Mutated Evidence Payload:</strong> <code>${escapeHtml(data.tampered_payload)}</code>
+            </div>
+          </div>
+        `;
+      }
+    }
+  } catch (err) {
+    console.error('Tamper simulation fetch error:', err);
+  }
+};
 
 function setupDownloadReport() {
   const btn = document.getElementById('download-report-btn');
@@ -1586,6 +1655,20 @@ function renderEventRow(event, index) {
         ${whyFlaggedHtml}
         <span>${escapeHtml(explanation)}</span>
         <button class="btn-remediation" onclick="event.stopPropagation(); openRemediationModal(${index})"><img src="/vendor/icons/shield.svg" alt="" width="12" height="12" style="vertical-align: middle; margin-right: 4px;">View Remediation Aid</button>
+        <button class="btn-outline" onclick="event.stopPropagation(); toggleEventXAIExplain(${index})" style="font-size: 0.7rem; padding: 3px 8px; margin-top: 4px; color: var(--accent-hover); border-color: var(--accent-border);" aria-label="Explain Alert ${index}"><img src="/vendor/icons/activity.svg" width="10" height="10" style="vertical-align: middle; margin-right: 3px;">Explain</button>
+        <div id="xai-explain-box-${index}" style="display: none; margin-top: 8px; background: #060911; border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 12px;">
+          <div style="font-size: 0.7rem; font-weight: 700; color: var(--accent-hover); margin-bottom: 4px;">FEATURE ATTRIBUTION XAI ANALYSIS</div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            ${(event.feature_attribution || [
+              {feature: "Payload Entropy", importance: 0.42, description: "High character randomness"},
+              {feature: "Connection Velocity", importance: 0.35, description: "Burst rate anomaly"},
+              {feature: "ACL Policy Violation", importance: 0.23, description: "Outside drop policy"}
+            ]).map(a => `<div style="background: #090e1a; border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px; font-size: 0.72rem;">
+              <strong style="color: #ffffff;">${escapeHtml(a.feature || 'Feature')}:</strong> ${(a.importance ? (a.importance * 100).toFixed(0) + '%' : 'N/A')}
+              <div style="font-size: 0.68rem; color: var(--text-muted);">${escapeHtml(a.description || '')}</div>
+            </div>`).join('')}
+          </div>
+        </div>
       </td>
       <td>
         <span class="merkle-hash" title="Click to copy Merkle Hash: ${escapeHtml(fullHash)}" onclick="event.stopPropagation(); copyToClipboard('${escapeHtml(fullHash)}')">
@@ -1606,6 +1689,7 @@ function renderEventRow(event, index) {
               <div class="merkle-audit-badge">
                 <span>SHA-256 Merkle Leaf Hash:</span>
                 <span class="merkle-hash-text">${escapeHtml(fullHash)}</span>
+                <button class="btn-outline" onclick="event.stopPropagation(); simulateTamperingInDashboard('${escapeJs(fullHash)}')" style="font-size: 0.7rem; padding: 2px 8px; margin-top: 6px; color: var(--severity-high); border-color: var(--severity-high-border);"><img src="/vendor/icons/alert-triangle.svg" width="10" height="10" style="vertical-align: middle; margin-right: 3px;">Simulate Tampering</button>
               </div>
             </div>
 

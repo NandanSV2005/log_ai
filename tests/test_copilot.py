@@ -137,3 +137,27 @@ def test_copilot_error_logging_diagnostics(auth_headers, monkeypatch, caplog):
             assert res.status_code == 200
             assert res.json()["model"] == "rule-assisted-soc-engine"
             assert "Gemini API call failed for model 'gemini-3.6-flash' [Status: 404]" in caplog.text
+
+
+def test_copilot_force_offline_air_gapped_mode(auth_headers, monkeypatch, caplog):
+    """
+    Verifies that when force_offline: true is passed, Gemini API is completely skipped
+    and local rule-assisted engine is forced.
+    """
+    monkeypatch.setenv("GEMINI_API_KEY", "mock_key_should_be_ignored")
+
+    mock_client = MagicMock()
+    with patch("google.genai.Client", return_value=mock_client):
+        with caplog.at_level("INFO"):
+            res = client.post(
+                "/api/v1/copilot/ask",
+                headers=auth_headers,
+                json={"question": "Check IP 192.168.1.100 status", "force_offline": True}
+            )
+            assert res.status_code == 200
+            data = res.json()
+            assert data["model"] == "rule-assisted-soc-engine"
+            assert data["force_offline"] is True
+            assert "Air-Gapped Mode active (force_offline=True)" in caplog.text
+            mock_client.models.generate_content.assert_not_called()
+
