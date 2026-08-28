@@ -42,7 +42,7 @@
           --:--:-- UTC
         </div>
         <button id="theme-toggle-btn" aria-label="Toggle Dark and Light Mode" style="background: transparent; border: 1px solid var(--border-color); color: white; padding: 0.4rem 0.6rem; border-radius: 6px; cursor: pointer;">
-          <span id="theme-toggle-icon">🌙</span>
+          <span id="theme-toggle-icon" style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">DARK</span>
         </button>
         <button id="logout-btn" aria-label="Log Out of SOC Session" style="background: transparent; border: 1px solid var(--border-color); color: white; padding: 0.4rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
           Log Out
@@ -81,7 +81,7 @@
           <div style="background: var(--bg-slate); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; display: flex; flex-direction: column; gap: 6px;">
             <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
               <img src="/vendor/icons/cpu.svg" alt="" width="14" height="14">
-              MTTD (Mean Time to Detect)
+              Processing Latency (MTTD proxy)
             </div>
             <div id="stat-mttd" class="font-mono" style="font-size: 1.8rem; font-weight: 800; color: var(--accent-hover);">N/A</div>
             <div id="stat-mttd-sub" style="font-size: 0.75rem; color: var(--text-dim);">Awaiting Telemetry Stream</div>
@@ -375,10 +375,10 @@ conditions:
             <div>
               <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px;">INCIDENT STATUS</div>
               <select id="inc-detail-status-select" aria-label="Incident Status Dropdown Selector" style="background: var(--bg-slate); border: 1px solid var(--border-color); color: #ffffff; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; width: 100%;">
-                <option value="New">🔴 New</option>
-                <option value="Investigating">🟡 Investigating</option>
-                <option value="Resolved">🟢 Resolved</option>
-                <option value="Dismissed">⚪ Dismissed</option>
+                <option value="New">New</option>
+                <option value="Investigating">Investigating</option>
+                <option value="Resolved">Resolved</option>
+                <option value="Dismissed">Dismissed</option>
               </select>
             </div>
           </div>

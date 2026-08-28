@@ -150,7 +150,7 @@ window.runMerkleVerification = async function () {
   if (!targetEvt) {
     resultBox.style.display = 'block';
     resultBox.innerHTML = `
-      <div style="color: #f43f5e; font-weight: bold; margin-bottom: 8px;">🔴 UNVERIFIED / NOT FOUND</div>
+      <div style="color: #f43f5e; font-weight: bold; margin-bottom: 8px;">UNVERIFIED / NOT FOUND</div>
       <div>No event matching hash "<strong>${escapeHtml(queryHash)}</strong>" found in active stream buffer.</div>
     `;
     return;
@@ -165,7 +165,7 @@ window.runMerkleVerification = async function () {
   resultBox.style.display = 'block';
   if (isMatch) {
     resultBox.innerHTML = `
-      <div style="color: #10b981; font-weight: bold; margin-bottom: 8px;">🟢 VERIFIED INTEGRITY (ZERO LOSS)</div>
+      <div style="color: #10b981; font-weight: bold; margin-bottom: 8px;">VERIFIED INTEGRITY (ZERO LOSS)</div>
       <div>Browser Web Crypto Digest matches Backend Storage Hash exactly!</div>
       <div style="font-family: monospace; font-size: 0.75rem; color: #a3a3a3; margin-top: 8px; word-break: break-all;">
         <strong>Browser SHA-256:</strong> ${computedBrowserHash}<br/>
@@ -177,7 +177,7 @@ window.runMerkleVerification = async function () {
     `;
   } else {
     resultBox.innerHTML = `
-      <div style="color: #f43f5e; font-weight: bold; margin-bottom: 8px;">🔴 HASH MISMATCH / POSSIBLE TAMPERING</div>
+      <div style="color: #f43f5e; font-weight: bold; margin-bottom: 8px;">HASH MISMATCH / POSSIBLE TAMPERING</div>
       <div>Calculated browser SHA-256 does not match stored backend hash!</div>
       <div style="font-family: monospace; font-size: 0.75rem; color: #f43f5e; margin-top: 8px; word-break: break-all;">
         <strong>Browser SHA-256:</strong> ${computedBrowserHash}<br/>
@@ -224,7 +224,7 @@ window.testRuleInSandbox = async function () {
       const data = await res.json();
       resultBox.style.display = 'block';
       resultBox.innerHTML = `
-        <div style="color: #10b981; font-weight: bold; margin-bottom: 8px;">⚡ RULE TEST EXECUTED: ${escapeHtml(data.rule_id || 'CUSTOM_01')}</div>
+        <div style="color: #10b981; font-weight: bold; margin-bottom: 8px;">RULE TEST EXECUTED: ${escapeHtml(data.rule_id || 'CUSTOM_01')}</div>
         <div>Matched <strong>${data.matched_count || 0}</strong> of <strong>${data.total_analyzed || currentEventsList.length}</strong> recent events in telemetry buffer.</div>
       `;
       showToast(`Rule tested: Matched ${data.matched_count || 0} events`, 'warning');
@@ -232,7 +232,7 @@ window.testRuleInSandbox = async function () {
       // Fallback for visual demo if endpoint isn't perfectly registered yet
       resultBox.style.display = 'block';
       resultBox.innerHTML = `
-        <div style="color: #10b981; font-weight: bold; margin-bottom: 8px;">⚡ RULE TEST EXECUTED (SIMULATION)</div>
+        <div style="color: #10b981; font-weight: bold; margin-bottom: 8px;">RULE TEST EXECUTED (SIMULATION)</div>
         <div>Matched <strong>3</strong> events in telemetry buffer matching criteria.</div>
       `;
       showToast('Rule simulation complete', 'warning');
@@ -240,7 +240,7 @@ window.testRuleInSandbox = async function () {
   } catch (err) {
     resultBox.style.display = 'block';
     resultBox.innerHTML = `
-        <div style="color: #10b981; font-weight: bold; margin-bottom: 8px;">⚡ RULE TEST EXECUTED (SIMULATION)</div>
+        <div style="color: #10b981; font-weight: bold; margin-bottom: 8px;">RULE TEST EXECUTED (SIMULATION)</div>
         <div>Matched <strong>3</strong> events in telemetry buffer matching criteria.</div>
       `;
     showToast('Rule simulation complete', 'warning');
@@ -848,7 +848,7 @@ function initOfflineThreatMap(events) {
             <animate attributeName="fill-opacity" values="0.4;0.0;0.4" dur="2s" repeatCount="indefinite"/>
           </circle>
           <circle r="${radius}" fill="${color}" stroke="#ffffff" stroke-width="1.5"/>
-          <title>🚨 ${level} (${score.toFixed(1)})\nIP: ${ip}\nLocation: ${geo.city}\nTactic: ${evt.mitre_tactic || 'Security Anomaly'}</title>
+          <title>${level} (${score.toFixed(1)})\nIP: ${ip}\nLocation: ${geo.city}\nTactic: ${evt.mitre_tactic || 'Security Anomaly'}</title>
         </g>
       `;
     }
@@ -900,7 +900,7 @@ function showToast(message, type = 'warning') {
   const toast = document.createElement('div');
   toast.className = `toast-banner toast-${type}`;
   toast.innerHTML = `
-    <span class="toast-icon">${type === 'warning' ? '⚠️' : '❌'}</span>
+    <span class="toast-icon"><img src="/vendor/icons/alert-triangle.svg" alt="" width="14" height="14" style="vertical-align: middle;"></span>
     <span class="toast-msg">${escapeHtml(message)}</span>
   `;
 
@@ -920,19 +920,19 @@ function setupThemeToggle() {
   const savedTheme = sessionStorage.getItem('theme') || 'dark';
   if (savedTheme === 'light') {
     document.body.classList.add('light-mode');
-    icon.textContent = '☀️';
+    icon.textContent = 'LIGHT';
   } else {
     document.body.classList.remove('light-mode');
-    icon.textContent = '🌙';
+    icon.textContent = 'DARK';
   }
 
   btn.addEventListener('click', () => {
     const isLight = document.body.classList.toggle('light-mode');
     if (isLight) {
-      icon.textContent = '☀️';
+      icon.textContent = 'LIGHT';
       sessionStorage.setItem('theme', 'light');
     } else {
-      icon.textContent = '🌙';
+      icon.textContent = 'DARK';
       sessionStorage.setItem('theme', 'dark');
     }
   });
@@ -1161,10 +1161,10 @@ function renderIncidentCard(inc) {
     badgeBorder = 'var(--severity-medium-border)';
   }
 
-  const tacticsHtml = tactics.map(t => `<span class="badge-mitre" style="font-size: 0.7rem;">🎯 ${escapeHtml(t)}</span>`).join(' ');
+  const tacticsHtml = tactics.map(t => `<span class="badge-mitre" style="font-size: 0.7rem;"><img src="/vendor/icons/shield.svg" alt="" width="10" height="10" style="vertical-align: middle; margin-right: 3px;">${escapeHtml(t)}</span>`).join(' ');
 
   return `
-    <div class="${cardPulseClass}" style="background: var(--bg-slate); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; display: flex; flex-direction: column; gap: 12px; transition: all 0.15s ease;">
+    <div class="${cardPulseClass}" role="button" tabindex="0" onclick="openIncidentDetail('${escapeJs(incId)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openIncidentDetail('${escapeJs(incId)}');}" aria-label="Incident from ${escapeHtml(ip)}, ${escapeHtml(level)} severity, ${count} events" style="background: var(--bg-slate); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; display: flex; flex-direction: column; gap: 12px; transition: all 0.15s ease; cursor: pointer;">
       <div style="display: flex; justify-content: space-between; align-items: flex-start;">
         <div>
           <div class="font-mono" style="font-size: 0.72rem; color: var(--text-muted);">${escapeHtml(incId.substring(0, 18))}...</div>
@@ -1182,7 +1182,7 @@ function renderIncidentCard(inc) {
 
       ${tactics.length > 0 ? `<div style="display: flex; gap: 4px; flex-wrap: wrap;">${tacticsHtml}</div>` : ''}
 
-      <button onclick="openIncidentDetail('${escapeJs(incId)}')" class="btn-primary" aria-label="Inspect Incident ${escapeHtml(incId)}" style="width: 100%; justify-content: center; padding: 8px; font-size: 0.8rem; margin-top: 4px;">
+      <button onclick="event.stopPropagation(); openIncidentDetail('${escapeJs(incId)}')" class="btn-primary" aria-label="Inspect Incident ${escapeHtml(incId)}" style="width: 100%; justify-content: center; padding: 8px; font-size: 0.8rem; margin-top: 4px;">
         <img src="/vendor/icons/git-branch.svg" alt="" width="14" height="14" style="filter: invert(100%);">
         Inspect Incident
       </button>
@@ -1224,7 +1224,7 @@ window.openIncidentDetail = function (incidentId) {
     const tactics = inc.mitre_tactics || [];
     if (tactics.length > 0) {
       mitreSeqEl.innerHTML = tactics.map(t => `
-        <span class="badge-mitre" style="padding: 4px 10px; font-size: 0.78rem;">🎯 ${escapeHtml(t)}</span>
+        <span class="badge-mitre" style="padding: 4px 10px; font-size: 0.78rem;"><img src="/vendor/icons/shield.svg" alt="" width="10" height="10" style="vertical-align: middle; margin-right: 3px;">${escapeHtml(t)}</span>
       `).join(' &rarr; ');
     } else {
       mitreSeqEl.innerHTML = `<span style="font-size: 0.78rem; color: var(--text-dim);">No specific MITRE tactics flagged</span>`;
@@ -1433,7 +1433,7 @@ function renderFilteredEventsTable() {
     tbody.innerHTML = `
       <tr class="empty-state-row">
         <td colspan="8" style="text-align: center; padding: 3rem 1.5rem; color: var(--text-muted);">
-          <div style="font-size: 1.6rem; margin-bottom: 0.5rem;">🛡️</div>
+          <div style="margin-bottom: 0.5rem;"><img src="/vendor/icons/shield.svg" alt="" width="32" height="32" style="opacity: 0.7;"></div>
           <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.25rem;">${emptyMsg}</div>
         </td>
       </tr>
@@ -1498,7 +1498,7 @@ function getMitreBadgeHtml(event) {
   if (!techId) {
     return `<span class="badge-mitre" style="background: rgba(255,255,255,0.05); color: var(--text-dim); border-color: var(--border-color);">T1083 Recon</span>`;
   }
-  return `<span class="badge-mitre" title="${escapeHtml(tactic || '')}">🎯 ${escapeHtml(techId)}</span>`;
+  return `<span class="badge-mitre" title="${escapeHtml(tactic || '')}"><img src="/vendor/icons/shield.svg" alt="" width="10" height="10" style="vertical-align: middle; margin-right: 3px;">${escapeHtml(techId)}</span>`;
 }
 
 function getWhyFlaggedPillHtml(event) {
@@ -1563,10 +1563,10 @@ function renderEventRow(event, index) {
     <select class="status-select status-${currentStatus.toLowerCase()}" 
             onclick="event.stopPropagation();" 
             onchange="updateEventStatus('${escapeJs(fullHash)}', this.value, this)">
-      <option value="New" ${currentStatus === 'New' ? 'selected' : ''}>🔴 New</option>
-      <option value="Investigating" ${currentStatus === 'Investigating' ? 'selected' : ''}>🟡 Investigating</option>
-      <option value="Resolved" ${currentStatus === 'Resolved' ? 'selected' : ''}>🟢 Resolved</option>
-      <option value="Dismissed" ${currentStatus === 'Dismissed' ? 'selected' : ''}>⚪ Dismissed</option>
+      <option value="New" ${currentStatus === 'New' ? 'selected' : ''}>New</option>
+      <option value="Investigating" ${currentStatus === 'Investigating' ? 'selected' : ''}>Investigating</option>
+      <option value="Resolved" ${currentStatus === 'Resolved' ? 'selected' : ''}>Resolved</option>
+      <option value="Dismissed" ${currentStatus === 'Dismissed' ? 'selected' : ''}>Dismissed</option>
     </select>
   `;
 
@@ -1585,7 +1585,7 @@ function renderEventRow(event, index) {
       <td class="xai-explanation">
         ${whyFlaggedHtml}
         <span>${escapeHtml(explanation)}</span>
-        <button class="btn-remediation" onclick="event.stopPropagation(); openRemediationModal(${index})">🛡️ View Remediation Aid</button>
+        <button class="btn-remediation" onclick="event.stopPropagation(); openRemediationModal(${index})"><img src="/vendor/icons/shield.svg" alt="" width="12" height="12" style="vertical-align: middle; margin-right: 4px;">View Remediation Aid</button>
       </td>
       <td>
         <span class="merkle-hash" title="Click to copy Merkle Hash: ${escapeHtml(fullHash)}" onclick="event.stopPropagation(); copyToClipboard('${escapeHtml(fullHash)}')">
@@ -1617,7 +1617,7 @@ function renderEventRow(event, index) {
               <div class="xai-banner-box">
                 <span class="xai-banner-title">EXPLAINABLE AI INSIGHT & PLAYBOOK</span>
                 <div class="xai-banner-text">${escapeHtml(explanation)}</div>
-                <button class="btn-remediation" style="margin-top: 8px;" onclick="event.stopPropagation(); openRemediationModal(${index})">🛡️ View Remediation Aid</button>
+                <button class="btn-remediation" style="margin-top: 8px;" onclick="event.stopPropagation(); openRemediationModal(${index})"><img src="/vendor/icons/shield.svg" alt="" width="12" height="12" style="vertical-align: middle; margin-right: 4px;">View Remediation Aid</button>
               </div>
               <pre class="code-block json-code"><code>${escapeHtml(formattedJson)}</code></pre>
             </div>
