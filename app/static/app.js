@@ -298,7 +298,7 @@ function setupCopilot() {
   }
 }
 
-function appendCopilotMessage(text, sender) {
+function appendCopilotMessage(text, sender, modelName) {
   const container = document.getElementById('copilot-messages');
   if (!container) return;
 
@@ -321,9 +321,19 @@ function appendCopilotMessage(text, sender) {
     msg.style.alignSelf = 'flex-start';
   }
 
-  msg.innerHTML = text.replace(/\n/g, '<br/>')
+  let tagHtml = '';
+  if (sender === 'bot') {
+    if (modelName === 'gemini-3.6-flash' || modelName === 'gemini') {
+      tagHtml = `<div style="margin-bottom: 6px;"><span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 2px 6px; border-radius: 4px; font-size: 0.68rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;"><img src="/vendor/icons/cpu.svg" alt="" width="10" height="10" style="vertical-align: middle; filter: invert(70%) sepia(80%) saturate(1000%) hue-rotate(170deg);"> LIVE AI (GEMINI 3.6 FLASH)</span></div>`;
+    } else {
+      tagHtml = `<div style="margin-bottom: 6px;"><span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); padding: 2px 6px; border-radius: 4px; font-size: 0.68rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;"><img src="/vendor/icons/shield.svg" alt="" width="10" height="10" style="vertical-align: middle;"> LOCAL ENGINE (AIR-GAPPED SOC)</span></div>`;
+    }
+  }
+
+  const formattedText = text.replace(/\n/g, '<br/>')
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/g, '<em>$1</em>');
+  msg.innerHTML = tagHtml + formattedText;
   container.appendChild(msg);
   container.scrollTop = container.scrollHeight;
 }
@@ -367,9 +377,9 @@ async function processCopilotQuery(query) {
 
     if (res.ok) {
       const data = await res.json();
-      appendCopilotMessage(data.answer || 'No response generated.', 'bot');
+      appendCopilotMessage(data.answer || 'No response generated.', 'bot', data.model);
     } else {
-      appendCopilotMessage('Failed to generate AI Copilot response.', 'bot');
+      appendCopilotMessage('Failed to generate AI Copilot response.', 'bot', 'rule-assisted-soc-engine');
     }
   } catch (err) {
     const tMsg = document.getElementById(typingId);

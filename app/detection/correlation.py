@@ -128,7 +128,10 @@ class IncidentEngine:
         event_ts_str = _format_timestamp(event.timestamp)
         event_ts_val = _parse_timestamp(event.timestamp)
 
-        event_hash = event.raw_event_hash or getattr(event, "payload_hash", None) or uuid_hash(event_ts_str, source_ip, event.original_event)
+        if not event.raw_event_hash:
+            event.raw_event_hash = getattr(event, "payload_hash", None) or uuid_hash(event_ts_str, source_ip, event.original_event)
+
+        event_hash = event.raw_event_hash
         threat_score = getattr(event, "threat_score", 0.0) or 0.0
         mitre_tactic = getattr(event, "mitre_tactic", None)
 

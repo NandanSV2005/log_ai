@@ -286,9 +286,13 @@ async def get_incident_detail(
         if (r.get("raw_event_hash") in member_hashes or r.get("payload_hash") in member_hashes)
     ]
     if not member_events:
+        from app.detection.correlation import _parse_timestamp
+        first_ts = _parse_timestamp(incident.first_seen) - 60.0
+        last_ts = _parse_timestamp(incident.last_seen) + 60.0
         member_events = [
             r for r in all_records
             if r.get("source_ip") == incident.source_ip
+            and (first_ts <= _parse_timestamp(r.get("timestamp", "")) <= last_ts)
         ]
     member_events.sort(key=lambda r: str(r.get("timestamp", "")), reverse=True)
 
