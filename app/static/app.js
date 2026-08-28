@@ -882,7 +882,7 @@ function initOfflineThreatMap(events) {
       </g>
 
       <!-- Small-Caps Muted Continent Labels -->
-      <g fill="#64748b" font-size="10" font-family="var(--font-sans)" font-weight="700" letter-spacing="1">
+      <g fill="#75859c" font-size="10" font-family="var(--font-sans)" font-weight="700" letter-spacing="1">
         <text x="${width*0.22}" y="${height*0.3}" text-anchor="middle">NORTH AMERICA</text>
         <text x="${width*0.31}" y="${height*0.65}" text-anchor="middle">SOUTH AMERICA</text>
         <text x="${width*0.52}" y="${height*0.22}" text-anchor="middle">EUROPE</text>
@@ -893,7 +893,7 @@ function initOfflineThreatMap(events) {
 
       <!-- Plotted Threat Nodes Overlay -->
       <g id="svg-threat-nodes-group">
-        ${threatDotsSvg || `<text x="${width/2}" y="${height/2}" text-anchor="middle" fill="#64748b" font-family="var(--font-sans)" font-size="12">[AIR-GAPPED OFFLINE VECTOR MAP • AWAITING THREAT LOCATIONS]</text>`}
+        ${threatDotsSvg || `<text x="${width/2}" y="${height/2}" text-anchor="middle" fill="#75859c" font-family="var(--font-sans)" font-size="12">[AIR-GAPPED OFFLINE VECTOR MAP • AWAITING THREAT LOCATIONS]</text>`}
       </g>
     </svg>
   `;

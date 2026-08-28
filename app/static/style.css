@@ -51,7 +51,7 @@
 
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
-  --text-dim: #64748b;
+  --text-dim: #75859c;
 
   /* ONE Calm Signature Accent Color for Non-Semantic UI */
   --accent-primary: #0284c7;
@@ -76,7 +76,7 @@
   --feature-forensics-bg: rgba(56, 189, 248, 0.12);
   --feature-forensics-border: rgba(56, 189, 248, 0.3);
 
-  --feature-copilot: #8b5cf6;
+  --feature-copilot: #a78bfa;
   --feature-copilot-bg: rgba(139, 92, 246, 0.12);
   --feature-copilot-border: rgba(139, 92, 246, 0.3);
 
@@ -1314,7 +1314,7 @@ body.light-mode {
 
   --text-main: #312e81;
   --text-muted: #4338ca;
-  --text-dim: #64748b;
+  --text-dim: #475569;
 
   /* Pastel Light Mode Accent Palette */
   --neon-mint: #312e81;
@@ -1325,11 +1325,11 @@ body.light-mode {
   --neon-violet-bg: rgba(67, 56, 202, 0.08);
   --neon-violet-border: rgba(67, 56, 202, 0.25);
 
-  --neon-red: #f43f5e;
+  --neon-red: #be123c;
   --neon-red-bg: rgba(244, 63, 94, 0.08);
   --neon-red-border: rgba(244, 63, 94, 0.25);
 
-  --neon-amber: #d97706;
+  --neon-amber: #92400e;
   --neon-amber-bg: rgba(217, 119, 6, 0.08);
   --neon-amber-border: rgba(217, 119, 6, 0.25);
 
