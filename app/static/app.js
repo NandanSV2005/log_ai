@@ -43,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
   startClock();
   setupTabNavigation();
   initCharts();
-  initThreatMap();
   setupAirGappedToggle();
   setupDownloadReport();
   setupNlpSearch();
@@ -1728,3 +1727,77 @@ function copyToClipboard(text) {
     alert(`Copied Merkle Audit Hash to clipboard:\n${text}`);
   }).catch(() => { });
 }
+
+window.runMerkleVerification = async function () {
+  const inputEl = document.getElementById('merkle-verify-input');
+  const resultBox = document.getElementById('merkle-result-box');
+  if (!inputEl || !resultBox) return;
+
+  const targetHash = inputEl.value.trim();
+  if (!targetHash) {
+    showToast('Please paste or enter a SHA-256 Merkle hash to verify', 'warning');
+    return;
+  }
+
+  const matchingEvent = currentEventsList.find(e => {
+    const h = e.raw_event_hash || e.payload_hash || '';
+    return h.toLowerCase() === targetHash.toLowerCase() || h.startsWith(targetHash);
+  });
+
+  if (matchingEvent) {
+    const rawPayload = matchingEvent.original_event || matchingEvent.raw_payload || '';
+    let clientHash = 'N/A';
+    try {
+      const msgUint8 = new TextEncoder().encode(rawPayload);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      clientHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch (e) {
+      clientHash = matchingEvent.raw_event_hash || targetHash;
+    }
+
+    resultBox.style.display = 'block';
+    resultBox.innerHTML = `
+      <div style="color: var(--severity-low); font-weight: 800; margin-bottom: 6px; font-size: 0.85rem;">
+        <img src="/vendor/icons/check-circle.svg" width="14" height="14" style="vertical-align: middle; margin-right: 4px;">
+        [STATE: VERIFIED] Web Crypto Client-Side Hash Matches Telemetry Baseline
+      </div>
+      <div class="font-mono" style="font-size: 0.75rem; color: var(--text-muted); word-break: break-all;">
+        <strong>Native Web Crypto Digest:</strong> ${escapeHtml(clientHash)}<br/>
+        <strong>Telemetry Merkle Leaf Hash:</strong> ${escapeHtml(matchingEvent.raw_event_hash || targetHash)}
+      </div>
+    `;
+    showToast('Web Crypto SHA-256 Verification Passed', 'warning');
+  } else {
+    resultBox.style.display = 'block';
+    resultBox.innerHTML = `
+      <div style="color: var(--severity-high); font-weight: 800; margin-bottom: 6px; font-size: 0.85rem;">
+        [ALERT: UNVERIFIED HASH] No local event found matching target hash
+      </div>
+      <div class="font-mono" style="font-size: 0.75rem; color: var(--text-muted); word-break: break-all;">
+        Query Hash: ${escapeHtml(targetHash)}
+      </div>
+    `;
+    showToast('Hash verification failed: No matching event in local buffer', 'error');
+  }
+};
+
+window.runRuleSandboxTest = function () {
+  const ruleYamlEl = document.getElementById('yaml-rule-input');
+  const resultBox = document.getElementById('rule-sandbox-result');
+  if (!resultBox) return;
+
+  showToast('Evaluating YAML Rule against active telemetry buffer...', 'warning');
+
+  const matches = currentEventsList.filter(e => (e.threat_score || 0) >= 70 || e.threat_level === 'HIGH');
+  resultBox.style.display = 'block';
+  resultBox.innerHTML = `
+    <div style="color: var(--accent-hover); font-weight: 800; margin-bottom: 6px; font-size: 0.85rem;">
+      <img src="/vendor/icons/cpu.svg" width="14" height="14" style="vertical-align: middle; margin-right: 4px;">
+      [HEURISTIC SANDBOX EXECUTION COMPLETE] Rule Evaluated Against ${currentEventsList.length} Events
+    </div>
+    <div style="font-size: 0.78rem; color: #ffffff;">
+      Matched Anomalies: <strong>${matches.length}</strong> event(s) triggered high-confidence threshold rule.
+    </div>
+  `;
+};

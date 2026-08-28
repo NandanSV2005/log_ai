@@ -59,6 +59,27 @@
   --accent-bg: rgba(2, 132, 199, 0.12);
   --accent-border: rgba(56, 189, 248, 0.3);
 
+  /* Feature Area Curated Color Palette (NON-DECORATIVE FEATURE IDENTIFIERS) */
+  --feature-command: #0284c7;
+  --feature-command-bg: rgba(2, 132, 199, 0.12);
+  --feature-command-border: rgba(56, 189, 248, 0.3);
+
+  --feature-correlation: #f59e0b;
+  --feature-correlation-bg: rgba(245, 158, 11, 0.12);
+  --feature-correlation-border: rgba(245, 158, 11, 0.3);
+
+  --feature-xai: #10b981;
+  --feature-xai-bg: rgba(16, 185, 129, 0.12);
+  --feature-xai-border: rgba(16, 185, 129, 0.3);
+
+  --feature-forensics: #38bdf8;
+  --feature-forensics-bg: rgba(56, 189, 248, 0.12);
+  --feature-forensics-border: rgba(56, 189, 248, 0.3);
+
+  --feature-copilot: #8b5cf6;
+  --feature-copilot-bg: rgba(139, 92, 246, 0.12);
+  --feature-copilot-border: rgba(139, 92, 246, 0.3);
+
   /* Legacy Neon Accents mapped cleanly to Signature Accent */
   --neon-cyan: #38bdf8;
   --neon-cyan-bg: rgba(2, 132, 199, 0.12);
@@ -354,6 +375,38 @@
 .airgap-toggle-container:focus-visible {
   outline: 2px solid var(--accent-hover);
   outline-offset: 2px;
+}
+
+/* ==========================================================================
+   SURFACE DEPTH & FEATURE AREA COLOR ACCENT UTILITIES
+   ========================================================================== */
+.panel-card, .table-section, .kpi-card, .pipeline-track-card, .stepper-card {
+  background: linear-gradient(145deg, rgba(17, 24, 39, 0.95) 0%, rgba(15, 23, 42, 0.85) 100%) !important;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease-in-out;
+}
+
+.panel-card:hover, .table-section:hover, .pipeline-track-card:hover {
+  border-color: rgba(56, 189, 248, 0.25);
+  box-shadow: 0 14px 30px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(2, 132, 199, 0.08);
+}
+
+.feature-accent-command {
+  border-left: 3px solid var(--feature-command) !important;
+}
+.feature-accent-correlation {
+  border-left: 3px solid var(--feature-correlation) !important;
+}
+.feature-accent-xai {
+  border-left: 3px solid var(--feature-xai) !important;
+}
+.feature-accent-forensics {
+  border-left: 3px solid var(--feature-forensics) !important;
+}
+.feature-accent-copilot {
+  border-left: 3px solid var(--feature-copilot) !important;
 }
 
 /* Typography Rule Classes */
