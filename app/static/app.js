@@ -813,22 +813,118 @@ function initCharts() {
   }
 }
 
+let leafletMapInstance = null;
+
+function renderRichMapTooltipHtml(evt, geo) {
+  const ip = evt.source_ip || evt.ip || 'N/A';
+  const score = (evt.threat_score !== undefined) ? evt.threat_score.toFixed(1) : '0.0';
+  const level = (evt.threat_level || 'LOW').toUpperCase();
+  const badgeClass = level === 'HIGH' ? 'badge-high' : level === 'MEDIUM' ? 'badge-medium' : 'badge-low';
+  const ts = (evt.timestamp || '').replace('T', ' ').substring(0, 19);
+  const vendor = (evt.event_type || 'unstructured_log').replace('_', ' ').toUpperCase();
+  const cityStr = geo ? `${geo.city}, ${geo.country}` : 'Remote Location';
+  const tactic = evt.mitre_tactic || 'Security Telemetry';
+
+  return `
+    <div style="font-family: var(--font-sans); color: #ffffff; padding: 4px; min-width: 190px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px;">
+        <strong class="font-mono" style="font-size: 0.85rem; color: var(--accent-hover);">${escapeHtml(ip)}</strong>
+        <span class="badge-threat ${badgeClass}" style="font-size: 0.68rem; padding: 1px 6px;">${level} (${score})</span>
+      </div>
+      <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">
+        <img src="/vendor/icons/database.svg" width="10" height="10" style="vertical-align: middle; margin-right: 4px;"><strong>Location:</strong> ${escapeHtml(cityStr)}
+      </div>
+      <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px;">
+        <strong>Type:</strong> <span class="vendor-badge" style="font-size: 0.65rem;">${escapeHtml(vendor)}</span>
+      </div>
+      <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px;">
+        <strong>Tactic:</strong> ${escapeHtml(tactic)}
+      </div>
+      <div style="font-size: 0.68rem; color: var(--text-dim);" class="font-mono">
+        ${escapeHtml(ts)}
+      </div>
+    </div>
+  `;
+}
+
 function initOfflineThreatMap(events) {
   const container = document.getElementById('offline-vector-threat-map');
   if (!container) return;
 
+  const mockGeoIpMap = {
+    '192.168.1.100': { lat: 37.7749, lng: -122.4194, city: 'San Francisco', country: 'United States' },
+    '10.0.0.15': { lat: 51.5074, lng: -0.1278, city: 'London', country: 'United Kingdom' },
+    '185.220.101.5': { lat: 52.5200, lng: 13.4050, city: 'Berlin', country: 'Germany' },
+    '203.0.113.195': { lat: 35.6762, lng: 139.6503, city: 'Tokyo', country: 'Japan' },
+    '198.51.100.42': { lat: -33.8688, lng: 151.2093, city: 'Sydney', country: 'Australia' }
+  };
+
+  const getGeoForIp = (ip) => {
+    if (mockGeoIpMap[ip]) return mockGeoIpMap[ip];
+    let hash = 0;
+    for (let i = 0; i < ip.length; i++) hash = (hash << 5) - hash + ip.charCodeAt(i);
+    const absHash = Math.abs(hash);
+    const lat = (absHash % 130) - 65;
+    const lng = ((absHash * 17) % 340) - 170;
+    const cities = [
+      { city: 'Frankfurt', country: 'Germany' },
+      { city: 'Toronto', country: 'Canada' },
+      { city: 'Zurich', country: 'Switzerland' },
+      { city: 'Mumbai', country: 'India' },
+      { city: 'Helsinki', country: 'Finland' }
+    ];
+    const c = cities[absHash % cities.length];
+    return { lat, lng, city: c.city, country: c.country };
+  };
+
+  if (!isAirGappedMode) {
+    if (!leafletMapInstance) {
+      container.innerHTML = `<div id="leaflet-map-div" style="width: 100%; height: 100%; min-height: 520px; background: #060911;"></div>`;
+      leafletMapInstance = L.map('leaflet-map-div').setView([20, 0], 2);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 18,
+        subdomains: 'abcd',
+        attribution: '&copy; OpenStreetMap &copy; CARTO'
+      }).addTo(leafletMapInstance);
+    }
+
+    if (leafletMapInstance._customMarkers) {
+      leafletMapInstance._customMarkers.forEach(m => m.remove());
+    }
+    leafletMapInstance._customMarkers = [];
+
+    (events || []).forEach((evt, idx) => {
+      const ip = evt.source_ip || evt.ip || evt.client_ip || '';
+      if (!ip) return;
+      const score = evt.threat_score !== undefined ? evt.threat_score : 0;
+      const level = (evt.threat_level || 'LOW').toUpperCase();
+      const geo = getGeoForIp(ip);
+      const color = (score >= 70 || level === 'HIGH') ? '#ef4444' : (score >= 35 || level === 'MEDIUM') ? '#f59e0b' : '#10b981';
+      const radius = (score >= 70 || level === 'HIGH') ? 9 : (score >= 35 || level === 'MEDIUM') ? 7 : 5;
+
+      const marker = L.circleMarker([geo.lat, geo.lng], {
+        radius: radius,
+        color: color,
+        fillColor: color,
+        fillOpacity: 0.7,
+        weight: 1.5
+      }).addTo(leafletMapInstance);
+
+      marker.bindPopup(renderRichMapTooltipHtml(evt, geo));
+      leafletMapInstance._customMarkers.push(marker);
+    });
+
+    return;
+  }
+
+  if (leafletMapInstance) {
+    leafletMapInstance.remove();
+    leafletMapInstance = null;
+  }
+
   const width = container.clientWidth || 900;
   const height = container.clientHeight || 520;
 
-  const mockGeoIpMap = {
-    '192.168.1.100': { lat: 37.7749, lng: -122.4194, city: 'San Francisco, USA' },
-    '10.0.0.15': { lat: 51.5074, lng: -0.1278, city: 'London, UK' },
-    '185.220.101.5': { lat: 52.5200, lng: 13.4050, city: 'Berlin, Germany' },
-    '203.0.113.195': { lat: 35.6762, lng: 139.6503, city: 'Tokyo, Japan' },
-    '198.51.100.42': { lat: -33.8688, lng: 151.2093, city: 'Sydney, Australia' }
-  };
-
-  // Convert (lat, lng) to canvas (x, y) via equirectangular projection
   function project(lat, lng) {
     const x = ((lng + 180) / 360) * width;
     const y = ((90 - lat) / 180) * height;
@@ -842,21 +938,12 @@ function initOfflineThreatMap(events) {
     const level = (evt.threat_level || 'LOW').toUpperCase();
 
     if (ip) {
-      let geo = mockGeoIpMap[ip];
-      if (!geo) {
-        let hash = 0;
-        for (let i = 0; i < ip.length; i++) {
-          hash = (hash << 5) - hash + ip.charCodeAt(i);
-        }
-        const absHash = Math.abs(hash);
-        const lat = (absHash % 130) - 65;
-        const lng = ((absHash * 17) % 340) - 170;
-        geo = { lat, lng, city: `Remote Node (${ip})` };
-      }
-
+      const geo = getGeoForIp(ip);
       const p = project(geo.lat, geo.lng);
       const color = (score >= 70 || level === 'HIGH') ? '#ef4444' : (score >= 35 || level === 'MEDIUM') ? '#f59e0b' : '#10b981';
       const radius = (score >= 70 || level === 'HIGH') ? 9 : (score >= 35 || level === 'MEDIUM') ? 7 : 5;
+
+      const tooltipContent = escapeHtml(`${level} (${score.toFixed(1)})\nIP: ${ip}\nLocation: ${geo.city}, ${geo.country}\nTactic: ${evt.mitre_tactic || 'Security Telemetry'}`);
 
       threatDotsSvg += `
         <g class="threat-dot-node" transform="translate(${p.x.toFixed(1)}, ${p.y.toFixed(1)})" style="cursor: pointer;" onclick="openRemediationModal(${idx})">
@@ -865,7 +952,7 @@ function initOfflineThreatMap(events) {
             <animate attributeName="fill-opacity" values="0.4;0.0;0.4" dur="2s" repeatCount="indefinite"/>
           </circle>
           <circle r="${radius}" fill="${color}" stroke="#ffffff" stroke-width="1.5"/>
-          <title>${level} (${score.toFixed(1)})\nIP: ${ip}\nLocation: ${geo.city}\nTactic: ${evt.mitre_tactic || 'Security Telemetry'}</title>
+          <title>${tooltipContent}</title>
         </g>
       `;
     }
@@ -873,7 +960,6 @@ function initOfflineThreatMap(events) {
 
   container.innerHTML = `
     <svg viewBox="0 0 ${width} ${height}" style="width: 100%; height: 100%; background: #060911;">
-      <!-- Equirectangular Grid Lines -->
       <g stroke="#1f293d" stroke-width="0.75" stroke-dasharray="3 3">
         <line x1="0" y1="${(height * 0.25).toFixed(0)}" x2="${width}" y2="${(height * 0.25).toFixed(0)}"/>
         <line x1="0" y1="${(height * 0.5).toFixed(0)}" x2="${width}" y2="${(height * 0.5).toFixed(0)}"/>
@@ -882,34 +968,23 @@ function initOfflineThreatMap(events) {
         <line x1="${(width * 0.5).toFixed(0)}" y1="0" x2="${(width * 0.5).toFixed(0)}" y2="${height}"/>
         <line x1="${(width * 0.75).toFixed(0)}" y1="0" x2="${(width * 0.75).toFixed(0)}" y2="${height}"/>
       </g>
-
-      <!-- Offline Vector Continents Path Outlines with Signature Accent Fill & Subtle Labels -->
       <g fill="rgba(2, 132, 199, 0.12)" stroke="rgba(56, 189, 248, 0.35)" stroke-width="1.5">
-        <!-- North America -->
         <path d="M ${width*0.08} ${height*0.2} L ${width*0.3} ${height*0.15} L ${width*0.35} ${height*0.35} L ${width*0.25} ${height*0.48} L ${width*0.1} ${height*0.38} Z"/>
-        <!-- South America -->
         <path d="M ${width*0.28} ${height*0.52} L ${width*0.38} ${height*0.55} L ${width*0.32} ${height*0.85} L ${width*0.25} ${height*0.7} Z"/>
-        <!-- Europe & Asia -->
         <path d="M ${width*0.45} ${height*0.15} L ${width*0.85} ${height*0.12} L ${width*0.9} ${height*0.45} L ${width*0.7} ${height*0.55} L ${width*0.5} ${height*0.45} L ${width*0.42} ${height*0.28} Z"/>
-        <!-- Africa -->
         <path d="M ${width*0.45} ${height*0.38} L ${width*0.62} ${height*0.4} L ${width*0.58} ${height*0.75} L ${width*0.48} ${height*0.65} Z"/>
-        <!-- Oceania -->
         <path d="M ${width*0.78} ${height*0.65} L ${width*0.9} ${height*0.64} L ${width*0.88} ${height*0.82} L ${width*0.76} ${height*0.8} Z"/>
       </g>
-
-      <!-- Small-Caps Muted Continent Labels -->
       <g fill="#75859c" font-size="10" font-family="var(--font-sans)" font-weight="700" letter-spacing="1">
         <text x="${width*0.22}" y="${height*0.3}" text-anchor="middle">NORTH AMERICA</text>
         <text x="${width*0.31}" y="${height*0.65}" text-anchor="middle">SOUTH AMERICA</text>
         <text x="${width*0.52}" y="${height*0.22}" text-anchor="middle">EUROPE</text>
         <text x="${width*0.72}" y="${height*0.28}" text-anchor="middle">ASIA</text>
-        <text x="${width*0.53}" y="${height*0.55}" text-anchor="middle">AFRICA</text>
+        <text x="${width*0.53}" y="${height*0.52}" text-anchor="middle">AFRICA</text>
         <text x="${width*0.83}" y="${height*0.73}" text-anchor="middle">OCEANIA</text>
       </g>
-
-      <!-- Plotted Threat Nodes Overlay -->
-      <g id="svg-threat-nodes-group">
-        ${threatDotsSvg || `<text x="${width/2}" y="${height/2}" text-anchor="middle" fill="#75859c" font-family="var(--font-sans)" font-size="12">[AIR-GAPPED OFFLINE VECTOR MAP • AWAITING THREAT LOCATIONS]</text>`}
+      <g id="threat-dots-layer">
+        ${threatDotsSvg}
       </g>
     </svg>
   `;

@@ -16,8 +16,8 @@
   <div class="app-layout" style="display: flex; flex-direction: column; min-height: 100vh;">
 
     <!-- 1. STICKY TOP HEADER -->
-    <header role="banner" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: #060911; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 1000;">
-      <div class="brand" style="display: flex; align-items: center; gap: 1rem;">
+    <header role="banner" class="main-navbar" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.75rem 2rem; background: #060911; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 1000;">
+      <div class="brand" style="display: flex; align-items: center; gap: 0.75rem;">
         <div class="logo-shield" aria-label="LOG AI Logo Shield" style="width: 34px; height: 34px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--accent-hover);">
           <img src="/vendor/icons/shield.svg" alt="" width="20" height="20" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
         </div>
@@ -28,48 +28,41 @@
         </div>
       </div>
 
-      <div style="display: flex; align-items: center; gap: 1.25rem;">
+      <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
         <div style="position: relative;">
           <input type="text" id="nlp-search-input" placeholder="Search telemetry, IPs, hashes..." aria-label="Search telemetry data by IP, vendor, or hash"
-            style="padding: 0.5rem 1rem 0.5rem 2.2rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-slate); color: white; width: 280px; font-size: 0.85rem;">
-          <img src="/vendor/icons/database.svg" alt="" width="14" height="14" style="position: absolute; left: 10px; top: 11px; opacity: 0.5;">
+            style="padding: 0.45rem 1rem 0.45rem 2.2rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-slate); color: white; width: 240px; font-size: 0.82rem;">
+          <img src="/vendor/icons/database.svg" alt="" width="14" height="14" style="position: absolute; left: 10px; top: 10px; opacity: 0.5;">
         </div>
-        <div class="status-pill font-mono" style="display: flex; align-items: center; gap: 0.5rem; color: var(--severity-low); font-size: 0.75rem; font-weight: bold; background: var(--severity-low-bg); padding: 4px 10px; border-radius: 20px; border: 1px solid var(--severity-low-border);">
+        <div class="status-pill font-mono" style="display: flex; align-items: center; gap: 0.4rem; color: var(--severity-low); font-size: 0.72rem; font-weight: bold; background: var(--severity-low-bg); padding: 4px 8px; border-radius: 20px; border: 1px solid var(--severity-low-border);">
           <span class="pulse-dot" style="width:6px; height:6px; background:var(--severity-low); border-radius:50%; display:inline-block;"></span>
           <span id="connection-status">LIVE POLLING</span>
         </div>
-        <div id="system-clock" class="font-mono" style="color: var(--text-muted); font-size: 0.75rem; border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px;">
+        <div id="system-clock" class="font-mono" style="color: var(--text-muted); font-size: 0.72rem; border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px;">
           --:--:-- UTC
         </div>
-        <div id="airgap-banner" class="font-mono" style="display: none; background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
+        <div id="airgap-banner" class="font-mono" style="display: none; background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); padding: 4px 8px; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
           <img src="/vendor/icons/shield.svg" alt="" width="12" height="12" style="vertical-align: middle; margin-right: 4px;"> AIR-GAPPED MODE ACTIVE
         </div>
-        <div style="display: flex; flex-direction: column; align-items: flex-end;">
-          <label id="airgap-toggle-label" class="airgap-toggle-container" title="Force Copilot to execute using local rule engine with zero cloud dependency" tabindex="0">
-            <input type="checkbox" id="airgap-toggle-checkbox" class="airgap-toggle-checkbox" role="switch" aria-checked="false" aria-label="Toggle Air-Gapped Mode" style="position: absolute; opacity: 0; width: 0; height: 0;">
-            <span class="airgap-switch-track">
-              <span class="airgap-switch-thumb"></span>
-            </span>
-            <img src="/vendor/icons/lock.svg" alt="" width="12" height="12">
-            <span id="airgap-toggle-text">Air-Gapped Mode</span>
-          </label>
-          <div style="display: flex; gap: 8px; align-items: center; margin-top: 2px;">
-            <div id="airgap-proof-counter" class="font-mono" style="font-size: 0.68rem; color: var(--text-muted); background: var(--bg-slate); border: 1px solid var(--border-color); padding: 1px 6px; border-radius: 4px;">
-              Ext requests: <strong id="ext-req-count" style="color: #10b981;">0</strong>
-            </div>
-            <span style="font-size: 0.68rem; color: var(--text-dim);" title="Demonstrates ULPF requirement: deployable in an air-gapped network">
-              Zero-Cloud Local Engine <span style="color: var(--accent-hover);">(ULPF Req)</span>
-            </span>
-          </div>
+        <div id="airgap-proof-counter" class="font-mono" style="font-size: 0.72rem; color: var(--text-muted); background: var(--bg-slate); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
+          Ext requests: <strong id="ext-req-count" style="color: #10b981;">0</strong>
         </div>
-        <button id="logout-btn" class="btn-outline" aria-label="Log Out of SOC Session">
+        <label id="airgap-toggle-label" class="airgap-toggle-container" title="Force Copilot to execute using local rule engine with zero cloud dependency" tabindex="0" style="margin: 0;">
+          <input type="checkbox" id="airgap-toggle-checkbox" class="airgap-toggle-checkbox" role="switch" aria-checked="false" aria-label="Toggle Air-Gapped Mode" style="position: absolute; opacity: 0; width: 0; height: 0;">
+          <span class="airgap-switch-track">
+            <span class="airgap-switch-thumb"></span>
+          </span>
+          <img src="/vendor/icons/lock.svg" alt="" width="12" height="12">
+          <span id="airgap-toggle-text">Air-Gapped Mode</span>
+        </label>
+        <button id="logout-btn" class="btn-outline" aria-label="Log Out of SOC Session" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
           Log Out
         </button>
       </div>
     </header>
 
     <!-- 2. WORKFLOW-BASED TAB NAVIGATION BAR (PART 1) -->
-    <nav id="tab-bar" aria-label="SOC Operation Navigation Tabs" style="display: flex; gap: 2rem; background: #060911; padding: 0 2rem; border-bottom: 1px solid var(--border-color); position: sticky; top: 69px; z-index: 999;">
+    <nav id="tab-bar" aria-label="SOC Operation Navigation Tabs" style="display: flex; gap: 2rem; background: #060911; padding: 0 2rem; border-bottom: 1px solid var(--border-color); position: sticky; top: 57px; z-index: 999;">
       <button class="tab-btn active" data-tab="executive" aria-label="Command View Tab" style="background: none; border: none; padding: 1rem 0; cursor: pointer; color: var(--accent-hover); border-bottom: 2px solid var(--accent-hover); font-weight: 600; font-size: 0.9rem; font-family: inherit; display: inline-flex; align-items: center; gap: 6px;">
         <img src="/vendor/icons/shield.svg" alt="" width="16" height="16" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
         Command
@@ -337,7 +330,7 @@
               <button onclick="runMerkleVerification()" class="btn-primary" aria-label="Execute Web Crypto Merkle Hash Verification">Verify Hash</button>
               <button onclick="simulateTamperingInDashboard(document.getElementById('merkle-verify-input').value)" class="btn-danger" aria-label="Simulate Log Tampering on Hash"><img src="/vendor/icons/alert-triangle.svg" width="14" height="14"> Simulate Tampering</button>
             </div>
-            <div id="merkle-result-box" style="display: block; background: #060911; border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem;">
+            <div id="merkle-result-box" style="display: block; background: #060911; border: 1px solid var(--border-color); border-radius: 6px; padding: 1.25rem; word-break: break-all; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.5; min-height: 80px;">
               <div style="font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
                 <span class="pulse-dot" style="width: 6px; height: 6px; background: var(--accent-hover); border-radius: 50%; display: inline-block;"></span>
                 <strong style="color: var(--accent-hover);">Verifier Ready:</strong> Click "Verify Hash" or "Simulate Tampering" above to test cryptographic verification live.
@@ -368,7 +361,7 @@ conditions:
   threshold_count: 3
 </textarea>
             <button id="btn-test-rule" onclick="testRuleInSandbox()" class="btn-primary" aria-label="Test YAML Rule Against Memory Buffer">Test Rule Against Buffer</button>
-            <div id="rule-sandbox-result" style="display: block; margin-top: 1rem; background: #060911; border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem;">
+            <div id="rule-sandbox-result" style="display: block; margin-top: 1rem; background: #060911; border: 1px solid var(--border-color); border-radius: 6px; padding: 1.25rem; word-break: break-all; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.5; min-height: 80px;">
               <div style="font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
                 <span class="pulse-dot" style="width: 6px; height: 6px; background: var(--severity-low); border-radius: 50%; display: inline-block;"></span>
                 <strong style="color: var(--severity-low);">Sandbox Ready:</strong> Click "Test Rule Against Buffer" above to evaluate heuristics against recent events.
@@ -463,6 +456,49 @@ conditions:
       </div>
     </div>
   </div>
+
+    <!-- AI SOC COPILOT FLOATING CHAT WIDGET -->
+    <div id="copilot-widget" class="copilot-widget">
+      <button id="copilot-toggle" class="copilot-toggle-btn" aria-label="Toggle AI SOC Copilot Chat Assistant">
+        <div class="copilot-btn-content">
+          <img src="/vendor/icons/cpu.svg" alt="" width="20" height="20" style="filter: invert(70%) sepia(80%) saturate(1000%) hue-rotate(170deg);">
+          <span>AI Copilot</span>
+        </div>
+        <span class="copilot-pulse-dot"></span>
+      </button>
+
+      <div id="copilot-panel" class="copilot-panel" style="display: none;">
+        <div class="copilot-header">
+          <div class="copilot-title">
+            <h4><img src="/vendor/icons/cpu.svg" alt="" width="16" height="16" style="filter: invert(70%) sepia(80%) saturate(1000%) hue-rotate(170deg); vertical-align: middle; margin-right: 6px;"> AI SOC Assistant</h4>
+            <span class="copilot-subtitle">Zero-Loss Forensics &amp; Threat Intelligence</span>
+          </div>
+          <button id="copilot-close" class="copilot-close-btn" aria-label="Close Copilot Panel">&times;</button>
+        </div>
+
+        <div id="copilot-messages" class="copilot-messages" style="display: flex; flex-direction: column; gap: 8px; padding: 12px; height: 320px; overflow-y: auto;">
+          <div style="background: #0a0a0a; border: 1px solid #262626; color: #e5e5e5; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; max-width: 85%;">
+            <div style="margin-bottom: 6px;">
+              <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); padding: 2px 6px; border-radius: 4px; font-size: 0.68rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                <img src="/vendor/icons/shield.svg" alt="" width="10" height="10"> LOCAL ENGINE (AIR-GAPPED SOC)
+              </span>
+            </div>
+            Hello! I am your AI SOC Copilot. Ask me about correlated incidents, threat scores, anomalous IP behavior, or mitigation playbooks.
+          </div>
+        </div>
+
+        <div style="padding: 6px 12px; background: #060911; border-top: 1px solid var(--border-color); display: flex; gap: 6px; overflow-x: auto;">
+          <button onclick="document.getElementById('copilot-input').value='Summarize high severity anomalies'; document.getElementById('copilot-send').click();" class="btn-outline" style="font-size: 0.68rem; padding: 2px 6px; white-space: nowrap;">High Threats</button>
+          <button onclick="document.getElementById('copilot-input').value='Explain Merkle leaf verification'; document.getElementById('copilot-send').click();" class="btn-outline" style="font-size: 0.68rem; padding: 2px 6px; white-space: nowrap;">Merkle Integrity</button>
+          <button onclick="document.getElementById('copilot-input').value='What remediation steps are needed?'; document.getElementById('copilot-send').click();" class="btn-outline" style="font-size: 0.68rem; padding: 2px 6px; white-space: nowrap;">Playbooks</button>
+        </div>
+
+        <div class="copilot-input-bar" style="display: flex; padding: 8px; gap: 6px; border-top: 1px solid var(--border-color); background: #090e1a;">
+          <input type="text" id="copilot-input" placeholder="Ask AI Copilot..." aria-label="Copilot Query Input" style="flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-slate); color: white; font-size: 0.82rem;">
+          <button id="copilot-send" class="btn-primary" style="padding: 6px 12px; font-size: 0.8rem;">Send</button>
+        </div>
+      </div>
+    </div>
 
   <!-- Main JS Logic Engine -->
   <script src="/app.js?v=7"></script>

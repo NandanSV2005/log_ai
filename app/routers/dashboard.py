@@ -9,8 +9,14 @@ from app.storage.normalized_writer import normalized_storage_manager
 from app.normalization.schema import UnifiedEvent
 from app.detection.correlation import incident_engine
 from app.routers.auth import get_current_user
+from app.services.geoip import geoip_resolver
 
 router = APIRouter(prefix="/api/v1/dashboard", tags=["Dashboard"])
+
+@router.get("/geoip/lookup/{ip}")
+async def lookup_geoip(ip: str, current_user=Depends(get_current_user)):
+    """Offline GeoIP resolution endpoint."""
+    return geoip_resolver.lookup(ip)
 
 def _read_all_normalized_records() -> List[Dict[str, Any]]:
     """Reads all normalized event dictionaries across JSONL files in storage_dir."""
