@@ -285,6 +285,11 @@ async def get_incident_detail(
         r for r in all_records
         if (r.get("raw_event_hash") in member_hashes or r.get("payload_hash") in member_hashes)
     ]
+    if not member_events:
+        member_events = [
+            r for r in all_records
+            if r.get("source_ip") == incident.source_ip
+        ]
     member_events.sort(key=lambda r: str(r.get("timestamp", "")), reverse=True)
 
     return {

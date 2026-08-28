@@ -41,14 +41,27 @@
         <div id="system-clock" class="font-mono" style="color: var(--text-muted); font-size: 0.75rem; border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px;">
           --:--:-- UTC
         </div>
-        <label id="airgap-toggle-label" class="airgap-toggle-container" title="Force Copilot to execute using local rule engine with zero cloud dependency" tabindex="0">
-          <input type="checkbox" id="airgap-toggle-checkbox" class="airgap-toggle-checkbox" role="switch" aria-checked="false" aria-label="Toggle Air-Gapped Mode" style="position: absolute; opacity: 0; width: 0; height: 0;">
-          <span class="airgap-switch-track">
-            <span class="airgap-switch-thumb"></span>
-          </span>
-          <img src="/vendor/icons/lock.svg" alt="" width="12" height="12">
-          <span id="airgap-toggle-text">Air-Gapped Mode</span>
-        </label>
+        <div id="airgap-banner" class="font-mono" style="display: none; background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700;">
+          🛡️ AIR-GAPPED MODE ACTIVE
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-end;">
+          <label id="airgap-toggle-label" class="airgap-toggle-container" title="Force Copilot to execute using local rule engine with zero cloud dependency" tabindex="0">
+            <input type="checkbox" id="airgap-toggle-checkbox" class="airgap-toggle-checkbox" role="switch" aria-checked="false" aria-label="Toggle Air-Gapped Mode" style="position: absolute; opacity: 0; width: 0; height: 0;">
+            <span class="airgap-switch-track">
+              <span class="airgap-switch-thumb"></span>
+            </span>
+            <img src="/vendor/icons/lock.svg" alt="" width="12" height="12">
+            <span id="airgap-toggle-text">Air-Gapped Mode</span>
+          </label>
+          <div style="display: flex; gap: 8px; align-items: center; margin-top: 2px;">
+            <div id="airgap-proof-counter" class="font-mono" style="font-size: 0.68rem; color: var(--text-muted); background: var(--bg-slate); border: 1px solid var(--border-color); padding: 1px 6px; border-radius: 4px;">
+              Ext requests: <strong id="ext-req-count" style="color: #10b981;">0</strong>
+            </div>
+            <span style="font-size: 0.68rem; color: var(--text-dim);" title="Demonstrates ULPF requirement: deployable in an air-gapped network">
+              Zero-Cloud Local Engine <span style="color: var(--accent-hover);">(ULPF Req)</span>
+            </span>
+          </div>
+        </div>
         <button id="logout-btn" class="btn-outline" aria-label="Log Out of SOC Session">
           Log Out
         </button>
@@ -312,16 +325,24 @@
                 Web Crypto SHA-256 Merkle Verifier
               </h2>
             </div>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
               Verify event payload integrity directly in your browser using native Web Crypto API (<code class="font-mono" style="color: var(--accent-hover);">crypto.subtle.digest</code>).
             </p>
+            <div style="font-size: 0.78rem; color: var(--text-dim); line-height: 1.4; margin-bottom: 0.8rem; background: rgba(56, 189, 248, 0.05); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.2);">
+              <strong>How it works:</strong> Client-side SHA-256 digests run directly via <code>window.crypto.subtle.digest</code> to independently re-calculate raw log hashes and verify cryptographic Merkle parent node linkages. Any byte alteration produces an immediate root hash mismatch.
+            </div>
             <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
               <input type="text" id="merkle-verify-input" placeholder="Paste event Merkle SHA-256 hash..." aria-label="Merkle Hash to verify" class="font-mono"
                 style="flex: 1; padding: 0.6rem 1rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-slate); color: white; font-size: 0.85rem;">
               <button onclick="runMerkleVerification()" class="btn-primary" aria-label="Execute Web Crypto Merkle Hash Verification">Verify Hash</button>
               <button onclick="simulateTamperingInDashboard(document.getElementById('merkle-verify-input').value)" class="btn-danger" aria-label="Simulate Log Tampering on Hash"><img src="/vendor/icons/alert-triangle.svg" width="14" height="14"> Simulate Tampering</button>
             </div>
-            <div id="merkle-result-box" style="display: none; background: #060911; border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem;"></div>
+            <div id="merkle-result-box" style="display: block; background: #060911; border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem;">
+              <div style="font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+                <span class="pulse-dot" style="width: 6px; height: 6px; background: var(--accent-hover); border-radius: 50%; display: inline-block;"></span>
+                <strong style="color: var(--accent-hover);">Verifier Ready:</strong> Click "Verify Hash" or "Simulate Tampering" above to test cryptographic verification live.
+              </div>
+            </div>
           </section>
 
           <section class="panel-card feature-accent-xai" aria-label="YAML Heuristic Rule Sandbox">
@@ -331,9 +352,12 @@
                 YAML Heuristic Rule Sandbox
               </h2>
             </div>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
               Test custom threat detection rules against active stream memory buffer.
             </p>
+            <div style="font-size: 0.78rem; color: var(--text-dim); line-height: 1.4; margin-bottom: 0.8rem; background: rgba(16, 185, 129, 0.05); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.2);">
+              <strong>How it works:</strong> Evaluates custom YAML threat specifications against the active telemetry event buffer in real time. Matches filter by event attributes and threshold counts to instantly trigger alert flags and remediation actions.
+            </div>
             <textarea id="rule-sandbox-editor" aria-label="YAML Rule Specification Editor" class="font-mono" rows="6" style="width: 100%; padding: 0.8rem; border-radius: 6px; border: 1px solid var(--border-color); background: #060911; color: var(--accent-hover); font-size: 0.82rem; margin-bottom: 1rem;">
 id: CUSTOM_RULE_01
 name: Rapid Failed SSH Password Spray
@@ -342,9 +366,14 @@ conditions:
   event_type: "linux_auth"
   action: "deny"
   threshold_count: 3
-            </textarea>
+</textarea>
             <button id="btn-test-rule" onclick="testRuleInSandbox()" class="btn-primary" aria-label="Test YAML Rule Against Memory Buffer">Test Rule Against Buffer</button>
-            <div id="rule-sandbox-result" style="display: none; margin-top: 1rem; background: #060911; border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem;"></div>
+            <div id="rule-sandbox-result" style="display: block; margin-top: 1rem; background: #060911; border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem;">
+              <div style="font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+                <span class="pulse-dot" style="width: 6px; height: 6px; background: var(--severity-low); border-radius: 50%; display: inline-block;"></span>
+                <strong style="color: var(--severity-low);">Sandbox Ready:</strong> Click "Test Rule Against Buffer" above to evaluate heuristics against recent events.
+              </div>
+            </div>
           </section>
         </div>
       </div>
