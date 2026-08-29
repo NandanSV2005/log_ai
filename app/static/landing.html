@@ -1101,7 +1101,7 @@
             <!-- Merkle Root Node -->
             <g transform="translate(180, 20)">
               <rect id="node-root-rect" x="0" y="0" width="440" height="45" rx="8" fill="url(#normalGrad)" stroke="#38bdf8" stroke-width="1.5"/>
-              <text x="220" y="18" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="var(--font-sans)" font-weight="700">MERKLE ROOT HASH (SHA-256)</text>
+              <text x="220" y="18" text-anchor="middle" fill="#ffffff" font-size="10.5" font-family="var(--font-sans)" font-weight="800" letter-spacing="0.5px">MERKLE ROOT HASH (SHA-256)</text>
               <text id="node-root-val" class="font-mono" x="220" y="34" text-anchor="middle" fill="#38bdf8" font-size="8.5" font-weight="700">cc84083289fa2d5ddc8b553944fe2ad0e7af621a38bada6e9191f288e9ebf342</text>
             </g>
 
@@ -1258,7 +1258,7 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
               <span class="chrome-dot dot-yellow"></span>
               <span class="chrome-dot dot-green"></span>
             </div>
-            <div class="console-title font-mono">LOG AI SOC CONSOLE — API CONNECTION DEMO</div>
+            <div class="console-title" style="font-family: var(--font-sans); font-size: 0.88rem; font-weight: 800; letter-spacing: 0.04em; color: var(--text-main);">LOG AI SOC CONSOLE &mdash; API CONNECTION DEMO</div>
             <div id="api-status-pill" class="status-badge-standby font-mono">[STANDBY] UNAUTHENTICATED</div>
           </div>
 
@@ -1790,9 +1790,24 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
       var resMTTR = document.getElementById('res-mttr');
       var resSavings = document.getElementById('res-savings');
 
+      function updateTrackFill(slider) {
+        if (!slider) return;
+        var min = parseFloat(slider.min) || 0;
+        var max = parseFloat(slider.max) || 100;
+        var val = parseFloat(slider.value) || 0;
+        var percent = ((val - min) / (max - min)) * 100;
+        var isLight = document.body.classList.contains('light-mode');
+        var fillColor = isLight ? '#0f172a' : 'var(--accent-hover)';
+        var bgTrack = isLight ? '#a8baa9' : 'var(--bg-slate)';
+        slider.style.background = 'linear-gradient(to right, ' + fillColor + ' 0%, ' + fillColor + ' ' + percent + '%, ' + bgTrack + ' ' + percent + '%, ' + bgTrack + ' 100%)';
+      }
+
       function updateROI() {
         var vol = parseInt(sliderVol.value, 10) || 500000;
         var dev = parseInt(sliderDev.value, 10) || 25;
+
+        updateTrackFill(sliderVol);
+        updateTrackFill(sliderDev);
 
         if (valVol) valVol.textContent = vol.toLocaleString();
         if (valDev) valDev.textContent = dev.toLocaleString();

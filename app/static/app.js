@@ -1100,7 +1100,7 @@ function initOfflineThreatMap(events) {
   if (!effectiveAirGapped) {
     if (!leafletMapInstance) {
       container.innerHTML = `<div id="leaflet-map-div" style="width: 100%; height: 100%; min-height: 520px; background: var(--bg-dark);"></div>`;
-      leafletMapInstance = L.map('leaflet-map-div').setView([20, 0], 2);
+      leafletMapInstance = L.map('leaflet-map-div').setView([25, 10], 4);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors'
