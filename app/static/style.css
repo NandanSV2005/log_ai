@@ -1352,16 +1352,40 @@ tr.row-medium:hover {
   background: #171717;
 }
 
+.toast-success {
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  color: var(--text-main);
+}
+.toast-success .toast-icon img {
+  filter: invert(55%) sepia(90%) saturate(1000%) hue-rotate(220deg);
+}
+
 .toast-warning {
-  background: #f59e0b;
-  color: #0a0a0a;
-  border: 1px solid #d97706;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: var(--text-main);
+}
+.toast-warning .toast-icon img {
+  filter: invert(70%) sepia(80%) saturate(1200%) hue-rotate(15deg);
 }
 
 .toast-error {
-  background: #f43f5e;
-  color: #ffffff;
-  border: 1px solid #e11d48;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: var(--text-main);
+}
+.toast-error .toast-icon img {
+  filter: invert(50%) sepia(80%) saturate(1200%) hue-rotate(330deg);
+}
+
+.toast-info {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: var(--text-main);
+}
+.toast-info .toast-icon img {
+  filter: invert(70%) sepia(80%) saturate(1000%) hue-rotate(170deg);
 }
 
 .ts-cell {

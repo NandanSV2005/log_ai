@@ -305,7 +305,7 @@ window.testRuleInSandbox = async function () {
         <div style="color: #10b981; font-weight: bold; margin-bottom: 8px;">RULE TEST EXECUTED: ${escapeHtml(data.rule_id || 'CUSTOM_01')}</div>
         <div>Matched <strong>${data.matched_count || 0}</strong> of <strong>${data.total_analyzed || currentEventsList.length}</strong> recent events in telemetry buffer.</div>
       `;
-      showToast(`Rule tested: Matched ${data.matched_count || 0} events`, 'warning');
+      showToast(`Rule tested: Matched ${data.matched_count || 0} events`, 'success');
     } else {
       // Fallback for visual demo if endpoint isn't perfectly registered yet
       resultBox.style.display = 'block';
@@ -313,7 +313,7 @@ window.testRuleInSandbox = async function () {
         <div style="color: #10b981; font-weight: bold; margin-bottom: 8px;">RULE TEST EXECUTED (SIMULATION)</div>
         <div>Matched <strong>3</strong> events in telemetry buffer matching criteria.</div>
       `;
-      showToast('Rule simulation complete', 'warning');
+      showToast('Rule simulation complete', 'success');
     }
   } catch (err) {
     resultBox.style.display = 'block';
@@ -321,7 +321,7 @@ window.testRuleInSandbox = async function () {
         <div style="color: #10b981; font-weight: bold; margin-bottom: 8px;">RULE TEST EXECUTED (SIMULATION)</div>
         <div>Matched <strong>3</strong> events in telemetry buffer matching criteria.</div>
       `;
-    showToast('Rule simulation complete', 'warning');
+    showToast('Rule simulation complete', 'success');
   } finally {
     if (btn) {
       btn.disabled = false;
@@ -516,7 +516,7 @@ window.markRemediationCompleted = function () {
     }
   }
   closeRemediationModal();
-  showToast('Playbook marked completed & incident resolved!', 'warning');
+  showToast('Playbook marked completed & incident resolved!', 'success');
 };
 
 window.bulkResolveCategory = async function (category) {
@@ -545,7 +545,7 @@ window.bulkResolveCategory = async function (category) {
 
   updateThreatGaugeAndROI(currentEventsList, totalEventsIngestedCount);
   renderFilteredEventsTable();
-  showToast(`Bulk resolved ${resolvedCount} events`, 'warning');
+  showToast(`Bulk resolved ${resolvedCount} events`, 'success');
 };
 
 /**
@@ -574,7 +574,7 @@ function setupAttackSimulator() {
     btn.innerHTML = '<span>Simulating Burst...</span>';
 
     triggerPipelineProgress();
-    showToast('Triggering Brute Force Attack Burst Simulation...', 'warning');
+    showToast('Triggering Brute Force Attack Burst Simulation...', 'info');
 
     try {
       const attackLines = [
@@ -730,7 +730,7 @@ function setupFileUpload() {
       analyzeBtn.innerHTML = '<span>Analyzing Log Telemetry...</span>';
 
       triggerPipelineProgress();
-      showToast(`Ingesting & analyzing ${file.name}...`, 'warning');
+      showToast(`Ingesting & analyzing ${file.name}...`, 'info');
 
       const formData = new FormData();
       formData.append('file', file);
@@ -753,7 +753,7 @@ function setupFileUpload() {
 
         if (res.ok) {
           const data = await res.json();
-          showToast(`Ingestion complete! Parsed ${data.events_processed || 0} events from ${file.name}`, 'warning');
+          showToast(`Ingestion complete! Parsed ${data.events_processed || 0} events from ${file.name}`, 'success');
           setSelectedFile(null);
           await fetchDashboardData();
         } else {
@@ -784,7 +784,7 @@ window.closeResetDataModal = function () {
 
 window.confirmResetData = async function () {
   closeResetDataModal();
-  showToast('Resetting all normalized SOC telemetry and active incidents...', 'warning');
+  showToast('Resetting all normalized SOC telemetry and active incidents...', 'info');
 
   try {
     const res = await fetch('/api/v1/dashboard/admin/reset-data', {
@@ -800,7 +800,7 @@ window.confirmResetData = async function () {
 
     if (res.ok) {
       const data = await res.json();
-      showToast(data.message || 'All SOC data reset successfully', 'warning');
+      showToast(data.message || 'All SOC data reset successfully', 'success');
       currentEventsList = [];
       currentIncidentsList = [];
       await fetchDashboardData();
@@ -834,7 +834,7 @@ async function triggerPresetScenario(type) {
       `2026-08-26T12:00:02Z auth_service Failed password for invalid user service_acct from 192.168.1.100 port 49154 ssh2`,
       `2026-08-26T12:00:03Z auth_service Failed password for invalid user sysadmin from 192.168.1.100 port 49155 ssh2`
     ].join('\n');
-    showToast('Executing Scenario A: SSH Brute Force (T1110)', 'warning');
+    showToast('Executing Scenario A: SSH Brute Force (T1110)', 'info');
   } else if (type === 'B') {
     payload = [
       `2026-08-26T12:00:00Z firewall_service Connection attempt to port 22 from 10.0.0.15 BLOCKED`,
@@ -843,13 +843,13 @@ async function triggerPresetScenario(type) {
       `2026-08-26T12:00:03Z firewall_service Connection attempt to port 3389 from 10.0.0.15 BLOCKED`,
       `2026-08-26T12:00:04Z firewall_service Connection attempt to port 8080 from 10.0.0.15 BLOCKED`
     ].join('\n');
-    showToast('Executing Scenario B: Port Scan Anomaly (T1046)', 'warning');
+    showToast('Executing Scenario B: Port Scan Anomaly (T1046)', 'info');
   } else if (type === 'C') {
     payload = [
       `10.0.0.15 - - [26/Aug/2026:12:00:01 +0000] "GET /api/v1/health HTTP/1.1" 200 120`,
       `10.0.0.15 - - [26/Aug/2026:12:00:05 +0000] "GET /dashboard HTTP/1.1" 200 8901`
     ].join('\n');
-    showToast('Executing Scenario C: Normal Benign Traffic', 'warning');
+    showToast('Executing Scenario C: Normal Benign Traffic', 'info');
   }
 
   try {
@@ -1215,7 +1215,7 @@ function initOfflineThreatMap(events) {
   `;
 }
 
-function showToast(message, type = 'warning') {
+function showToast(message, type = 'info') {
   let container = document.getElementById('toast-container');
   if (!container) {
     container = document.createElement('div');
@@ -1224,10 +1224,19 @@ function showToast(message, type = 'warning') {
     document.body.appendChild(container);
   }
 
+  const iconMap = {
+    success: '/vendor/icons/check-circle.svg',
+    warning: '/vendor/icons/alert-triangle.svg',
+    error: '/vendor/icons/x-circle.svg',
+    info: '/vendor/icons/activity.svg'
+  };
+
+  const iconSrc = iconMap[type] || iconMap.info;
+
   const toast = document.createElement('div');
   toast.className = `toast-banner toast-${type}`;
   toast.innerHTML = `
-    <span class="toast-icon"><img src="/vendor/icons/alert-triangle.svg" alt="" width="14" height="14" style="vertical-align: middle;"></span>
+    <span class="toast-icon"><img src="${iconSrc}" alt="" width="16" height="16" style="vertical-align: middle;"></span>
     <span class="toast-msg">${escapeHtml(message)}</span>
   `;
 
@@ -1247,7 +1256,7 @@ function setupAirGappedToggle() {
   const updateState = () => {
     isAirGappedMode = cb.checked;
     cb.setAttribute('aria-checked', isAirGappedMode ? 'true' : 'false');
-    showToast(`Air-Gapped Mode ${isAirGappedMode ? 'ENABLED (Local Engine Forced)' : 'DISABLED (Cloud AI Active)'}`, 'warning');
+    showToast(`Air-Gapped Mode ${isAirGappedMode ? 'ENABLED (Local Engine Forced)' : 'DISABLED (Cloud AI Active)'}`, 'success');
     if (label) {
       if (isAirGappedMode) {
         label.style.borderColor = 'var(--accent-hover)';
@@ -1314,7 +1323,7 @@ window.runMerkleVerification = async function () {
       </div>
     </div>
   `;
-  showToast('Web Crypto Merkle Hash Verification Succeeded', 'warning');
+  showToast('Web Crypto Merkle Hash Verification Succeeded', 'success');
 };
 
 window.testRuleInSandbox = function () {
@@ -1362,7 +1371,7 @@ window.testRuleInSandbox = function () {
       </div>
     </div>
   `;
-  showToast(`Rule tested: Matched ${matchCount} events in ${elapsedMs} ms`, 'warning');
+  showToast(`Rule tested: Matched ${matchCount} events in ${elapsedMs} ms`, 'success');
 };
 
 window.simulateTamperingInDashboard = async function (rawHash) {
@@ -1384,7 +1393,7 @@ window.simulateTamperingInDashboard = async function (rawHash) {
     });
     if (res.ok) {
       const data = await res.json();
-      showToast('Log Tampering Simulation Executed (Non-destructive)', 'warning');
+      showToast('Log Tampering Simulation Executed (Non-destructive)', 'info');
       if (resultBox) {
         resultBox.style.display = 'block';
         resultBox.innerHTML = `
@@ -1429,7 +1438,7 @@ function setupDownloadReport() {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
-      showToast('Threat Report CSV downloaded successfully', 'warning');
+      showToast('Threat Report CSV downloaded successfully', 'success');
     } catch (err) {
       console.error('Error downloading CSV report:', err);
       showToast('Error downloading report', 'error');
@@ -1757,7 +1766,7 @@ window.updateIncidentStatus = async function (incidentId, newStatus) {
     }
 
     if (res.ok) {
-      showToast(`Incident ${incidentId.substring(0, 12)} status updated to ${newStatus}`, 'warning');
+      showToast(`Incident ${incidentId.substring(0, 12)} status updated to ${newStatus}`, 'success');
       await updateIncidentsGrid();
     } else {
       showToast(`Failed to update status (${res.status})`, 'error');
@@ -1950,7 +1959,7 @@ window.updateEventStatus = async function (eventId, newStatus, selectEl) {
     }
 
     if (res.ok) {
-      showToast(`Incident status updated to ${newStatus}`, 'warning');
+      showToast(`Incident status updated to ${newStatus}`, 'success');
     } else {
       showToast(`Failed to update status (${res.status})`, 'error');
     }
@@ -2177,7 +2186,7 @@ window.runMerkleVerification = async function () {
         <strong>Telemetry Merkle Leaf Hash:</strong> ${escapeHtml(matchingEvent.raw_event_hash || targetHash)}
       </div>
     `;
-    showToast('Web Crypto SHA-256 Verification Passed', 'warning');
+    showToast('Web Crypto SHA-256 Verification Passed', 'success');
   } else {
     resultBox.style.display = 'block';
     resultBox.innerHTML = `
@@ -2197,7 +2206,7 @@ window.runRuleSandboxTest = function () {
   const resultBox = document.getElementById('rule-sandbox-result');
   if (!resultBox) return;
 
-  showToast('Evaluating YAML Rule against active telemetry buffer...', 'warning');
+  showToast('Evaluating YAML Rule against active telemetry buffer...', 'info');
 
   const matches = currentEventsList.filter(e => (e.threat_score || 0) >= 70 || e.threat_level === 'HIGH');
   resultBox.style.display = 'block';
