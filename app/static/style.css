@@ -123,24 +123,43 @@ body.light-mode {
   background-color: #d2b08a !important;
   color: #24140c !important;
 
-  --bg-dark: #d2b08a;
+  --bg-dark: #cba882;
   --bg-slate: #e5caaa;
   --bg-card: #e5caaa;
   --bg-card-hover: #eed6b9;
 
   --border-color: #bfa07c;
-  --border-glow-cyan: rgba(59, 7, 100, 0.3);
+  --border-glow-cyan: rgba(110, 41, 13, 0.35);
 
   --text-main: #24140c;
   --text-muted: #3d2417;
   --text-dim: #543422;
   --text-white: #120906;
 
-  --accent-primary: #3b0764;
-  --accent-hover: #5b21b6;
-  --accent-bg: rgba(59, 7, 100, 0.12);
-  --accent-border: rgba(59, 7, 100, 0.35);
+  /* NEW Light Mode Signature Accent: Warm Burnt Terracotta / Dark Copper (#6e290d) */
+  --accent-primary: #6e290d;
+  --accent-hover: #8c3613;
+  --accent-bg: rgba(110, 41, 13, 0.14);
+  --accent-border: rgba(110, 41, 13, 0.35);
 
+  /* Feature Area Overrides in Light Mode */
+  --feature-command: #6e290d;
+  --feature-command-bg: rgba(110, 41, 13, 0.14);
+  --feature-command-border: rgba(110, 41, 13, 0.35);
+
+  --feature-copilot: #6e290d;
+  --feature-copilot-bg: rgba(110, 41, 13, 0.14);
+  --feature-copilot-border: rgba(110, 41, 13, 0.35);
+
+  --neon-cyan: #6e290d;
+  --neon-cyan-bg: rgba(110, 41, 13, 0.14);
+  --neon-cyan-border: rgba(110, 41, 13, 0.35);
+
+  --neon-violet: #6e290d;
+  --neon-violet-bg: rgba(110, 41, 13, 0.14);
+  --neon-violet-border: rgba(110, 41, 13, 0.35);
+
+  /* Severity Signaling Palette in Light Mode */
   --severity-high: #7f1d1d;
   --severity-high-bg: rgba(127, 29, 29, 0.12);
   --severity-high-border: rgba(127, 29, 29, 0.35);
@@ -159,6 +178,69 @@ body.light-mode #tab-bar,
 body.light-mode .navbar {
   background: #c6a27c !important;
   border-bottom-color: #bfa07c !important;
+  box-shadow: 0 4px 14px rgba(66, 39, 25, 0.14) !important;
+}
+
+body.light-mode #log-upload-dropzone,
+body.light-mode #offline-vector-threat-map,
+body.light-mode #merkle-result-box,
+body.light-mode #rule-sandbox-result,
+body.light-mode #rule-sandbox-editor,
+body.light-mode .pipeline-track-card,
+body.light-mode .sample-code-pre,
+body.light-mode .copilot-messages > div {
+  background: #cba882 !important;
+  border-color: #bfa07c !important;
+  color: #120906 !important;
+}
+
+body.light-mode #analyze-logs-btn {
+  background: #6e290d !important;
+  color: #ffffff !important;
+  border-color: #58200a !important;
+}
+
+body.light-mode #analyze-logs-btn:disabled {
+  background: #bfa07c !important;
+  color: #543422 !important;
+  border-color: #a88a66 !important;
+  opacity: 0.7 !important;
+}
+
+body.light-mode .btn-primary {
+  background: #6e290d !important;
+  color: #ffffff !important;
+  border-color: #58200a !important;
+}
+
+body.light-mode .btn-primary:hover {
+  background: #8c3613 !important;
+}
+
+body.light-mode .btn-outline {
+  border-color: #6e290d !important;
+  color: #6e290d !important;
+}
+
+body.light-mode .btn-outline:hover {
+  background: rgba(110, 41, 13, 0.14) !important;
+}
+
+body.light-mode select,
+body.light-mode input[type="text"],
+body.light-mode input[type="password"],
+body.light-mode textarea {
+  background: #cba882 !important;
+  color: #120906 !important;
+  border-color: #bfa07c !important;
+}
+
+body.light-mode select:focus,
+body.light-mode input[type="text"]:focus,
+body.light-mode input[type="password"]:focus,
+body.light-mode textarea:focus {
+  border-color: #6e290d !important;
+  box-shadow: 0 0 0 2px rgba(110, 41, 13, 0.35) !important;
 }
 
 body.light-mode .panel-card,

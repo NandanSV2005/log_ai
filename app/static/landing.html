@@ -458,13 +458,13 @@
 
     .step-btn:hover {
       border-color: var(--accent-hover);
-      background: #111b2e;
+      background: var(--bg-card-hover);
     }
 
     .step-btn.active {
       border-color: var(--accent-hover);
-      background: rgba(139, 92, 246, 0.18);
-      box-shadow: 0 0 12px rgba(167, 139, 250, 0.3);
+      background: var(--accent-bg);
+      box-shadow: 0 0 12px var(--accent-border);
     }
 
     .step-num {
@@ -477,7 +477,7 @@
     .step-name {
       font-size: 0.78rem;
       font-weight: 700;
-      color: #ffffff;
+      color: var(--text-main);
     }
 
     .stepper-card {
@@ -502,7 +502,7 @@
     .step-detail-title {
       font-size: 1.05rem;
       font-weight: 800;
-      color: #ffffff;
+      color: var(--text-main);
     }
 
     .step-detail-module {
@@ -532,7 +532,7 @@
     }
 
     .sample-code-pre {
-      background: #060911;
+      background: var(--bg-dark);
       border: 1px solid var(--border-color);
       border-radius: 6px;
       padding: 1rem;

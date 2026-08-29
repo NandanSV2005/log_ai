@@ -16,7 +16,7 @@
   <div class="app-layout" style="display: flex; flex-direction: column; min-height: 100vh;">
 
     <!-- 1. STICKY TOP HEADER -->
-    <header role="banner" class="main-navbar" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.75rem 2rem; background: #060911; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 1000;">
+    <header role="banner" class="main-navbar" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.75rem 2rem; background: var(--bg-slate); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 1000;">
       <div class="brand" style="display: flex; align-items: center; gap: 0.75rem;">
         <div class="logo-shield" aria-label="LOG AI Logo Shield" style="width: 34px; height: 34px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--accent-hover);">
           <img src="/vendor/icons/shield.svg" alt="" width="20" height="20" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
@@ -62,7 +62,7 @@
     </header>
 
     <!-- 2. WORKFLOW-BASED TAB NAVIGATION BAR (PART 1) -->
-    <nav id="tab-bar" aria-label="SOC Operation Navigation Tabs" style="display: flex; gap: 2rem; background: #060911; padding: 0 2rem; border-bottom: 1px solid var(--border-color); position: sticky; top: 57px; z-index: 999;">
+    <nav id="tab-bar" aria-label="SOC Operation Navigation Tabs" style="display: flex; gap: 2rem; background: var(--bg-slate); padding: 0 2rem; border-bottom: 1px solid var(--border-color); position: sticky; top: 57px; z-index: 999;">
       <button class="tab-btn active" data-tab="executive" aria-label="Command View Tab" style="background: none; border: none; padding: 1rem 0; cursor: pointer; color: var(--accent-hover); border-bottom: 2px solid var(--accent-hover); font-weight: 600; font-size: 0.9rem; font-family: inherit; display: inline-flex; align-items: center; gap: 6px;">
         <img src="/vendor/icons/shield.svg" alt="" width="16" height="16" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
         Command
@@ -151,14 +151,14 @@
           </div>
 
           <!-- Drag and Drop Zone Container -->
-          <div id="log-upload-dropzone" style="border: 2px dashed var(--border-color); border-radius: 8px; padding: 2rem; text-align: center; background: #060911; transition: all 0.2s ease-in-out; cursor: pointer;">
+          <div id="log-upload-dropzone" style="border: 2px dashed var(--border-color); border-radius: 8px; padding: 2rem; text-align: center; background: var(--bg-dark); transition: all 0.2s ease-in-out; cursor: pointer;">
             <input type="file" id="upload-log-input" accept=".log,.txt,.csv" aria-label="Log file selection input" style="display: none;" />
             
             <div id="dropzone-prompt-wrapper">
               <div style="margin-bottom: 0.5rem;">
                 <img src="/vendor/icons/database.svg" alt="" width="36" height="36" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg); opacity: 0.8;">
               </div>
-              <div style="font-size: 0.95rem; font-weight: 700; color: #ffffff; margin-bottom: 4px;">
+              <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">
                 Drag &amp; drop server log files here, or <span id="browse-files-trigger" style="color: var(--accent-hover); text-decoration: underline; cursor: pointer;">browse</span>
               </div>
               <div style="font-size: 0.78rem; color: var(--text-muted);">
@@ -167,10 +167,10 @@
             </div>
 
             <!-- Selected File Confirmation Box -->
-            <div id="dropzone-selected-box" style="display: none; background: rgba(139, 92, 246, 0.1); border: 1px solid var(--accent-border); border-radius: 6px; padding: 14px; margin-top: 4px;">
+            <div id="dropzone-selected-box" style="display: none; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; padding: 14px; margin-top: 4px;">
               <div style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
                 <img src="/vendor/icons/check-circle.svg" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
-                <span style="font-size: 0.88rem; color: #ffffff; font-weight: 700;">Selected File:</span>
+                <span style="font-size: 0.88rem; color: var(--text-main); font-weight: 700;">Selected File:</span>
                 <code id="selected-filename-display" class="font-mono" style="color: var(--accent-hover); background: var(--bg-slate); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border-color); font-size: 0.85rem;">filename.log</code>
                 <span id="selected-filesize-display" class="font-mono" style="font-size: 0.75rem; color: var(--text-muted);">(0 KB)</span>
                 <button id="change-file-btn" class="btn-outline" style="font-size: 0.72rem; padding: 2px 8px; margin-left: 6px;">Change File</button>
@@ -190,7 +190,7 @@
               </button>
             </div>
 
-            <button id="analyze-logs-btn" class="btn-primary" disabled style="padding: 0.6rem 1.6rem; font-size: 0.88rem; font-weight: 700; opacity: 0.4; cursor: not-allowed;">
+            <button id="analyze-logs-btn" class="btn-primary" disabled style="padding: 0.6rem 1.6rem; font-size: 0.88rem; font-weight: 700; cursor: not-allowed;">
               Analyze Logs &rarr;
             </button>
           </div>
@@ -298,7 +298,8 @@
               ZERO NETWORK CALLS &bull; 100% OFFLINE
             </span>
           </div>
-          <div id="offline-vector-threat-map" style="height: 520px; width: 100%; border-radius: 8px; background: #060911; border: 1px solid var(--border-color); position: relative; overflow: hidden;">
+          </div>
+          <div id="offline-vector-threat-map" style="height: 520px; width: 100%; border-radius: 8px; background: var(--bg-dark); border: 1px solid var(--border-color); position: relative; overflow: hidden;">
             <!-- Rendered by initOfflineThreatMap() in app.js -->
           </div>
         </section>
@@ -363,11 +364,11 @@
             </div>
             <div style="display: flex; gap: 12px; margin-bottom: 1.25rem; flex-wrap: wrap;">
               <input type="text" id="merkle-verify-input" placeholder="Paste event Merkle SHA-256 hash..." aria-label="Merkle Hash to verify" class="font-mono"
-                style="flex: 1; min-width: 320px; padding: 0.7rem 1rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-slate); color: white; font-size: 0.88rem;">
+                style="flex: 1; min-width: 320px; padding: 0.7rem 1rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-slate); color: var(--text-main); font-size: 0.88rem;">
               <button onclick="runMerkleVerification()" class="btn-primary" aria-label="Execute Web Crypto Merkle Hash Verification" style="padding: 0.7rem 1.4rem;">Verify Hash</button>
               <button onclick="simulateTamperingInDashboard(document.getElementById('merkle-verify-input').value)" class="btn-danger" aria-label="Simulate Log Tampering on Hash" style="padding: 0.7rem 1.4rem;"><img src="/vendor/icons/alert-triangle.svg" width="14" height="14"> Simulate Tampering</button>
             </div>
-            <div id="merkle-result-box" style="display: block; background: #060911; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; word-break: break-all; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.6; min-height: 120px;">
+            <div id="merkle-result-box" style="display: block; background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; word-break: break-all; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.6; min-height: 120px;">
               <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
                 <span class="pulse-dot" style="width: 8px; height: 8px; background: var(--accent-hover); border-radius: 50%; display: inline-block;"></span>
                 <strong style="color: var(--accent-hover);">Verifier Ready:</strong> Click "Verify Hash" or "Simulate Tampering" above to test cryptographic verification live.
@@ -388,7 +389,7 @@
             <div style="font-size: 0.82rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 1.25rem; background: rgba(16, 185, 129, 0.05); padding: 12px 16px; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.2);">
               <strong>How it works:</strong> Evaluates custom YAML threat specifications against the active telemetry event buffer in real time. Matches filter by event attributes and threshold counts to instantly trigger alert flags and remediation actions.
             </div>
-            <textarea id="rule-sandbox-editor" aria-label="YAML Rule Specification Editor" class="font-mono" rows="8" style="width: 100%; padding: 1rem; border-radius: 6px; border: 1px solid var(--border-color); background: #060911; color: var(--accent-hover); font-size: 0.88rem; margin-bottom: 1.25rem; line-height: 1.5;">
+            <textarea id="rule-sandbox-editor" aria-label="YAML Rule Specification Editor" class="font-mono" rows="8" style="width: 100%; padding: 1rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-dark); color: var(--text-main); font-size: 0.88rem; margin-bottom: 1.25rem; line-height: 1.5;">
 id: CUSTOM_RULE_01
 name: Rapid Failed SSH Password Spray
 severity: HIGH
@@ -398,7 +399,7 @@ conditions:
   threshold_count: 3
 </textarea>
             <button id="btn-test-rule" onclick="testRuleInSandbox()" class="btn-primary" aria-label="Test YAML Rule Against Memory Buffer" style="padding: 0.7rem 1.5rem; margin-bottom: 1.25rem;">Test Rule Against Buffer</button>
-            <div id="rule-sandbox-result" style="display: block; background: #060911; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; word-break: break-all; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.6; min-height: 120px;">
+            <div id="rule-sandbox-result" style="display: block; background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; word-break: break-all; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.6; min-height: 120px;">
               <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
                 <span class="pulse-dot" style="width: 8px; height: 8px; background: var(--severity-low); border-radius: 50%; display: inline-block;"></span>
                 <strong style="color: var(--severity-low);">Sandbox Ready:</strong> Click "Test Rule Against Buffer" above to evaluate heuristics against recent events.
@@ -460,7 +461,7 @@ conditions:
             </p>
             <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
               <label for="polling-interval-select" style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);">Polling Refresh Rate:</label>
-              <select id="polling-interval-select" onchange="updatePollingIntervalPreference(this.value)" aria-label="Select Stream Polling Refresh Rate" style="padding: 0.5rem 1rem; border-radius: 6px; background: #060911; color: #fff; border: 1px solid var(--border-color); font-size: 0.85rem;">
+              <select id="polling-interval-select" onchange="updatePollingIntervalPreference(this.value)" aria-label="Select Stream Polling Refresh Rate" style="padding: 0.5rem 1rem; border-radius: 6px; background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border-color); font-size: 0.85rem;">
                 <option value="2000">2 Seconds (Real-Time)</option>
                 <option value="5000">5 Seconds (Balanced)</option>
                 <option value="10000">10 Seconds (Low Network Impact)</option>
@@ -482,7 +483,7 @@ conditions:
             </p>
             <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
               <label for="map-mode-select" style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);">Default Map Engine Mode:</label>
-              <select id="map-mode-select" onchange="updateMapModePreference(this.value)" aria-label="Select Default Map Engine Mode" style="padding: 0.5rem 1rem; border-radius: 6px; background: #060911; color: #fff; border: 1px solid var(--border-color); font-size: 0.85rem;">
+              <select id="map-mode-select" onchange="updateMapModePreference(this.value)" aria-label="Select Default Map Engine Mode" style="padding: 0.5rem 1rem; border-radius: 6px; background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border-color); font-size: 0.85rem;">
                 <option value="live">Prefer Live Tiles when Online (CARTO Dark)</option>
                 <option value="offline">Always Use 100% Offline SVG Map</option>
               </select>
@@ -515,11 +516,11 @@ conditions:
     <!-- INCIDENT DETAIL DRILL-IN MODAL / PANEL -->
     <div id="incident-detail-modal" role="dialog" aria-label="Incident Detail Drill-In Modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 2000; align-items: center; justify-content: center; padding: 2rem;">
       <div style="background: var(--bg-slate); border: 1px solid var(--border-color); border-radius: 12px; width: 100%; max-width: 900px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.5);">
-        <div style="background: #060911; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+        <div style="background: var(--bg-dark); padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
           <div style="display: flex; align-items: center; gap: 10px;">
             <img src="/vendor/icons/git-branch.svg" alt="" width="20" height="20" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
             <div>
-              <h3 id="inc-detail-id" class="font-mono" style="color: #ffffff; font-size: 1rem; margin: 0; font-weight: 700;">INCIDENT DRILL-IN</h3>
+              <h3 id="inc-detail-id" class="font-mono" style="color: var(--text-main); font-size: 1rem; margin: 0; font-weight: 700;">INCIDENT DRILL-IN</h3>
               <span id="inc-detail-ip" class="font-mono" style="color: var(--accent-hover); font-size: 0.8rem;">IP: 0.0.0.0</span>
             </div>
           </div>
@@ -527,10 +528,10 @@ conditions:
         </div>
 
         <div style="padding: 1.5rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 1.5rem;">
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; background: #060911; padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; background: var(--bg-dark); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
             <div>
               <div style="font-size: 0.72rem; color: var(--text-muted);">EVENT COUNT</div>
-              <div id="inc-detail-count" class="font-mono" style="font-size: 1.2rem; font-weight: 700; color: #ffffff;">0 events</div>
+              <div id="inc-detail-count" class="font-mono" style="font-size: 1.2rem; font-weight: 700; color: var(--text-main);">0 events</div>
             </div>
             <div>
               <div style="font-size: 0.72rem; color: var(--text-muted);">MAX THREAT SCORE</div>
@@ -542,7 +543,7 @@ conditions:
             </div>
             <div>
               <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px;">INCIDENT STATUS</div>
-              <select id="inc-detail-status-select" aria-label="Incident Status Dropdown Selector" style="background: var(--bg-slate); border: 1px solid var(--border-color); color: #ffffff; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; width: 100%;">
+              <select id="inc-detail-status-select" aria-label="Incident Status Dropdown Selector" style="background: var(--bg-slate); border: 1px solid var(--border-color); color: var(--text-main); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; width: 100%;">
                 <option value="New">New</option>
                 <option value="Investigating">Investigating</option>
                 <option value="Resolved">Resolved</option>
@@ -581,7 +582,7 @@ conditions:
     <div id="remediation-modal" role="dialog" aria-label="Remediation Playbook Modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 2000; align-items: center; justify-content: center; padding: 2rem;">
       <div style="background: var(--bg-slate); border: 1px solid var(--border-color); border-radius: 12px; width: 100%; max-width: 600px; padding: 1.5rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-          <h3 style="color: white; font-size: 1.1rem; margin: 0;">Automated Remediation Playbook</h3>
+          <h3 style="color: var(--text-main); font-size: 1.1rem; margin: 0;">Automated Remediation Playbook</h3>
           <button onclick="closeRemediationModal()" aria-label="Close Remediation Playbook Modal" style="background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer;">&times;</button>
         </div>
         <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
@@ -606,7 +607,7 @@ conditions:
           </h3>
           <button onclick="closeResetDataModal()" aria-label="Close Reset Confirmation Modal" style="background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer;">&times;</button>
         </div>
-        <p style="font-size: 0.88rem; color: #e5e5e5; line-height: 1.5; margin-bottom: 1.25rem;">
+        <p style="font-size: 0.88rem; color: var(--text-main); line-height: 1.5; margin-bottom: 1.25rem;">
           Are you sure you want to clear all normalized telemetry events and active incident trackers? This will reset all dashboard KPIs to zero and clear recent event streams while preserving raw forensic audit logs.
         </p>
         <div style="display: flex; justify-content: flex-end; gap: 10px;">
@@ -637,7 +638,7 @@ conditions:
         </div>
 
         <div id="copilot-messages" class="copilot-messages" style="display: flex; flex-direction: column; gap: 8px; padding: 12px; height: 320px; overflow-y: auto;">
-          <div style="background: #0a0a0a; border: 1px solid #262626; color: #e5e5e5; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; max-width: 85%;">
+          <div style="background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; max-width: 85%;">
             <div style="margin-bottom: 6px;">
               <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); padding: 2px 6px; border-radius: 4px; font-size: 0.68rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
                 <img src="/vendor/icons/shield.svg" alt="" width="10" height="10"> LOCAL ENGINE (AIR-GAPPED SOC)
@@ -647,14 +648,14 @@ conditions:
           </div>
         </div>
 
-        <div style="padding: 6px 12px; background: #060911; border-top: 1px solid var(--border-color); display: flex; gap: 6px; overflow-x: auto;">
+        <div style="padding: 6px 12px; background: var(--bg-dark); border-top: 1px solid var(--border-color); display: flex; gap: 6px; overflow-x: auto;">
           <button onclick="document.getElementById('copilot-input').value='Summarize high severity anomalies'; document.getElementById('copilot-send').click();" class="btn-outline" style="font-size: 0.68rem; padding: 2px 6px; white-space: nowrap;">High Threats</button>
           <button onclick="document.getElementById('copilot-input').value='Explain Merkle leaf verification'; document.getElementById('copilot-send').click();" class="btn-outline" style="font-size: 0.68rem; padding: 2px 6px; white-space: nowrap;">Merkle Integrity</button>
           <button onclick="document.getElementById('copilot-input').value='What remediation steps are needed?'; document.getElementById('copilot-send').click();" class="btn-outline" style="font-size: 0.68rem; padding: 2px 6px; white-space: nowrap;">Playbooks</button>
         </div>
 
-        <div class="copilot-input-bar" style="display: flex; padding: 8px; gap: 6px; border-top: 1px solid var(--border-color); background: #090e1a;">
-          <input type="text" id="copilot-input" placeholder="Ask AI Copilot..." aria-label="Copilot Query Input" style="flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-slate); color: white; font-size: 0.82rem;">
+        <div class="copilot-input-bar" style="display: flex; padding: 8px; gap: 6px; border-top: 1px solid var(--border-color); background: var(--bg-dark);">
+          <input type="text" id="copilot-input" placeholder="Ask AI Copilot..." aria-label="Copilot Query Input" style="flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-slate); color: var(--text-main); font-size: 0.82rem;">
           <button id="copilot-send" class="btn-primary" style="padding: 6px 12px; font-size: 0.8rem;">Send</button>
         </div>
       </div>
