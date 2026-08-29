@@ -19,7 +19,7 @@
     <header role="banner" class="main-navbar" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.75rem 2rem; background: #060911; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 1000;">
       <div class="brand" style="display: flex; align-items: center; gap: 0.75rem;">
         <div class="logo-shield" aria-label="LOG AI Logo Shield" style="width: 34px; height: 34px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--accent-hover);">
-          <img src="/vendor/icons/shield.svg" alt="" width="20" height="20" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
+          <img src="/vendor/icons/shield.svg" alt="" width="20" height="20" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
         </div>
         <div>
           <h1 style="color: white; font-size: 1.1rem; margin: 0; font-weight: 800; display: flex; align-items: center; gap: 8px;">
@@ -64,7 +64,7 @@
     <!-- 2. WORKFLOW-BASED TAB NAVIGATION BAR (PART 1) -->
     <nav id="tab-bar" aria-label="SOC Operation Navigation Tabs" style="display: flex; gap: 2rem; background: #060911; padding: 0 2rem; border-bottom: 1px solid var(--border-color); position: sticky; top: 57px; z-index: 999;">
       <button class="tab-btn active" data-tab="executive" aria-label="Command View Tab" style="background: none; border: none; padding: 1rem 0; cursor: pointer; color: var(--accent-hover); border-bottom: 2px solid var(--accent-hover); font-weight: 600; font-size: 0.9rem; font-family: inherit; display: inline-flex; align-items: center; gap: 6px;">
-        <img src="/vendor/icons/shield.svg" alt="" width="16" height="16" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
+        <img src="/vendor/icons/shield.svg" alt="" width="16" height="16" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
         Command
       </button>
       <button class="tab-btn" data-tab="threat-map" aria-label="Threat Map View Tab" style="background: none; border: none; padding: 1rem 0; cursor: pointer; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; font-family: inherit; display: inline-flex; align-items: center; gap: 6px;">
@@ -135,7 +135,7 @@
           <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
             <div>
               <h2 style="font-size: 1.1rem; font-weight: 800; color: #ffffff; margin: 0; display: flex; align-items: center; gap: 8px;">
-                <img src="/vendor/icons/database.svg" alt="" width="20" height="20" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
+                <img src="/vendor/icons/database.svg" alt="" width="20" height="20" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
                 Sovereign Server Log Upload &amp; Analysis Engine
               </h2>
               <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0;">
@@ -156,7 +156,7 @@
             
             <div id="dropzone-prompt-wrapper">
               <div style="margin-bottom: 0.5rem;">
-                <img src="/vendor/icons/database.svg" alt="" width="36" height="36" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg); opacity: 0.8;">
+                <img src="/vendor/icons/database.svg" alt="" width="36" height="36" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg); opacity: 0.8;">
               </div>
               <div style="font-size: 0.95rem; font-weight: 700; color: #ffffff; margin-bottom: 4px;">
                 Drag &amp; drop server log files here, or <span id="browse-files-trigger" style="color: var(--accent-hover); text-decoration: underline; cursor: pointer;">browse</span>
@@ -167,9 +167,9 @@
             </div>
 
             <!-- Selected File Confirmation Box -->
-            <div id="dropzone-selected-box" style="display: none; background: rgba(2, 132, 199, 0.1); border: 1px solid var(--accent-border); border-radius: 6px; padding: 14px; margin-top: 4px;">
+            <div id="dropzone-selected-box" style="display: none; background: rgba(139, 92, 246, 0.1); border: 1px solid var(--accent-border); border-radius: 6px; padding: 14px; margin-top: 4px;">
               <div style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
-                <img src="/vendor/icons/check-circle.svg" width="18" height="18" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
+                <img src="/vendor/icons/check-circle.svg" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
                 <span style="font-size: 0.88rem; color: #ffffff; font-weight: 700;">Selected File:</span>
                 <code id="selected-filename-display" class="font-mono" style="color: var(--accent-hover); background: var(--bg-slate); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border-color); font-size: 0.85rem;">filename.log</code>
                 <span id="selected-filesize-display" class="font-mono" style="font-size: 0.75rem; color: var(--text-muted);">(0 KB)</span>
@@ -234,7 +234,7 @@
         <section aria-label="Correlated Active Incidents Section" style="margin-bottom: 2rem;">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
             <h2 style="font-size: 1.1rem; font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 8px; margin: 0;">
-              <img src="/vendor/icons/git-branch.svg" alt="" width="18" height="18" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
+              <img src="/vendor/icons/git-branch.svg" alt="" width="18" height="18" style="filter: invert(65%) sepia(80%) saturate(1000%) hue-rotate(5deg);">
               Correlated Security Incidents
             </h2>
             <span id="incidents-count-badge" class="font-mono" style="font-size: 0.78rem; color: var(--text-muted); background: var(--bg-slate); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 4px;">
@@ -244,7 +244,7 @@
 
           <div id="incidents-grid-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 1.25rem;">
             <div style="grid-column: 1 / -1; background: var(--bg-slate); border: 1px solid var(--border-color); border-radius: 8px; padding: 2.5rem; text-align: center; color: var(--text-muted);">
-              <img src="/vendor/icons/check-circle.svg" alt="" width="28" height="28" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg); margin-bottom: 0.5rem;">
+              <img src="/vendor/icons/check-circle.svg" alt="" width="28" height="28" style="filter: invert(65%) sepia(70%) saturate(1000%) hue-rotate(120deg); margin-bottom: 0.5rem;">
               <div style="font-size: 0.95rem; font-weight: 700; color: #ffffff;">No Active Incidents</div>
               <div style="font-size: 0.82rem; margin-top: 4px;">All telemetry nominal. Trigger a simulation or upload logs to analyze incident clusters.</div>
             </div>
@@ -521,7 +521,7 @@ conditions:
       <div style="background: var(--bg-slate); border: 1px solid var(--border-color); border-radius: 12px; width: 100%; max-width: 900px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.5);">
         <div style="background: #060911; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
           <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="/vendor/icons/git-branch.svg" alt="" width="20" height="20" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
+            <img src="/vendor/icons/git-branch.svg" alt="" width="20" height="20" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
             <div>
               <h3 id="inc-detail-id" class="font-mono" style="color: #ffffff; font-size: 1rem; margin: 0; font-weight: 700;">INCIDENT DRILL-IN</h3>
               <span id="inc-detail-ip" class="font-mono" style="color: var(--accent-hover); font-size: 0.8rem;">IP: 0.0.0.0</span>
@@ -625,7 +625,7 @@ conditions:
     <div id="copilot-widget" class="copilot-widget">
       <button id="copilot-toggle" class="copilot-toggle-btn" aria-label="Toggle AI SOC Copilot Chat Assistant">
         <div class="copilot-btn-content">
-          <img src="/vendor/icons/cpu.svg" alt="" width="20" height="20" style="filter: invert(70%) sepia(80%) saturate(1000%) hue-rotate(170deg);">
+          <img src="/vendor/icons/cpu.svg" alt="" width="20" height="20" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
           <span>AI Copilot</span>
         </div>
         <span class="copilot-pulse-dot"></span>
@@ -634,7 +634,7 @@ conditions:
       <div id="copilot-panel" class="copilot-panel" style="display: none;">
         <div class="copilot-header">
           <div class="copilot-title">
-            <h4><img src="/vendor/icons/cpu.svg" alt="" width="16" height="16" style="filter: invert(70%) sepia(80%) saturate(1000%) hue-rotate(170deg); vertical-align: middle; margin-right: 6px;"> AI SOC Assistant</h4>
+            <h4><img src="/vendor/icons/cpu.svg" alt="" width="16" height="16" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg); vertical-align: middle; margin-right: 6px;"> AI SOC Assistant</h4>
             <span class="copilot-subtitle">Zero-Loss Forensics &amp; Threat Intelligence</span>
           </div>
           <button id="copilot-close" class="copilot-close-btn" aria-label="Close Copilot Panel">&times;</button>
