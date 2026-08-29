@@ -1899,9 +1899,9 @@ function renderFilteredEventsTable() {
       : 'System Secure. No anomalies detected. Upload a .LOG file or run a simulation to begin analysis.';
     tbody.innerHTML = `
       <tr class="empty-state-row">
-        <td colspan="8" style="text-align: center; padding: 3rem 1.5rem; color: var(--text-muted);">
-          <div style="margin-bottom: 0.5rem;"><img src="/vendor/icons/shield.svg" alt="" width="32" height="32" style="opacity: 0.7;"></div>
-          <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.25rem;">${emptyMsg}</div>
+        <td colspan="8" style="text-align: center; padding: 2.5rem 1.5rem; color: var(--text-muted);">
+          <img src="/vendor/icons/shield.svg" alt="" width="22" height="22" style="opacity: 0.4; display: block; margin: 0 auto 0.5rem;">
+          <div style="font-family: var(--font-sans); font-size: 0.82rem; font-weight: 400; color: var(--text-muted); line-height: 1.5;">${emptyMsg}</div>
         </td>
       </tr>
     `;

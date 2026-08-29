@@ -263,7 +263,7 @@
               <img src="/vendor/icons/database.svg" alt="" width="18" height="18">
               Live Telemetry Event Stream &amp; Merkle Audit Trail
             </h2>
-            <span id="table-count-badge" class="table-subtitle font-mono">Showing 0 of 0 events</span>
+            <span id="table-count-badge" class="table-subtitle">Showing 0 of 0 events &bull; Click row for raw evidence</span>
           </div>
           <div class="table-responsive">
             <table class="event-table">
@@ -281,8 +281,11 @@
               </thead>
               <tbody id="event-stream-body">
                 <tr class="empty-state-row">
-                  <td colspan="8" style="text-align: center; padding: 3rem 1.5rem; color: var(--text-muted);">
-                    System Secure. No anomalies detected. Upload a .LOG file or run a simulation to begin analysis.
+                  <td colspan="8" style="text-align: center; padding: 2.5rem 1.5rem; color: var(--text-muted);">
+                    <img src="/vendor/icons/shield.svg" alt="" width="22" height="22" style="opacity: 0.4; display: block; margin: 0 auto 0.5rem;">
+                    <div style="font-family: var(--font-sans); font-size: 0.82rem; font-weight: 400; color: var(--text-muted); line-height: 1.5;">
+                      System Secure. No anomalies detected. Upload a .LOG file or run a simulation to begin analysis.
+                    </div>
                   </td>
                 </tr>
               </tbody>
