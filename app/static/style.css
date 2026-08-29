@@ -2680,3 +2680,22 @@ body.light-mode .copilot-msg.user-msg .msg-bubble {
   background: #0a0a0a;
   border-top: 1px solid #262626;
 }
+
+/* Minimal App Footer (index.html, login.html, register.html) */
+.app-footer-minimal {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-slate);
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  margin-top: auto;
+  width: 100%;
+}
+
+.app-footer-minimal strong {
+  color: var(--text-main);
+  font-weight: 700;
+}

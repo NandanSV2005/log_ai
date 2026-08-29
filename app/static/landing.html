@@ -687,7 +687,131 @@
       overflow-x: auto;
       white-space: nowrap;
     }
-    .stream-row:last-child { border-bottom: none; }
+    /* FOOTER STYLES */
+    .landing-footer {
+      background: var(--bg-slate);
+      border-top: 1px solid var(--border-color);
+      padding: 3.5rem 0 1.75rem 0;
+      margin-top: 4rem;
+    }
+
+    .footer-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1.5fr;
+      gap: 2.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 1.75rem;
+      }
+    }
+
+    .footer-brand-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 0.75rem;
+    }
+
+    .footer-brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: 0.5px;
+    }
+
+    .footer-badge {
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--accent-bg);
+      color: var(--accent-hover);
+      border: 1px solid var(--accent-border);
+      letter-spacing: 0.5px;
+    }
+
+    .footer-brand-tagline {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      max-width: 380px;
+    }
+
+    .footer-col-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .footer-nav-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .footer-link {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+
+    .footer-link:hover {
+      color: var(--accent-hover);
+    }
+
+    .footer-badges-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .footer-pillar-pill {
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+
+    .footer-bottom-bar {
+      border-top: 1px solid var(--border-color);
+      padding-top: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-copyright-text {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    .copyright-brand {
+      font-weight: 700;
+      color: var(--text-main);
+    }
 
     .badge-ip {
       color: var(--accent-hover);
@@ -1070,7 +1194,7 @@
       </section>
 
       <!-- SECTION 1: ANIMATED PIPELINE STEPPER -->
-      <section class="landing-section" aria-label="Ingestion and Analysis Pipeline Stepper">
+      <section id="pipeline-architecture" class="landing-section" aria-label="Ingestion and Analysis Pipeline Stepper">
         <div class="section-header">
           <span class="section-tag font-mono">PIPELINE ARCHITECTURE</span>
           <h2 class="section-title">6-Stage Zero-Loss Telemetry Processing</h2>
@@ -1119,7 +1243,7 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
       </section>
 
       <!-- SECTION 2: INTERACTIVE PROTOTYPE PREVIEW -->
-      <section class="landing-section" aria-label="Interactive Prototype Preview">
+      <section id="console-preview" class="landing-section" aria-label="Interactive Prototype Preview">
         <div class="section-header">
           <span class="section-tag font-mono">SOC CONSOLE PREVIEW</span>
           <h2 class="section-title">Telemetry Output &amp; Console Intelligence</h2>
@@ -1211,7 +1335,7 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
       </section>
 
       <!-- SECTION 3: ROI / EFFICIENCY ESTIMATOR -->
-      <section class="landing-section" aria-label="ROI and Efficiency Estimator">
+      <section id="financial-impact" class="landing-section" aria-label="ROI and Efficiency Estimator">
         <div class="section-header">
           <span class="section-tag font-mono">FINANCIAL IMPACT ESTIMATOR</span>
           <h2 class="section-title">Calculate SOC Efficiency &amp; MTTR Reduction</h2>
@@ -1266,7 +1390,7 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
       </section>
 
       <!-- SECTION 4: USE CASES -->
-      <section class="landing-section" aria-label="Perimeter Security Use Cases">
+      <section id="perimeter-targets" class="landing-section" aria-label="Perimeter Security Use Cases">
         <div class="section-header">
           <span class="section-tag font-mono">PERIMETER TARGETS</span>
           <h2 class="section-title">Supported Perimeter Security Appliances</h2>
@@ -1331,7 +1455,7 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
       </section>
 
       <!-- SECTION 5: ARCHITECTURE / READINESS STRIP -->
-      <section class="landing-section" aria-label="Architecture and Readiness Specifications" style="margin-bottom: 2rem;">
+      <section id="architecture-readiness" class="landing-section" aria-label="Architecture and Readiness Specifications" style="margin-bottom: 2rem;">
         <div class="readiness-strip">
           <div class="readiness-badge">
             <img src="/vendor/icons/check-circle.svg" alt="" width="16" height="16">
@@ -1358,9 +1482,55 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
     </main>
 
     <footer class="landing-footer" role="contentinfo">
-      <div class="footer-inner">
-        <div class="footer-brand-text">
-          <strong style="color: #ffffff;">LOG AI Security Platform</strong> &copy; 2026 LOG AI Inc. All rights reserved. Self-hosted air-gapped deployment architecture.
+      <div class="footer-container">
+        <div class="footer-grid">
+          <!-- COLUMN 1: BRAND & MISSION -->
+          <div class="footer-col footer-col-brand">
+            <div class="footer-brand-header">
+              <div class="logo-shield" style="width: 28px; height: 28px; background: #10b981; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #0a0a0a;">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  <path d="m9 12 2 2 4-4"></path>
+                </svg>
+              </div>
+              <span class="footer-brand-title">LOG AI</span>
+              <span class="footer-badge font-mono">ENTERPRISE SOC</span>
+            </div>
+            <p class="footer-brand-tagline">
+              Universal Log Pre-processing Framework for next-generation SIEM and autonomous SOC security pipelines.
+            </p>
+          </div>
+
+          <!-- COLUMN 2: QUICK NAVIGATION -->
+          <div class="footer-col">
+            <h3 class="footer-col-title font-mono">PLATFORM NAVIGATION</h3>
+            <ul class="footer-nav-list">
+              <li><a href="#pipeline-architecture" class="footer-link">Pipeline Architecture</a></li>
+              <li><a href="#console-preview" class="footer-link">Console Preview</a></li>
+              <li><a href="#financial-impact" class="footer-link">Efficiency Estimator</a></li>
+              <li><a href="#perimeter-targets" class="footer-link">Perimeter Appliances</a></li>
+              <li><a href="#architecture-readiness" class="footer-link">Architecture &amp; Readiness</a></li>
+            </ul>
+          </div>
+
+          <!-- COLUMN 3: DEPLOYMENT & INTEGRITY BADGES -->
+          <div class="footer-col">
+            <h3 class="footer-col-title font-mono">DEPLOYMENT &amp; INTEGRITY</h3>
+            <div class="footer-badges-list">
+              <span class="footer-pillar-pill font-mono">OCSF-Aligned Schema</span>
+              <span class="footer-pillar-pill font-mono">Air-Gapped Ready</span>
+              <span class="footer-pillar-pill font-mono">Container-Native (Docker)</span>
+              <span class="footer-pillar-pill font-mono">Forensic Chain-of-Custody</span>
+              <span class="footer-pillar-pill font-mono">Tamper-Evident Audit Log</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOTTOM BAR -->
+        <div class="footer-bottom-bar">
+          <div class="footer-copyright-text">
+            <span class="copyright-brand">LOG AI Security Platform</span> &copy; 2026 LOG AI Inc. All rights reserved. Self-hosted air-gapped deployment architecture.
+          </div>
         </div>
       </div>
     </footer>
