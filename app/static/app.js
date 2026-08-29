@@ -930,6 +930,20 @@ function initCharts() {
         labels: [],
         datasets: [
           {
+            label: 'High Threat Alerts',
+            data: [],
+            borderColor: '#ef4444',
+            backgroundColor: 'rgba(239, 68, 68, 0.2)',
+            borderWidth: 2.5,
+            pointBackgroundColor: '#ef4444',
+            pointBorderColor: '#ffffff',
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            fill: false,
+            tension: 0.35,
+            order: 1
+          },
+          {
             label: 'Total Ingested Events',
             data: [],
             borderColor: '#10b981',
@@ -937,19 +951,9 @@ function initCharts() {
             borderWidth: 2,
             pointBackgroundColor: '#10b981',
             pointRadius: 3,
-            fill: true,
+            fill: 'origin',
             tension: 0.35,
-          },
-          {
-            label: 'High Threat Alerts',
-            data: [],
-            borderColor: '#f43f5e',
-            backgroundColor: 'rgba(244, 63, 94, 0.15)',
-            borderWidth: 2,
-            pointBackgroundColor: '#f43f5e',
-            pointRadius: 3,
-            fill: true,
-            tension: 0.35,
+            order: 2
           }
         ]
       },
@@ -1526,8 +1530,8 @@ async function updateStats() {
   if (ingestionVolumeChart) {
     const nowStr = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
     ingestionVolumeChart.data.labels.push(nowStr);
-    ingestionVolumeChart.data.datasets[0].data.push(totalEvents);
-    ingestionVolumeChart.data.datasets[1].data.push(highCount);
+    ingestionVolumeChart.data.datasets[0].data.push(highCount);
+    ingestionVolumeChart.data.datasets[1].data.push(totalEvents);
 
     if (ingestionVolumeChart.data.labels.length > MAX_CHART_POINTS) {
       ingestionVolumeChart.data.labels.shift();

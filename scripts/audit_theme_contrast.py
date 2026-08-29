@@ -119,9 +119,16 @@ JS_CONTRAST_SNIPPET = r"""
         const isLargeText = fontSizePx >= 24 || (fontSizePx >= 18.66 && isBold);
         const requiredRatio = isLargeText ? 3.0 : 4.5;
 
-        const isFailure = ratio < requiredRatio;
+        const isLightMode = document.body.classList.contains('light-mode') || document.documentElement.classList.contains('light-mode');
+        const bgLuminance = getLuminance(bgColor);
+        const isInteractiveControl = el.tagName === 'BUTTON' || el.tagName === 'A' || el.tagName === 'INPUT' || el.classList.contains('btn') || el.classList.contains('btn-primary') || el.classList.contains('btn-submit');
+        const isDarkSurfaceInLightMode = isLightMode && !isInteractiveControl && bgLuminance < 0.20;
+
+        const isContrastFailure = ratio < requiredRatio;
+        const isFailure = isContrastFailure || isDarkSurfaceInLightMode;
 
         if (isFailure) {
+            let reason = isContrastFailure ? `Contrast ${ratio.toFixed(2)}:1 < ${requiredRatio}:1` : `Dark surface (L=${bgLuminance.toFixed(2)}) in Light Mode`;
             results.push({
                 tagName: el.tagName.toLowerCase(),
                 id: el.id || null,
@@ -131,6 +138,7 @@ JS_CONTRAST_SNIPPET = r"""
                 bg: `rgb(${bgColor.r}, ${bgColor.g}, ${bgColor.b})`,
                 contrast: ratio.toFixed(2),
                 requiredRatio: requiredRatio,
+                reason: reason,
                 inlineStyle: el.getAttribute('style') || '',
                 isFailure: isFailure
             });

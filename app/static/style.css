@@ -401,6 +401,14 @@ body.light-mode strong {
   color: #08120b !important;
 }
 
+body.light-mode table th,
+body.light-mode .event-table th,
+body.light-mode .data-table th {
+  background: #b0c4b1 !important;
+  color: #08120b !important;
+  border-bottom: 1px solid #7b917c !important;
+}
+
 body.light-mode p,
 body.light-mode span,
 body.light-mode td,
