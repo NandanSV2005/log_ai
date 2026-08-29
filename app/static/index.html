@@ -133,16 +133,18 @@
         <!-- DEDICATED SOVEREIGN SERVER LOG UPLOAD & ANALYSIS PANEL -->
         <section class="panel-card feature-accent-forensics" aria-label="Sovereign Server Log Upload and Analysis Engine" style="padding: 1.5rem; margin-bottom: 2rem;">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
-            <div>
-              <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 10px;">
-                <div style="width: 32px; height: 32px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                  <img src="/vendor/icons/database.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
-                </div>
-                Sovereign Server Log Upload &amp; Analysis Engine
-              </h2>
-              <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
-                Ingest raw multi-vendor server logs (.log, .txt, .csv) for instant zero-loss Merkle hashing, AI threat scoring, and OCSF normalization.
-              </p>
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                <img src="/vendor/icons/database.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+              </div>
+              <div>
+                <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                  Sovereign Server Log Upload &amp; Analysis Engine
+                </h2>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                  Ingest raw multi-vendor server logs (.log, .txt, .csv) for instant zero-loss Merkle hashing, AI threat scoring, and OCSF normalization.
+                </p>
+              </div>
             </div>
             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
               <span style="font-size: 0.75rem; color: var(--text-dim); font-weight: 600;">Presets:</span>
@@ -240,16 +242,18 @@
         <!-- INCIDENT-FIRST HERO VIEW -->
         <section aria-label="Correlated Active Incidents Section" style="margin-bottom: 2rem;">
           <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
-            <div>
-              <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 10px; margin: 0;">
-                <div style="width: 32px; height: 32px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                  <img src="/vendor/icons/git-branch.svg" alt="" width="18" height="18" style="filter: invert(65%) sepia(80%) saturate(1000%) hue-rotate(5deg);">
-                </div>
-                Correlated Security Incidents
-              </h2>
-              <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
-                Real-time automated incident clustering and MITRE ATT&amp;CK tactic mapping.
-              </p>
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                <img src="/vendor/icons/git-branch.svg" alt="" width="18" height="18" style="filter: invert(65%) sepia(80%) saturate(1000%) hue-rotate(5deg);">
+              </div>
+              <div>
+                <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                  Correlated Security Incidents
+                </h2>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                  Real-time automated incident clustering and MITRE ATT&amp;CK tactic mapping.
+                </p>
+              </div>
             </div>
             <span id="incidents-count-badge" class="font-mono" style="font-size: 0.78rem; color: var(--text-muted); background: var(--bg-slate); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 4px;">
               0 Correlated Incidents
@@ -268,16 +272,18 @@
         <!-- TELEMETRY EVENT STREAM TABLE -->
         <section class="panel-card feature-accent-command" aria-label="Live Telemetry Event Stream">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
-            <div>
-              <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 10px;">
-                <div style="width: 32px; height: 32px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                  <img src="/vendor/icons/database.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
-                </div>
-                Live Telemetry Event Stream &amp; Merkle Audit Trail
-              </h2>
-              <p id="table-count-badge" style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
-                Showing 0 of 0 events &bull; Click row for raw evidence
-              </p>
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                <img src="/vendor/icons/database.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+              </div>
+              <div>
+                <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                  Live Telemetry Event Stream &amp; Merkle Audit Trail
+                </h2>
+                <p id="table-count-badge" style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                  Showing 0 of 0 events &bull; Click row for raw evidence
+                </p>
+              </div>
             </div>
           </div>
           <div class="table-responsive">
@@ -313,16 +319,18 @@
       <div id="tab-threat-map" class="tab-view">
         <section class="panel-card" aria-label="100 Percent Offline Threat Vector Map">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
-            <div>
-              <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 10px;">
-                <div style="width: 32px; height: 32px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                  <img src="/vendor/icons/activity.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
-                </div>
-                Global Threat Vector Map (100% Air-Gapped Offline SVG Map)
-              </h2>
-              <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
-                Interactive 100% offline air-gapped SVG attack origin visualization.
-              </p>
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                <img src="/vendor/icons/activity.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+              </div>
+              <div>
+                <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                  Global Threat Vector Map (100% Air-Gapped Offline SVG Map)
+                </h2>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                  Interactive 100% offline air-gapped SVG attack origin visualization.
+                </p>
+              </div>
             </div>
             <span class="font-mono" style="font-size: 0.72rem; color: var(--severity-low); background: var(--severity-low-bg); padding: 3px 8px; border-radius: 4px; border: 1px solid var(--severity-low-border);">
               ZERO NETWORK CALLS &bull; 100% OFFLINE
@@ -339,16 +347,18 @@
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
           <section class="panel-card" aria-label="Ingestion Throughput Velocity Chart">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
-              <div>
-                <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 10px;">
-                  <div style="width: 32px; height: 32px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <img src="/vendor/icons/activity.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
-                  </div>
-                  Ingestion Throughput Velocity
-                </h2>
-                <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
-                  Real-time telemetry event throughput and threat alert velocity.
-                </p>
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                  <img src="/vendor/icons/activity.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+                </div>
+                <div>
+                  <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                    Ingestion Throughput Velocity
+                  </h2>
+                  <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                    Real-time telemetry event throughput and threat alert velocity.
+                  </p>
+                </div>
               </div>
             </div>
             <div style="height: 280px;">
@@ -358,16 +368,18 @@
 
           <section class="panel-card" aria-label="Severity Rating Distribution Chart">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
-              <div>
-                <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 10px;">
-                  <div style="width: 32px; height: 32px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <img src="/vendor/icons/alert-triangle.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
-                  </div>
-                  Severity Rating Distribution
-                </h2>
-                <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
-                  Categorized distribution of HIGH, MEDIUM, and LOW severity alerts.
-                </p>
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                  <img src="/vendor/icons/alert-triangle.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+                </div>
+                <div>
+                  <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                    Severity Rating Distribution
+                  </h2>
+                  <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                    Categorized distribution of HIGH, MEDIUM, and LOW severity alerts.
+                  </p>
+                </div>
               </div>
             </div>
             <div style="height: 280px;">
@@ -378,16 +390,18 @@
 
         <section class="panel-card" aria-label="Multi-Vendor Log Parsing Breakdown Chart">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
-            <div>
-              <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 10px;">
-                <div style="width: 32px; height: 32px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                  <img src="/vendor/icons/database.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
-                </div>
-                Multi-Vendor Log Parsing Breakdown
-              </h2>
-              <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
-                OCSF normalization counts across Syslog, Cisco, Fortinet, and Suricata.
-              </p>
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                <img src="/vendor/icons/database.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+              </div>
+              <div>
+                <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                  Multi-Vendor Log Parsing Breakdown
+                </h2>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                  OCSF normalization counts across Syslog, Cisco, Fortinet, and Suricata.
+                </p>
+              </div>
             </div>
           </div>
           <div style="height: 240px;">
@@ -401,16 +415,18 @@
         <div style="display: flex; flex-direction: column; gap: 2rem; width: 100%;">
           <section class="panel-card feature-accent-forensics" aria-label="Web Crypto Merkle Verifier" style="padding: 1.75rem; width: 100%;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem;">
-              <div>
-                <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 10px;">
-                  <div style="width: 32px; height: 32px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <img src="/vendor/icons/lock.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
-                  </div>
-                  Web Crypto SHA-256 Merkle Verifier
-                </h2>
-                <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
-                  Verify event payload integrity directly in your browser using native Web Crypto API (<code class="font-mono" style="color: var(--accent-hover);">crypto.subtle.digest</code>).
-                </p>
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                  <img src="/vendor/icons/lock.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+                </div>
+                <div>
+                  <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                    Web Crypto SHA-256 Merkle Verifier
+                  </h2>
+                  <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                    Verify event payload integrity directly in your browser using native Web Crypto API (<code class="font-mono" style="color: var(--accent-hover);">crypto.subtle.digest</code>).
+                  </p>
+                </div>
               </div>
             </div>
             <div style="font-size: 0.82rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 1.25rem; background: rgba(56, 189, 248, 0.05); padding: 12px 16px; border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.2);">
@@ -432,16 +448,18 @@
 
           <section class="panel-card feature-accent-xai" aria-label="YAML Heuristic Rule Sandbox" style="padding: 1.75rem; width: 100%;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem;">
-              <div>
-                <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 10px;">
-                  <div style="width: 32px; height: 32px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <img src="/vendor/icons/cpu.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
-                  </div>
-                  YAML Heuristic Rule Sandbox
-                </h2>
-                <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
-                  Test custom threat detection rules against active stream memory buffer.
-                </p>
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                  <img src="/vendor/icons/cpu.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+                </div>
+                <div>
+                  <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                    YAML Heuristic Rule Sandbox
+                  </h2>
+                  <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                    Test custom threat detection rules against active stream memory buffer.
+                  </p>
+                </div>
               </div>
             </div>
             <div style="font-size: 0.82rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 1.25rem; background: rgba(16, 185, 129, 0.05); padding: 12px 16px; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.2);">
@@ -474,16 +492,18 @@ conditions:
           <!-- SECTION 1: APPEARANCE -->
           <section class="panel-card" aria-label="Appearance & Theme Settings" style="padding: 1.75rem;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem;">
-              <div>
-                <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 10px;">
-                  <div style="width: 32px; height: 32px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <img src="/vendor/icons/settings.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
-                  </div>
-                  Appearance &amp; Theme Engine
-                </h2>
-                <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
-                  Toggle dashboard visual identity between Near-Black Dark Mode and Stone-Green Sage Light Mode.
-                </p>
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                  <img src="/vendor/icons/settings.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+                </div>
+                <div>
+                  <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                    Appearance &amp; Theme Engine
+                  </h2>
+                  <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                    Toggle dashboard visual identity between Near-Black Dark Mode and Stone-Green Sage Light Mode.
+                  </p>
+                </div>
               </div>
             </div>
             <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
@@ -495,16 +515,18 @@ conditions:
           <!-- SECTION 2: DATA MANAGEMENT -->
           <section class="panel-card" aria-label="Data Management Settings" style="padding: 1.75rem;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem;">
-              <div>
-                <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 10px;">
-                  <div style="width: 32px; height: 32px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <img src="/vendor/icons/database.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
-                  </div>
-                  Data Management &amp; State Reset
-                </h2>
-                <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
-                  Reset active SOC state, clear normalized event buffers, and reset telemetry metrics.
-                </p>
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                  <img src="/vendor/icons/database.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+                </div>
+                <div>
+                  <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                    Data Management &amp; State Reset
+                  </h2>
+                  <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                    Reset active SOC state, clear normalized event buffers, and reset telemetry metrics.
+                  </p>
+                </div>
               </div>
             </div>
             <div style="margin-top: 1rem;">
@@ -517,16 +539,18 @@ conditions:
           <!-- SECTION 3: DASHBOARD BEHAVIOR -->
           <section class="panel-card" aria-label="Dashboard Polling Behavior Settings" style="padding: 1.75rem;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem;">
-              <div>
-                <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 10px;">
-                  <div style="width: 32px; height: 32px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <img src="/vendor/icons/activity.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
-                  </div>
-                  Dashboard Behavior &amp; Stream Polling
-                </h2>
-                <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
-                  Configure telemetry refresh interval for real-time KPI updates and threat detection feeds.
-                </p>
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                  <img src="/vendor/icons/activity.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+                </div>
+                <div>
+                  <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                    Dashboard Behavior &amp; Stream Polling
+                  </h2>
+                  <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                    Configure telemetry refresh interval for real-time KPI updates and threat detection feeds.
+                  </p>
+                </div>
               </div>
             </div>
             <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
@@ -543,16 +567,18 @@ conditions:
           <!-- SECTION 4: THREAT MAP ENGINE -->
           <section class="panel-card" aria-label="Threat Map Preferences" style="padding: 1.75rem;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem;">
-              <div>
-                <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 10px;">
-                  <div style="width: 32px; height: 32px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <img src="/vendor/icons/activity.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
-                  </div>
-                  Threat Map Engine Preference
-                </h2>
-                <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
-                  Select your default geo-spatial map engine renderer on page load.
-                </p>
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                  <img src="/vendor/icons/activity.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+                </div>
+                <div>
+                  <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                    Threat Map Engine Preference
+                  </h2>
+                  <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                    Select your default geo-spatial map engine renderer on page load.
+                  </p>
+                </div>
               </div>
             </div>
             <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
