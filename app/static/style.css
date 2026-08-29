@@ -253,6 +253,15 @@ body.light-mode .pipeline-track-card {
   box-shadow: 0 4px 12px rgba(66, 39, 25, 0.08) !important;
 }
 
+/* OpenStreetMap Dark Mode Tile Filter */
+.leaflet-tile-pane {
+  filter: brightness(0.6) invert(1) contrast(2.5) hue-rotate(200deg) saturate(0.4);
+}
+
+body.light-mode .leaflet-tile-pane {
+  filter: none !important;
+}
+
 body.light-mode h1,
 body.light-mode h2,
 body.light-mode h3,
