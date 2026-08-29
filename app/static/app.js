@@ -5,7 +5,8 @@
 const API_STATS_URL = '/api/v1/dashboard/stats';
 const API_RECENT_EVENTS_URL = '/api/v1/dashboard/events/recent?limit=100';
 const API_INCIDENTS_URL = '/api/v1/dashboard/incidents';
-const POLLING_INTERVAL_MS = 2000;
+let POLLING_INTERVAL_MS = parseInt(localStorage.getItem('pollingInterval') || '2000', 10);
+let pollingTimer = null;
 const MAX_CHART_POINTS = 15;
 
 let threatVelocityChart = null;
@@ -38,9 +39,10 @@ function getAuthHeaders(extraHeaders = {}) {
   };
 }
 
-let isAirGappedMode = false;
+let isAirGappedMode = localStorage.getItem('defaultAirGapped') === 'true';
 
 document.addEventListener('DOMContentLoaded', () => {
+  initSettingsTab();
   startClock();
   setupTabNavigation();
   initCharts();
@@ -53,7 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
   setupCopilot();
   setupLogout();
   fetchDashboardData();
-  setInterval(fetchDashboardData, POLLING_INTERVAL_MS);
+  
+  if (pollingTimer) clearInterval(pollingTimer);
+  pollingTimer = setInterval(fetchDashboardData, POLLING_INTERVAL_MS);
+  
   updateAirGappedProofCounter();
   setInterval(updateAirGappedProofCounter, 3000);
 
@@ -63,6 +68,64 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+function initSettingsTab() {
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  setApplicationTheme(savedTheme);
+
+  const pollSelect = document.getElementById('polling-interval-select');
+  if (pollSelect) {
+    pollSelect.value = POLLING_INTERVAL_MS.toString();
+  }
+
+  const mapSelect = document.getElementById('map-mode-select');
+  if (mapSelect) {
+    mapSelect.value = localStorage.getItem('defaultMapMode') || 'live';
+  }
+
+  const airgappedCheck = document.getElementById('default-airgapped-checkbox');
+  if (airgappedCheck) {
+    airgappedCheck.checked = localStorage.getItem('defaultAirGapped') === 'true';
+  }
+}
+
+function setApplicationTheme(theme) {
+  localStorage.setItem('theme', theme);
+  if (theme === 'light') {
+    document.body.classList.add('light-mode');
+    document.documentElement.classList.add('light-mode');
+  } else {
+    document.body.classList.remove('light-mode');
+    document.documentElement.classList.remove('light-mode');
+  }
+
+  const darkBtn = document.getElementById('theme-dark-btn');
+  const lightBtn = document.getElementById('theme-light-btn');
+  if (darkBtn && lightBtn) {
+    if (theme === 'light') {
+      lightBtn.className = 'btn-primary';
+      darkBtn.className = 'btn-outline';
+    } else {
+      darkBtn.className = 'btn-primary';
+      lightBtn.className = 'btn-outline';
+    }
+  }
+}
+
+function updatePollingIntervalPreference(val) {
+  POLLING_INTERVAL_MS = parseInt(val, 10);
+  localStorage.setItem('pollingInterval', val);
+  if (pollingTimer) clearInterval(pollingTimer);
+  pollingTimer = setInterval(fetchDashboardData, POLLING_INTERVAL_MS);
+}
+
+function updateMapModePreference(val) {
+  localStorage.setItem('defaultMapMode', val);
+}
+
+function updateAirGappedDefaultPreference(isChecked) {
+  localStorage.setItem('defaultAirGapped', isChecked ? 'true' : 'false');
+}
 
 /**
  * Step 1: SPA Tab Navigation Router (Updated for Horizontal Tabs)
@@ -1031,7 +1094,10 @@ function initOfflineThreatMap(events) {
     return { lat, lng, city: c.city, country: c.country };
   };
 
-  if (!isAirGappedMode) {
+  const preferredMapMode = localStorage.getItem('defaultMapMode') || 'live';
+  const effectiveAirGapped = isAirGappedMode || (preferredMapMode === 'offline');
+
+  if (!effectiveAirGapped) {
     if (!leafletMapInstance) {
       container.innerHTML = `<div id="leaflet-map-div" style="width: 100%; height: 100%; min-height: 520px; background: #060911;"></div>`;
       leafletMapInstance = L.map('leaflet-map-div').setView([20, 0], 2);

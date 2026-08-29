@@ -79,6 +79,10 @@
         <img src="/vendor/icons/lock.svg" alt="" width="16" height="16" style="filter: invert(60%);">
         Forensics &amp; Rule Studio
       </button>
+      <button class="tab-btn" data-tab="settings" aria-label="System Settings View Tab" style="background: none; border: none; padding: 1rem 0; cursor: pointer; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; font-family: inherit; display: inline-flex; align-items: center; gap: 6px;">
+        <img src="/vendor/icons/sliders.svg" alt="" width="16" height="16" style="filter: invert(60%);">
+        Settings
+      </button>
     </nav>
 
     <!-- 3. MAIN CONTENT AREA -->
@@ -143,7 +147,6 @@
               <button id="scenario-ssh-btn" class="btn-outline" style="font-size: 0.72rem; padding: 4px 10px;" aria-label="Trigger SSH Brute Force Scenario">SSH Spray</button>
               <button id="scenario-portscan-btn" class="btn-outline" style="font-size: 0.72rem; padding: 4px 10px;" aria-label="Trigger Port Scan Scenario">Port Scan</button>
               <button id="scenario-normal-btn" class="btn-outline" style="font-size: 0.72rem; padding: 4px 10px;" aria-label="Trigger Normal Baseline Scenario">Normal Baseline</button>
-              <button id="reset-data-btn" class="btn-danger" style="font-size: 0.72rem; padding: 4px 10px;" aria-label="Clear All SOC Telemetry Data"><img src="/vendor/icons/alert-triangle.svg" width="12" height="12"> Clear All Data</button>
             </div>
           </div>
 
@@ -402,6 +405,113 @@ conditions:
               </div>
             </div>
           </section>
+        </div>
+      </div>
+
+      <!-- TAB 5: SETTINGS VIEW -->
+      <div id="tab-settings" class="tab-view">
+        <div style="display: flex; flex-direction: column; gap: 1.75rem; width: 100%; max-width: 1000px; margin: 0 auto;">
+          
+          <!-- SECTION 1: APPEARANCE -->
+          <section class="panel-card" aria-label="Appearance & Theme Settings" style="padding: 1.75rem;">
+            <div class="panel-header" style="margin-bottom: 1rem;">
+              <h2 class="panel-title" style="font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                <img src="/vendor/icons/sun.svg" alt="" width="20" height="20" style="filter: invert(70%);">
+                Appearance &amp; Theme Engine
+              </h2>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+              Toggle dashboard visual identity between Near-Black Dark Mode and Aged Sepia Brown Light Mode.
+            </p>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+              <button id="theme-dark-btn" onclick="setApplicationTheme('dark')" class="btn-primary" aria-label="Switch to Dark Mode" style="display: inline-flex; align-items: center; gap: 8px; padding: 0.65rem 1.25rem; font-size: 0.85rem;">
+                <img src="/vendor/icons/moon.svg" width="16" height="16" style="filter: invert(100%);"> Dark Mode
+              </button>
+              <button id="theme-light-btn" onclick="setApplicationTheme('light')" class="btn-outline" aria-label="Switch to Sepia Brown Light Mode" style="display: inline-flex; align-items: center; gap: 8px; padding: 0.65rem 1.25rem; font-size: 0.85rem;">
+                <img src="/vendor/icons/sun.svg" width="16" height="16" style="filter: invert(70%);"> Sepia Brown Theme
+              </button>
+            </div>
+          </section>
+
+          <!-- SECTION 2: DATA MANAGEMENT -->
+          <section class="panel-card" aria-label="Data Management Settings" style="padding: 1.75rem;">
+            <div class="panel-header" style="margin-bottom: 1rem;">
+              <h2 class="panel-title" style="font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                <img src="/vendor/icons/database.svg" alt="" width="20" height="20" style="filter: invert(70%);">
+                Data Management &amp; State Reset
+              </h2>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+              Reset active SOC state, clear normalized event buffers, and reset telemetry metrics.
+            </p>
+            <div>
+              <button id="reset-data-btn" class="btn-danger" aria-label="Clear All SOC Telemetry Data" style="display: inline-flex; align-items: center; gap: 8px; padding: 0.65rem 1.25rem; font-size: 0.85rem;">
+                <img src="/vendor/icons/alert-triangle.svg" width="16" height="16"> Clear All Data
+              </button>
+            </div>
+          </section>
+
+          <!-- SECTION 3: DASHBOARD BEHAVIOR -->
+          <section class="panel-card" aria-label="Dashboard Polling Behavior Settings" style="padding: 1.75rem;">
+            <div class="panel-header" style="margin-bottom: 1rem;">
+              <h2 class="panel-title" style="font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                <img src="/vendor/icons/activity.svg" alt="" width="20" height="20" style="filter: invert(70%);">
+                Dashboard Behavior &amp; Stream Polling
+              </h2>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+              Configure telemetry refresh interval for real-time KPI updates and threat detection feeds.
+            </p>
+            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+              <label for="polling-interval-select" style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);">Polling Refresh Rate:</label>
+              <select id="polling-interval-select" onchange="updatePollingIntervalPreference(this.value)" aria-label="Select Stream Polling Refresh Rate" style="padding: 0.5rem 1rem; border-radius: 6px; background: #060911; color: #fff; border: 1px solid var(--border-color); font-size: 0.85rem;">
+                <option value="2000">2 Seconds (Real-Time)</option>
+                <option value="5000">5 Seconds (Balanced)</option>
+                <option value="10000">10 Seconds (Low Network Impact)</option>
+                <option value="30000">30 Seconds (Manual Stream)</option>
+              </select>
+            </div>
+          </section>
+
+          <!-- SECTION 4: THREAT MAP ENGINE -->
+          <section class="panel-card" aria-label="Threat Map Preferences" style="padding: 1.75rem;">
+            <div class="panel-header" style="margin-bottom: 1rem;">
+              <h2 class="panel-title" style="font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                <img src="/vendor/icons/globe.svg" alt="" width="20" height="20" style="filter: invert(70%);">
+                Threat Map Engine Preference
+              </h2>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+              Select your default geo-spatial map engine renderer on page load.
+            </p>
+            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+              <label for="map-mode-select" style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);">Default Map Engine Mode:</label>
+              <select id="map-mode-select" onchange="updateMapModePreference(this.value)" aria-label="Select Default Map Engine Mode" style="padding: 0.5rem 1rem; border-radius: 6px; background: #060911; color: #fff; border: 1px solid var(--border-color); font-size: 0.85rem;">
+                <option value="live">Prefer Live Tiles when Online (CARTO Dark)</option>
+                <option value="offline">Always Use 100% Offline SVG Map</option>
+              </select>
+            </div>
+          </section>
+
+          <!-- SECTION 5: AI COPILOT SECURITY -->
+          <section class="panel-card" aria-label="AI Copilot Preferences" style="padding: 1.75rem;">
+            <div class="panel-header" style="margin-bottom: 1rem;">
+              <h2 class="panel-title" style="font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                <img src="/vendor/icons/shield.svg" alt="" width="20" height="20" style="filter: invert(70%);">
+                AI Copilot Air-Gapped Security Preference
+              </h2>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+              Set persistent Air-Gapped default for local SOC analysis.
+            </p>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <input type="checkbox" id="default-airgapped-checkbox" onchange="updateAirGappedDefaultPreference(this.checked)" aria-label="Default Air-Gapped Preference" style="width: 18px; height: 18px; cursor: pointer;">
+              <label for="default-airgapped-checkbox" style="font-size: 0.88rem; font-weight: 600; color: var(--text-main); cursor: pointer;">
+                Always use Air-Gapped Mode by default on startup
+              </label>
+            </div>
+          </section>
+
         </div>
       </div>
     </main>
