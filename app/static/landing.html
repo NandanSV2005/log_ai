@@ -623,6 +623,47 @@
       border: 1px solid var(--border-color);
       border-radius: 8px;
       padding: 1rem;
+      transition: all 0.25 ease;
+    }
+
+    .stream-sample-box.is-sample {
+      border: 1px dashed rgba(167, 139, 250, 0.45);
+      background: repeating-linear-gradient(135deg, #060911, #060911 12px, #0b101c 12px, #0b101c 24px);
+    }
+
+    .badge-sample-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(167, 139, 250, 0.15);
+      color: var(--accent-hover);
+      border: 1px solid var(--accent-border);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .badge-sample-tag.live-active {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--neon-mint);
+      border-color: rgba(16, 185, 129, 0.35);
+    }
+
+    .stream-context-note {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px 12px;
+      margin-bottom: 1rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.4;
     }
 
     .stream-header {
@@ -1081,8 +1122,8 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
       <section class="landing-section" aria-label="Interactive Prototype Preview">
         <div class="section-header">
           <span class="section-tag font-mono">SOC CONSOLE PREVIEW</span>
-          <h2 class="section-title">Live Telemetry &amp; Dashboard Intelligence</h2>
-          <p class="section-desc">Real-time stats fetched directly from API endpoints when authenticated, with honest standby states.</p>
+          <h2 class="section-title">Telemetry Output &amp; Console Intelligence</h2>
+          <p class="section-desc">Real-time stats fetched directly from API endpoints when authenticated, with honest standby states when unauthenticated.</p>
         </div>
 
         <div class="mock-console-card">
@@ -1120,38 +1161,49 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
               </div>
             </div>
 
-            <div class="stream-sample-box">
+            <!-- EXPLICIT CONCEPTUAL CONNECTOR NOTE -->
+            <div id="stream-context-note" class="stream-context-note">
+              <img src="/vendor/icons/activity.svg" alt="" width="14" height="14" style="vertical-align: middle; opacity: 0.7; flex-shrink: 0;">
+              <span id="stream-context-text">The KPI counters above reflect your current session status (0 active events in unauthenticated standby mode). Below is a representative preview of telemetry log output formatting when stream ingestion is active.</span>
+            </div>
+
+            <div id="stream-sample-box" class="stream-sample-box is-sample">
               <div class="stream-header">
-                <span class="font-mono" style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted);">LIVE TELEMETRY STREAM PATTERN (REPRESENTATIVE SAMPLE)</span>
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <span id="sample-stream-title" class="font-mono" style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted);">SAMPLE TELEMETRY STREAM (ILLUSTRATIVE DEMO)</span>
+                  <span id="sample-stream-badge" class="badge-sample-tag font-mono">FOR ILLUSTRATION ONLY</span>
+                </div>
                 <span class="font-mono" style="font-size: 0.7rem; color: var(--accent-hover);">OCSF UNIFIED PROTOCOL</span>
               </div>
-              <div class="stream-row">
-                <span>2026-08-28 07:14:02</span>
-                <span class="badge-ip">192.168.1.100</span>
-                <span class="badge-vendor">Cisco ASA</span>
-                <span style="color: var(--severity-high); font-weight: 700;">HIGH (88.5)</span>
-                <span>Deny tcp src outside:192.168.1.100/54321 dst inside:10.0.0.50/80</span>
-              </div>
-              <div class="stream-row">
-                <span>2026-08-28 07:14:15</span>
-                <span class="badge-ip">192.168.1.105</span>
-                <span class="badge-vendor">Fortinet</span>
-                <span style="color: var(--severity-low); font-weight: 700;">LOW (12.0)</span>
-                <span>SSL VPN authentication successful user="admin_jdoe"</span>
-              </div>
-              <div class="stream-row">
-                <span>2026-08-28 07:14:31</span>
-                <span class="badge-ip">192.168.1.200</span>
-                <span class="badge-vendor">Suricata</span>
-                <span style="color: var(--severity-high); font-weight: 700;">HIGH (94.2)</span>
-                <span>ET MALWARE Compromised Host Activity Signature Match</span>
-              </div>
-              <div class="stream-row">
-                <span>2026-08-28 07:14:48</span>
-                <span class="badge-ip">192.168.1.100</span>
-                <span class="badge-vendor">pfSense</span>
-                <span style="color: var(--severity-medium); font-weight: 700;">MEDIUM (62.1)</span>
-                <span>Block pfSense default deny rule IPv4 WAN interface</span>
+              <div id="stream-rows-container">
+                <div class="stream-row">
+                  <span>2026-08-28 07:14:02</span>
+                  <span class="badge-ip">192.168.1.100</span>
+                  <span class="badge-vendor">Cisco ASA</span>
+                  <span style="color: var(--severity-high); font-weight: 700;">HIGH (88.5)</span>
+                  <span>Deny tcp src outside:192.168.1.100/54321 dst inside:10.0.0.50/80</span>
+                </div>
+                <div class="stream-row">
+                  <span>2026-08-28 07:14:15</span>
+                  <span class="badge-ip">192.168.1.105</span>
+                  <span class="badge-vendor">Fortinet</span>
+                  <span style="color: var(--severity-low); font-weight: 700;">LOW (12.0)</span>
+                  <span>SSL VPN authentication successful user="admin_jdoe"</span>
+                </div>
+                <div class="stream-row">
+                  <span>2026-08-28 07:14:31</span>
+                  <span class="badge-ip">192.168.1.200</span>
+                  <span class="badge-vendor">Suricata</span>
+                  <span style="color: var(--severity-high); font-weight: 700;">HIGH (94.2)</span>
+                  <span>ET MALWARE Compromised Host Activity Signature Match</span>
+                </div>
+                <div class="stream-row">
+                  <span>2026-08-28 07:14:48</span>
+                  <span class="badge-ip">192.168.1.100</span>
+                  <span class="badge-vendor">pfSense</span>
+                  <span style="color: var(--severity-medium); font-weight: 700;">MEDIUM (62.1)</span>
+                  <span>Block pfSense default deny rule IPv4 WAN interface</span>
+                </div>
               </div>
             </div>
           </div>
@@ -1488,6 +1540,11 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
       var eventsEl = document.getElementById('prev-stat-events');
       var scoreEl = document.getElementById('prev-stat-score');
       var incsEl = document.getElementById('prev-stat-incidents');
+      var sampleBox = document.getElementById('stream-sample-box');
+      var sampleTitle = document.getElementById('sample-stream-title');
+      var sampleBadge = document.getElementById('sample-stream-badge');
+      var contextText = document.getElementById('stream-context-text');
+      var rowsContainer = document.getElementById('stream-rows-container');
 
       if (!token) {
         if (statusPill) statusPill.textContent = '[STANDBY] UNAUTHENTICATED SESSION';
@@ -1507,6 +1564,43 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
           if (eventsEl) eventsEl.textContent = (data.total_events || 0).toLocaleString();
           if (scoreEl) scoreEl.textContent = (data.avg_threat_score || 0).toFixed(1);
           if (incsEl) incsEl.textContent = (data.active_incidents || 0).toLocaleString();
+
+          // If user is authenticated and has ingested data, upgrade sample stream to real live event rows
+          var evRes = await fetch('/api/v1/dashboard/events/recent?limit=4', {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          if (evRes.ok) {
+            var evData = await evRes.json();
+            var events = evData.events || [];
+            if (events.length > 0 && rowsContainer) {
+              if (sampleBox) sampleBox.classList.remove('is-sample');
+              if (sampleTitle) sampleTitle.textContent = 'ACTIVE TELEMETRY STREAM (LIVE BUFFER)';
+              if (sampleBadge) {
+                sampleBadge.textContent = 'LIVE STREAM ACTIVE';
+                sampleBadge.className = 'badge-sample-tag font-mono live-active';
+              }
+              if (contextText) {
+                contextText.textContent = 'Session authenticated. Displaying live ingested telemetry events directly from your active stream buffer.';
+              }
+              rowsContainer.innerHTML = events.map(function (e) {
+                var ts = (e.timestamp || '').replace('T', ' ').substring(0, 19);
+                var ip = e.source_ip || '127.0.0.1';
+                var vendor = e.vendor || e.event_type || 'Syslog';
+                var level = (e.threat_level || 'LOW').toUpperCase();
+                var score = (e.threat_score || 0).toFixed(1);
+                var raw = e.original_event || e.raw_payload || 'Event payload captured';
+                var sevColor = level === 'HIGH' || level === 'CRITICAL' ? 'var(--severity-high)' : (level === 'MEDIUM' ? 'var(--severity-medium)' : 'var(--severity-low)');
+
+                return '<div class="stream-row">' +
+                  '<span>' + ts + '</span>' +
+                  '<span class="badge-ip">' + ip + '</span>' +
+                  '<span class="badge-vendor">' + vendor + '</span>' +
+                  '<span style="color: ' + sevColor + '; font-weight: 700;">' + level + ' (' + score + ')</span>' +
+                  '<span>' + raw.substring(0, 80) + '</span>' +
+                  '</div>';
+              }).join('');
+            }
+          }
         } else {
           if (statusPill) statusPill.textContent = '[STANDBY] AUTHENTICATION REQUIRED';
         }
