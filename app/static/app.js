@@ -56,6 +56,12 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(fetchDashboardData, POLLING_INTERVAL_MS);
   updateAirGappedProofCounter();
   setInterval(updateAirGappedProofCounter, 3000);
+
+  window.addEventListener('resize', () => {
+    if (leafletMapInstance) {
+      leafletMapInstance.invalidateSize();
+    }
+  });
 });
 
 /**
@@ -104,7 +110,12 @@ function setupTabNavigation() {
       }
 
       if (targetTab === 'threat-map') {
-        setTimeout(() => initOfflineThreatMap(currentEventsList), 50);
+        setTimeout(() => {
+          if (leafletMapInstance) {
+            leafletMapInstance.invalidateSize();
+          }
+          initOfflineThreatMap(currentEventsList);
+        }, 100);
       }
     });
   });
@@ -1030,6 +1041,12 @@ function initOfflineThreatMap(events) {
         attribution: '&copy; OpenStreetMap &copy; CARTO'
       }).addTo(leafletMapInstance);
     }
+
+    setTimeout(() => {
+      if (leafletMapInstance) {
+        leafletMapInstance.invalidateSize();
+      }
+    }, 100);
 
     if (leafletMapInstance._customMarkers) {
       leafletMapInstance._customMarkers.forEach(m => m.remove());

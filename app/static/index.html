@@ -127,7 +127,7 @@
         </section>
 
         <!-- DEDICATED SOVEREIGN SERVER LOG UPLOAD & ANALYSIS PANEL -->
-        <section class="panel-card feature-accent-forensics" aria-label="Sovereign Server Log Upload and Analysis Engine" style="margin-bottom: 2rem;">
+        <section class="panel-card feature-accent-forensics" aria-label="Sovereign Server Log Upload and Analysis Engine" style="padding: 1.5rem; margin-bottom: 2rem;">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
             <div>
               <h2 style="font-size: 1.1rem; font-weight: 800; color: #ffffff; margin: 0; display: flex; align-items: center; gap: 8px;">
@@ -175,13 +175,13 @@
             </div>
           </div>
 
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
-            <div style="display: flex; gap: 8px; align-items: center;">
-              <button id="simulate-attack-btn" class="btn-attack" aria-label="Simulate Brute Force Attack Burst" style="padding: 0.45rem 0.9rem; font-size: 0.78rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-top: 1.25rem; width: 100%;">
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <button id="simulate-attack-btn" class="btn-attack" aria-label="Simulate Brute Force Attack Burst" style="padding: 0.5rem 1rem; font-size: 0.78rem;">
                 <img src="/vendor/icons/alert-triangle.svg" alt="" width="14" height="14">
                 <span>Simulate Brute Force Attack</span>
               </button>
-              <button id="download-report-btn" class="btn-secondary" title="Download CSV Report" aria-label="Export CSV Threat Report" style="padding: 0.45rem 0.9rem; font-size: 0.78rem;">
+              <button id="download-report-btn" class="btn-secondary" title="Download CSV Report" aria-label="Export CSV Threat Report" style="padding: 0.5rem 1rem; font-size: 0.78rem;">
                 <img src="/vendor/icons/arrow-right.svg" alt="" width="14" height="14">
                 <span>Export CSV Report</span>
               </button>
@@ -344,48 +344,48 @@
 
       <!-- TAB 4: FORENSICS & RULE STUDIO VIEW -->
       <div id="tab-forensics" class="tab-view">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-          <section class="panel-card feature-accent-forensics" aria-label="Web Crypto Merkle Verifier">
-            <div class="panel-header">
-              <h2 class="panel-title">
-                <img src="/vendor/icons/lock.svg" alt="" width="18" height="18" style="filter: invert(70%) sepia(80%) saturate(1000%) hue-rotate(170deg);">
+        <div style="display: flex; flex-direction: column; gap: 2rem; width: 100%;">
+          <section class="panel-card feature-accent-forensics" aria-label="Web Crypto Merkle Verifier" style="padding: 1.75rem; width: 100%;">
+            <div class="panel-header" style="margin-bottom: 0.75rem;">
+              <h2 class="panel-title" style="font-size: 1.15rem; font-weight: 800;">
+                <img src="/vendor/icons/lock.svg" alt="" width="20" height="20" style="filter: invert(70%) sepia(80%) saturate(1000%) hue-rotate(170deg);">
                 Web Crypto SHA-256 Merkle Verifier
               </h2>
             </div>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0.75rem; line-height: 1.5;">
               Verify event payload integrity directly in your browser using native Web Crypto API (<code class="font-mono" style="color: var(--accent-hover);">crypto.subtle.digest</code>).
             </p>
-            <div style="font-size: 0.78rem; color: var(--text-dim); line-height: 1.4; margin-bottom: 0.8rem; background: rgba(56, 189, 248, 0.05); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.2);">
+            <div style="font-size: 0.82rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 1.25rem; background: rgba(56, 189, 248, 0.05); padding: 12px 16px; border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.2);">
               <strong>How it works:</strong> Client-side SHA-256 digests run directly via <code>window.crypto.subtle.digest</code> to independently re-calculate raw log hashes and verify cryptographic Merkle parent node linkages. Any byte alteration produces an immediate root hash mismatch.
             </div>
-            <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
+            <div style="display: flex; gap: 12px; margin-bottom: 1.25rem; flex-wrap: wrap;">
               <input type="text" id="merkle-verify-input" placeholder="Paste event Merkle SHA-256 hash..." aria-label="Merkle Hash to verify" class="font-mono"
-                style="flex: 1; padding: 0.6rem 1rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-slate); color: white; font-size: 0.85rem;">
-              <button onclick="runMerkleVerification()" class="btn-primary" aria-label="Execute Web Crypto Merkle Hash Verification">Verify Hash</button>
-              <button onclick="simulateTamperingInDashboard(document.getElementById('merkle-verify-input').value)" class="btn-danger" aria-label="Simulate Log Tampering on Hash"><img src="/vendor/icons/alert-triangle.svg" width="14" height="14"> Simulate Tampering</button>
+                style="flex: 1; min-width: 320px; padding: 0.7rem 1rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-slate); color: white; font-size: 0.88rem;">
+              <button onclick="runMerkleVerification()" class="btn-primary" aria-label="Execute Web Crypto Merkle Hash Verification" style="padding: 0.7rem 1.4rem;">Verify Hash</button>
+              <button onclick="simulateTamperingInDashboard(document.getElementById('merkle-verify-input').value)" class="btn-danger" aria-label="Simulate Log Tampering on Hash" style="padding: 0.7rem 1.4rem;"><img src="/vendor/icons/alert-triangle.svg" width="14" height="14"> Simulate Tampering</button>
             </div>
-            <div id="merkle-result-box" style="display: block; background: #060911; border: 1px solid var(--border-color); border-radius: 6px; padding: 1.25rem; word-break: break-all; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.5; min-height: 80px;">
-              <div style="font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
-                <span class="pulse-dot" style="width: 6px; height: 6px; background: var(--accent-hover); border-radius: 50%; display: inline-block;"></span>
+            <div id="merkle-result-box" style="display: block; background: #060911; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; word-break: break-all; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.6; min-height: 120px;">
+              <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+                <span class="pulse-dot" style="width: 8px; height: 8px; background: var(--accent-hover); border-radius: 50%; display: inline-block;"></span>
                 <strong style="color: var(--accent-hover);">Verifier Ready:</strong> Click "Verify Hash" or "Simulate Tampering" above to test cryptographic verification live.
               </div>
             </div>
           </section>
 
-          <section class="panel-card feature-accent-xai" aria-label="YAML Heuristic Rule Sandbox">
-            <div class="panel-header">
-              <h2 class="panel-title">
-                <img src="/vendor/icons/cpu.svg" alt="" width="18" height="18">
+          <section class="panel-card feature-accent-xai" aria-label="YAML Heuristic Rule Sandbox" style="padding: 1.75rem; width: 100%;">
+            <div class="panel-header" style="margin-bottom: 0.75rem;">
+              <h2 class="panel-title" style="font-size: 1.15rem; font-weight: 800;">
+                <img src="/vendor/icons/cpu.svg" alt="" width="20" height="20">
                 YAML Heuristic Rule Sandbox
               </h2>
             </div>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0.75rem; line-height: 1.5;">
               Test custom threat detection rules against active stream memory buffer.
             </p>
-            <div style="font-size: 0.78rem; color: var(--text-dim); line-height: 1.4; margin-bottom: 0.8rem; background: rgba(16, 185, 129, 0.05); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.2);">
+            <div style="font-size: 0.82rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 1.25rem; background: rgba(16, 185, 129, 0.05); padding: 12px 16px; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.2);">
               <strong>How it works:</strong> Evaluates custom YAML threat specifications against the active telemetry event buffer in real time. Matches filter by event attributes and threshold counts to instantly trigger alert flags and remediation actions.
             </div>
-            <textarea id="rule-sandbox-editor" aria-label="YAML Rule Specification Editor" class="font-mono" rows="6" style="width: 100%; padding: 0.8rem; border-radius: 6px; border: 1px solid var(--border-color); background: #060911; color: var(--accent-hover); font-size: 0.82rem; margin-bottom: 1rem;">
+            <textarea id="rule-sandbox-editor" aria-label="YAML Rule Specification Editor" class="font-mono" rows="8" style="width: 100%; padding: 1rem; border-radius: 6px; border: 1px solid var(--border-color); background: #060911; color: var(--accent-hover); font-size: 0.88rem; margin-bottom: 1.25rem; line-height: 1.5;">
 id: CUSTOM_RULE_01
 name: Rapid Failed SSH Password Spray
 severity: HIGH
@@ -394,10 +394,10 @@ conditions:
   action: "deny"
   threshold_count: 3
 </textarea>
-            <button id="btn-test-rule" onclick="testRuleInSandbox()" class="btn-primary" aria-label="Test YAML Rule Against Memory Buffer">Test Rule Against Buffer</button>
-            <div id="rule-sandbox-result" style="display: block; margin-top: 1rem; background: #060911; border: 1px solid var(--border-color); border-radius: 6px; padding: 1.25rem; word-break: break-all; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.5; min-height: 80px;">
-              <div style="font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
-                <span class="pulse-dot" style="width: 6px; height: 6px; background: var(--severity-low); border-radius: 50%; display: inline-block;"></span>
+            <button id="btn-test-rule" onclick="testRuleInSandbox()" class="btn-primary" aria-label="Test YAML Rule Against Memory Buffer" style="padding: 0.7rem 1.5rem; margin-bottom: 1.25rem;">Test Rule Against Buffer</button>
+            <div id="rule-sandbox-result" style="display: block; background: #060911; border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; word-break: break-all; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.6; min-height: 120px;">
+              <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+                <span class="pulse-dot" style="width: 8px; height: 8px; background: var(--severity-low); border-radius: 50%; display: inline-block;"></span>
                 <strong style="color: var(--severity-low);">Sandbox Ready:</strong> Click "Test Rule Against Buffer" above to evaluate heuristics against recent events.
               </div>
             </div>
