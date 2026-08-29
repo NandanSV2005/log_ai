@@ -117,7 +117,7 @@
 }
 
 /* ==========================================================================
-   GENUINE LIGHT TAN / COFFEE-WITH-MILK THEME (Luminance: 0.4659)
+   MUTED SAGE / STONE-GREEN LIGHT THEME (Base Luminance: 0.5188)
    ========================================================================== */
 body.light-mode {
   background-color: #b0c4b1 !important;
@@ -173,6 +173,36 @@ body.light-mode {
   --severity-low-border: rgba(2, 44, 34, 0.35);
 }
 
+/* Dashboard Tab Bar Navigation Styles (Dark Mode Base) */
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 1rem 0;
+  cursor: pointer;
+  color: var(--text-muted) !important; /* #94a3b8 in Dark Mode — contrast 6.92:1 AA */
+  border-bottom: 2px solid transparent !important;
+  font-weight: 600;
+  font-size: 0.9rem;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+  opacity: 0.85;
+}
+
+.tab-btn:hover {
+  color: var(--text-main) !important; /* #f8fafc */
+  opacity: 1;
+}
+
+.tab-btn.active {
+  color: var(--accent-hover) !important; /* #a78bfa in Dark Mode — contrast 7.85:1 AAA */
+  border-bottom: 2px solid var(--accent-hover) !important;
+  font-weight: 700;
+  opacity: 1;
+}
+
 body.light-mode .main-navbar,
 body.light-mode #tab-bar,
 body.light-mode .navbar {
@@ -182,7 +212,8 @@ body.light-mode .navbar {
 }
 
 body.light-mode .tab-btn {
-  color: #223326 !important;
+  color: #223326 !important; /* contrast 7.25:1 AAA against #a1b6a2 */
+  border-bottom-color: transparent !important;
   font-weight: 600 !important;
   opacity: 0.85 !important;
 }
@@ -193,7 +224,7 @@ body.light-mode .tab-btn:hover {
 }
 
 body.light-mode .tab-btn.active {
-  color: #0f172a !important;
+  color: #0f172a !important; /* #0f172a Deep Sapphire Navy — contrast 9.67:1 AAA */
   border-bottom: 2px solid #0f172a !important;
   font-weight: 700 !important;
   opacity: 1 !important;

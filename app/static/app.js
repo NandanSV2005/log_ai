@@ -151,8 +151,6 @@ function setupTabNavigation() {
       // Reset all buttons
       tabBtns.forEach(n => {
         n.classList.remove('active');
-        n.style.color = '';
-        n.style.borderBottom = '';
       });
 
       // Reset all views
@@ -163,8 +161,6 @@ function setupTabNavigation() {
 
       // Activate clicked
       btn.classList.add('active');
-      btn.style.color = '';
-      btn.style.borderBottom = '';
 
       const activeView = document.getElementById(`tab-${targetTab}`);
       if (activeView) {

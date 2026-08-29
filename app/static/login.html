@@ -16,10 +16,13 @@
   <style>
     .auth-container {
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      padding: 2rem;
+      padding: 2rem 1rem;
+      box-sizing: border-box;
+      width: 100%;
     }
     .auth-card {
       background: var(--bg-card);
@@ -148,7 +151,7 @@
         Don't have an account? <a href="/register">Register here</a>
       </div>
     </div>
-    <footer class="app-footer-minimal" role="contentinfo" style="max-width: 420px; border-top: none; background: transparent;">
+    <footer class="app-footer-minimal" role="contentinfo" style="max-width: 480px; width: 100%; margin-top: 2rem; border-top: 1px solid var(--border-color); background: transparent; padding-top: 1.25rem; text-align: center;">
       <strong>LOG AI Security Platform</strong> &copy; 2026 LOG AI Inc. All rights reserved. Self-hosted air-gapped deployment architecture.
     </footer>
   </div>
