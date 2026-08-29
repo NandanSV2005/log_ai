@@ -1843,6 +1843,7 @@ body.light-mode .copilot-msg.user-msg .msg-bubble {
 
 .pipeline-steps-wrapper {
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
@@ -1851,7 +1852,7 @@ body.light-mode .copilot-msg.user-msg .msg-bubble {
 }
 
 .pipeline-step-node {
-  background: #060911;
+  background: var(--bg-dark);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 10px 14px;
@@ -1859,14 +1860,15 @@ body.light-mode .copilot-msg.user-msg .msg-bubble {
   align-items: center;
   gap: 10px;
   flex: 1;
-  min-width: 140px;
+  min-width: 130px;
+  white-space: nowrap;
   transition: all 0.2s ease;
 }
 
 .pipeline-step-node.active {
-  background: rgba(2, 132, 199, 0.15);
+  background: var(--accent-bg);
   border-color: var(--accent-hover);
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+  box-shadow: 0 0 12px var(--accent-border);
 }
 
 .step-node-num {
