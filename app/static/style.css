@@ -120,21 +120,21 @@
    GENUINE LIGHT TAN / COFFEE-WITH-MILK THEME (Luminance: 0.4659)
    ========================================================================== */
 body.light-mode {
-  background-color: #d2b08a !important;
-  color: #24140c !important;
+  background-color: #b0c4b1 !important;
+  color: #0f1c13 !important;
 
-  --bg-dark: #cba882;
-  --bg-slate: #e5caaa;
-  --bg-card: #e5caaa;
-  --bg-card-hover: #eed6b9;
+  --bg-dark: #a1b6a2;
+  --bg-slate: #c5d5c6;
+  --bg-card: #c5d5c6;
+  --bg-card-hover: #d4e3d5;
 
-  --border-color: #bfa07c;
+  --border-color: #91a792;
   --border-glow-cyan: rgba(15, 23, 42, 0.35);
 
-  --text-main: #24140c;
-  --text-muted: #3d2417;
-  --text-dim: #543422;
-  --text-white: #120906;
+  --text-main: #0f1c13;
+  --text-muted: #223326;
+  --text-dim: #354739;
+  --text-white: #08120b;
 
   /* NEW Light Mode Signature Accent: Deep Sapphire Navy (#0f172a) */
   --accent-primary: #0f172a;
@@ -176,9 +176,27 @@ body.light-mode {
 body.light-mode .main-navbar,
 body.light-mode #tab-bar,
 body.light-mode .navbar {
-  background: #c6a27c !important;
-  border-bottom-color: #bfa07c !important;
-  box-shadow: 0 4px 14px rgba(66, 39, 25, 0.14) !important;
+  background: #a1b6a2 !important;
+  border-bottom-color: #91a792 !important;
+  box-shadow: 0 4px 14px rgba(15, 28, 19, 0.14) !important;
+}
+
+body.light-mode .tab-btn {
+  color: #223326 !important;
+  font-weight: 600 !important;
+  opacity: 0.85 !important;
+}
+
+body.light-mode .tab-btn:hover {
+  color: #0f1c13 !important;
+  opacity: 1 !important;
+}
+
+body.light-mode .tab-btn.active {
+  color: #0f172a !important;
+  border-bottom: 2px solid #0f172a !important;
+  font-weight: 700 !important;
+  opacity: 1 !important;
 }
 
 body.light-mode #log-upload-dropzone,
@@ -189,9 +207,9 @@ body.light-mode #rule-sandbox-editor,
 body.light-mode .pipeline-track-card,
 body.light-mode .sample-code-pre,
 body.light-mode .copilot-messages > div {
-  background: #cba882 !important;
-  border-color: #bfa07c !important;
-  color: #120906 !important;
+  background: #a8baa9 !important;
+  border-color: #91a792 !important;
+  color: #08120b !important;
 }
 
 body.light-mode #analyze-logs-btn {
@@ -201,10 +219,10 @@ body.light-mode #analyze-logs-btn {
 }
 
 body.light-mode #analyze-logs-btn:disabled {
-  background: #bfa07c !important;
-  color: #543422 !important;
-  border-color: #a88a66 !important;
-  opacity: 0.7 !important;
+  background: #a1b6a2 !important;
+  color: #354739 !important;
+  border-color: #91a792 !important;
+  opacity: 0.75 !important;
 }
 
 body.light-mode .btn-primary {
@@ -226,13 +244,28 @@ body.light-mode .btn-outline:hover {
   background: rgba(15, 23, 42, 0.12) !important;
 }
 
+body.light-mode .preset-btn,
+body.light-mode button.preset-btn {
+  background: #a1b6a2 !important;
+  color: #0f1c13 !important;
+  border: 1px solid #91a792 !important;
+  font-weight: 600 !important;
+}
+
+body.light-mode .preset-btn:hover,
+body.light-mode button.preset-btn:hover {
+  background: #b0c4b1 !important;
+  border-color: #0f172a !important;
+  color: #0f172a !important;
+}
+
 body.light-mode select,
 body.light-mode input[type="text"],
 body.light-mode input[type="password"],
 body.light-mode textarea {
-  background: #cba882 !important;
-  color: #120906 !important;
-  border-color: #bfa07c !important;
+  background: #a8baa9 !important;
+  color: #08120b !important;
+  border-color: #91a792 !important;
 }
 
 body.light-mode select:focus,
@@ -247,10 +280,10 @@ body.light-mode .panel-card,
 body.light-mode .table-section,
 body.light-mode .kpi-card,
 body.light-mode .pipeline-track-card {
-  background: #e5caaa !important;
-  border-color: #bfa07c !important;
-  color: #24140c !important;
-  box-shadow: 0 4px 12px rgba(66, 39, 25, 0.08) !important;
+  background: #c5d5c6 !important;
+  border-color: #91a792 !important;
+  color: #0f1c13 !important;
+  box-shadow: 0 4px 12px rgba(15, 28, 19, 0.08) !important;
 }
 
 /* OpenStreetMap Dark Mode Tile Filter */
@@ -269,42 +302,42 @@ body.light-mode h4,
 body.light-mode .panel-title,
 body.light-mode .card-title,
 body.light-mode strong {
-  color: #120906 !important;
+  color: #08120b !important;
 }
 
 body.light-mode p,
 body.light-mode span,
 body.light-mode td,
 body.light-mode th {
-  color: #24140c !important;
+  color: #0f1c13 !important;
 }
 
 body.light-mode .text-muted,
 body.light-mode small {
-  color: #3d2417 !important;
+  color: #223326 !important;
 }
 
 body.light-mode input[type="text"],
 body.light-mode input[type="password"],
 body.light-mode textarea,
 body.light-mode select {
-  background: #f0dbbf !important;
-  color: #120906 !important;
-  border-color: #bfa07c !important;
+  background: #a8baa9 !important;
+  color: #08120b !important;
+  border-color: #91a792 !important;
 }
 
 body.light-mode .auth-card {
-  background: #e5caaa !important;
-  border-color: #bfa07c !important;
-  box-shadow: 0 20px 40px rgba(45, 26, 17, 0.2) !important;
+  background: #c5d5c6 !important;
+  border-color: #91a792 !important;
+  box-shadow: 0 20px 40px rgba(15, 28, 19, 0.2) !important;
 }
 
 body.light-mode .auth-header h2 {
-  color: #120906 !important;
+  color: #08120b !important;
 }
 
 body.light-mode .auth-header p {
-  color: #3d2417 !important;
+  color: #223326 !important;
 }
 
 /* Background Grid Motif Utility for Auth Pages */

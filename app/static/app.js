@@ -151,8 +151,8 @@ function setupTabNavigation() {
       // Reset all buttons
       tabBtns.forEach(n => {
         n.classList.remove('active');
-        n.style.color = '#a3a3a3';
-        n.style.borderBottom = 'none';
+        n.style.color = '';
+        n.style.borderBottom = '';
       });
 
       // Reset all views
@@ -163,8 +163,8 @@ function setupTabNavigation() {
 
       // Activate clicked
       btn.classList.add('active');
-      btn.style.color = '#10b981';
-      btn.style.borderBottom = '2px solid #10b981';
+      btn.style.color = '';
+      btn.style.borderBottom = '';
 
       const activeView = document.getElementById(`tab-${targetTab}`);
       if (activeView) {
