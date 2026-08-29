@@ -117,61 +117,103 @@
 }
 
 /* ==========================================================================
-   PART 2: GENUINE BROWN-TONED LIGHT THEME (AGED LEATHER / SEPIA PALETTE)
+   GENUINE LIGHT TAN / COFFEE-WITH-MILK THEME (Luminance: 0.4659)
    ========================================================================== */
 body.light-mode {
-  --bg-dark: #241a18;
-  --bg-slate: #352723;
-  --bg-card: #352723;
-  --bg-card-hover: #44322d;
+  background-color: #d2b08a !important;
+  color: #24140c !important;
 
-  --border-color: #4e3934;
-  --border-glow-cyan: rgba(167, 139, 250, 0.4);
+  --bg-dark: #d2b08a;
+  --bg-slate: #e5caaa;
+  --bg-card: #e5caaa;
+  --bg-card-hover: #eed6b9;
 
-  --text-main: #f2dfd0;
-  --text-muted: #d4b29b;
-  --text-dim: #b89882;
+  --border-color: #bfa07c;
+  --border-glow-cyan: rgba(59, 7, 100, 0.3);
 
-  --accent-primary: #a78bfa;
-  --accent-hover: #c084fc;
-  --accent-bg: rgba(167, 139, 250, 0.18);
-  --accent-border: rgba(167, 139, 250, 0.45);
+  --text-main: #24140c;
+  --text-muted: #3d2417;
+  --text-dim: #543422;
+  --text-white: #120906;
 
-  --severity-high: #f87171;
-  --severity-high-bg: rgba(248, 113, 113, 0.2);
-  --severity-high-border: rgba(248, 113, 113, 0.45);
+  --accent-primary: #3b0764;
+  --accent-hover: #5b21b6;
+  --accent-bg: rgba(59, 7, 100, 0.12);
+  --accent-border: rgba(59, 7, 100, 0.35);
 
-  --severity-medium: #fbbf24;
-  --severity-medium-bg: rgba(251, 191, 36, 0.2);
-  --severity-medium-border: rgba(251, 191, 36, 0.45);
+  --severity-high: #7f1d1d;
+  --severity-high-bg: rgba(127, 29, 29, 0.12);
+  --severity-high-border: rgba(127, 29, 29, 0.35);
 
-  --severity-low: #34d399;
-  --severity-low-bg: rgba(52, 211, 153, 0.2);
-  --severity-low-border: rgba(52, 211, 153, 0.45);
+  --severity-medium: #712b06;
+  --severity-medium-bg: rgba(113, 43, 6, 0.12);
+  --severity-medium-border: rgba(113, 43, 6, 0.35);
+
+  --severity-low: #022c22;
+  --severity-low-bg: rgba(2, 44, 34, 0.12);
+  --severity-low-border: rgba(2, 44, 34, 0.35);
 }
 
 body.light-mode .main-navbar,
 body.light-mode #tab-bar,
 body.light-mode .navbar {
-  background: #1c1412 !important;
-  border-bottom-color: #4e3934 !important;
+  background: #c6a27c !important;
+  border-bottom-color: #bfa07c !important;
 }
 
 body.light-mode .panel-card,
 body.light-mode .table-section,
 body.light-mode .kpi-card,
 body.light-mode .pipeline-track-card {
-  background: linear-gradient(145deg, rgba(53, 39, 35, 0.95) 0%, rgba(42, 30, 27, 0.85) 100%) !important;
-  border-color: #4e3934 !important;
+  background: #e5caaa !important;
+  border-color: #bfa07c !important;
+  color: #24140c !important;
+  box-shadow: 0 4px 12px rgba(66, 39, 25, 0.08) !important;
+}
+
+body.light-mode h1,
+body.light-mode h2,
+body.light-mode h3,
+body.light-mode h4,
+body.light-mode .panel-title,
+body.light-mode .card-title,
+body.light-mode strong {
+  color: #120906 !important;
+}
+
+body.light-mode p,
+body.light-mode span,
+body.light-mode td,
+body.light-mode th {
+  color: #24140c !important;
+}
+
+body.light-mode .text-muted,
+body.light-mode small {
+  color: #3d2417 !important;
 }
 
 body.light-mode input[type="text"],
 body.light-mode input[type="password"],
 body.light-mode textarea,
 body.light-mode select {
-  background: #1c1412 !important;
-  color: #fce8d5 !important;
-  border-color: #4e3934 !important;
+  background: #f0dbbf !important;
+  color: #120906 !important;
+  border-color: #bfa07c !important;
+}
+
+body.light-mode .auth-card {
+  background: #e5caaa !important;
+  border-color: #bfa07c !important;
+  box-shadow: 0 20px 40px rgba(45, 26, 17, 0.2) !important;
+}
+
+body.light-mode .auth-header h2 {
+  color: #120906 !important;
+}
+
+body.light-mode .auth-header p {
+  color: #3d2417 !important;
 }
 
 /* Background Grid Motif Utility for Auth Pages */
