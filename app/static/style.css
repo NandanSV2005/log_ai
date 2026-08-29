@@ -129,35 +129,35 @@ body.light-mode {
   --bg-card-hover: #eed6b9;
 
   --border-color: #bfa07c;
-  --border-glow-cyan: rgba(110, 41, 13, 0.35);
+  --border-glow-cyan: rgba(15, 23, 42, 0.35);
 
   --text-main: #24140c;
   --text-muted: #3d2417;
   --text-dim: #543422;
   --text-white: #120906;
 
-  /* NEW Light Mode Signature Accent: Warm Burnt Terracotta / Dark Copper (#6e290d) */
-  --accent-primary: #6e290d;
-  --accent-hover: #8c3613;
-  --accent-bg: rgba(110, 41, 13, 0.14);
-  --accent-border: rgba(110, 41, 13, 0.35);
+  /* NEW Light Mode Signature Accent: Deep Sapphire Navy (#0f172a) */
+  --accent-primary: #0f172a;
+  --accent-hover: #1e293b;
+  --accent-bg: rgba(15, 23, 42, 0.12);
+  --accent-border: rgba(15, 23, 42, 0.35);
 
   /* Feature Area Overrides in Light Mode */
-  --feature-command: #6e290d;
-  --feature-command-bg: rgba(110, 41, 13, 0.14);
-  --feature-command-border: rgba(110, 41, 13, 0.35);
+  --feature-command: #0f172a;
+  --feature-command-bg: rgba(15, 23, 42, 0.12);
+  --feature-command-border: rgba(15, 23, 42, 0.35);
 
-  --feature-copilot: #6e290d;
-  --feature-copilot-bg: rgba(110, 41, 13, 0.14);
-  --feature-copilot-border: rgba(110, 41, 13, 0.35);
+  --feature-copilot: #0f172a;
+  --feature-copilot-bg: rgba(15, 23, 42, 0.12);
+  --feature-copilot-border: rgba(15, 23, 42, 0.35);
 
-  --neon-cyan: #6e290d;
-  --neon-cyan-bg: rgba(110, 41, 13, 0.14);
-  --neon-cyan-border: rgba(110, 41, 13, 0.35);
+  --neon-cyan: #0f172a;
+  --neon-cyan-bg: rgba(15, 23, 42, 0.12);
+  --neon-cyan-border: rgba(15, 23, 42, 0.35);
 
-  --neon-violet: #6e290d;
-  --neon-violet-bg: rgba(110, 41, 13, 0.14);
-  --neon-violet-border: rgba(110, 41, 13, 0.35);
+  --neon-violet: #0f172a;
+  --neon-violet-bg: rgba(15, 23, 42, 0.12);
+  --neon-violet-border: rgba(15, 23, 42, 0.35);
 
   /* Severity Signaling Palette in Light Mode */
   --severity-high: #7f1d1d;
@@ -195,9 +195,9 @@ body.light-mode .copilot-messages > div {
 }
 
 body.light-mode #analyze-logs-btn {
-  background: #6e290d !important;
+  background: #0f172a !important;
   color: #ffffff !important;
-  border-color: #58200a !important;
+  border-color: #020617 !important;
 }
 
 body.light-mode #analyze-logs-btn:disabled {
@@ -208,22 +208,22 @@ body.light-mode #analyze-logs-btn:disabled {
 }
 
 body.light-mode .btn-primary {
-  background: #6e290d !important;
+  background: #0f172a !important;
   color: #ffffff !important;
-  border-color: #58200a !important;
+  border-color: #020617 !important;
 }
 
 body.light-mode .btn-primary:hover {
-  background: #8c3613 !important;
+  background: #1e293b !important;
 }
 
 body.light-mode .btn-outline {
-  border-color: #6e290d !important;
-  color: #6e290d !important;
+  border-color: #0f172a !important;
+  color: #0f172a !important;
 }
 
 body.light-mode .btn-outline:hover {
-  background: rgba(110, 41, 13, 0.14) !important;
+  background: rgba(15, 23, 42, 0.12) !important;
 }
 
 body.light-mode select,
@@ -239,8 +239,8 @@ body.light-mode select:focus,
 body.light-mode input[type="text"]:focus,
 body.light-mode input[type="password"]:focus,
 body.light-mode textarea:focus {
-  border-color: #6e290d !important;
-  box-shadow: 0 0 0 2px rgba(110, 41, 13, 0.35) !important;
+  border-color: #0f172a !important;
+  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.35) !important;
 }
 
 body.light-mode .panel-card,
