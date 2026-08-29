@@ -22,7 +22,7 @@
           <img src="/vendor/icons/shield.svg" alt="" width="20" height="20" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
         </div>
         <div>
-          <h1 style="color: white; font-size: 1.1rem; margin: 0; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+          <h1 style="color: var(--text-main); font-size: 1.1rem; margin: 0; font-weight: 800; display: flex; align-items: center; gap: 8px;">
             LOG AI <span class="font-mono" style="background: var(--accent-bg); color: var(--accent-hover); padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; border: 1px solid var(--accent-border);">ENTERPRISE SOC</span>
           </h1>
         </div>
@@ -31,7 +31,7 @@
       <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
         <div style="position: relative;">
           <input type="text" id="nlp-search-input" placeholder="Search telemetry, IPs, hashes..." aria-label="Search telemetry data by IP, vendor, or hash"
-            style="padding: 0.45rem 1rem 0.45rem 2.2rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-slate); color: white; width: 240px; font-size: 0.82rem;">
+            style="padding: 0.45rem 1rem 0.45rem 2.2rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-slate); color: var(--text-main); width: 240px; font-size: 0.82rem;">
           <img src="/vendor/icons/database.svg" alt="" width="14" height="14" style="position: absolute; left: 10px; top: 10px; opacity: 0.5;">
         </div>
         <div class="status-pill font-mono" style="display: flex; align-items: center; gap: 0.4rem; color: var(--severity-low); font-size: 0.72rem; font-weight: bold; background: var(--severity-low-bg); padding: 4px 8px; border-radius: 20px; border: 1px solid var(--severity-low-border);">
@@ -125,7 +125,7 @@
               <img src="/vendor/icons/database.svg" alt="" width="14" height="14">
               Ingestion Rate &amp; Volume
             </div>
-            <div id="stat-ingestion-rate" class="font-mono" style="font-size: 1.8rem; font-weight: 800; color: #ffffff;">0 evt/s</div>
+            <div id="stat-ingestion-rate" class="font-mono" style="font-size: 1.8rem; font-weight: 800; color: var(--text-main);">0 evt/s</div>
             <div id="stat-total-volume" style="font-size: 0.75rem; color: var(--text-dim);">Total 0 events parsed</div>
           </div>
         </section>
@@ -134,7 +134,7 @@
         <section class="panel-card feature-accent-forensics" aria-label="Sovereign Server Log Upload and Analysis Engine" style="padding: 1.5rem; margin-bottom: 2rem;">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
             <div>
-              <h2 style="font-size: 1.1rem; font-weight: 800; color: #ffffff; margin: 0; display: flex; align-items: center; gap: 8px;">
+              <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">
                 <img src="/vendor/icons/database.svg" alt="" width="20" height="20" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
                 Sovereign Server Log Upload &amp; Analysis Engine
               </h2>
@@ -238,7 +238,7 @@
         <!-- INCIDENT-FIRST HERO VIEW -->
         <section aria-label="Correlated Active Incidents Section" style="margin-bottom: 2rem;">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-            <h2 style="font-size: 1.1rem; font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 8px; margin: 0;">
+            <h2 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; margin: 0;">
               <img src="/vendor/icons/git-branch.svg" alt="" width="18" height="18" style="filter: invert(65%) sepia(80%) saturate(1000%) hue-rotate(5deg);">
               Correlated Security Incidents
             </h2>
@@ -250,7 +250,7 @@
           <div id="incidents-grid-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 1.25rem;">
             <div style="grid-column: 1 / -1; background: var(--bg-slate); border: 1px solid var(--border-color); border-radius: 8px; padding: 2.5rem; text-align: center; color: var(--text-muted);">
               <img src="/vendor/icons/check-circle.svg" alt="" width="28" height="28" style="filter: invert(65%) sepia(70%) saturate(1000%) hue-rotate(120deg); margin-bottom: 0.5rem;">
-              <div style="font-size: 0.95rem; font-weight: 700; color: #ffffff;">No Active Incidents</div>
+              <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-main);">No Active Incidents</div>
               <div style="font-size: 0.82rem; margin-top: 4px;">All telemetry nominal. Trigger a simulation or upload logs to analyze incident clusters.</div>
             </div>
           </div>

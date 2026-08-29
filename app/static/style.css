@@ -205,10 +205,26 @@ body.light-mode {
 
 body.light-mode .main-navbar,
 body.light-mode #tab-bar,
-body.light-mode .navbar {
+body.light-mode .navbar,
+body.light-mode .top-nav {
   background: #a1b6a2 !important;
   border-bottom-color: #91a792 !important;
   box-shadow: 0 4px 14px rgba(15, 28, 19, 0.14) !important;
+}
+
+body.light-mode .top-nav h1 {
+  color: #08120b !important;
+}
+
+body.light-mode .hero-title span {
+  color: #0f172a !important;
+}
+
+body.light-mode .tamper-toggle-btn,
+body.light-mode .stream-context-note {
+  background: #a8baa9 !important;
+  color: #08120b !important;
+  border-color: #7b917c !important;
 }
 
 body.light-mode .tab-btn {
@@ -256,10 +272,15 @@ body.light-mode #analyze-logs-btn:disabled {
   opacity: 0.75 !important;
 }
 
-body.light-mode .btn-primary {
+body.light-mode .btn-primary,
+body.light-mode a.btn-primary,
+body.light-mode button.btn-primary {
   background: #0f172a !important;
   color: #ffffff !important;
   border-color: #020617 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 body.light-mode .btn-primary:hover {
@@ -310,11 +331,47 @@ body.light-mode textarea:focus {
 body.light-mode .panel-card,
 body.light-mode .table-section,
 body.light-mode .kpi-card,
-body.light-mode .pipeline-track-card {
+body.light-mode .pipeline-track-card,
+body.light-mode .merkle-card-header,
+body.light-mode .merkle-svg-wrapper,
+body.light-mode .merkle-explanation-box,
+body.light-mode .merkle-step-card,
+body.light-mode .feature-card,
+body.light-mode .stepper-card,
+body.light-mode .mock-console-card,
+body.light-mode .preview-kpi-card,
+body.light-mode .stream-sample-box,
+body.light-mode .roi-card,
+body.light-mode .roi-results-col,
+body.light-mode .roi-assumptions,
+body.light-mode .usecase-card,
+body.light-mode .readiness-strip,
+body.light-mode .readiness-badge,
+body.light-mode .landing-footer {
   background: #c5d5c6 !important;
   border-color: #91a792 !important;
   color: #0f1c13 !important;
   box-shadow: 0 4px 12px rgba(15, 28, 19, 0.08) !important;
+}
+
+body.light-mode .stream-sample-box.is-sample {
+  border-color: #7b917c !important;
+  background: repeating-linear-gradient(135deg, #a8baa9, #a8baa9 12px, #b0c4b1 12px, #b0c4b1 24px) !important;
+}
+
+body.light-mode .stream-row {
+  color: #08120b !important;
+  border-bottom-color: #91a792 !important;
+}
+
+body.light-mode .badge-vendor {
+  background: #a8baa9 !important;
+  color: #08120b !important;
+  border-color: #7b917c !important;
+}
+
+body.light-mode #ext-req-count {
+  color: #022c22 !important;
 }
 
 /* OpenStreetMap Dark Mode Tile Filter */
@@ -332,6 +389,14 @@ body.light-mode h3,
 body.light-mode h4,
 body.light-mode .panel-title,
 body.light-mode .card-title,
+body.light-mode .hero-title,
+body.light-mode .section-title,
+body.light-mode .feature-title,
+body.light-mode .uc-title,
+body.light-mode .step-card-title,
+body.light-mode .merkle-card-title,
+body.light-mode .res-val,
+body.light-mode .slider-label,
 body.light-mode strong {
   color: #08120b !important;
 }
@@ -339,11 +404,16 @@ body.light-mode strong {
 body.light-mode p,
 body.light-mode span,
 body.light-mode td,
-body.light-mode th {
+body.light-mode th,
+body.light-mode label,
+body.light-mode div {
   color: #0f1c13 !important;
 }
 
 body.light-mode .text-muted,
+body.light-mode .res-label,
+body.light-mode .kpi-label,
+body.light-mode .step-card-desc,
 body.light-mode small {
   color: #223326 !important;
 }
@@ -369,6 +439,22 @@ body.light-mode .auth-header h2 {
 
 body.light-mode .auth-header p {
   color: #223326 !important;
+}
+
+body.light-mode .btn-submit {
+  background: #0f172a !important;
+  color: #ffffff !important;
+  border-color: #020617 !important;
+}
+
+body.light-mode .app-footer-minimal {
+  background: transparent !important;
+  color: #0f1c13 !important;
+  border-color: #91a792 !important;
+}
+
+body.light-mode .app-footer-minimal strong {
+  color: #08120b !important;
 }
 
 /* Background Grid Motif Utility for Auth Pages */

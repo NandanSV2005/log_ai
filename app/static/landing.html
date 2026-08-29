@@ -198,7 +198,7 @@
     .merkle-card-title {
       font-size: 0.85rem;
       font-weight: 700;
-      color: #ffffff;
+      color: var(--text-main);
       letter-spacing: 0.5px;
       text-transform: uppercase;
     }
@@ -231,7 +231,7 @@
 
     .merkle-svg-wrapper {
       padding: 24px;
-      background: #090e1a;
+      background: var(--bg-dark);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -269,7 +269,7 @@
     }
 
     .merkle-step-card {
-      background: #0b1220;
+      background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: 8px;
       padding: 1rem;
@@ -292,7 +292,7 @@
     .step-card-title {
       font-size: 0.85rem;
       font-weight: 700;
-      color: #ffffff;
+      color: var(--text-main);
     }
 
     .step-card-desc {
@@ -368,7 +368,7 @@
     .feature-title {
       font-size: 1.15rem;
       font-weight: 800;
-      color: #ffffff;
+      color: var(--text-main);
       margin: 0;
     }
 
@@ -414,7 +414,7 @@
     .section-title {
       font-size: 1.75rem;
       font-weight: 800;
-      color: #ffffff;
+      color: var(--text-main);
       margin-bottom: 0.5rem;
     }
 
@@ -591,7 +591,7 @@
     }
 
     .preview-kpi-card {
-      background: #060911;
+      background: var(--bg-dark);
       border: 1px solid var(--border-color);
       border-radius: 8px;
       padding: 1rem;
@@ -619,7 +619,7 @@
     }
 
     .stream-sample-box {
-      background: #060911;
+      background: var(--bg-dark);
       border: 1px solid var(--border-color);
       border-radius: 8px;
       padding: 1rem;
@@ -627,8 +627,8 @@
     }
 
     .stream-sample-box.is-sample {
-      border: 1px dashed rgba(167, 139, 250, 0.45);
-      background: repeating-linear-gradient(135deg, #060911, #060911 12px, #0b101c 12px, #0b101c 24px);
+      border: 1px dashed var(--accent-border);
+      background: repeating-linear-gradient(135deg, var(--bg-dark), var(--bg-dark) 12px, var(--bg-slate) 12px, var(--bg-slate) 24px);
     }
 
     .badge-sample-tag {
@@ -819,8 +819,9 @@
     }
 
     .badge-vendor {
-      color: #cbd5e1;
-      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      background: var(--accent-bg);
+      border: 1px solid var(--accent-border);
       padding: 2px 6px;
       border-radius: 4px;
       font-size: 0.7rem;
@@ -862,7 +863,7 @@
     .slider-label {
       font-size: 0.85rem;
       font-weight: 700;
-      color: #ffffff;
+      color: var(--text-main);
     }
 
     .slider-value {
@@ -885,7 +886,7 @@
     }
 
     .roi-results-col {
-      background: #060911;
+      background: var(--bg-dark);
       border: 1px solid var(--border-color);
       border-radius: 8px;
       padding: 1.5rem;
@@ -911,15 +912,15 @@
     .res-val {
       font-size: 1.6rem;
       font-weight: 800;
-      color: #ffffff;
+      color: var(--text-main);
     }
 
     .roi-assumptions {
       margin-top: 1rem;
       font-size: 0.75rem;
-      color: var(--text-dim);
+      color: var(--text-muted);
       line-height: 1.6;
-      background: #090e1a;
+      background: var(--bg-slate);
       padding: 1rem;
       border-radius: 6px;
       border: 1px solid var(--border-color);
@@ -976,7 +977,7 @@
     .uc-title {
       font-size: 0.95rem;
       font-weight: 700;
-      color: #ffffff;
+      color: var(--text-main);
       margin: 0;
     }
 
@@ -1003,7 +1004,7 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: #060911;
+      background: var(--bg-dark);
       border: 1px solid var(--border-color);
       padding: 6px 14px;
       border-radius: 9999px;
@@ -1026,7 +1027,7 @@
           <img src="/vendor/icons/shield.svg" alt="" width="22" height="22" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg) brightness(98%) contrast(98%);">
         </div>
         <div class="brand-title">
-          <h1 style="font-size: 1rem; font-weight: 800; color: #ffffff; margin: 0; display: flex; align-items: center; gap: 8px;">
+          <h1 style="font-size: 1rem; font-weight: 800; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px;">
             LOG AI
             <span class="badge-tag">FORENSIC ENGINE</span>
           </h1>
