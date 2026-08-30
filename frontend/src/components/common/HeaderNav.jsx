@@ -101,7 +101,21 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
             }
           >
             <span className="material-symbols-outlined text-lg">dashboard</span>
-            <span>Command Center</span>
+            <span>Dashboard</span>
+          </NavLink>
+
+          <NavLink
+            to="/threat-intel"
+            className={({ isActive }) =>
+              `flex items-center gap-2 px-4 py-2 rounded-md transition-all whitespace-nowrap ${
+                isActive
+                  ? 'bg-surface-container text-primary border border-border-muted shadow-sm font-bold'
+                  : 'text-text-muted hover:text-text-primary hover:bg-surface-hover'
+              }`
+            }
+          >
+            <span className="material-symbols-outlined text-lg">security</span>
+            <span>Threat Intel</span>
           </NavLink>
 
           <NavLink
@@ -119,7 +133,7 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
           </NavLink>
 
           <NavLink
-            to="/threat-intel"
+            to="/forensics"
             className={({ isActive }) =>
               `flex items-center gap-2 px-4 py-2 rounded-md transition-all whitespace-nowrap ${
                 isActive
@@ -128,8 +142,8 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
               }`
             }
           >
-            <span className="material-symbols-outlined text-lg">public</span>
-            <span>Threat Intelligence</span>
+            <span className="material-symbols-outlined text-lg">search_insights</span>
+            <span>Forensics</span>
           </NavLink>
 
           <NavLink
@@ -142,7 +156,7 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
               }`
             }
           >
-            <span className="material-symbols-outlined text-lg">verified</span>
+            <span className="material-symbols-outlined text-lg">terminal</span>
             <span>Forensics & Rule Studio</span>
           </NavLink>
 
