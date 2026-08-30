@@ -240,25 +240,31 @@ export function LandingPage() {
               <span className="text-4xl font-extrabold font-mono text-rose-500">03</span>
             </div>
 
-            {/* ISSUE 2 FIX: Real-Time Telemetry Stream Graph */}
-            <div className="md:col-span-8 glass-panel rounded-2xl p-6 border border-border-muted space-y-3">
+            {/* Real-Time Telemetry Stream Graph Card */}
+            <div className="md:col-span-8 glass-panel rounded-2xl p-6 border border-border-muted relative overflow-hidden group space-y-3">
+              <div
+                className="absolute left-0 top-0 bottom-0 w-1 opacity-50 group-hover:opacity-100 transition-opacity"
+                style={{ backgroundColor: 'var(--color-tertiary)' }}
+              ></div>
               <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-emerald-400 text-2xl">speed</span>
-                <h3 className="text-lg font-bold text-text-primary">Real-Time Telemetry Stream</h3>
+                <span className="material-symbols-outlined text-2xl" style={{ color: 'var(--color-tertiary)' }}>
+                  speed
+                </span>
+                <h3 className="text-lg font-bold text-text-primary">Real-Time Telemetry</h3>
               </div>
-              <div className="h-32 w-full rounded-xl border border-border-muted bg-surface-dim flex items-end p-3 gap-2 overflow-hidden">
-                <div className="w-1/12 bg-primary/70 h-1/4 rounded-t opacity-70"></div>
-                <div className="w-1/12 bg-primary/70 h-2/4 rounded-t opacity-70"></div>
-                <div className="w-1/12 bg-primary/70 h-1/3 rounded-t opacity-70"></div>
-                <div className="w-1/12 bg-primary/70 h-3/4 rounded-t opacity-70"></div>
-                <div className="w-1/12 bg-primary/70 h-1/2 rounded-t opacity-70"></div>
-                <div className="w-1/12 bg-primary h-5/6 rounded-t opacity-90 animate-pulse"></div>
-                <div className="w-1/12 bg-primary/70 h-1/4 rounded-t opacity-70"></div>
-                <div className="w-1/12 bg-primary/70 h-2/3 rounded-t opacity-70"></div>
-                <div className="w-1/12 bg-primary/70 h-3/5 rounded-t opacity-70"></div>
-                <div className="w-1/12 bg-primary/70 h-4/5 rounded-t opacity-70"></div>
-                <div className="w-1/12 bg-primary/70 h-1/2 rounded-t opacity-70"></div>
-                <div className="w-1/12 bg-primary h-full rounded-t opacity-90"></div>
+              <div className="h-32 w-full rounded-xl border border-border-muted bg-surface-dim flex items-end p-2 gap-1 overflow-hidden">
+                <div className="w-1/12 h-1/4 rounded-t opacity-70" style={{ backgroundColor: 'var(--color-tertiary)' }}></div>
+                <div className="w-1/12 h-2/4 rounded-t opacity-70" style={{ backgroundColor: 'var(--color-tertiary)' }}></div>
+                <div className="w-1/12 h-1/3 rounded-t opacity-70" style={{ backgroundColor: 'var(--color-tertiary)' }}></div>
+                <div className="w-1/12 h-3/4 rounded-t opacity-70" style={{ backgroundColor: 'var(--color-tertiary)' }}></div>
+                <div className="w-1/12 h-1/2 rounded-t opacity-70" style={{ backgroundColor: 'var(--color-tertiary)' }}></div>
+                <div className="w-1/12 h-5/6 rounded-t opacity-90 animate-pulse" style={{ backgroundColor: 'var(--color-tertiary)' }}></div>
+                <div className="w-1/12 h-1/4 rounded-t opacity-70" style={{ backgroundColor: 'var(--color-tertiary)' }}></div>
+                <div className="w-1/12 h-2/3 rounded-t opacity-70" style={{ backgroundColor: 'var(--color-tertiary)' }}></div>
+                <div className="w-1/12 h-3/5 rounded-t opacity-70" style={{ backgroundColor: 'var(--color-tertiary)' }}></div>
+                <div className="w-1/12 h-4/5 rounded-t opacity-70" style={{ backgroundColor: 'var(--color-tertiary)' }}></div>
+                <div className="w-1/12 h-1/2 rounded-t opacity-70" style={{ backgroundColor: 'var(--color-tertiary)' }}></div>
+                <div className="w-1/12 h-full rounded-t opacity-90" style={{ backgroundColor: 'var(--color-tertiary)' }}></div>
               </div>
             </div>
           </div>
