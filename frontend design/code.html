@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Log AI - Secure Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=JetBrains+Mono:wght@500;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#4edea3",
+                        "surface-container": "#1c1f29",
+                        "on-tertiary-container": "#00311f",
+                        "background": "#0f131c",
+                        "severity-medium": "#f59e0b",
+                        "secondary-fixed-dim": "#7bd0ff",
+                        "outline-variant": "#494454",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "surface-variant": "#31353f",
+                        "primary-container": "#a078ff",
+                        "on-surface": "#dfe2ef",
+                        "on-secondary-fixed": "#001e2c",
+                        "on-secondary-container": "#00374d",
+                        "surface-tint": "#d0bcff",
+                        "surface-container-lowest": "#0a0e17",
+                        "on-primary-fixed-variant": "#5516be",
+                        "inverse-surface": "#dfe2ef",
+                        "secondary-container": "#00a6e0",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed": "#002113",
+                        "on-surface-variant": "#cbc3d7",
+                        "on-secondary-fixed-variant": "#004c69",
+                        "on-primary": "#3c0091",
+                        "on-primary-fixed": "#23005c",
+                        "error": "#ffb4ab",
+                        "border-glow": "rgba(167, 139, 250, 0.4)",
+                        "surface": "#111827",
+                        "primary-fixed": "#e9ddff",
+                        "error-container": "#93000a",
+                        "on-background": "#dfe2ef",
+                        "border-muted": "#1f293d",
+                        "on-tertiary": "#003824",
+                        "tertiary": "#4edea3",
+                        "surface-container-highest": "#31353f",
+                        "primary": "#d0bcff",
+                        "surface-bright": "#353943",
+                        "primary-fixed-dim": "#d0bcff",
+                        "severity-high": "#ef4444",
+                        "inverse-on-surface": "#2c303a",
+                        "severity-low": "#10b981",
+                        "text-muted": "#94a3b8",
+                        "outline": "#958ea0",
+                        "text-dim": "#75859c",
+                        "surface-dim": "#0f131c",
+                        "tertiary-fixed": "#6ffbbe",
+                        "secondary": "#7bd0ff",
+                        "on-secondary": "#00354a",
+                        "inverse-primary": "#6d3bd7",
+                        "tertiary-container": "#00a572",
+                        "on-primary-container": "#340080",
+                        "accent-violet-light": "#a78bfa",
+                        "on-error-container": "#ffdad6",
+                        "text-primary": "#f8fafc",
+                        "secondary-fixed": "#c4e7ff",
+                        "surface-container-low": "#181b25",
+                        "surface-container-high": "#262a34",
+                        "surface-hover": "#1f293d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "sm": "8px",
+                        "xl": "32px",
+                        "md": "16px",
+                        "container-max": "1600px",
+                        "lg": "24px",
+                        "unit": "4px",
+                        "gutter": "20px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Inter"],
+                        "badge-caps": ["JetBrains Mono"],
+                        "telemetry-mono": ["JetBrains Mono"],
+                        "display-hero": ["Inter"],
+                        "body-base": ["Inter"],
+                        "kpi-stat": ["JetBrains Mono"],
+                        "title-card": ["Inter"],
+                        "body-bold": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "800" }],
+                        "badge-caps": ["10px", { "lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "telemetry-mono": ["12px", { "lineHeight": "18px", "letterSpacing": "0", "fontWeight": "500" }],
+                        "display-hero": ["52px", { "lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "body-base": ["14px", { "lineHeight": "21px", "letterSpacing": "0", "fontWeight": "400" }],
+                        "kpi-stat": ["36px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "800" }],
+                        "title-card": ["14px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+                        "body-bold": ["14px", { "lineHeight": "21px", "letterSpacing": "0", "fontWeight": "700" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: linear-gradient(145deg, #111827, #0f172a);
+            border: 1px solid #1f293d;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .input-cyber {
+            background-color: #0f131c;
+            border: 1px solid #1f293d;
+            background-image: radial-gradient(#1f293d 1px, transparent 0);
+            background-size: 8px 8px;
+        }
+        .input-cyber:focus {
+            border-color: #a78bfa;
+            box-shadow: 0 0 0 1px #a78bfa, 0 0 8px rgba(167, 139, 250, 0.2);
+            outline: none;
+        }
+        .btn-primary {
+            background-color: #a78bfa;
+            color: #0f131c;
+            border: 1px solid #a78bfa;
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover {
+            filter: brightness(1.1);
+            box-shadow: 0 0 12px rgba(167, 139, 250, 0.4);
+        }
+        .btn-secondary {
+            background-color: transparent;
+            color: #94a3b8;
+            border: 1px solid #1f293d;
+            transition: all 0.2s ease;
+        }
+        .btn-secondary:hover {
+            color: #f8fafc;
+            border-color: #494454;
+            background-color: #1c1f29;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-base text-body-base overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- Supressing TopNavBar as this is a linear/transactional login screen, but keeping a simplified brand header -->
+<header class="w-full h-16 flex justify-between items-center px-lg max-w-container-max mx-auto absolute top-0 left-0 right-0 z-50">
+<div class="font-headline-lg text-headline-lg font-extrabold text-primary tracking-tighter flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">security</span>
+            LOG AI
+        </div>
+<div class="flex items-center gap-4 text-text-muted text-sm">
+<span>SOC Access Only</span>
+</div>
+</header>
+<main class="flex-grow flex items-center justify-center p-4 relative z-10">
+<!-- Abstract Background Element -->
+<div class="absolute inset-0 z-0 overflow-hidden pointer-events-none flex items-center justify-center opacity-30">
+<div class="w-[800px] h-[800px] rounded-full bg-primary-container/5 blur-[120px]"></div>
+<div class="absolute w-full h-full bg-[radial-gradient(circle_at_center,transparent_0%,#090d16_100%)]"></div>
+</div>
+<!-- Login Card -->
+<div class="glass-panel w-full max-w-md rounded-xl p-8 relative z-10">
+<!-- Header -->
+<div class="text-center mb-8">
+<div class="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-surface-container border border-border-muted mb-4 shadow-[0_0_15px_rgba(167,139,250,0.15)]">
+<span class="material-symbols-outlined text-primary-fixed-dim text-2xl" style="font-variation-settings: 'FILL' 1;">lock</span>
+</div>
+<h1 class="font-headline-md text-headline-md text-text-primary mb-2">Command Center Login</h1>
+<p class="text-text-muted font-body-base">Authenticate to access SOC telemetry.</p>
+</div>
+<!-- Form -->
+<form class="space-y-6" onsubmit="event.preventDefault();">
+<div class="space-y-2">
+<label class="block font-title-card text-title-card text-on-surface" for="username">Operator ID / Email</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-text-muted text-sm">person</span>
+</div>
+<input class="input-cyber w-full rounded-lg py-2.5 pl-10 pr-4 text-on-surface font-telemetry-mono text-telemetry-mono placeholder-text-dim transition-all" id="username" placeholder="Enter credentials" required="" type="text"/>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<label class="block font-title-card text-title-card text-on-surface" for="password">Access Token</label>
+<a class="text-xs text-primary-fixed-dim hover:text-accent-violet-light transition-colors font-body-bold" href="#">Reset Token?</a>
+</div>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-text-muted text-sm">key</span>
+</div>
+<input class="input-cyber w-full rounded-lg py-2.5 pl-10 pr-10 text-on-surface font-telemetry-mono text-telemetry-mono placeholder-text-dim transition-all" id="password" placeholder="••••••••••••" required="" type="password"/>
+<button class="absolute inset-y-0 right-0 pr-3 flex items-center text-text-muted hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-sm">visibility</span>
+</button>
+</div>
+</div>
+<div class="flex items-center">
+<input class="h-4 w-4 rounded border-border-muted bg-surface-dim text-accent-violet-light focus:ring-accent-violet-light focus:ring-offset-background" id="remember" type="checkbox"/>
+<label class="ml-2 block text-sm text-text-muted" for="remember">Maintain active session</label>
+</div>
+<button class="btn-primary w-full rounded-lg py-3 font-body-bold text-body-bold flex items-center justify-center gap-2" type="submit">
+                    Secure Login
+                    <span class="material-symbols-outlined text-sm">login</span>
+</button>
+</form>
+<div class="mt-8 flex items-center justify-center gap-4">
+<div class="h-px bg-border-muted flex-grow"></div>
+<span class="text-xs text-text-dim font-badge-caps text-badge-caps">OR USE</span>
+<div class="h-px bg-border-muted flex-grow"></div>
+</div>
+<div class="mt-6">
+<button class="btn-secondary w-full rounded-lg py-2.5 font-body-bold text-body-bold flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-sm">business</span>
+                    Enterprise SSO Login
+                </button>
+</div>
+</div>
+</main>
+<!-- Suppressing Footer as this is a transactional screen, keeping minimal copyright -->
+<footer class="w-full py-4 text-center text-text-dim font-telemetry-mono text-[10px] relative z-10 border-t border-border-muted/50">
+        © 2024 Log AI Security. Authorized Personnel Only.
+    </footer>
+</body></html>

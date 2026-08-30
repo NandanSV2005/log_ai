@@ -94,16 +94,17 @@
     }
 
     .hero-title {
-      font-size: 3.2rem;
+      font-size: 3.4rem;
       font-weight: 800;
-      line-height: 1.15;
+      line-height: 1.12;
       margin-bottom: 1.25rem;
-      color: #ffffff;
-      letter-spacing: -0.02em;
+      color: var(--text-main);
+      letter-spacing: -0.025em;
     }
 
     .hero-title span {
       color: var(--accent-hover);
+      text-shadow: 0 0 24px rgba(167, 139, 250, 0.35);
     }
 
     .hero-subtitle {
@@ -126,22 +127,24 @@
     .btn-primary {
       font-family: var(--font-sans);
       font-size: 0.92rem;
-      font-weight: 600;
-      color: #ffffff;
-      background: var(--accent-primary);
+      font-weight: 700;
+      color: #0f131c;
+      background: var(--accent-hover);
       border: 1px solid var(--accent-hover);
       padding: 10px 24px;
       border-radius: 6px;
       text-decoration: none;
-      transition: all 0.15s ease;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      box-shadow: 0 0 16px rgba(167, 139, 250, 0.25);
     }
 
     .btn-primary:hover {
-      background: var(--accent-hover);
-      box-shadow: 0 0 16px rgba(167, 139, 250, 0.35);
+      filter: brightness(1.15);
+      box-shadow: 0 0 24px rgba(167, 139, 250, 0.45);
+      transform: translateY(-2px);
     }
 
     .btn-outline {
@@ -154,7 +157,7 @@
       padding: 10px 24px;
       border-radius: 6px;
       text-decoration: none;
-      transition: all 0.15s ease;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       display: inline-flex;
       align-items: center;
       gap: 8px;
@@ -163,17 +166,20 @@
     .btn-outline:hover {
       border-color: var(--accent-hover);
       color: #ffffff;
+      background: var(--bg-card-hover);
+      box-shadow: 0 0 12px rgba(167, 139, 250, 0.15);
+      transform: translateY(-2px);
     }
 
     /* Merkle Interactive Diagram Card */
     .merkle-demo-card {
       width: 100%;
       max-width: 960px;
-      background: var(--bg-slate);
+      background: linear-gradient(145deg, var(--bg-slate), #0f172a);
       border: 1px solid var(--border-color);
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
       margin-bottom: 4rem;
       text-align: left;
     }
@@ -1094,6 +1100,64 @@
       transform: translateY(-2px);
       border-color: var(--accent-hover);
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Light Mode Theme Overrides for Cyber-Void Design */
+    body.light-mode .merkle-demo-card,
+    body.light-mode .stepper-card,
+    body.light-mode .mock-console-card,
+    body.light-mode .roi-card,
+    body.light-mode .usecase-card,
+    body.light-mode .landing-footer {
+      background: linear-gradient(145deg, #c5d5c6, #a1b6a2) !important;
+      border-color: #91a792 !important;
+      box-shadow: 0 10px 30px rgba(15, 28, 19, 0.12) !important;
+    }
+
+    body.light-mode .merkle-card-header,
+    body.light-mode .console-chrome,
+    body.light-mode .roi-results-col {
+      background: #a1b6a2 !important;
+      border-color: #91a792 !important;
+    }
+
+    body.light-mode .merkle-svg-wrapper,
+    body.light-mode .sample-code-pre,
+    body.light-mode .stream-sample-box,
+    body.light-mode .preview-kpi-card,
+    body.light-mode .roi-assumptions {
+      background: #d8e3d8 !important;
+      border-color: #91a792 !important;
+      color: #0f1c13 !important;
+    }
+
+    body.light-mode .merkle-step-card,
+    body.light-mode .readiness-badge,
+    body.light-mode .footer-pillar-pill {
+      background: #c5d5c6 !important;
+      border-color: #91a792 !important;
+      color: #0f1c13 !important;
+    }
+
+    body.light-mode .footer-link {
+      color: #0f1c13 !important;
+    }
+
+    body.light-mode .footer-link:hover {
+      color: #3b0764 !important;
+    }
+
+    body.light-mode .btn-primary {
+      background: #0f172a !important;
+      color: #ffffff !important;
+      border-color: #0f172a !important;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.3) !important;
+    }
+
+    body.light-mode .btn-outline {
+      background: #c5d5c6 !important;
+      color: #0f1c13 !important;
+      border-color: #91a792 !important;
     }
 
     /* Accessibility: Respect prefers-reduced-motion OS preference */
