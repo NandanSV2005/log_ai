@@ -465,6 +465,25 @@ body.light-mode .app-footer-minimal strong {
   color: #08120b !important;
 }
 
+body.light-mode #merkle-result-box,
+body.light-mode #rule-sandbox-result {
+  background: #a8baa9 !important;
+  border-color: #7b917c !important;
+  color: #08120b !important;
+}
+
+body.light-mode .copilot-toggle-btn {
+  background: linear-gradient(135deg, #c5d5c6, #a8baa9) !important;
+  color: #08120b !important;
+  border-color: #7b917c !important;
+  box-shadow: 0 8px 24px rgba(15, 28, 19, 0.15) !important;
+}
+
+body.light-mode .copilot-panel {
+  background: #c5d5c6 !important;
+  border-color: #91a792 !important;
+}
+
 /* Background Grid Motif Utility for Auth Pages */
 .auth-bg-grid {
   background-color: var(--bg-dark);

@@ -332,26 +332,26 @@
 
       <!-- TAB 2: THREAT MAP VIEW (PART 4 — 100% OFFLINE VECTOR MAP, ZERO EXTERNAL CALLS) -->
       <div id="tab-threat-map" class="tab-view">
-        <section class="panel-card" aria-label="100 Percent Offline Threat Vector Map">
+        <section class="glass-panel-card" aria-label="100 Percent Offline Threat Vector Map" style="padding: 1.75rem; max-width: none;">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
-            <div style="display: flex; align-items: flex-start; gap: 12px;">
-              <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
-                <img src="/vendor/icons/activity.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+            <div style="display: flex; align-items: flex-start; gap: 14px;">
+              <div class="auth-icon-box" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; margin-bottom: 0;">
+                <img src="/vendor/icons/activity.svg" alt="" width="20" height="20" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
               </div>
               <div>
-                <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25; letter-spacing: -0.01em;">
                   Global Threat Vector Map (100% Air-Gapped Offline SVG Map)
                 </h2>
-                <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                <p style="font-size: 0.83rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
                   Interactive 100% offline air-gapped SVG attack origin visualization.
                 </p>
               </div>
             </div>
-            <span class="font-mono" style="font-size: 0.72rem; color: var(--severity-low); background: var(--severity-low-bg); padding: 3px 8px; border-radius: 4px; border: 1px solid var(--severity-low-border);">
+            <span class="font-mono" style="font-size: 0.72rem; font-weight: 700; color: var(--severity-low); background: var(--severity-low-bg); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--severity-low-border);">
               ZERO NETWORK CALLS &bull; 100% OFFLINE
             </span>
           </div>
-          <div id="offline-vector-threat-map" style="height: 520px; width: 100%; border-radius: 8px; background: var(--bg-dark); border: 1px solid var(--border-color); position: relative; overflow: hidden;">
+          <div id="offline-vector-threat-map" style="height: 520px; width: 100%; border-radius: 10px; background: var(--bg-dark); border: 1px solid var(--border-color); position: relative; overflow: hidden;">
             <!-- Rendered by initOfflineThreatMap() in app.js -->
           </div>
         </section>
@@ -359,15 +359,15 @@
 
       <!-- TAB 3: SYSTEM ANALYTICS VIEW -->
       <div id="tab-analytics" class="tab-view">
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
-          <section class="panel-card" aria-label="Ingestion Throughput Velocity Chart">
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+          <section class="glass-panel-card" aria-label="Ingestion Throughput Velocity Chart" style="padding: 1.5rem; max-width: none;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
-              <div style="display: flex; align-items: flex-start; gap: 12px;">
-                <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
-                  <img src="/vendor/icons/activity.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+              <div style="display: flex; align-items: flex-start; gap: 14px;">
+                <div class="auth-icon-box" style="width: 38px; height: 38px; border-radius: 8px; flex-shrink: 0; margin-bottom: 0;">
+                  <img src="/vendor/icons/activity.svg" alt="" width="18" height="18" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
                 </div>
                 <div>
-                  <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                  <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25; letter-spacing: -0.01em;">
                     Ingestion Throughput Velocity
                   </h2>
                   <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
@@ -381,14 +381,14 @@
             </div>
           </section>
 
-          <section class="panel-card" aria-label="Severity Rating Distribution Chart">
+          <section class="glass-panel-card" aria-label="Severity Rating Distribution Chart" style="padding: 1.5rem; max-width: none;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
-              <div style="display: flex; align-items: flex-start; gap: 12px;">
-                <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
-                  <img src="/vendor/icons/alert-triangle.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+              <div style="display: flex; align-items: flex-start; gap: 14px;">
+                <div class="auth-icon-box" style="width: 38px; height: 38px; border-radius: 8px; flex-shrink: 0; margin-bottom: 0;">
+                  <img src="/vendor/icons/alert-triangle.svg" alt="" width="18" height="18" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
                 </div>
                 <div>
-                  <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                  <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25; letter-spacing: -0.01em;">
                     Severity Rating Distribution
                   </h2>
                   <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
@@ -403,14 +403,14 @@
           </section>
         </div>
 
-        <section class="panel-card" aria-label="Multi-Vendor Log Parsing Breakdown Chart">
+        <section class="glass-panel-card" aria-label="Multi-Vendor Log Parsing Breakdown Chart" style="padding: 1.5rem; max-width: none;">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
-            <div style="display: flex; align-items: flex-start; gap: 12px;">
-              <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
-                <img src="/vendor/icons/database.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+            <div style="display: flex; align-items: flex-start; gap: 14px;">
+              <div class="auth-icon-box" style="width: 38px; height: 38px; border-radius: 8px; flex-shrink: 0; margin-bottom: 0;">
+                <img src="/vendor/icons/database.svg" alt="" width="18" height="18" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
               </div>
               <div>
-                <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25; letter-spacing: -0.01em;">
                   Multi-Vendor Log Parsing Breakdown
                 </h2>
                 <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
@@ -427,33 +427,33 @@
 
       <!-- TAB 4: FORENSICS & RULE STUDIO VIEW -->
       <div id="tab-forensics" class="tab-view">
-        <div style="display: flex; flex-direction: column; gap: 2rem; width: 100%;">
-          <section class="panel-card feature-accent-forensics" aria-label="Web Crypto Merkle Verifier" style="padding: 1.75rem; width: 100%;">
+        <div style="display: flex; flex-direction: column; gap: 1.75rem; width: 100%;">
+          <section class="glass-panel-card feature-accent-forensics" aria-label="Web Crypto Merkle Verifier" style="padding: 1.75rem; max-width: none;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem;">
-              <div style="display: flex; align-items: flex-start; gap: 12px;">
-                <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
-                  <img src="/vendor/icons/lock.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+              <div style="display: flex; align-items: flex-start; gap: 14px;">
+                <div class="auth-icon-box" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; margin-bottom: 0;">
+                  <img src="/vendor/icons/lock.svg" alt="" width="20" height="20" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
                 </div>
                 <div>
-                  <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                  <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25; letter-spacing: -0.01em;">
                     Web Crypto SHA-256 Merkle Verifier
                   </h2>
-                  <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                  <p style="font-size: 0.83rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
                     Verify event payload integrity directly in your browser using native Web Crypto API (<code class="font-mono" style="color: var(--accent-hover);">crypto.subtle.digest</code>).
                   </p>
                 </div>
               </div>
             </div>
-            <div style="font-size: 0.82rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 1.25rem; background: rgba(56, 189, 248, 0.05); padding: 12px 16px; border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.2);">
-              <strong>How it works:</strong> Client-side SHA-256 digests run directly via <code>window.crypto.subtle.digest</code> to independently re-calculate raw log hashes and verify cryptographic Merkle parent node linkages. Any byte alteration produces an immediate root hash mismatch.
+            <div style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.25rem; background: rgba(167, 139, 250, 0.06); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--accent-border);">
+              <strong style="color: var(--accent-hover);">How it works:</strong> Client-side SHA-256 digests run directly via <code>window.crypto.subtle.digest</code> to independently re-calculate raw log hashes and verify cryptographic Merkle parent node linkages. Any byte alteration produces an immediate root hash mismatch.
             </div>
             <div style="display: flex; gap: 12px; margin-bottom: 1.25rem; flex-wrap: wrap;">
-              <input type="text" id="merkle-verify-input" placeholder="Paste event Merkle SHA-256 hash..." aria-label="Merkle Hash to verify" class="font-mono"
-                style="flex: 1; min-width: 320px; padding: 0.7rem 1rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-slate); color: var(--text-main); font-size: 0.88rem;">
-              <button onclick="runMerkleVerification()" class="btn-primary" aria-label="Execute Web Crypto Merkle Hash Verification" style="padding: 0.7rem 1.4rem;">Verify Hash</button>
+              <input type="text" id="merkle-verify-input" placeholder="Paste event Merkle SHA-256 hash..." aria-label="Merkle Hash to verify" class="input-cyber font-mono"
+                style="flex: 1; min-width: 320px; font-size: 0.88rem;">
+              <button onclick="runMerkleVerification()" class="btn-cyber-primary" aria-label="Execute Web Crypto Merkle Hash Verification" style="padding: 0.7rem 1.4rem; font-weight: 700;">Verify Hash</button>
               <button onclick="simulateTamperingInDashboard(document.getElementById('merkle-verify-input').value)" class="btn-danger" aria-label="Simulate Log Tampering on Hash" style="padding: 0.7rem 1.4rem;"><img src="/vendor/icons/alert-triangle.svg" width="14" height="14"> Simulate Tampering</button>
             </div>
-            <div id="merkle-result-box" style="display: block; background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; word-break: break-all; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.6; min-height: 120px;">
+            <div id="merkle-result-box" style="display: block; background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; word-break: break-all; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.6; min-height: 120px;">
               <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
                 <span class="pulse-dot" style="width: 8px; height: 8px; background: var(--accent-hover); border-radius: 50%; display: inline-block;"></span>
                 <strong style="color: var(--accent-hover);">Verifier Ready:</strong> Click "Verify Hash" or "Simulate Tampering" above to test cryptographic verification live.
@@ -461,26 +461,26 @@
             </div>
           </section>
 
-          <section class="panel-card feature-accent-xai" aria-label="YAML Heuristic Rule Sandbox" style="padding: 1.75rem; width: 100%;">
+          <section class="glass-panel-card feature-accent-xai" aria-label="YAML Heuristic Rule Sandbox" style="padding: 1.75rem; max-width: none;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem;">
-              <div style="display: flex; align-items: flex-start; gap: 12px;">
-                <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
-                  <img src="/vendor/icons/cpu.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+              <div style="display: flex; align-items: flex-start; gap: 14px;">
+                <div class="auth-icon-box" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; margin-bottom: 0;">
+                  <img src="/vendor/icons/cpu.svg" alt="" width="20" height="20" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
                 </div>
                 <div>
-                  <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                  <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25; letter-spacing: -0.01em;">
                     YAML Heuristic Rule Sandbox
                   </h2>
-                  <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                  <p style="font-size: 0.83rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
                     Test custom threat detection rules against active stream memory buffer.
                   </p>
                 </div>
               </div>
             </div>
-            <div style="font-size: 0.82rem; color: var(--text-dim); line-height: 1.5; margin-bottom: 1.25rem; background: rgba(16, 185, 129, 0.05); padding: 12px 16px; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.2);">
-              <strong>How it works:</strong> Evaluates custom YAML threat specifications against the active telemetry event buffer in real time. Matches filter by event attributes and threshold counts to instantly trigger alert flags and remediation actions.
+            <div style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.25rem; background: rgba(16, 185, 129, 0.06); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--severity-low-border);">
+              <strong style="color: var(--severity-low);">How it works:</strong> Evaluates custom YAML threat specifications against the active telemetry event buffer in real time. Matches filter by event attributes and threshold counts to instantly trigger alert flags and remediation actions.
             </div>
-            <textarea id="rule-sandbox-editor" aria-label="YAML Rule Specification Editor" class="font-mono" rows="8" style="width: 100%; padding: 1rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-dark); color: var(--text-main); font-size: 0.88rem; margin-bottom: 1.25rem; line-height: 1.5;">
+            <textarea id="rule-sandbox-editor" aria-label="YAML Rule Specification Editor" class="input-cyber font-mono" rows="8" style="width: 100%; padding: 1rem; margin-bottom: 1.25rem; line-height: 1.5; font-size: 0.88rem;">
 id: CUSTOM_RULE_01
 name: Rapid Failed SSH Password Spray
 severity: HIGH
@@ -489,8 +489,8 @@ conditions:
   action: "deny"
   threshold_count: 3
 </textarea>
-            <button id="btn-test-rule" onclick="testRuleInSandbox()" class="btn-primary" aria-label="Test YAML Rule Against Memory Buffer" style="padding: 0.7rem 1.5rem; margin-bottom: 1.25rem;">Test Rule Against Buffer</button>
-            <div id="rule-sandbox-result" style="display: block; background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; word-break: break-all; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.6; min-height: 120px;">
+            <button id="btn-test-rule" onclick="testRuleInSandbox()" class="btn-cyber-primary" aria-label="Test YAML Rule Against Memory Buffer" style="padding: 0.7rem 1.5rem; margin-bottom: 1.25rem; font-weight: 700;">Test Rule Against Buffer</button>
+            <div id="rule-sandbox-result" style="display: block; background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; word-break: break-all; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.6; min-height: 120px;">
               <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
                 <span class="pulse-dot" style="width: 8px; height: 8px; background: var(--severity-low); border-radius: 50%; display: inline-block;"></span>
                 <strong style="color: var(--severity-low);">Sandbox Ready:</strong> Click "Test Rule Against Buffer" above to evaluate heuristics against recent events.
@@ -505,40 +505,40 @@ conditions:
         <div style="display: flex; flex-direction: column; gap: 1.75rem; width: 100%; max-width: 1000px; margin: 0 auto;">
           
           <!-- SECTION 1: APPEARANCE -->
-          <section class="panel-card" aria-label="Appearance & Theme Settings" style="padding: 1.75rem;">
+          <section class="glass-panel-card" aria-label="Appearance & Theme Settings" style="padding: 1.75rem; max-width: none;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem;">
-              <div style="display: flex; align-items: flex-start; gap: 12px;">
-                <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
-                  <img src="/vendor/icons/settings.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+              <div style="display: flex; align-items: flex-start; gap: 14px;">
+                <div class="auth-icon-box" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; margin-bottom: 0;">
+                  <img src="/vendor/icons/settings.svg" alt="" width="20" height="20" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
                 </div>
                 <div>
-                  <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                  <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25; letter-spacing: -0.01em;">
                     Appearance &amp; Theme Engine
                   </h2>
-                  <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                  <p style="font-size: 0.83rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
                     Toggle dashboard visual identity between Near-Black Dark Mode and Stone-Green Sage Light Mode.
                   </p>
                 </div>
               </div>
             </div>
             <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
-              <button id="theme-dark-btn" onclick="setApplicationTheme('dark')" class="btn-primary" aria-label="Switch to Dark Mode" style="padding: 0.65rem 1.25rem; font-size: 0.85rem;">Dark Mode</button>
-              <button id="theme-light-btn" onclick="setApplicationTheme('light')" class="btn-outline" aria-label="Switch to Sage Light Mode" style="padding: 0.65rem 1.25rem; font-size: 0.85rem;">Sage Theme</button>
+              <button id="theme-dark-btn" onclick="setApplicationTheme('dark')" class="btn-cyber-primary" aria-label="Switch to Dark Mode" style="padding: 0.65rem 1.25rem; font-size: 0.85rem; font-weight: 700;">Dark Mode</button>
+              <button id="theme-light-btn" onclick="setApplicationTheme('light')" class="btn-outline" aria-label="Switch to Sage Light Mode" style="padding: 0.65rem 1.25rem; font-size: 0.85rem; font-weight: 700;">Sage Theme</button>
             </div>
           </section>
 
           <!-- SECTION 2: DATA MANAGEMENT -->
-          <section class="panel-card" aria-label="Data Management Settings" style="padding: 1.75rem;">
+          <section class="glass-panel-card" aria-label="Data Management Settings" style="padding: 1.75rem; max-width: none;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem;">
-              <div style="display: flex; align-items: flex-start; gap: 12px;">
-                <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
-                  <img src="/vendor/icons/database.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+              <div style="display: flex; align-items: flex-start; gap: 14px;">
+                <div class="auth-icon-box" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; margin-bottom: 0;">
+                  <img src="/vendor/icons/database.svg" alt="" width="20" height="20" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
                 </div>
                 <div>
-                  <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                  <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25; letter-spacing: -0.01em;">
                     Data Management &amp; State Reset
                   </h2>
-                  <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                  <p style="font-size: 0.83rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
                     Reset active SOC state, clear normalized event buffers, and reset telemetry metrics.
                   </p>
                 </div>
@@ -552,25 +552,25 @@ conditions:
           </section>
 
           <!-- SECTION 3: DASHBOARD BEHAVIOR -->
-          <section class="panel-card" aria-label="Dashboard Polling Behavior Settings" style="padding: 1.75rem;">
+          <section class="glass-panel-card" aria-label="Dashboard Polling Behavior Settings" style="padding: 1.75rem; max-width: none;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem;">
-              <div style="display: flex; align-items: flex-start; gap: 12px;">
-                <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
-                  <img src="/vendor/icons/activity.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+              <div style="display: flex; align-items: flex-start; gap: 14px;">
+                <div class="auth-icon-box" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; margin-bottom: 0;">
+                  <img src="/vendor/icons/activity.svg" alt="" width="20" height="20" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
                 </div>
                 <div>
-                  <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                  <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25; letter-spacing: -0.01em;">
                     Dashboard Behavior &amp; Stream Polling
                   </h2>
-                  <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                  <p style="font-size: 0.83rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
                     Configure telemetry refresh interval for real-time KPI updates and threat detection feeds.
                   </p>
                 </div>
               </div>
             </div>
             <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
-              <label for="polling-interval-select" style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);">Polling Refresh Rate:</label>
-              <select id="polling-interval-select" onchange="updatePollingIntervalPreference(this.value)" aria-label="Select Stream Polling Refresh Rate" style="padding: 0.5rem 1rem; border-radius: 6px; background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border-color); font-size: 0.85rem;">
+              <label for="polling-interval-select" style="font-size: 0.85rem; font-weight: 700; color: var(--text-main);">Polling Refresh Rate:</label>
+              <select id="polling-interval-select" onchange="updatePollingIntervalPreference(this.value)" aria-label="Select Stream Polling Refresh Rate" class="input-cyber" style="padding: 0.5rem 1rem; font-size: 0.85rem; width: auto; font-weight: 600;">
                 <option value="2000">2 Seconds (Real-Time)</option>
                 <option value="5000">5 Seconds (Balanced)</option>
                 <option value="10000">10 Seconds (Low Network Impact)</option>
@@ -580,25 +580,25 @@ conditions:
           </section>
 
           <!-- SECTION 4: THREAT MAP ENGINE -->
-          <section class="panel-card" aria-label="Threat Map Preferences" style="padding: 1.75rem;">
+          <section class="glass-panel-card" aria-label="Threat Map Preferences" style="padding: 1.75rem; max-width: none;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem;">
-              <div style="display: flex; align-items: flex-start; gap: 12px;">
-                <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
-                  <img src="/vendor/icons/activity.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+              <div style="display: flex; align-items: flex-start; gap: 14px;">
+                <div class="auth-icon-box" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; margin-bottom: 0;">
+                  <img src="/vendor/icons/activity.svg" alt="" width="20" height="20" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
                 </div>
                 <div>
-                  <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                  <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25; letter-spacing: -0.01em;">
                     Threat Map Engine Preference
                   </h2>
-                  <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                  <p style="font-size: 0.83rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
                     Select your default geo-spatial map engine renderer on page load.
                   </p>
                 </div>
               </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-              <label for="map-mode-select" style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);">Default Map Engine Mode:</label>
-              <select id="map-mode-select" onchange="updateMapModePreference(this.value)" aria-label="Select Default Map Engine Mode" style="padding: 0.5rem 1rem; border-radius: 6px; background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border-color); font-size: 0.85rem;">
+            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
+              <label for="map-mode-select" style="font-size: 0.85rem; font-weight: 700; color: var(--text-main);">Default Map Engine Mode:</label>
+              <select id="map-mode-select" onchange="updateMapModePreference(this.value)" aria-label="Select Default Map Engine Mode" class="input-cyber" style="padding: 0.5rem 1rem; font-size: 0.85rem; width: auto; font-weight: 600;">
                 <option value="live">Prefer Live Tiles when Online (CARTO Dark)</option>
                 <option value="offline">Always Use 100% Offline SVG Map</option>
               </select>
@@ -606,18 +606,24 @@ conditions:
           </section>
 
           <!-- SECTION 5: AI COPILOT SECURITY -->
-          <section class="panel-card" aria-label="AI Copilot Preferences" style="padding: 1.75rem;">
-            <div class="panel-header" style="margin-bottom: 1rem;">
-              <h2 class="panel-title" style="font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 10px;">
-                <img src="/vendor/icons/shield.svg" alt="" width="20" height="20" style="filter: invert(70%);">
-                AI Copilot Air-Gapped Security Preference
-              </h2>
+          <section class="glass-panel-card" aria-label="AI Copilot Preferences" style="padding: 1.75rem; max-width: none;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem;">
+              <div style="display: flex; align-items: flex-start; gap: 14px;">
+                <div class="auth-icon-box" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; margin-bottom: 0;">
+                  <img src="/vendor/icons/shield.svg" alt="" width="20" height="20" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
+                </div>
+                <div>
+                  <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25; letter-spacing: -0.01em;">
+                    AI Copilot Air-Gapped Security Preference
+                  </h2>
+                  <p style="font-size: 0.83rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                    Set persistent Air-Gapped default for local SOC analysis.
+                  </p>
+                </div>
+              </div>
             </div>
-            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
-              Set persistent Air-Gapped default for local SOC analysis.
-            </p>
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <input type="checkbox" id="default-airgapped-checkbox" onchange="updateAirGappedDefaultPreference(this.checked)" aria-label="Default Air-Gapped Preference" style="width: 18px; height: 18px; cursor: pointer;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-top: 1rem;">
+              <input type="checkbox" id="default-airgapped-checkbox" onchange="updateAirGappedDefaultPreference(this.checked)" aria-label="Default Air-Gapped Preference" style="width: 18px; height: 18px; accent-color: var(--accent-hover); cursor: pointer;">
               <label for="default-airgapped-checkbox" style="font-size: 0.88rem; font-weight: 600; color: var(--text-main); cursor: pointer;">
                 Always use Air-Gapped Mode by default on startup
               </label>
@@ -742,25 +748,32 @@ conditions:
     <div id="copilot-widget" class="copilot-widget">
       <button id="copilot-toggle" class="copilot-toggle-btn" aria-label="Toggle AI SOC Copilot Chat Assistant">
         <div class="copilot-btn-content">
-          <img src="/vendor/icons/cpu.svg" alt="" width="20" height="20" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+          <div class="auth-icon-box" style="width: 24px; height: 24px; border-radius: 4px; margin-bottom: 0; background: transparent; border: none;">
+            <img src="/vendor/icons/cpu.svg" alt="" width="18" height="18" style="filter: invert(100%);">
+          </div>
           <span>AI Copilot</span>
         </div>
         <span class="copilot-pulse-dot"></span>
       </button>
 
-      <div id="copilot-panel" class="copilot-panel" style="display: none;">
-        <div class="copilot-header">
-          <div class="copilot-title">
-            <h4><img src="/vendor/icons/cpu.svg" alt="" width="16" height="16" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg); vertical-align: middle; margin-right: 6px;"> AI SOC Assistant</h4>
-            <span class="copilot-subtitle">Zero-Loss Forensics &amp; Threat Intelligence</span>
+      <div id="copilot-panel" class="copilot-panel glass-panel-card" style="display: none; padding: 0; border-radius: 14px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); max-width: none;">
+        <div class="copilot-header" style="background: var(--bg-dark); padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+          <div class="copilot-title" style="display: flex; align-items: center; gap: 10px;">
+            <div class="auth-icon-box" style="width: 32px; height: 32px; border-radius: 6px; margin-bottom: 0;">
+              <img src="/vendor/icons/cpu.svg" alt="" width="16" height="16" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
+            </div>
+            <div>
+              <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.2;">AI SOC Assistant</h4>
+              <span class="copilot-subtitle" style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-sans);">Zero-Loss Forensics &amp; Threat Intelligence</span>
+            </div>
           </div>
-          <button id="copilot-close" class="copilot-close-btn" aria-label="Close Copilot Panel">&times;</button>
+          <button id="copilot-close" class="copilot-close-btn" aria-label="Close Copilot Panel" style="background: transparent; border: none; color: var(--text-muted); font-size: 1.4rem; cursor: pointer; padding: 0 4px; font-weight: 700;">&times;</button>
         </div>
 
-        <div id="copilot-messages" class="copilot-messages" style="display: flex; flex-direction: column; gap: 8px; padding: 12px; height: 320px; overflow-y: auto;">
-          <div style="background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; max-width: 85%;">
+        <div id="copilot-messages" class="copilot-messages" style="display: flex; flex-direction: column; gap: 10px; padding: 1rem; height: 340px; overflow-y: auto;">
+          <div style="background: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px 14px; border-radius: 10px; font-size: 0.83rem; max-width: 88%; line-height: 1.5;">
             <div style="margin-bottom: 6px;">
-              <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); padding: 2px 6px; border-radius: 4px; font-size: 0.68rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+              <span class="badge copilot-tag-fallback" style="background: var(--severity-low-bg); color: var(--severity-low); border: 1px solid var(--severity-low-border); padding: 2px 8px; border-radius: 4px; font-size: 0.68rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono);">
                 <img src="/vendor/icons/shield.svg" alt="" width="10" height="10"> LOCAL ENGINE (AIR-GAPPED SOC)
               </span>
             </div>
@@ -768,15 +781,15 @@ conditions:
           </div>
         </div>
 
-        <div style="padding: 6px 12px; background: var(--bg-dark); border-top: 1px solid var(--border-color); display: flex; gap: 6px; overflow-x: auto;">
-          <button onclick="document.getElementById('copilot-input').value='Summarize high severity anomalies'; document.getElementById('copilot-send').click();" class="btn-outline" style="font-size: 0.68rem; padding: 2px 6px; white-space: nowrap;">High Threats</button>
-          <button onclick="document.getElementById('copilot-input').value='Explain Merkle leaf verification'; document.getElementById('copilot-send').click();" class="btn-outline" style="font-size: 0.68rem; padding: 2px 6px; white-space: nowrap;">Merkle Integrity</button>
-          <button onclick="document.getElementById('copilot-input').value='What remediation steps are needed?'; document.getElementById('copilot-send').click();" class="btn-outline" style="font-size: 0.68rem; padding: 2px 6px; white-space: nowrap;">Playbooks</button>
+        <div style="padding: 8px 12px; background: var(--bg-dark); border-top: 1px solid var(--border-color); display: flex; gap: 6px; overflow-x: auto;">
+          <button onclick="document.getElementById('copilot-input').value='Summarize high severity anomalies'; document.getElementById('copilot-send').click();" class="btn-outline" style="font-size: 0.72rem; padding: 3px 8px; white-space: nowrap; font-weight: 600;">High Threats</button>
+          <button onclick="document.getElementById('copilot-input').value='Explain Merkle leaf verification'; document.getElementById('copilot-send').click();" class="btn-outline" style="font-size: 0.72rem; padding: 3px 8px; white-space: nowrap; font-weight: 600;">Merkle Integrity</button>
+          <button onclick="document.getElementById('copilot-input').value='What remediation steps are needed?'; document.getElementById('copilot-send').click();" class="btn-outline" style="font-size: 0.72rem; padding: 3px 8px; white-space: nowrap; font-weight: 600;">Playbooks</button>
         </div>
 
-        <div class="copilot-input-bar" style="display: flex; padding: 8px; gap: 6px; border-top: 1px solid var(--border-color); background: var(--bg-dark);">
-          <input type="text" id="copilot-input" placeholder="Ask AI Copilot..." aria-label="Copilot Query Input" style="flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-slate); color: var(--text-main); font-size: 0.82rem;">
-          <button id="copilot-send" class="btn-primary" style="padding: 6px 12px; font-size: 0.8rem;">Send</button>
+        <div class="copilot-input-bar" style="display: flex; padding: 10px; gap: 8px; border-top: 1px solid var(--border-color); background: var(--bg-dark);">
+          <input type="text" id="copilot-input" placeholder="Ask AI Copilot..." aria-label="Copilot Query Input" class="input-cyber" style="flex: 1; padding: 8px 12px; font-size: 0.83rem;">
+          <button id="copilot-send" class="btn-cyber-primary" style="padding: 8px 16px; font-size: 0.83rem; width: auto; font-weight: 700;">Send</button>
         </div>
       </div>
     </div>
