@@ -9,13 +9,21 @@ export function LandingPage() {
   const [logVolume, setLogVolume] = useState(500000);
   const [devicesMonitored, setDevicesMonitored] = useState(25);
 
-  // 6-Stage Pipeline Stepper State
+  // 6-Stage Pipeline Stepper State (Hover Activated)
   const [activeStage, setActiveStage] = useState(1);
 
   // Calculations for Financial Impact Estimator
   const hoursSaved = ((logVolume * 0.001 * 0.85 * 3.5 * 30) / 60).toFixed(1);
   const mttrReduction = Math.min(85, (50 + devicesMonitored * 0.2)).toFixed(1);
   const monthlySavings = (hoursSaved * 65).toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+  const TICKER_ITEMS = [
+    { type: 'ALERT', color: 'text-rose-400', text: '[ALERT] SYN Flood detected on Edge Node 04' },
+    { type: 'INFO', color: 'text-text-muted', text: '[INFO] Routine model retraining completed' },
+    { type: 'WARN', color: 'text-amber-400', text: '[WARN] Anomaly in egress traffic volume (IP: 192.168.1.105)' },
+    { type: 'INFO', color: 'text-emerald-400', text: '[INFO] Ingestion rate stabilized at 4.2M EPS' },
+    { type: 'ALERT', color: 'text-rose-400', text: '[ALERT] Multiple failed auth attempts - Region: EU-West' },
+  ];
 
   const STAGES_DATA = [
     {
@@ -84,6 +92,8 @@ export function LandingPage() {
 
   return (
     <div className="bg-background text-text-primary antialiased min-h-screen flex flex-col relative overflow-x-hidden font-sans">
+      <div className="scan-overlay"></div>
+
       {/* Top Navbar */}
       <header className="w-full h-16 bg-background border-b border-border-muted hidden md:flex justify-between items-center px-6 max-w-7xl mx-auto relative z-20">
         <Link to="/" className="font-extrabold text-xl text-primary tracking-tighter flex items-center gap-2">
@@ -137,9 +147,22 @@ export function LandingPage() {
       </nav>
 
       <main className="flex-grow relative z-10 pb-24 md:pb-0">
-        {/* Hero Section */}
-        <section className="relative min-h-[720px] flex flex-col justify-center items-center overflow-hidden px-4 text-center">
-          <div className="z-10 max-w-4xl mx-auto glass-panel p-8 sm:p-12 rounded-2xl border border-border-muted shadow-2xl">
+        {/* ISSUE 1 FIX: Hero Section with Authentic Stitch Background Overlay */}
+        <section className="relative min-h-[780px] flex flex-col justify-center items-center overflow-hidden px-4 text-center">
+          {/* Authentic Stitch Cyber/Sage Void Background Image Layer */}
+          <div
+            className={`absolute inset-0 z-0 ${
+              theme === 'sage' ? 'opacity-15 mix-blend-multiply' : 'opacity-40 mix-blend-screen'
+            }`}
+            style={{
+              backgroundImage:
+                "url('https://lh3.googleusercontent.com/aida-public/AB6AXuB8S2Qg245nw_HTuz2z_1HAFvI_uOZzTAqhRg2nI7CPKTXrXtVhQmkBe9GVjIdobqaom0DfUDMAPpCeuU8Pt_TW22GeTUAx1kQs4HbBn5r0of637-XKI8wod359PGV_7oAodswanWeQQJGQ3xwINTDW5q8c3YLijIiIeXa0-3d70sAQHhXDgipdmupMSzDXqPcDvJzA17tlQFTzwK_8a-MygDqo9XleANw7qqDJlfV-uohTzjG1rKlP')",
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          ></div>
+
+          <div className="z-10 max-w-4xl mx-auto glass-panel p-8 sm:p-12 rounded-2xl border border-border-muted shadow-2xl relative">
             <div className="inline-flex items-center gap-2 mb-6 bg-surface-dim px-4 py-1.5 rounded-full border border-border-muted">
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
               <span className="font-mono text-xs text-text-primary tracking-wide">
@@ -173,14 +196,14 @@ export function LandingPage() {
             </div>
           </div>
 
-          {/* Live Marquee Ticker Bar */}
-          <div className="w-full bg-surface border-y border-border-muted overflow-hidden h-10 flex items-center mt-12">
-            <div className="whitespace-nowrap font-mono text-xs text-text-muted flex gap-8 animate-[marquee_25s_linear_infinite]">
-              <span className="text-rose-400 font-bold">[ALERT] SYN Flood detected on Edge Node 04</span>
-              <span>[INFO] Routine model retraining completed</span>
-              <span className="text-amber-400 font-bold">[WARN] Anomaly in egress traffic volume (IP: 192.168.1.105)</span>
-              <span className="text-emerald-400 font-bold">[INFO] Ingestion rate stabilized at 4.2M EPS</span>
-              <span className="text-rose-400 font-bold">[ALERT] Multiple failed auth attempts - Region: EU-West</span>
+          {/* ISSUE 3 FIX: Smooth Continuous Marquee Event Ticker */}
+          <div className="w-full bg-surface border-y border-border-muted overflow-hidden h-10 flex items-center mt-12 relative z-10">
+            <div className="animate-marquee-smooth font-mono text-xs text-text-muted gap-8">
+              {[...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS].map((item, idx) => (
+                <span key={idx} className={`whitespace-nowrap ${item.color} font-medium`}>
+                  {item.text}
+                </span>
+              ))}
             </div>
           </div>
         </section>
@@ -217,25 +240,25 @@ export function LandingPage() {
               <span className="text-4xl font-extrabold font-mono text-rose-500">03</span>
             </div>
 
-            {/* Feature 2: Real-Time Telemetry Chart */}
+            {/* ISSUE 2 FIX: Real-Time Telemetry Stream Graph */}
             <div className="md:col-span-8 glass-panel rounded-2xl p-6 border border-border-muted space-y-3">
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-emerald-400 text-2xl">speed</span>
                 <h3 className="text-lg font-bold text-text-primary">Real-Time Telemetry Stream</h3>
               </div>
-              <div className="h-28 w-full rounded-xl border border-border-muted bg-surface-dim flex items-end p-3 gap-2 overflow-hidden">
-                <div className="w-1/12 bg-primary/40 h-1/4 rounded-t"></div>
-                <div className="w-1/12 bg-primary/50 h-2/4 rounded-t"></div>
-                <div className="w-1/12 bg-primary/60 h-1/3 rounded-t"></div>
-                <div className="w-1/12 bg-primary/70 h-3/4 rounded-t"></div>
-                <div className="w-1/12 bg-primary/80 h-1/2 rounded-t"></div>
-                <div className="w-1/12 bg-primary h-5/6 rounded-t animate-pulse"></div>
-                <div className="w-1/12 bg-primary/50 h-1/4 rounded-t"></div>
-                <div className="w-1/12 bg-primary/60 h-2/3 rounded-t"></div>
-                <div className="w-1/12 bg-primary/70 h-3/5 rounded-t"></div>
-                <div className="w-1/12 bg-primary/80 h-4/5 rounded-t"></div>
-                <div className="w-1/12 bg-primary/90 h-1/2 rounded-t"></div>
-                <div className="w-1/12 bg-primary h-full rounded-t"></div>
+              <div className="h-32 w-full rounded-xl border border-border-muted bg-surface-dim flex items-end p-3 gap-2 overflow-hidden">
+                <div className="w-1/12 bg-primary/70 h-1/4 rounded-t opacity-70"></div>
+                <div className="w-1/12 bg-primary/70 h-2/4 rounded-t opacity-70"></div>
+                <div className="w-1/12 bg-primary/70 h-1/3 rounded-t opacity-70"></div>
+                <div className="w-1/12 bg-primary/70 h-3/4 rounded-t opacity-70"></div>
+                <div className="w-1/12 bg-primary/70 h-1/2 rounded-t opacity-70"></div>
+                <div className="w-1/12 bg-primary h-5/6 rounded-t opacity-90 animate-pulse"></div>
+                <div className="w-1/12 bg-primary/70 h-1/4 rounded-t opacity-70"></div>
+                <div className="w-1/12 bg-primary/70 h-2/3 rounded-t opacity-70"></div>
+                <div className="w-1/12 bg-primary/70 h-3/5 rounded-t opacity-70"></div>
+                <div className="w-1/12 bg-primary/70 h-4/5 rounded-t opacity-70"></div>
+                <div className="w-1/12 bg-primary/70 h-1/2 rounded-t opacity-70"></div>
+                <div className="w-1/12 bg-primary h-full rounded-t opacity-90"></div>
               </div>
             </div>
           </div>
@@ -420,7 +443,7 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* Telemetry Output & Console Intelligence (SOC Console Preview) */}
+        {/* ISSUE 4 FIX: High-Contrast Log Text Color in Telemetry Terminal */}
         <section className="max-w-7xl mx-auto px-4 py-16 border-t border-border-muted space-y-8">
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <div className="text-xs font-mono text-text-muted uppercase tracking-widest">SOC Console Preview</div>
@@ -457,56 +480,83 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* Terminal Log Output Preview */}
-            <div className="rounded-xl border border-border-muted bg-[#1e1e1e] overflow-hidden font-mono text-xs">
-              <div className="bg-[#252526] px-4 py-2 border-b border-border-muted flex justify-between text-text-muted text-[11px]">
+            {/* High-Contrast Terminal Log Output Box */}
+            <div
+              className="rounded-xl border border-border-muted overflow-hidden font-mono text-xs diag-stripes shadow-inner"
+              style={{ backgroundColor: 'var(--terminal-bg)' }}
+            >
+              <div
+                className="px-4 py-2 border-b border-border-muted flex justify-between items-center text-[11px]"
+                style={{ backgroundColor: 'var(--terminal-header-bg)', color: 'var(--terminal-text-muted)' }}
+              >
                 <span>Sample Telemetry Stream (OCSF Unified Protocol)</span>
-                <span>FOR DEMO ONLY</span>
+                <span className="font-bold px-2 py-0.5 rounded bg-surface-container border border-border-muted text-[10px]">
+                  FOR DEMO ONLY
+                </span>
               </div>
-              <div className="p-4 space-y-2 text-text-muted overflow-x-auto">
-                <div className="flex gap-3 whitespace-nowrap">
-                  <span>2026-08-30 14:14:02</span>
-                  <span className="font-bold text-text-primary">192.168.1.100</span>
+
+              <div className="p-4 space-y-3 overflow-x-auto">
+                <div className="flex items-center gap-3 whitespace-nowrap border-b border-white/5 pb-2">
+                  <span style={{ color: 'var(--terminal-text-muted)' }}>2026-08-30 14:14:02</span>
+                  <span style={{ color: 'var(--terminal-text-main)' }} className="font-bold">192.168.1.100</span>
+                  <span className="border border-border-muted px-2 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: 'var(--color-bg-card)', color: 'var(--terminal-text-main)' }}>
+                    Cisco ASA
+                  </span>
                   <span className="text-rose-400 font-bold">HIGH (88.5)</span>
-                  <span>%ASA-4-106023: Deny tcp src outside:192.168.1.100/54321 dst inside:10.0.0.50/80</span>
+                  <span style={{ color: 'var(--terminal-text-main)' }}>
+                    %ASA-4-106023: Deny tcp src outside:192.168.1.100/54321 dst inside:10.0.0.50/80
+                  </span>
                 </div>
-                <div className="flex gap-3 whitespace-nowrap">
-                  <span>2026-08-30 14:14:15</span>
-                  <span className="font-bold text-text-primary">192.168.1.105</span>
+
+                <div className="flex items-center gap-3 whitespace-nowrap border-b border-white/5 pb-2">
+                  <span style={{ color: 'var(--terminal-text-muted)' }}>2026-08-30 14:14:15</span>
+                  <span style={{ color: 'var(--terminal-text-main)' }} className="font-bold">192.168.1.105</span>
+                  <span className="border border-border-muted px-2 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: 'var(--color-bg-card)', color: 'var(--terminal-text-main)' }}>
+                    Fortinet
+                  </span>
                   <span className="text-emerald-400 font-bold">LOW (12.0)</span>
-                  <span>Fortinet SSL VPN authentication successful user="admin_jdoe"</span>
+                  <span style={{ color: 'var(--terminal-text-main)' }}>
+                    Fortinet SSL VPN authentication successful user="admin_jdoe"
+                  </span>
                 </div>
-                <div className="flex gap-3 whitespace-nowrap">
-                  <span>2026-08-30 14:14:31</span>
-                  <span className="font-bold text-text-primary">192.168.1.200</span>
+
+                <div className="flex items-center gap-3 whitespace-nowrap">
+                  <span style={{ color: 'var(--terminal-text-muted)' }}>2026-08-30 14:14:31</span>
+                  <span style={{ color: 'var(--terminal-text-main)' }} className="font-bold">192.168.1.200</span>
+                  <span className="border border-border-muted px-2 py-0.5 rounded text-[10px] font-bold" style={{ backgroundColor: 'var(--color-bg-card)', color: 'var(--terminal-text-main)' }}>
+                    Suricata
+                  </span>
                   <span className="text-rose-400 font-bold">HIGH (94.2)</span>
-                  <span>Suricata ET MALWARE Compromised Host Activity Signature Match</span>
+                  <span style={{ color: 'var(--terminal-text-main)' }}>
+                    Suricata ET MALWARE Compromised Host Activity Signature Match
+                  </span>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* 6-Stage Zero-Loss Telemetry Processing Stepper */}
+        {/* ISSUE 5 FIX: 6-Stage Telemetry Processing Pipeline Hover Activation */}
         <section className="max-w-7xl mx-auto px-4 py-16 border-t border-border-muted space-y-8">
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <h2 className="text-2xl font-bold text-text-primary">6-Stage Zero-Loss Telemetry Processing Pipeline</h2>
             <p className="text-xs text-text-muted leading-relaxed">
-              Step-by-step forensic execution from raw edge capture to Explainable AI feature attribution.
+              Hover over any stage below to inspect real-time processing details and payload transformation steps.
             </p>
           </div>
 
           <div className="max-w-4xl mx-auto space-y-6">
-            {/* Stepper Tabs */}
+            {/* Stepper Tabs with Hover Interaction */}
             <div className="flex flex-wrap gap-2 justify-center font-mono text-xs">
               {STAGES_DATA.map((stage) => (
                 <button
                   key={stage.id}
+                  onMouseEnter={() => setActiveStage(stage.id)}
                   onClick={() => setActiveStage(stage.id)}
-                  className={`px-4 py-2.5 rounded-lg border font-bold transition-all ${
+                  className={`px-4 py-2.5 rounded-lg border font-bold transition-all duration-150 ${
                     activeStage === stage.id
-                      ? 'bg-primary text-surface-lowest border-primary shadow-md'
-                      : 'bg-surface border-border-muted text-text-muted hover:text-text-primary'
+                      ? 'bg-primary text-surface-lowest border-primary shadow-lg scale-105'
+                      : 'bg-surface border-border-muted text-text-muted hover:text-text-primary hover:border-primary/50'
                   }`}
                 >
                   <span className="opacity-60 mr-1">{stage.num}</span> {stage.name}
@@ -515,7 +565,7 @@ export function LandingPage() {
             </div>
 
             {/* Active Stage Content Card */}
-            <div className="glass-panel p-6 sm:p-8 rounded-2xl border border-border-muted space-y-4">
+            <div className="glass-panel p-6 sm:p-8 rounded-2xl border border-border-muted space-y-4 transition-all duration-200">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border-muted pb-4">
                 <h3 className="text-lg font-bold text-text-primary">{activeStageObj.title}</h3>
                 <span className="px-3 py-1 rounded bg-surface-dim border border-border-muted font-mono text-xs text-primary">

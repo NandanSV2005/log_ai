@@ -32,6 +32,12 @@
   --color-severity-low: #10b981;
   --color-severity-low-bg: rgba(16, 185, 129, 0.15);
   --color-severity-low-border: rgba(16, 185, 129, 0.4);
+
+  --terminal-bg: #1e1e1e;
+  --terminal-header-bg: #252526;
+  --terminal-text-main: #f8fafc;
+  --terminal-text-muted: #94a3b8;
+  --terminal-text-dim: #64748b;
 }
 
 :root[data-theme="sage"] {
@@ -66,6 +72,12 @@
   --color-severity-low: #15803d;
   --color-severity-low-bg: rgba(21, 128, 61, 0.12);
   --color-severity-low-border: rgba(21, 128, 61, 0.3);
+
+  --terminal-bg: #f0f4ea;
+  --terminal-header-bg: #e2e8d8;
+  --terminal-text-main: #1f2e15;
+  --terminal-text-muted: #637055;
+  --terminal-text-dim: #49543e;
 }
 
 body {
@@ -121,4 +133,51 @@ body {
   color: var(--color-text-main);
   border-color: var(--color-primary);
   background-color: var(--color-surface-hover);
+}
+
+/* Continuous Marquee Ticker Keyframes */
+@keyframes marquee-scroll {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee-smooth {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 25s linear infinite;
+}
+
+.animate-marquee-smooth:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee-smooth {
+    animation: none;
+  }
+}
+
+/* Scanline Animation Overlay */
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+.scan-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(to bottom, transparent, rgba(167, 139, 250, 0.08), transparent);
+  animation: scanline 8s linear infinite;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.diag-stripes {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(255, 255, 255, 0.02) 10px,
+    rgba(255, 255, 255, 0.02) 20px
+  );
 }
