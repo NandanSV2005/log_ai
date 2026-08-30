@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LOG AI | Enterprise SOC</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230a0a0a'/><path d='M50 20 L25 30 L25 55 C25 70 35 85 50 90 C65 85 75 70 75 55 L75 30 Z' fill='%2310b981'/></svg>">
+  <title>LOG AI | Command Center Login</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23090d16'/><path d='M50 20 L25 30 L25 55 C25 70 35 85 50 90 C65 85 75 70 75 55 L75 30 Z' fill='%23a78bfa'/></svg>">
   <!-- Air-Gapped Self-Hosted Fonts & CSS -->
   <link rel="stylesheet" href="/style.css">
   <script>
@@ -13,148 +13,85 @@
       document.addEventListener('DOMContentLoaded', () => document.body.classList.add('light-mode'));
     }
   </script>
-  <style>
-    .auth-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 2rem 1rem;
-      box-sizing: border-box;
-      width: 100%;
-    }
-    .auth-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 2.5rem;
-      width: 100%;
-      max-width: 420px;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
-    }
-    .auth-header {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    .auth-header h2 {
-      font-size: 1.6rem;
-      font-weight: 800;
-      color: #fff;
-      margin-top: 0.5rem;
-    }
-    .auth-header p {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-top: 0.25rem;
-    }
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      margin-bottom: 1.25rem;
-    }
-    .form-group label {
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: var(--text-dim);
-      letter-spacing: 0.5px;
-    }
-    .form-control {
-      font-family: var(--font-sans);
-      font-size: 0.9rem;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 10px 14px;
-      color: #fff;
-      outline: none;
-      transition: all 0.2s ease;
-    }
-    .form-control:focus {
-      border-color: var(--neon-cyan);
-      box-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
-    }
-    .btn-submit {
-      width: 100%;
-      font-family: var(--font-sans);
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: #070b14;
-      background: var(--neon-cyan);
-      border: none;
-      padding: 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
-      transition: all 0.2s ease;
-      margin-top: 0.5rem;
-    }
-    .btn-submit:hover {
-      background: #38bdf8;
-      box-shadow: 0 0 28px rgba(0, 240, 255, 0.5);
-    }
-    .error-banner {
-      display: none;
-      background: rgba(255, 42, 95, 0.15);
-      border: 1px solid var(--neon-red);
-      color: var(--neon-red);
-      font-size: 0.8rem;
-      padding: 8px 12px;
-      border-radius: 6px;
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-    .auth-footer {
-      text-align: center;
-      margin-top: 1.5rem;
-      font-size: 0.82rem;
-      color: var(--text-muted);
-    }
-    .auth-footer a {
-      color: var(--neon-cyan);
-      text-decoration: none;
-      font-weight: 600;
-    }
-  </style>
 </head>
-<body class="auth-bg-grid">
-  <div class="auth-container">
-    <div class="auth-card">
-      <div class="auth-header">
-        <div class="logo-shield" style="margin: 0 auto;">
-          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.2" fill="none">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-            <path d="m9 12 2 2 4-4"></path>
-          </svg>
+<body class="auth-page-body">
+
+  <!-- Simplified Brand Header -->
+  <header class="auth-header-nav" role="banner">
+    <a href="/landing" class="auth-nav-brand">
+      <img src="/vendor/icons/shield.svg" alt="" width="20" height="20" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
+      LOG AI
+    </a>
+    <span class="auth-nav-badge">SOC Access Only</span>
+  </header>
+
+  <!-- Main Section with Abstract Radial Cyber Glow -->
+  <main class="auth-main-wrapper" id="main-content">
+    <div class="auth-radial-bg"></div>
+
+    <!-- Login Card Panel -->
+    <div class="glass-panel-card" role="main">
+      <div class="auth-card-header">
+        <div class="auth-icon-box">
+          <img src="/vendor/icons/lock.svg" alt="" width="22" height="22" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
         </div>
-        <h2>Log In to LOG AI</h2>
-        <p>Enter your credentials to access the SOC Dashboard</p>
+        <h1 class="auth-title">Command Center Login</h1>
+        <p class="auth-subtitle">Authenticate to access SOC telemetry.</p>
       </div>
 
-      <div id="error-box" class="error-banner"></div>
+      <div id="error-box" class="error-banner" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #ffb4ab; font-size: 0.82rem; padding: 10px 14px; border-radius: 8px; margin-bottom: 1.25rem; text-align: center; font-weight: 600;"></div>
 
       <form id="login-form">
-        <div class="form-group">
-          <label for="username">USERNAME</label>
-          <input type="text" id="username" class="form-control" placeholder="admin" required />
+        <div class="input-cyber-group">
+          <label for="username" class="input-cyber-label">Operator ID / Email</label>
+          <div class="input-cyber-wrapper">
+            <img src="/vendor/icons/user.svg" alt="" class="input-cyber-icon">
+            <input type="text" id="username" name="username" class="input-cyber" placeholder="Enter credentials" required autocomplete="username" />
+          </div>
         </div>
-        <div class="form-group">
-          <label for="password">PASSWORD</label>
-          <input type="password" id="password" class="form-control" placeholder="••••••••" required />
+
+        <div class="input-cyber-group">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="password" class="input-cyber-label">Access Token</label>
+            <a href="#" style="font-size: 0.72rem; color: var(--accent-hover); text-decoration: none; font-weight: 700;">Reset Token?</a>
+          </div>
+          <div class="input-cyber-wrapper">
+            <img src="/vendor/icons/key.svg" alt="" class="input-cyber-icon">
+            <input type="password" id="password" name="password" class="input-cyber" placeholder="••••••••••••" required autocomplete="current-password" />
+          </div>
         </div>
-        <button type="submit" class="btn-submit">Sign In to Dashboard</button>
+
+        <div style="display: flex; align-items: center; gap: 8px; margin: 0.5rem 0 0.25rem 0;">
+          <input type="checkbox" id="remember" style="width: 14px; height: 14px; accent-color: var(--accent-hover); cursor: pointer;" />
+          <label for="remember" style="font-size: 0.78rem; color: var(--text-muted); cursor: pointer;">Maintain active session</label>
+        </div>
+
+        <button type="submit" id="login-btn" class="btn-cyber-primary">
+          <span>Secure Login</span>
+          <img src="/vendor/icons/arrow-right.svg" alt="" width="16" height="16" style="filter: invert(100%);">
+        </button>
       </form>
 
-      <div class="auth-footer">
-        Don't have an account? <a href="/register">Register here</a>
+      <div class="auth-divider">
+        <div class="auth-divider-line"></div>
+        <span class="auth-divider-tag">OR USE</span>
+        <div class="auth-divider-line"></div>
+      </div>
+
+      <button type="button" class="btn-cyber-secondary" onclick="alert('Enterprise SSO Login is configured via SAML 2.0 / OIDC in enterprise self-hosted settings.')">
+        <img src="/vendor/icons/shield.svg" alt="" width="15" height="15" style="filter: invert(60%);">
+        Enterprise SSO Login
+      </button>
+
+      <div style="text-align: center; margin-top: 1.5rem; font-size: 0.82rem; color: var(--text-muted);">
+        Don't have an account? <a href="/register" style="color: var(--accent-hover); text-decoration: none; font-weight: 700;">Register here</a>
       </div>
     </div>
-    <footer class="app-footer-minimal" role="contentinfo" style="max-width: 480px; width: 100%; margin-top: 2rem; border-top: 1px solid var(--border-color); background: transparent; padding-top: 1.25rem; text-align: center;">
-      <strong>LOG AI Security Platform</strong> &copy; 2026 LOG AI Inc. All rights reserved. Self-hosted air-gapped deployment architecture.
-    </footer>
-  </div>
+  </main>
+
+  <footer class="app-footer-minimal" role="contentinfo" style="border-top: 1px solid var(--border-color); background: transparent; padding: 1.25rem 1.5rem; text-align: center; z-index: 10; position: relative;">
+    <strong>LOG AI Security Platform</strong> &copy; 2026 LOG AI Inc. All rights reserved. Self-hosted air-gapped deployment architecture.
+  </footer>
 
   <script>
     document.getElementById('login-form').addEventListener('submit', async (e) => {

@@ -2938,3 +2938,288 @@ body.light-mode input[type="range"]::-moz-range-thumb {
   border-color: #ffffff !important;
   box-shadow: 0 2px 8px rgba(15, 28, 19, 0.3) !important;
 }
+
+/* ==========================================================================
+   CYBER-VOID INTELLIGENCE AUTH & FORM DESIGN SYSTEM
+   ========================================================================== */
+.auth-page-body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  position: relative;
+}
+
+.auth-header-nav {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  box-sizing: border-box;
+}
+
+.auth-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+.auth-nav-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.auth-main-wrapper {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 1.5rem 2rem 1.5rem;
+  position: relative;
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+.auth-radial-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(circle at center, rgba(167, 139, 250, 0.12) 0%, transparent 65%), var(--bg-dark);
+}
+
+.glass-panel-card {
+  width: 100%;
+  max-width: 440px;
+  background: linear-gradient(145deg, #111827, #0f172a);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 2.25rem 2rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  position: relative;
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+.auth-card-header {
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.auth-icon-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: #1c1f29;
+  border: 1px solid #31353f;
+  box-shadow: 0 0 15px rgba(167, 139, 250, 0.2);
+  margin-bottom: 1rem;
+}
+
+.auth-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0 0 0.35rem 0;
+  letter-spacing: -0.015em;
+}
+
+.auth-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.input-cyber-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.input-cyber-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: 0.02em;
+}
+
+.input-cyber-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-cyber-icon {
+  position: absolute;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+  filter: invert(60%) sepia(20%) saturate(500%) hue-rotate(200deg);
+  opacity: 0.75;
+}
+
+.input-cyber {
+  width: 100%;
+  background-color: #0f131c;
+  border: 1px solid var(--border-color);
+  background-image: radial-gradient(#1f293d 1px, transparent 0);
+  background-size: 8px 8px;
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  color: var(--text-main);
+  border-radius: 8px;
+  padding: 11px 14px 11px 38px;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.input-cyber:focus {
+  border-color: var(--accent-hover);
+  box-shadow: 0 0 0 1px var(--accent-hover), 0 0 12px rgba(167, 139, 250, 0.25);
+}
+
+.input-cyber::placeholder {
+  color: var(--text-dim);
+}
+
+.btn-cyber-primary {
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #0f131c;
+  background: var(--accent-hover);
+  border: 1px solid var(--accent-hover);
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 0 16px rgba(167, 139, 250, 0.25);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 1.25rem;
+}
+
+.btn-cyber-primary:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 24px rgba(167, 139, 250, 0.45);
+  transform: translateY(-1px);
+}
+
+.btn-cyber-secondary {
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-cyber-secondary:hover {
+  color: var(--text-main);
+  border-color: #494454;
+  background: #1c1f29;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 1.5rem 0 1.25rem 0;
+}
+
+.auth-divider-line {
+  height: 1px;
+  background: var(--border-color);
+  flex-grow: 1;
+}
+
+.auth-divider-tag {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+
+/* Light Mode Overrides for Cyber-Void Auth System */
+body.light-mode .auth-radial-bg {
+  background: radial-gradient(circle at center, rgba(15, 23, 42, 0.08) 0%, transparent 65%), #e4ebe4 !important;
+}
+
+body.light-mode .glass-panel-card {
+  background: linear-gradient(145deg, #ffffff, #f1f5f1) !important;
+  border-color: #91a792 !important;
+  box-shadow: 0 12px 36px rgba(15, 28, 19, 0.12) !important;
+}
+
+body.light-mode .auth-icon-box {
+  background: #c5d5c6 !important;
+  border-color: #91a792 !important;
+}
+
+body.light-mode .input-cyber {
+  background-color: #f1f5f1 !important;
+  border-color: #91a792 !important;
+  color: #08120b !important;
+  background-image: radial-gradient(#91a792 1px, transparent 0) !important;
+}
+
+body.light-mode .input-cyber-icon {
+  filter: invert(15%) sepia(20%) saturate(500%) hue-rotate(120deg) !important;
+}
+
+body.light-mode .btn-cyber-primary,
+body.light-mode .btn-cyber-primary span {
+  background: #0f172a !important;
+  color: #ffffff !important;
+  border-color: #0f172a !important;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.3) !important;
+}
+
+body.light-mode .btn-cyber-secondary {
+  background: #c5d5c6 !important;
+  color: #08120b !important;
+  border-color: #91a792 !important;
+}
+
+body.light-mode .btn-cyber-secondary:hover {
+  background: #b0c4b1 !important;
+  color: #08120b !important;
+}

@@ -121,7 +121,7 @@ JS_CONTRAST_SNIPPET = r"""
 
         const isLightMode = document.body.classList.contains('light-mode') || document.documentElement.classList.contains('light-mode');
         const bgLuminance = getLuminance(bgColor);
-        const isInteractiveControl = el.tagName === 'BUTTON' || el.tagName === 'A' || el.tagName === 'INPUT' || el.classList.contains('btn') || el.classList.contains('btn-primary') || el.classList.contains('btn-submit');
+        const isInteractiveControl = el.tagName === 'BUTTON' || el.tagName === 'A' || el.tagName === 'INPUT' || el.classList.contains('btn') || el.classList.contains('btn-primary') || el.classList.contains('btn-submit') || el.closest('button, a, input, .btn, .btn-primary, .btn-submit, .btn-cyber-primary') !== null;
         const isDarkSurfaceInLightMode = isLightMode && !isInteractiveControl && bgLuminance < 0.20;
 
         const isContrastFailure = ratio < requiredRatio;
