@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Log Explorer - LOG AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#4edea3",
+                        "surface-container": "#1c1f29",
+                        "on-tertiary-container": "#00311f",
+                        "background": "#0f131c",
+                        "severity-medium": "#f59e0b",
+                        "secondary-fixed-dim": "#7bd0ff",
+                        "outline-variant": "#494454",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "surface-variant": "#31353f",
+                        "primary-container": "#a078ff",
+                        "on-surface": "#dfe2ef",
+                        "on-secondary-fixed": "#001e2c",
+                        "on-secondary-container": "#00374d",
+                        "surface-tint": "#d0bcff",
+                        "surface-container-lowest": "#0a0e17",
+                        "on-primary-fixed-variant": "#5516be",
+                        "inverse-surface": "#dfe2ef",
+                        "secondary-container": "#00a6e0",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed": "#002113",
+                        "on-surface-variant": "#cbc3d7",
+                        "on-secondary-fixed-variant": "#004c69",
+                        "on-primary": "#3c0091",
+                        "on-primary-fixed": "#23005c",
+                        "error": "#ffb4ab",
+                        "border-glow": "rgba(167, 139, 250, 0.4)",
+                        "surface": "#111827",
+                        "primary-fixed": "#e9ddff",
+                        "error-container": "#93000a",
+                        "on-background": "#dfe2ef",
+                        "border-muted": "#1f293d",
+                        "on-tertiary": "#003824",
+                        "tertiary": "#4edea3",
+                        "surface-container-highest": "#31353f",
+                        "primary": "#d0bcff",
+                        "surface-bright": "#353943",
+                        "primary-fixed-dim": "#d0bcff",
+                        "severity-high": "#ef4444",
+                        "inverse-on-surface": "#2c303a",
+                        "severity-low": "#10b981",
+                        "text-muted": "#94a3b8",
+                        "outline": "#958ea0",
+                        "text-dim": "#75859c",
+                        "surface-dim": "#0f131c",
+                        "tertiary-fixed": "#6ffbbe",
+                        "secondary": "#7bd0ff",
+                        "on-secondary": "#00354a",
+                        "inverse-primary": "#6d3bd7",
+                        "tertiary-container": "#00a572",
+                        "on-primary-container": "#340080",
+                        "accent-violet-light": "#a78bfa",
+                        "on-error-container": "#ffdad6",
+                        "text-primary": "#f8fafc",
+                        "secondary-fixed": "#c4e7ff",
+                        "surface-container-low": "#181b25",
+                        "surface-container-high": "#262a34",
+                        "surface-hover": "#1f293d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "sm": "8px",
+                        "xl": "32px",
+                        "md": "16px",
+                        "container-max": "1600px",
+                        "lg": "24px",
+                        "unit": "4px",
+                        "gutter": "20px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Inter"],
+                        "badge-caps": ["JetBrains Mono"],
+                        "telemetry-mono": ["JetBrains Mono"],
+                        "display-hero": ["Inter"],
+                        "body-base": ["Inter"],
+                        "kpi-stat": ["JetBrains Mono"],
+                        "title-card": ["Inter"],
+                        "body-bold": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "800" }],
+                        "badge-caps": ["10px", { "lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "telemetry-mono": ["12px", { "lineHeight": "18px", "letterSpacing": "0", "fontWeight": "500" }],
+                        "display-hero": ["52px", { "lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "body-base": ["14px", { "lineHeight": "21px", "letterSpacing": "0", "fontWeight": "400" }],
+                        "kpi-stat": ["36px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "800" }],
+                        "title-card": ["14px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+                        "body-bold": ["14px", { "lineHeight": "21px", "letterSpacing": "0", "fontWeight": "700" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #090d16; color: #f8fafc; }
+        .glass-panel {
+            background: linear-gradient(145deg, #111827, #0f172a);
+            border: 1px solid #1f293d;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+        .glow-focus:focus-within {
+            border-color: #a78bfa;
+            box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.4), inset 0 0 12px rgba(167, 139, 250, 0.1);
+        }
+        .syntax-keyword { color: #a078ff; }
+        .syntax-string { color: #4edea3; }
+        .syntax-operator { color: #7bd0ff; }
+    </style>
+</head>
+<body class="bg-background min-h-screen flex flex-col font-body-base text-body-base antialiased">
+<!-- Top Navigation (Mobile/Web Hybrid) -->
+<header class="hidden md:flex justify-between items-center px-lg w-full max-w-container-max mx-auto h-16 bg-background dark:bg-background flat no shadows">
+<div class="flex items-center gap-xl">
+<span class="font-headline-lg text-headline-lg font-extrabold text-primary tracking-tighter">LOG AI</span>
+<nav class="flex gap-lg">
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 cursor-pointer active:scale-95" href="#">Threat Intel</a>
+<a class="text-primary border-b-2 border-primary-container pb-1 cursor-pointer active:scale-95" href="#">Log Explorer</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 cursor-pointer active:scale-95" href="#">Forensics</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 cursor-pointer active:scale-95" href="#">Command Center</a>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer transition-colors" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer transition-colors" data-icon="terminal">terminal</span>
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden border border-outline-variant">
+<img alt="Analyst profile" class="w-full h-full object-cover" data-alt="A small, stylized avatar profile picture of a cybersecurity analyst, rendered in a futuristic, neon-lit cyberpunk style. The lighting is cool blue and vivid purple, matching a high-tech SOC environment. The image is a close-up headshot, highly detailed." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDq6njrBRODNFPVpXTeTbtCFRYfUtKQLr7xORPraR85wh8hcH1xEWxAgCU3ZT9TCZjYlQZpyWHVWiozEA5LhSfqqw7yXFjsa_5ZIXvquM157d18Qqcj95asOCNBetE3W-iXeb6VHGA9Mpg6qw5NSKNwAZSkqskStgDsDFiqVJVgoUJhexVMlovf63Dhh_0HGnb9k3PQ4VxXQm5cgnSvEuec2kU4MxPhybZD6SJdK8IGJ_04XvCQniFB"/>
+</div>
+</div>
+</header>
+<!-- Side Navigation (Web) -->
+<aside class="hidden md:flex bg-surface-container-lowest dark:bg-surface-container-lowest h-screen w-64 flex-col border-r border-outline-variant bg-gradient-to-br from-surface-container to-background shadow-md fixed left-0 top-0 bottom-0 z-40">
+<div class="p-lg flex items-center gap-md border-b border-outline-variant/50">
+<div class="w-10 h-10 rounded-full bg-surface-variant overflow-hidden">
+<img alt="System Operator" class="w-full h-full object-cover" data-alt="System operator avatar, futuristic, high-contrast lighting, cyber void aesthetic, intense focus, blue and purple neon rim light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRZOsRTDu_TH9Rnq5KX4XjyKpR1-v4CxGMW_MWpNAlppdzX-vpdakp_b8Q43Mebydv_9JvQC2ZjLZTrfDP9UBjmqvQdgdyt8S56kJt-w5Rav0DL79yaU0Kaa-scIYItUWTXR72r0nLNGFlgD9ObCy2eGdt_49XwfFWL45-fIGrcB2QoxEwOD5wGnMRr0vW6gYZ5qP-1Y8r55CaeqMBzZGpFg1cw45qYSc2yKEeCAuzF02hjw0oe0AH"/>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-black text-primary">LOG AI</h1>
+<p class="font-telemetry-mono text-telemetry-mono text-text-dim">SOC Command</p>
+</div>
+</div>
+<div class="px-md py-lg">
+<button class="w-full bg-surface-hover text-text-primary border border-border-muted rounded-lg py-sm px-md flex justify-center items-center gap-sm hover:bg-surface-bright hover:border-accent-violet-light hover:shadow-[0_0_12px_rgba(167,139,250,0.2)] transition-all duration-200">
+<span class="material-symbols-outlined text-accent-violet-light" data-icon="add">add</span>
+<span class="font-body-bold text-body-bold">New Investigation</span>
+</button>
+</div>
+<nav class="flex-1 overflow-y-auto py-sm">
+<a class="text-on-surface-variant hover:bg-surface-hover hover:text-primary transition-all duration-150 rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 active:brightness-125" href="#">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<span class="font-body-bold text-body-bold">Threat Intel</span>
+</a>
+<a class="bg-primary-container text-on-primary-container rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 border-l-4 border-primary active:brightness-125" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-body-bold text-body-bold">Log Explorer</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-hover hover:text-primary transition-all duration-150 rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 active:brightness-125" href="#">
+<span class="material-symbols-outlined" data-icon="search_insights">search_insights</span>
+<span class="font-body-bold text-body-bold">Forensics</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-hover hover:text-primary transition-all duration-150 rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 active:brightness-125" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body-bold text-body-bold">Command Center</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-hover hover:text-primary transition-all duration-150 rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 active:brightness-125" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-bold text-body-bold">Settings</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-outline-variant/50 p-sm">
+<a class="text-on-surface-variant hover:bg-surface-hover hover:text-primary transition-all duration-150 rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 active:brightness-125" href="#">
+<span class="material-symbols-outlined" data-icon="sensors">sensors</span>
+<span class="font-body-bold text-body-bold">System Status</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-hover hover:text-primary transition-all duration-150 rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 active:brightness-125" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="font-body-bold text-body-bold">Documentation</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 flex flex-col h-screen overflow-hidden">
+<!-- Search & Action Bar -->
+<div class="p-lg border-b border-border-muted glass-panel flex flex-col md:flex-row gap-md items-center justify-between z-10 relative">
+<div class="w-full flex-1 relative glow-focus rounded-lg transition-all duration-300">
+<div class="absolute inset-y-0 left-0 pl-sm flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-text-muted" data-icon="search">search</span>
+</div>
+<div class="w-full bg-surface-dim border border-border-muted rounded-lg py-sm pl-xl pr-md font-telemetry-mono text-telemetry-mono text-text-primary focus:outline-none min-h-[44px] flex items-center" contenteditable="true" spellcheck="false">
+<span class="syntax-keyword">source</span><span class="syntax-operator">="</span><span class="syntax-string">/var/log/auth.log</span><span class="syntax-operator">"</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">severity</span><span class="syntax-operator">&gt;=</span><span class="syntax-string">4</span> <span class="syntax-keyword">|</span> <span class="syntax-keyword">stats</span> <span class="syntax-keyword">count</span> <span class="syntax-keyword">by</span> <span class="syntax-keyword">src_ip</span>
+</div>
+<div class="absolute inset-y-0 right-0 pr-sm flex items-center gap-xs">
+<button class="p-xs text-text-muted hover:text-primary transition-colors rounded hover:bg-surface-hover"><span class="material-symbols-outlined text-[18px]" data-icon="history">history</span></button>
+<button class="p-xs text-text-muted hover:text-primary transition-colors rounded hover:bg-surface-hover"><span class="material-symbols-outlined text-[18px]" data-icon="bookmark_add">bookmark_add</span></button>
+</div>
+</div>
+<div class="flex items-center gap-md w-full md:w-auto shrink-0">
+<div class="flex items-center bg-surface border border-border-muted rounded-lg px-sm py-xs gap-sm">
+<span class="material-symbols-outlined text-text-muted text-[16px]" data-icon="schedule">schedule</span>
+<span class="font-telemetry-mono text-telemetry-mono text-text-primary">Last 15m</span>
+<span class="material-symbols-outlined text-text-muted text-[16px] cursor-pointer" data-icon="expand_more">expand_more</span>
+</div>
+<button class="bg-surface-hover border border-border-muted text-text-muted font-body-bold text-body-bold px-md py-sm rounded-lg hover:text-text-primary hover:border-accent-violet-light transition-all flex items-center gap-sm">
+<span class="material-symbols-outlined text-[18px]" data-icon="save">save</span> Save Query
+                </button>
+<button class="bg-primary-container text-on-primary-container font-body-bold text-body-bold px-md py-sm rounded-lg border border-accent-violet-light hover:brightness-110 shadow-[0_0_8px_rgba(167,139,250,0.3)] transition-all flex items-center gap-sm">
+<span class="material-symbols-outlined text-[18px]" data-icon="play_arrow">play_arrow</span> Run
+                </button>
+</div>
+</div>
+<!-- Explorer Layout -->
+<div class="flex-1 flex overflow-hidden">
+<!-- Filter Sidebar -->
+<div class="w-64 glass-panel border-r border-t-0 border-b-0 border-border-muted flex-col overflow-y-auto hidden lg:flex shrink-0">
+<div class="p-md border-b border-border-muted flex justify-between items-center sticky top-0 bg-surface-container/90 backdrop-blur-md z-10">
+<h3 class="font-title-card text-title-card text-text-primary uppercase tracking-wider">Filters</h3>
+<button class="text-text-muted hover:text-primary transition-colors"><span class="material-symbols-outlined text-[18px]" data-icon="filter_list_off">filter_list_off</span></button>
+</div>
+<div class="p-md flex flex-col gap-lg">
+<!-- Filter Group: Severity -->
+<div>
+<h4 class="font-badge-caps text-badge-caps text-text-muted mb-sm">SEVERITY</h4>
+<div class="flex flex-col gap-xs">
+<label class="flex items-center gap-sm cursor-pointer group">
+<input checked="" class="form-checkbox bg-surface-dim border-border-muted rounded text-accent-violet-light focus:ring-accent-violet-light focus:ring-offset-background" type="checkbox"/>
+<div class="w-2 h-2 rounded-full bg-severity-high shadow-[0_0_4px_rgba(239,68,68,0.5)]"></div>
+<span class="font-body-base text-body-base text-text-primary group-hover:text-primary transition-colors">Critical</span>
+<span class="font-telemetry-mono text-telemetry-mono text-text-dim ml-auto">1,245</span>
+</label>
+<label class="flex items-center gap-sm cursor-pointer group">
+<input checked="" class="form-checkbox bg-surface-dim border-border-muted rounded text-accent-violet-light focus:ring-accent-violet-light focus:ring-offset-background" type="checkbox"/>
+<div class="w-2 h-2 rounded-full bg-severity-medium shadow-[0_0_4px_rgba(245,158,11,0.5)]"></div>
+<span class="font-body-base text-body-base text-text-primary group-hover:text-primary transition-colors">Warning</span>
+<span class="font-telemetry-mono text-telemetry-mono text-text-dim ml-auto">8,432</span>
+</label>
+<label class="flex items-center gap-sm cursor-pointer group">
+<input class="form-checkbox bg-surface-dim border-border-muted rounded text-accent-violet-light focus:ring-accent-violet-light focus:ring-offset-background" type="checkbox"/>
+<div class="w-2 h-2 rounded-full bg-severity-low shadow-[0_0_4px_rgba(16,185,129,0.5)]"></div>
+<span class="font-body-base text-body-base text-text-muted group-hover:text-primary transition-colors">Info</span>
+<span class="font-telemetry-mono text-telemetry-mono text-text-dim ml-auto">45k+</span>
+</label>
+</div>
+</div>
+<!-- Filter Group: Source -->
+<div>
+<div class="flex justify-between items-center mb-sm">
+<h4 class="font-badge-caps text-badge-caps text-text-muted">SOURCE</h4>
+<span class="material-symbols-outlined text-[14px] text-text-muted cursor-pointer hover:text-primary" data-icon="search">search</span>
+</div>
+<div class="flex flex-col gap-xs">
+<label class="flex items-center gap-sm cursor-pointer group">
+<input checked="" class="form-checkbox bg-surface-dim border-border-muted rounded text-accent-violet-light focus:ring-accent-violet-light focus:ring-offset-background" type="checkbox"/>
+<span class="font-telemetry-mono text-telemetry-mono text-text-primary group-hover:text-primary transition-colors truncate">/var/log/auth.log</span>
+</label>
+<label class="flex items-center gap-sm cursor-pointer group">
+<input class="form-checkbox bg-surface-dim border-border-muted rounded text-accent-violet-light focus:ring-accent-violet-light focus:ring-offset-background" type="checkbox"/>
+<span class="font-telemetry-mono text-telemetry-mono text-text-muted group-hover:text-primary transition-colors truncate">aws.cloudtrail</span>
+</label>
+<label class="flex items-center gap-sm cursor-pointer group">
+<input class="form-checkbox bg-surface-dim border-border-muted rounded text-accent-violet-light focus:ring-accent-violet-light focus:ring-offset-background" type="checkbox"/>
+<span class="font-telemetry-mono text-telemetry-mono text-text-muted group-hover:text-primary transition-colors truncate">k8s.ingress.nginx</span>
+</label>
+</div>
+<button class="text-text-muted font-body-base text-[12px] mt-xs hover:text-primary hover:underline">Show all 42 sources...</button>
+</div>
+</div>
+</div>
+<!-- Main Data Table Area -->
+<div class="flex-1 flex flex-col bg-background relative overflow-hidden">
+<!-- Table Header Actions -->
+<div class="px-md py-sm flex justify-between items-center border-b border-border-muted bg-surface/50 backdrop-blur">
+<span class="font-telemetry-mono text-telemetry-mono text-text-dim">Displaying <strong class="text-text-primary">1-50</strong> of <strong class="text-text-primary">9,677</strong> events (14ms)</span>
+<div class="flex gap-sm">
+<button class="p-xs text-text-muted hover:text-primary transition-colors rounded border border-transparent hover:border-border-muted hover:bg-surface-hover flex items-center gap-xs" title="Export">
+<span class="material-symbols-outlined text-[18px]" data-icon="download">download</span>
+<span class="font-body-base text-[12px] hidden sm:inline">Export</span>
+</button>
+<button class="p-xs text-text-muted hover:text-primary transition-colors rounded border border-transparent hover:border-border-muted hover:bg-surface-hover flex items-center gap-xs" title="View Options">
+<span class="material-symbols-outlined text-[18px]" data-icon="view_column">view_column</span>
+</button>
+</div>
+</div>
+<!-- Table Container -->
+<div class="flex-1 overflow-auto">
+<table class="w-full text-left border-collapse whitespace-nowrap">
+<thead class="sticky top-0 bg-surface z-10 shadow-[0_1px_0_#1f293d]">
+<tr>
+<th class="font-badge-caps text-badge-caps text-text-muted p-sm pl-md w-12 text-center"></th>
+<th class="font-badge-caps text-badge-caps text-text-muted p-sm w-48">TIMESTAMP</th>
+<th class="font-badge-caps text-badge-caps text-text-muted p-sm w-32">SEVERITY</th>
+<th class="font-badge-caps text-badge-caps text-text-muted p-sm w-48">SOURCE</th>
+<th class="font-badge-caps text-badge-caps text-text-muted p-sm max-w-lg">RAW LOG</th>
+</tr>
+</thead>
+<tbody class="font-telemetry-mono text-telemetry-mono text-text-primary divide-y divide-border-muted/50">
+<!-- High Severity Row -->
+<tr class="hover:bg-surface-hover/50 group bg-severity-high/5 relative">
+<td class="p-sm pl-md text-center align-top relative">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-severity-high"></div>
+<span class="material-symbols-outlined text-text-muted group-hover:text-primary text-[16px] cursor-pointer" data-icon="chevron_right">chevron_right</span>
+</td>
+<td class="p-sm text-text-dim align-top">2023-10-27 14:32:01.442</td>
+<td class="p-sm align-top"><span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-severity-high/20 text-severity-high border border-severity-high/30">CRITICAL</span></td>
+<td class="p-sm text-text-dim truncate align-top">/var/log/auth.log</td>
+<td class="p-sm truncate max-w-lg font-mono text-[11px] align-top whitespace-pre-wrap"><span class="text-error">Failed password</span> for root from <span class="text-secondary">192.168.1.105</span> port 22 ssh2</td>
+</tr>
+<!-- Medium Severity Row -->
+<tr class="hover:bg-surface-hover/50 group">
+<td class="p-sm pl-md text-center align-top relative">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-severity-medium/50 hidden group-hover:block"></div>
+<span class="material-symbols-outlined text-text-muted group-hover:text-primary text-[16px] cursor-pointer" data-icon="chevron_right">chevron_right</span>
+</td>
+<td class="p-sm text-text-dim align-top">2023-10-27 14:31:58.110</td>
+<td class="p-sm align-top"><span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-severity-medium/20 text-severity-medium border border-severity-medium/30">WARN</span></td>
+<td class="p-sm text-text-dim truncate align-top">aws.cloudtrail</td>
+<td class="p-sm truncate max-w-lg font-mono text-[11px] align-top whitespace-pre-wrap">User <span class="text-primary-container">admin_bob</span> attempted unauthorized API call: <span class="text-tertiary">DeleteBucket</span></td>
+</tr>
+<!-- Medium Severity Row (Expanded State Simulation) -->
+<tr class="bg-surface-hover/30 border-b-0">
+<td class="p-sm pl-md text-center align-top relative">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-accent-violet-light"></div>
+<span class="material-symbols-outlined text-primary text-[16px] cursor-pointer transform rotate-90 transition-transform" data-icon="chevron_right">chevron_right</span>
+</td>
+<td class="p-sm text-text-dim align-top">2023-10-27 14:30:12.899</td>
+<td class="p-sm align-top"><span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-severity-medium/20 text-severity-medium border border-severity-medium/30">WARN</span></td>
+<td class="p-sm text-text-dim truncate align-top">/var/log/syslog</td>
+<td class="p-sm truncate max-w-lg font-mono text-[11px] align-top whitespace-pre-wrap">Connection timeout to upstream server <span class="text-secondary">10.0.0.54:8080</span></td>
+</tr>
+<tr class="bg-surface-hover/10 shadow-inner">
+<td class="p-0 border-b border-border-muted" colspan="5">
+<div class="pl-xl pr-md py-md grid grid-cols-1 md:grid-cols-2 gap-md relative">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-accent-violet-light/50"></div>
+<div class="bg-surface-dim rounded border border-border-muted p-sm font-mono text-[11px] overflow-x-auto">
+<span class="text-text-muted"># Parsed JSON Fields</span><br/>
+<span class="text-secondary">"event_type"</span>: <span class="text-tertiary">"timeout"</span>,<br/>
+<span class="text-secondary">"src_ip"</span>: <span class="text-tertiary">"192.168.1.10"</span>,<br/>
+<span class="text-secondary">"dest_ip"</span>: <span class="text-tertiary">"10.0.0.54"</span>,<br/>
+<span class="text-secondary">"dest_port"</span>: <span class="text-tertiary">8080</span>,<br/>
+<span class="text-secondary">"protocol"</span>: <span class="text-tertiary">"tcp"</span>
+</div>
+<div class="flex flex-col gap-sm">
+<div class="glass-panel p-sm rounded border border-border-muted/50 flex items-start gap-sm">
+<span class="material-symbols-outlined text-primary-container text-[20px] mt-0.5" data-icon="smart_toy">smart_toy</span>
+<div>
+<h5 class="font-title-card text-[12px] text-primary-container mb-xs">AI Attribution</h5>
+<p class="font-body-base text-[11px] text-text-dim">Anomalous timeout rate detected for destination IP 10.0.0.54. Deviates from baseline by +400% over the last 15m.</p>
+</div>
+</div>
+<div class="flex gap-sm mt-auto">
+<button class="text-[11px] font-body-bold px-sm py-xs border border-border-muted rounded bg-surface-dim hover:bg-surface-hover transition-colors">Pivot on Dest IP</button>
+<button class="text-[11px] font-body-bold px-sm py-xs border border-border-muted rounded bg-surface-dim hover:bg-surface-hover transition-colors">Create Alert Rule</button>
+</div>
+</div>
+</div>
+</td>
+</tr>
+<!-- Low Severity Row -->
+<tr class="hover:bg-surface-hover/50 group">
+<td class="p-sm pl-md text-center align-top relative">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-severity-low/50 hidden group-hover:block"></div>
+<span class="material-symbols-outlined text-text-muted group-hover:text-primary text-[16px] cursor-pointer" data-icon="chevron_right">chevron_right</span>
+</td>
+<td class="p-sm text-text-dim align-top">2023-10-27 14:29:45.001</td>
+<td class="p-sm align-top"><span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold text-text-dim border border-border-muted">INFO</span></td>
+<td class="p-sm text-text-dim truncate align-top">k8s.ingress.nginx</td>
+<td class="p-sm truncate max-w-lg font-mono text-[11px] align-top whitespace-pre-wrap">GET /api/v1/health status: 200 latency: 12ms</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="p-sm border-t border-border-muted flex justify-center items-center gap-md bg-surface/80 backdrop-blur sticky bottom-0 z-10">
+<button class="p-xs rounded hover:bg-surface-hover text-text-muted disabled:opacity-50" disabled=""><span class="material-symbols-outlined text-[20px]" data-icon="chevron_left">chevron_left</span></button>
+<div class="flex gap-xs">
+<button class="w-6 h-6 rounded bg-primary-container text-on-primary-container font-telemetry-mono text-[12px] flex items-center justify-center">1</button>
+<button class="w-6 h-6 rounded hover:bg-surface-hover text-text-muted font-telemetry-mono text-[12px] flex items-center justify-center">2</button>
+<button class="w-6 h-6 rounded hover:bg-surface-hover text-text-muted font-telemetry-mono text-[12px] flex items-center justify-center">3</button>
+<span class="text-text-muted px-1">...</span>
+<button class="w-6 h-6 rounded hover:bg-surface-hover text-text-muted font-telemetry-mono text-[12px] flex items-center justify-center">194</button>
+</div>
+<button class="p-xs rounded hover:bg-surface-hover text-text-primary"><span class="material-symbols-outlined text-[20px]" data-icon="chevron_right">chevron_right</span></button>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="md:ml-64 bg-surface-container-lowest dark:bg-surface-container-lowest w-full py-xl border-t border-outline-variant flat no shadows flex flex-col md:flex-row justify-between items-center px-lg z-20 relative">
+<span class="font-headline-md text-headline-md font-bold text-on-surface mb-sm md:mb-0">LOG AI</span>
+<div class="flex flex-col md:flex-row items-center gap-md font-body-base text-body-base">
+<span class="text-text-dim text-center md:text-left mb-sm md:mb-0">© 2024 Log AI Security. All rights reserved.</span>
+<div class="flex gap-md">
+<a class="text-text-dim hover:text-primary-container underline transition-all" href="#">Privacy Policy</a>
+<a class="text-text-dim hover:text-primary-container underline transition-all" href="#">Terms of Service</a>
+<a class="text-text-dim hover:text-primary-container underline transition-all" href="#">API Status</a>
+<a class="text-text-dim hover:text-primary-container underline transition-all" href="#">Contact Support</a>
+</div>
+</div>
+</footer>
+</body></html>

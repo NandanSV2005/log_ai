@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Log AI - Next-Gen SOC Command Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&amp;family=JetBrains+Mono:wght@500;700;800&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed-dim": "#4edea3",
+                      "surface-container": "#1c1f29",
+                      "on-tertiary-container": "#00311f",
+                      "background": "#0f131c",
+                      "severity-medium": "#f59e0b",
+                      "secondary-fixed-dim": "#7bd0ff",
+                      "outline-variant": "#494454",
+                      "on-tertiary-fixed-variant": "#005236",
+                      "surface-variant": "#31353f",
+                      "primary-container": "#a078ff",
+                      "on-surface": "#dfe2ef",
+                      "on-secondary-fixed": "#001e2c",
+                      "on-secondary-container": "#00374d",
+                      "surface-tint": "#d0bcff",
+                      "surface-container-lowest": "#0a0e17",
+                      "on-primary-fixed-variant": "#5516be",
+                      "inverse-surface": "#dfe2ef",
+                      "secondary-container": "#00a6e0",
+                      "on-error": "#690005",
+                      "on-tertiary-fixed": "#002113",
+                      "on-surface-variant": "#cbc3d7",
+                      "on-secondary-fixed-variant": "#004c69",
+                      "on-primary": "#3c0091",
+                      "on-primary-fixed": "#23005c",
+                      "error": "#ffb4ab",
+                      "border-glow": "rgba(167, 139, 250, 0.4)",
+                      "surface": "#111827",
+                      "primary-fixed": "#e9ddff",
+                      "error-container": "#93000a",
+                      "on-background": "#dfe2ef",
+                      "border-muted": "#1f293d",
+                      "on-tertiary": "#003824",
+                      "tertiary": "#4edea3",
+                      "surface-container-highest": "#31353f",
+                      "primary": "#d0bcff",
+                      "surface-bright": "#353943",
+                      "primary-fixed-dim": "#d0bcff",
+                      "severity-high": "#ef4444",
+                      "inverse-on-surface": "#2c303a",
+                      "severity-low": "#10b981",
+                      "text-muted": "#94a3b8",
+                      "outline": "#958ea0",
+                      "text-dim": "#75859c",
+                      "surface-dim": "#0f131c",
+                      "tertiary-fixed": "#6ffbbe",
+                      "secondary": "#7bd0ff",
+                      "on-secondary": "#00354a",
+                      "inverse-primary": "#6d3bd7",
+                      "tertiary-container": "#00a572",
+                      "on-primary-container": "#340080",
+                      "accent-violet-light": "#a78bfa",
+                      "on-error-container": "#ffdad6",
+                      "text-primary": "#f8fafc",
+                      "secondary-fixed": "#c4e7ff",
+                      "surface-container-low": "#181b25",
+                      "surface-container-high": "#262a34",
+                      "surface-hover": "#1f293d"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "xs": "4px",
+                      "sm": "8px",
+                      "xl": "32px",
+                      "md": "16px",
+                      "container-max": "1600px",
+                      "lg": "24px",
+                      "unit": "4px",
+                      "gutter": "20px"
+              },
+              "fontFamily": {
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "badge-caps": [
+                              "JetBrains Mono"
+                      ],
+                      "telemetry-mono": [
+                              "JetBrains Mono"
+                      ],
+                      "display-hero": [
+                              "Inter"
+                      ],
+                      "body-base": [
+                              "Inter"
+                      ],
+                      "kpi-stat": [
+                              "JetBrains Mono"
+                      ],
+                      "title-card": [
+                              "Inter"
+                      ],
+                      "body-bold": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "badge-caps": [
+                              "10px",
+                              {
+                                      "lineHeight": "14px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "telemetry-mono": [
+                              "12px",
+                              {
+                                      "lineHeight": "18px",
+                                      "letterSpacing": "0",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "display-hero": [
+                              "52px",
+                              {
+                                      "lineHeight": "60px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "body-base": [
+                              "14px",
+                              {
+                                      "lineHeight": "21px",
+                                      "letterSpacing": "0",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "kpi-stat": [
+                              "36px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "title-card": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-bold": [
+                              "14px",
+                              {
+                                      "lineHeight": "21px",
+                                      "letterSpacing": "0",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "letterSpacing": "0em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        .glass-panel {
+            background: linear-gradient(145deg, rgba(17, 24, 39, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
+            backdrop-filter: blur(16px);
+            border: 1px solid theme('colors.border-muted');
+        }
+        .glow-hover:hover {
+            border-color: theme('colors.accent-violet-light');
+            box-shadow: 0 0 15px rgba(167, 139, 250, 0.2);
+        }
+        .text-glow {
+            text-shadow: 0 0 10px rgba(208, 188, 255, 0.5);
+        }
+        
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
+        }
+        .scan-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, transparent, rgba(167, 139, 250, 0.1), transparent);
+            animation: scanline 8s linear infinite;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+        .status-dot {
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+        
+        .diag-stripes {
+            background-image: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255, 255, 255, 0.02) 10px,
+                rgba(255, 255, 255, 0.02) 20px
+            );
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased min-h-screen flex flex-col relative overflow-x-hidden">
+<div class="scan-overlay"></div>
+<!-- TopNavBar (Responsive hidden on md) -->
+<header class="w-full h-16 bg-background dark:bg-background border-b border-outline-variant hidden md:flex justify-between items-center px-lg max-w-container-max mx-auto relative z-20">
+<div class="font-headline-lg text-headline-lg font-extrabold text-primary tracking-tighter">
+            LOG AI
+        </div>
+<nav class="flex gap-lg">
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 cursor-pointer active:scale-95" href="#">Threat Intel</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 cursor-pointer active:scale-95" href="#">Log Explorer</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 cursor-pointer active:scale-95" href="#">Forensics</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 cursor-pointer active:scale-95" href="#">Command Center</a>
+</nav>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim cursor-pointer active:scale-95 hover:text-primary transition-colors duration-200" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim cursor-pointer active:scale-95 hover:text-primary transition-colors duration-200" data-icon="terminal">terminal</span>
+</div>
+</header>
+<!-- SideNavBar (Responsive visible on mobile) -->
+<nav class="fixed bottom-0 left-0 right-0 bg-surface-container-lowest border-t border-outline-variant z-40 md:hidden flex justify-around py-sm px-xs shadow-md">
+<a class="flex flex-col items-center p-sm text-on-surface-variant hover:text-primary" href="#">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<span class="font-badge-caps text-badge-caps mt-1">Intel</span>
+</a>
+<a class="flex flex-col items-center p-sm text-on-surface-variant hover:text-primary" href="#">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-badge-caps text-badge-caps mt-1">Logs</span>
+</a>
+<a class="flex flex-col items-center p-sm text-on-surface-variant hover:text-primary" href="#">
+<span class="material-symbols-outlined" data-icon="search_insights">search_insights</span>
+<span class="font-badge-caps text-badge-caps mt-1">Forensics</span>
+</a>
+<a class="flex flex-col items-center p-sm text-on-surface-variant hover:text-primary" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-badge-caps text-badge-caps mt-1">Command</span>
+</a>
+</nav>
+<main class="flex-grow relative z-10 pb-24 md:pb-0">
+<!-- Hero Section -->
+<section class="relative min-h-[819px] flex flex-col justify-center items-center overflow-hidden px-md">
+<div class="absolute inset-0 z-0 opacity-40 mix-blend-screen" data-alt="A highly complex, abstract digital representation of raw data streams and network topology in a dark cyber void. Glowing violet and cool blue lines intersect forming a dense web, with subtle bright nodes representing active log events. The lighting is high-contrast, moody, and deeply technical, evoking a high-end SOC environment. 8k resolution, futuristic aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB8S2Qg245nw_HTuz2z_1HAFvI_uOZzTAqhRg2nI7CPKTXrXtVhQmkBe9GVjIdobqaom0DfUDMAPpCeuU8Pt_TW22GeTUAx1kQs4HbBn5r0of637-XKI8wod359PGV_7oAodswanWeQQJGQ3xwINTDW5q8c3YLijIiIeXa0-3d70sAQHhXDgipdmupMSzDXqPcDvJzA17tlQFTzwK_8a-MygDqo9XleANw7qqDJlfV-uohTzjG1rKlP')"></div>
+<div class="z-10 text-center max-w-4xl mx-auto glass-panel p-xl rounded-xl glow-hover transition-all duration-500">
+<div class="inline-flex items-center gap-2 mb-6 bg-surface-container-high px-4 py-1.5 rounded-full border border-border-muted">
+<div class="w-2 h-2 rounded-full bg-severity-low status-dot"></div>
+<span class="font-telemetry-mono text-telemetry-mono text-text-primary tracking-wide">SYSTEM LIVE: INGESTING 4.2M EVENTS/SEC</span>
+</div>
+<h1 class="font-display-hero text-display-hero text-text-primary mb-6 text-glow">
+                    Command the <span class="text-primary-container">Cyber Void</span>
+</h1>
+<p class="font-body-base text-body-base text-on-surface-variant mb-8 max-w-2xl mx-auto leading-relaxed">
+                    Log AI merges hyper-scale telemetry with autonomous threat detection. Transform chaotic raw logs into actionable, high-assurance intelligence in milliseconds.
+                </p>
+<div class="flex flex-col sm:flex-row gap-4 justify-center">
+<button class="bg-primary-container text-on-primary-container font-body-bold text-body-bold px-8 py-3 rounded-lg border border-border-glow hover:brightness-110 hover:shadow-[0_0_15px_rgba(167,139,250,0.4)] transition-all duration-300">
+                        Initialize Core
+                    </button>
+<button class="bg-surface text-text-muted font-body-bold text-body-bold px-8 py-3 rounded-lg border border-border-muted hover:text-text-primary hover:border-outline-variant transition-all duration-300">
+                        View Threat Map
+                    </button>
+</div>
+</div>
+<!-- Live Ticker -->
+<div class="absolute bottom-0 left-0 w-full bg-surface-container-lowest border-y border-border-muted overflow-hidden h-10 flex items-center">
+<div class="whitespace-nowrap font-telemetry-mono text-telemetry-mono text-text-dim flex gap-8 animate-[marquee_20s_linear_infinite]" id="ticker-content">
+<span>[ALERT] SYN Flood detected on Edge Node 04</span>
+<span>[INFO] Routine model retraining completed</span>
+<span>[WARN] Anomaly in egress traffic volume (IP: 192.168.1.105)</span>
+<span>[INFO] Ingestion rate stabilized at 4.2M EPS</span>
+<span>[ALERT] Multiple failed auth attempts - Region: EU-West</span>
+</div>
+</div>
+</section>
+<!-- Features Bento Grid -->
+<section class="max-w-container-max mx-auto px-md py-xl md:py-24">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-md md:gap-lg auto-rows-[minmax(180px,auto)]">
+<!-- Feature 1: AI Detection -->
+<div class="md:col-span-8 glass-panel rounded-xl p-lg relative overflow-hidden group">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-accent-violet-light opacity-80 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex flex-col h-full justify-between z-10 relative">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-primary-container" data-icon="psychology">psychology</span>
+<h3 class="font-headline-md text-headline-md text-text-primary">Autonomous AI Detection</h3>
+</div>
+<p class="font-body-base text-body-base text-on-surface-variant mb-6">
+                            Deploy self-learning models that baseline normal network behavior and flag zero-day anomalies instantly, reducing MTTR by 80%.
+                        </p>
+<div class="bg-surface-container-high rounded-lg p-sm border border-border-muted font-telemetry-mono text-telemetry-mono text-severity-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="warning">warning</span>
+                             Analyzing behavioral deviation... Confidence: 94.2%
+                        </div>
+</div>
+</div>
+<!-- KPI Tile 1 -->
+<div class="md:col-span-4 glass-panel rounded-xl p-lg flex flex-col justify-center items-center relative group">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-secondary opacity-50 group-hover:opacity-100 transition-opacity"></div>
+<span class="font-title-card text-title-card text-text-muted mb-2 uppercase tracking-widest">MTTD</span>
+<span class="font-kpi-stat text-kpi-stat text-secondary-fixed-dim">1.4s</span>
+</div>
+<!-- KPI Tile 2 -->
+<div class="md:col-span-4 glass-panel rounded-xl p-lg flex flex-col justify-center items-center relative group">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-severity-high opacity-50 group-hover:opacity-100 transition-opacity"></div>
+<span class="font-title-card text-title-card text-text-muted mb-2 uppercase tracking-widest">Active Threats</span>
+<span class="font-kpi-stat text-kpi-stat text-severity-high">03</span>
+</div>
+<!-- Feature 2: Telemetry -->
+<div class="md:col-span-8 glass-panel rounded-xl p-lg relative group">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-tertiary-fixed opacity-50 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-tertiary-fixed" data-icon="speed">speed</span>
+<h3 class="font-headline-md text-headline-md text-text-primary">Real-Time Telemetry</h3>
+</div>
+<div class="h-32 w-full rounded border border-border-muted bg-surface-container-low flex items-end p-2 gap-1 overflow-hidden">
+<!-- Simulated bar chart -->
+<div class="w-1/12 bg-tertiary-fixed-dim h-1/4 rounded-t opacity-70"></div>
+<div class="w-1/12 bg-tertiary-fixed-dim h-2/4 rounded-t opacity-70"></div>
+<div class="w-1/12 bg-tertiary-fixed-dim h-1/3 rounded-t opacity-70"></div>
+<div class="w-1/12 bg-tertiary-fixed-dim h-3/4 rounded-t opacity-70"></div>
+<div class="w-1/12 bg-tertiary-fixed-dim h-1/2 rounded-t opacity-70"></div>
+<div class="w-1/12 bg-tertiary-fixed-dim h-5/6 rounded-t opacity-90 animate-pulse"></div>
+<div class="w-1/12 bg-tertiary-fixed-dim h-1/4 rounded-t opacity-70"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Supported Perimeter Security Appliances -->
+<section class="max-w-container-max mx-auto px-md py-xl md:py-24 border-t border-border-muted">
+<div class="text-center mb-12">
+<h2 class="font-headline-lg text-headline-lg text-text-primary mb-4 text-glow">Supported Perimeter Security Appliances</h2>
+<p class="font-body-base text-body-base text-on-surface-variant max-w-2xl mx-auto">Tailored parsers and threat detection workflows for core enterprise perimeter network appliances.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg mb-8">
+<!-- Cisco ASA -->
+<div class="glass-panel p-6 rounded-xl relative hover:border-outline-variant transition-colors">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-accent-violet-light" data-icon="shield">shield</span>
+<span class="font-badge-caps text-badge-caps text-text-muted bg-surface-container-high px-2 py-1 rounded border border-border-muted uppercase">FIREWALL</span>
+</div>
+<h4 class="font-headline-md text-headline-md text-text-primary mb-3">Cisco ASA Firewall</h4>
+<p class="font-body-base text-body-base text-on-surface-variant text-sm">Connection flood detection and ACL deny policy violations across outside access groups to spot stealthy port scans.</p>
+</div>
+<!-- Fortinet -->
+<div class="glass-panel p-6 rounded-xl relative hover:border-outline-variant transition-colors">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-accent-violet-light" data-icon="lock">lock</span>
+<span class="font-badge-caps text-badge-caps text-text-muted bg-surface-container-high px-2 py-1 rounded border border-border-muted uppercase">VPN GATEWAY</span>
+</div>
+<h4 class="font-headline-md text-headline-md text-text-primary mb-3">Fortinet FortiGate</h4>
+<p class="font-body-base text-body-base text-on-surface-variant text-sm">SSL VPN authentication brute-force monitoring and perimeter policy bypass detection with geographic anomaly tracking.</p>
+</div>
+<!-- Suricata -->
+<div class="glass-panel p-6 rounded-xl relative hover:border-outline-variant transition-colors">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-accent-violet-light" data-icon="monitoring">monitoring</span>
+<span class="font-badge-caps text-badge-caps text-text-muted bg-surface-container-high px-2 py-1 rounded border border-border-muted uppercase">IDS / IPS</span>
+</div>
+<h4 class="font-headline-md text-headline-md text-text-primary mb-3">Suricata IDS / IPS</h4>
+<p class="font-body-base text-body-base text-on-surface-variant text-sm">ET Malware signature alert parsing and automated correlation of IDS payload signatures with firewall drop events.</p>
+</div>
+<!-- pfSense -->
+<div class="glass-panel p-6 rounded-xl relative hover:border-outline-variant transition-colors">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-accent-violet-light" data-icon="route">route</span>
+<span class="font-badge-caps text-badge-caps text-text-muted bg-surface-container-high px-2 py-1 rounded border border-border-muted uppercase">PERIMETER</span>
+</div>
+<h4 class="font-headline-md text-headline-md text-text-primary mb-3">pfSense Gateway</h4>
+<p class="font-body-base text-body-base text-on-surface-variant text-sm">Edge packet filter deny log tracking and state table exhaustion detection before internal infrastructure impact.</p>
+</div>
+<!-- Generic Syslog -->
+<div class="glass-panel p-6 rounded-xl relative hover:border-outline-variant transition-colors">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-accent-violet-light" data-icon="storage">storage</span>
+<span class="font-badge-caps text-badge-caps text-text-muted bg-surface-container-high px-2 py-1 rounded border border-border-muted uppercase">REGISTRY</span>
+</div>
+<h4 class="font-headline-md text-headline-md text-text-primary mb-3">Generic Syslog / CEF</h4>
+<p class="font-body-base text-body-base text-on-surface-variant text-sm">Dynamic fallback parser extracting structured key-value pairs (CEF, Key=Value, JSON) for any custom perimeter log stream.</p>
+</div>
+<!-- Multi-Vendor Correlation -->
+<div class="glass-panel p-6 rounded-xl relative hover:border-outline-variant transition-colors">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-accent-violet-light" data-icon="hub">hub</span>
+<span class="font-badge-caps text-badge-caps text-text-muted bg-surface-container-high px-2 py-1 rounded border border-border-muted uppercase">ENSEMBLE</span>
+</div>
+<h4 class="font-headline-md text-headline-md text-text-primary mb-3">Multi-Vendor Correlation</h4>
+<p class="font-body-base text-body-base text-on-surface-variant text-sm">Cross-appliance IP incident grouping linking Cisco, Fortinet, and Suricata events into unified 15-minute attack timelines.</p>
+</div>
+</div>
+<!-- Feature Tags -->
+<div class="glass-panel rounded-xl p-6 flex flex-wrap justify-center gap-4">
+<div class="flex items-center gap-2 bg-surface-container-high border border-border-muted px-4 py-2 rounded-full">
+<span class="material-symbols-outlined text-accent-violet-light text-sm" data-icon="check_circle">check_circle</span>
+<span class="font-body-base text-body-base text-text-primary text-sm font-medium">OCSF-Aligned Schema</span>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-high border border-border-muted px-4 py-2 rounded-full">
+<span class="material-symbols-outlined text-accent-violet-light text-sm" data-icon="check_circle">check_circle</span>
+<span class="font-body-base text-body-base text-text-primary text-sm font-medium">Air-Gapped Deployment Ready</span>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-high border border-border-muted px-4 py-2 rounded-full">
+<span class="material-symbols-outlined text-accent-violet-light text-sm" data-icon="check_circle">check_circle</span>
+<span class="font-body-base text-body-base text-text-primary text-sm font-medium">Container-Native (Docker)</span>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-high border border-border-muted px-4 py-2 rounded-full">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="check_circle">check_circle</span>
+<span class="font-body-base text-body-base text-text-primary text-sm font-medium">Forensic Chain-of-Custody (SHA-256 Merkle)</span>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-high border border-border-muted px-4 py-2 rounded-full">
+<span class="material-symbols-outlined text-accent-violet-light text-sm" data-icon="check_circle">check_circle</span>
+<span class="font-body-base text-body-base text-text-primary text-sm font-medium">Tamper-Evident Audit Log</span>
+</div>
+</div>
+</section>
+<!-- Calculate SOC Efficiency -->
+<section class="max-w-container-max mx-auto px-md py-xl md:py-24 border-t border-border-muted">
+<div class="text-center mb-12">
+<div class="font-badge-caps text-badge-caps text-text-muted mb-2 tracking-widest uppercase">Financial Impact Estimator</div>
+<h2 class="font-headline-lg text-headline-lg text-text-primary mb-4 text-glow">Calculate SOC Efficiency &amp; MTTR Reduction</h2>
+<p class="font-body-base text-body-base text-on-surface-variant max-w-2xl mx-auto">Estimate analyst time saved and incident response acceleration based on your perimeter footprint.</p>
+</div>
+<div class="glass-panel rounded-xl p-8 max-w-5xl mx-auto mb-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+<!-- Sliders -->
+<div class="space-y-10">
+<div>
+<div class="flex justify-between mb-2">
+<label class="font-body-bold text-body-bold text-text-primary">Daily Log Volume (Events / Day)</label>
+<span class="font-telemetry-mono text-telemetry-mono text-text-primary">500,000</span>
+</div>
+<input class="w-full h-2 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary-container" max="10000000" min="10000" type="range" value="500000"/>
+<div class="flex justify-between mt-2 text-xs text-text-muted font-telemetry-mono">
+<span>10K</span>
+<span>5M</span>
+<span>10M</span>
+</div>
+</div>
+<div>
+<div class="flex justify-between mb-2">
+<label class="font-body-bold text-body-bold text-text-primary">Number of Perimeter Devices Monitored</label>
+<span class="font-telemetry-mono text-telemetry-mono text-text-primary">25</span>
+</div>
+<input class="w-full h-2 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary-container" max="500" min="1" type="range" value="25"/>
+<div class="flex justify-between mt-2 text-xs text-text-muted font-telemetry-mono">
+<span>1</span>
+<span>250</span>
+<span>500</span>
+</div>
+</div>
+</div>
+<!-- Results -->
+<div class="bg-surface-container-low border border-border-muted rounded-xl p-8 flex flex-col items-center justify-center text-center space-y-8">
+<div>
+<div class="font-badge-caps text-badge-caps text-text-muted mb-2 tracking-widest uppercase">Analyst Hours Saved / Month</div>
+<div class="font-kpi-stat text-kpi-stat text-text-primary">743.8 hrs</div>
+</div>
+<div>
+<div class="font-badge-caps text-badge-caps text-text-muted mb-2 tracking-widest uppercase">Estimated MTTR Reduction</div>
+<div class="font-kpi-stat text-kpi-stat text-text-primary">55.0%</div>
+</div>
+<div>
+<div class="font-badge-caps text-badge-caps text-text-muted mb-2 tracking-widest uppercase">Estimated Monthly Cost Savings</div>
+<div class="font-kpi-stat text-kpi-stat text-text-primary">$48,344 / mo</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Assumptions -->
+<div class="glass-panel rounded-xl p-6 max-w-5xl mx-auto text-center border-t-2 border-t-outline-variant">
+<h5 class="font-title-card text-title-card text-text-primary mb-4 font-telemetry-mono">Stated Assumptions &amp; Formula:</h5>
+<ul class="font-telemetry-mono text-telemetry-mono text-text-dim text-sm space-y-2 list-disc list-inside">
+<li>Assumes 0.1% baseline raw anomaly rate requiring triage.</li>
+<li>Assumes 3.5 minutes manual triage per raw log without correlation vs 0.5 minutes with automated incident grouping.</li>
+<li>Assumes 85% alert noise deduplication via IP cluster correlation.</li>
+<li>SOC Analyst baseline cost: $65/hr fully burdened rate.</li>
+<li>Formula: Hours Saved = (Volume × 0.001 × 0.85 × 3.5 × 30) / 60 | Savings = Hours Saved × $65</li>
+</ul>
+<div class="mt-4 pt-4 border-t border-border-muted font-badge-caps text-badge-caps text-text-muted tracking-widest uppercase">Perimeter Targets</div>
+</div>
+</section>
+<!-- Telemetry Output & Console Intelligence -->
+<section class="max-w-container-max mx-auto px-md py-xl md:py-24 border-t border-border-muted">
+<div class="text-center mb-12">
+<div class="font-badge-caps text-badge-caps text-text-muted mb-2 tracking-widest uppercase">SOC Console Preview</div>
+<h2 class="font-headline-lg text-headline-lg text-text-primary mb-4 text-glow">Telemetry Output &amp; Console Intelligence</h2>
+<p class="font-body-base text-body-base text-on-surface-variant max-w-2xl mx-auto">Real-time stats fetched directly from API endpoints when authenticated, with honest standby states when unauthenticated.</p>
+</div>
+<div class="glass-panel rounded-xl p-8 max-w-6xl mx-auto">
+<div class="text-center mb-8">
+<h4 class="font-title-card text-title-card text-text-primary mb-2 uppercase">LOG AI SOC CONSOLE — API CONNECTION DEMO</h4>
+<div class="font-telemetry-mono text-telemetry-mono text-text-muted">[STANDBY] UNAUTHENTICATED SESSION</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+<!-- Stats -->
+<div class="bg-surface-container-low border border-border-muted rounded-lg p-6 text-center">
+<div class="font-badge-caps text-badge-caps text-text-muted mb-4 uppercase">Total Events Analyzed</div>
+<div class="font-kpi-stat text-kpi-stat text-text-primary mb-2">0</div>
+<div class="font-body-base text-body-base text-text-dim text-xs">Ingested Buffer Stream</div>
+</div>
+<div class="bg-surface-container-low border border-border-muted rounded-lg p-6 text-center">
+<div class="font-badge-caps text-badge-caps text-text-muted mb-4 uppercase">Threat Anomaly Index</div>
+<div class="font-kpi-stat text-kpi-stat text-text-primary mb-2">0.0</div>
+<div class="font-body-base text-body-base text-text-dim text-xs">Normalized Pipeline Avg</div>
+</div>
+<div class="bg-surface-container-low border border-border-muted rounded-lg p-6 text-center">
+<div class="font-badge-caps text-badge-caps text-text-muted mb-4 uppercase">Active Incidents</div>
+<div class="font-kpi-stat text-kpi-stat text-text-primary mb-2">0</div>
+<div class="font-body-base text-body-base text-text-dim text-xs">IP Cluster Groups</div>
+</div>
+<div class="bg-surface-container-low border border-border-muted rounded-lg p-6 text-center">
+<div class="font-badge-caps text-badge-caps text-text-muted mb-4 uppercase">Pipeline Latency</div>
+<div class="font-kpi-stat text-kpi-stat text-text-primary mb-2">11.4 ms</div>
+<div class="font-body-base text-body-base text-text-dim text-xs">Ingest to Score (MTTD proxy)</div>
+</div>
+</div>
+<div class="bg-surface-container border border-border-muted rounded-lg p-4 mb-6 flex items-start gap-4">
+<span class="material-symbols-outlined text-text-muted" data-icon="show_chart">show_chart</span>
+<p class="font-body-base text-body-base text-text-dim text-sm">The KPI counters above reflect your current session status (0 active events in unauthenticated standby mode). Below is a representative preview of telemetry log output formatting when stream ingestion is active.</p>
+</div>
+<!-- Terminal Output -->
+<div class="bg-[#1e1e1e] border border-border-muted rounded-lg overflow-hidden diag-stripes">
+<div class="flex justify-between items-center bg-[#252526] px-4 py-2 border-b border-border-muted">
+<div class="flex items-center gap-2">
+<span class="font-badge-caps text-badge-caps text-text-muted uppercase tracking-widest">Sample Telemetry Stream (Illustrative Demo)</span>
+<span class="bg-surface-container-highest text-text-dim px-2 py-0.5 rounded text-[10px] font-bold">FOR ILLUSTRATION ONLY</span>
+</div>
+<span class="font-badge-caps text-badge-caps text-text-muted uppercase">OCSF Unified Protocol</span>
+</div>
+<div class="p-4 font-telemetry-mono text-telemetry-mono text-sm space-y-4 text-text-dim overflow-x-auto">
+<div class="flex items-center gap-3 whitespace-nowrap border-b border-white/5 pb-2">
+<span class="text-text-muted">2026-08-28 07:14:02</span>
+<span class="font-bold text-text-primary">192.168.1.100</span>
+<span class="border border-border-muted bg-surface-container-low px-1.5 rounded text-xs">Cisco ASA</span>
+<span class="text-text-primary font-bold">HIGH (88.5)</span>
+<span>Deny tcp src outside:192.168.1.100/54321 dst inside:10.0.0.50/80</span>
+</div>
+<div class="flex items-center gap-3 whitespace-nowrap border-b border-white/5 pb-2">
+<span class="text-text-muted">2026-08-28 07:14:15</span>
+<span class="font-bold text-text-primary">192.168.1.105</span>
+<span class="border border-border-muted bg-surface-container-low px-1.5 rounded text-xs">Fortinet</span>
+<span class="text-text-primary font-bold">LOW (12.0)</span>
+<span>SSL VPN authentication successful user="admin_jdoe"</span>
+</div>
+<div class="flex items-center gap-3 whitespace-nowrap border-b border-white/5 pb-2">
+<span class="text-text-muted">2026-08-28 07:14:31</span>
+<span class="font-bold text-text-primary">192.168.1.200</span>
+<span class="border border-border-muted bg-surface-container-low px-1.5 rounded text-xs">Suricata</span>
+<span class="text-text-primary font-bold">HIGH (94.2)</span>
+<span>ET MALWARE Compromised Host Activity Signature Match</span>
+</div>
+<div class="flex items-center gap-3 whitespace-nowrap">
+<span class="text-text-muted">2026-08-28 07:14:48</span>
+<span class="font-bold text-text-primary">192.168.1.100</span>
+<span class="border border-border-muted bg-surface-container-low px-1.5 rounded text-xs">pfSense</span>
+<span class="text-text-primary font-bold">MEDIUM (62.1)</span>
+<span>Block pfSense default deny rule IPv4 WAN interface</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 6-Stage Zero-Loss Telemetry Processing -->
+<section class="max-w-container-max mx-auto px-md py-xl md:py-24 border-t border-border-muted">
+<div class="text-center mb-12">
+<div class="font-badge-caps text-badge-caps text-text-muted mb-2 tracking-widest uppercase">Pipeline Architecture</div>
+<h2 class="font-headline-lg text-headline-lg text-text-primary mb-4 text-glow">6-Stage Zero-Loss Telemetry Processing</h2>
+<p class="font-body-base text-body-base text-on-surface-variant max-w-2xl mx-auto">From raw log wire-capture to explainable AI incident playbooks in milliseconds.</p>
+</div>
+<div class="max-w-6xl mx-auto">
+<!-- Navigation -->
+<div class="flex flex-wrap lg:flex-nowrap gap-2 mb-8 justify-center">
+<div class="bg-surface-container-high border border-border-muted rounded text-center py-3 px-6 flex-1 min-w-[140px] cursor-pointer hover:border-outline-variant text-text-primary font-body-bold shadow-[0_0_10px_rgba(167,139,250,0.1)] border-b-2 border-b-primary-container">
+<span class="text-xs text-text-dim mr-2 font-telemetry-mono">01</span> Ingestion
+            </div>
+<div class="bg-surface border border-border-muted rounded text-center py-3 px-6 flex-1 min-w-[140px] cursor-pointer hover:border-outline-variant text-text-dim font-body-bold">
+<span class="text-xs text-text-muted/50 mr-2 font-telemetry-mono">02</span> Parsing
+            </div>
+<div class="bg-surface border border-border-muted rounded text-center py-3 px-6 flex-1 min-w-[140px] cursor-pointer hover:border-outline-variant text-text-dim font-body-bold">
+<span class="text-xs text-text-muted/50 mr-2 font-telemetry-mono">03</span> Normalization
+            </div>
+<div class="bg-surface border border-border-muted rounded text-center py-3 px-6 flex-1 min-w-[140px] cursor-pointer hover:border-outline-variant text-text-dim font-body-bold">
+<span class="text-xs text-text-muted/50 mr-2 font-telemetry-mono">04</span> Detection
+            </div>
+<div class="bg-surface border border-border-muted rounded text-center py-3 px-6 flex-1 min-w-[140px] cursor-pointer hover:border-outline-variant text-text-dim font-body-bold">
+<span class="text-xs text-text-muted/50 mr-2 font-telemetry-mono">05</span> Correlation
+            </div>
+<div class="bg-surface border border-border-muted rounded text-center py-3 px-6 flex-1 min-w-[140px] cursor-pointer hover:border-outline-variant text-text-dim font-body-bold">
+<span class="text-xs text-text-muted/50 mr-2 font-telemetry-mono">06</span> XAI Insights
+            </div>
+</div>
+<!-- Content Box -->
+<div class="glass-panel rounded-xl p-8 border border-border-muted">
+<div class="flex justify-between items-center mb-6 border-b border-border-muted pb-4">
+<h3 class="font-headline-md text-headline-md text-text-primary">Stage 1: Raw Wire-Capture &amp; SHA-256 Leaf Hashing</h3>
+<span class="font-telemetry-mono text-telemetry-mono text-text-muted bg-surface-container px-3 py-1 rounded border border-border-muted text-xs">app/storage/raw_writer.py</span>
+</div>
+<p class="font-body-base text-body-base text-text-primary mb-8 text-center max-w-4xl mx-auto leading-relaxed">
+                Raw log payloads are captured byte-for-byte at the network edge and immediately hashed with SHA-256 before any parsing occurs, establishing an unbroken forensic chain of custody with zero information loss.
+            </p>
+<div class="text-center mb-2">
+<span class="font-badge-caps text-badge-caps text-text-muted uppercase tracking-widest">Real Codebase Execution Sample</span>
+</div>
+<div class="bg-surface-container-lowest border border-border-muted rounded-lg p-6 font-telemetry-mono text-telemetry-mono text-sm text-text-dim text-center overflow-x-auto">
+<div class="mb-2">Raw Payload: %ASA-4-106023: Deny tcp src outside:192.168.1.100/54321 dst inside:10.0.0.50/80 by access-group "outside_acl"</div>
+<div>SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a537bf</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-xl mt-auto bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant flex flex-col md:flex-row justify-between items-center px-lg max-w-container-max mx-auto relative z-20">
+<div class="font-headline-md text-headline-md font-bold text-on-surface mb-4 md:mb-0">
+            LOG AI
+        </div>
+<div class="flex flex-wrap justify-center gap-4 text-text-dim font-body-base text-body-base">
+<a class="hover:text-primary-container underline transition-all" href="#">Privacy Policy</a>
+<a class="hover:text-primary-container underline transition-all" href="#">Terms of Service</a>
+<a class="hover:text-primary-container underline transition-all" href="#">API Status</a>
+<a class="hover:text-primary-container underline transition-all" href="#">Contact Support</a>
+</div>
+<div class="mt-4 md:mt-0 text-text-dim font-body-base text-body-base">
+            © 2024 Log AI Security. All rights reserved.
+        </div>
+</footer>
+<style>
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+    </style>
+<script>
+        // Duplicate ticker content for smooth infinite scrolling
+        const ticker = document.getElementById('ticker-content');
+        if(ticker) {
+            ticker.innerHTML += ticker.innerHTML;
+        }
+    </script>
+</body></html>

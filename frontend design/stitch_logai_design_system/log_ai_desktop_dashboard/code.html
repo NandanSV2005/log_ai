@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Log AI - Desktop Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&amp;family=JetBrains+Mono:wght@500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-tint": "#d0bcff",
+                        "text-primary": "#f8fafc",
+                        "inverse-primary": "#6d3bd7",
+                        "surface-container-lowest": "#0a0e17",
+                        "surface-container-highest": "#31353f",
+                        "on-tertiary": "#003824",
+                        "text-muted": "#94a3b8",
+                        "on-primary-fixed-variant": "#5516be",
+                        "on-secondary": "#00354a",
+                        "on-primary-fixed": "#23005c",
+                        "surface-bright": "#353943",
+                        "on-error": "#690005",
+                        "severity-medium": "#f59e0b",
+                        "inverse-surface": "#dfe2ef",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "error": "#ffb4ab",
+                        "on-surface-variant": "#cbc3d7",
+                        "primary-fixed-dim": "#d0bcff",
+                        "on-background": "#dfe2ef",
+                        "on-tertiary-fixed": "#002113",
+                        "border-glow": "rgba(167, 139, 250, 0.4)",
+                        "primary-fixed": "#e9ddff",
+                        "secondary": "#7bd0ff",
+                        "on-secondary-fixed": "#001e2c",
+                        "surface-variant": "#31353f",
+                        "tertiary-container": "#00a572",
+                        "secondary-container": "#00a6e0",
+                        "on-surface": "#dfe2ef",
+                        "border-muted": "#1f293d",
+                        "accent-violet-light": "#a78bfa",
+                        "secondary-fixed": "#c4e7ff",
+                        "surface-container": "#1c1f29",
+                        "severity-high": "#ef4444",
+                        "on-tertiary-container": "#00311f",
+                        "surface-dim": "#0f131c",
+                        "primary": "#d0bcff",
+                        "surface-hover": "#1f293d",
+                        "on-primary-container": "#340080",
+                        "surface": "#111827",
+                        "error-container": "#93000a",
+                        "tertiary": "#4edea3",
+                        "background": "#0f131c",
+                        "surface-container-high": "#262a34",
+                        "on-primary": "#3c0091",
+                        "on-secondary-container": "#00374d",
+                        "outline-variant": "#494454",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "secondary-fixed-dim": "#7bd0ff",
+                        "tertiary-fixed": "#6ffbbe",
+                        "primary-container": "#a078ff",
+                        "surface-container-low": "#181b25",
+                        "inverse-on-surface": "#2c303a",
+                        "outline": "#958ea0",
+                        "on-secondary-fixed-variant": "#004c69",
+                        "severity-low": "#10b981",
+                        "text-dim": "#75859c",
+                        "on-error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-max": "1600px",
+                        "xl": "32px",
+                        "gutter": "20px",
+                        "md": "16px",
+                        "unit": "4px",
+                        "sm": "8px",
+                        "lg": "24px",
+                        "xs": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Inter"],
+                        "telemetry-mono": ["JetBrains Mono"],
+                        "kpi-stat": ["JetBrains Mono"],
+                        "title-card": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "display-hero": ["Inter"],
+                        "body-base": ["Inter"],
+                        "badge-caps": ["JetBrains Mono"],
+                        "body-bold": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "800" }],
+                        "telemetry-mono": ["12px", { "lineHeight": "18px", "letterSpacing": "0", "fontWeight": "500" }],
+                        "kpi-stat": ["36px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "800" }],
+                        "title-card": ["14px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "700" }],
+                        "display-hero": ["52px", { "lineHeight": "60px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "body-base": ["14px", { "lineHeight": "21px", "letterSpacing": "0", "fontWeight": "400" }],
+                        "badge-caps": ["10px", { "lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "body-bold": ["14px", { "lineHeight": "21px", "letterSpacing": "0", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #0f131c; color: #f8fafc; }
+        .glass-panel {
+            background: linear-gradient(145deg, #111827, #0f172a);
+            border: 1px solid #1f293d;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .cyber-glow-border:hover, .cyber-glow-border:focus-within {
+            border-color: #a78bfa;
+            box-shadow: 0 0 12px rgba(167, 139, 250, 0.4);
+        }
+        .ai-glow-text { text-shadow: 0 0 8px rgba(208, 188, 255, 0.6); }
+    </style>
+</head>
+<body class="bg-background text-text-primary antialiased flex flex-col min-h-screen">
+<!-- TopNavBar (Shared Component) -->
+<nav class="bg-surface-container-lowest border-b border-border-muted fixed top-0 w-full z-50 flex justify-between items-center px-lg h-16">
+<div class="flex items-center gap-md">
+<span class="font-headline-md text-headline-md font-extrabold text-primary tracking-tight">Log AI</span>
+<!-- Search Bar: on_left -->
+<div class="hidden md:flex items-center bg-surface-container rounded-DEFAULT border border-border-muted px-sm py-xs cyber-glow-border ml-lg w-64">
+<span class="material-symbols-outlined text-text-muted text-lg mr-sm" style="font-variation-settings: 'FILL' 0;">search</span>
+<input class="bg-transparent border-none text-body-base text-text-primary focus:ring-0 w-full placeholder-text-muted font-telemetry-mono" placeholder="Search logs, IPs..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="text-text-muted hover:text-primary transition-colors duration-200 cursor-pointer active:scale-95 flex items-center justify-center p-sm rounded-full hover:bg-surface-hover">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</button>
+<button class="text-text-muted hover:text-primary transition-colors duration-200 cursor-pointer active:scale-95 flex items-center justify-center p-sm rounded-full hover:bg-surface-hover">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-surface-hover border border-border-muted overflow-hidden flex-shrink-0 cursor-pointer active:scale-95 ml-sm">
+<img alt="Security Analyst Profile" class="object-cover w-full h-full" data-alt="A futuristic, high-contrast, cyberpunk-style avatar portrait of a Security Analyst. The image features deep void blacks and pristine whites, illuminated by striking electric violet lighting and subtle glowing neon accents, evoking a highly secure, advanced AI command center." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBy6CCqBE0FCTBPWMgLeMTDcUjuTQVnElvgv6UpGee5acW3MnN9vUQl20yENCmagJGQl882KiIBti-l3_91nOUplDaAVFoRkNyizTv4h9GhNjo94y4lbwj2d0UIpRhEQMJFfbFJGYlyaWWOx2CvXauMER2pxhtvF43qWSv5bMtLVfuUYCzihWSxnA3aMLwixG7IlXt5dgnerocQw9fCzf3FgbV1Ng-8xcXbkmGoxajK229aj5SnVlwZ"/>
+</div>
+</div>
+</nav>
+<div class="flex flex-1 pt-16">
+<!-- SideNavBar (Shared Component) -->
+<aside class="bg-surface-container border-r border-border-muted fixed left-0 top-16 h-[calc(100vh-64px)] w-64 flex flex-col py-md hidden md:flex z-40">
+<div class="px-md mb-lg flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full border border-border-muted overflow-hidden">
+<img alt="SOC Node Alpha" class="w-full h-full object-cover" data-alt="A minimalist, glowing abstract icon representing an AI node. Set against a deep cyber void background (#090d16), the node features sharp, high-assurance technical details and luminous violet attribution glows, conveying authoritative AI intelligence and calm control." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCO2nFqI-OIWor7sLAC7XWcNAWaztVz-n6pCvIZbLen6OctUjuujbhl6bfqGWq9jcxQBSB7QBJejPbr5553kK-P-HVe1BCyrm09ZQKFWJsYkUmp-BcN3R3x-ToQTPxsANtcbEU-KMngQBoeshclROBcPeKX_na-6jlBaODBJEA7H05a8iIRAbC-5OjTF_2XByCV0_tNHnu3S7inf9XOAUJpjdymE_BMSVJCngjaszOxGmuusY_lGTXf"/>
+</div>
+<div>
+<div class="font-body-bold text-body-bold text-text-primary">System Status</div>
+<div class="font-body-base text-body-base text-severity-low flex items-center gap-xs">
+<span class="w-2 h-2 rounded-full bg-severity-low animate-pulse"></span>
+                        Vigilant Mode
+                    </div>
+</div>
+</div>
+<nav class="flex-1 px-sm space-y-1">
+<!-- Dashboard (Active) -->
+<a class="bg-primary-container text-on-primary-container rounded-lg font-body-bold flex items-center gap-md px-md py-sm cursor-pointer active:scale-95 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+                    Dashboard
+                </a>
+<a class="text-text-muted font-body-base hover:bg-surface-hover hover:text-text-primary transition-all duration-200 flex items-center gap-md px-md py-sm rounded-lg cursor-pointer active:translate-x-1" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">security</span>
+                    Threat Intel
+                </a>
+<a class="text-text-muted font-body-base hover:bg-surface-hover hover:text-text-primary transition-all duration-200 flex items-center gap-md px-md py-sm rounded-lg cursor-pointer active:translate-x-1" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">database</span>
+                    Log Explorer
+                </a>
+<a class="text-text-muted font-body-base hover:bg-surface-hover hover:text-text-primary transition-all duration-200 flex items-center gap-md px-md py-sm rounded-lg cursor-pointer active:translate-x-1" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">search_insights</span>
+                    Forensics
+                </a>
+<a class="text-text-muted font-body-base hover:bg-surface-hover hover:text-text-primary transition-all duration-200 flex items-center gap-md px-md py-sm rounded-lg cursor-pointer active:translate-x-1" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">terminal</span>
+                    Command Center
+                </a>
+</nav>
+<div class="px-md mt-auto space-y-md">
+<button class="w-full bg-primary text-on-primary font-body-bold py-sm rounded-DEFAULT border border-accent-violet-light hover:brightness-110 hover:shadow-[0_0_8px_rgba(167,139,250,0.4)] transition-all duration-200">
+                    Initiate Scan
+                </button>
+<div class="pt-sm border-t border-border-muted space-y-1">
+<a class="text-text-muted font-body-base hover:text-text-primary transition-all duration-200 flex items-center gap-sm py-xs" href="#">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 0;">help</span>
+                        Documentation
+                    </a>
+<a class="text-text-muted font-body-base hover:text-text-primary transition-all duration-200 flex items-center gap-sm py-xs" href="#">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 0;">contact_support</span>
+                        Support
+                    </a>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 p-lg md:p-xl max-w-container-max mx-auto w-full">
+<header class="mb-lg">
+<h1 class="font-headline-lg text-headline-lg text-text-primary">Dashboard</h1>
+<p class="font-body-base text-body-base text-text-muted mt-xs">SOC Operations &amp; Telemetry Overview</p>
+</header>
+<!-- Hero Metrics Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md mb-xl">
+<!-- KPI 1 -->
+<div class="glass-panel rounded-lg p-md relative overflow-hidden pl-5 group cyber-glow-border transition-all duration-300">
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-severity-high"></div>
+<h3 class="font-title-card text-title-card text-text-muted mb-xs flex items-center gap-xs uppercase">
+<span class="material-symbols-outlined text-sm text-severity-high">warning</span>
+                        Active Threats
+                    </h3>
+<div class="font-kpi-stat text-kpi-stat text-severity-high">12</div>
+<div class="mt-sm flex items-center text-xs font-telemetry-mono text-text-muted">
+<span class="text-severity-high mr-1 flex items-center">
+<span class="material-symbols-outlined text-xs">trending_up</span> +3
+                        </span>
+                        vs last hour
+                    </div>
+</div>
+<!-- KPI 2 -->
+<div class="glass-panel rounded-lg p-md relative overflow-hidden pl-5 group cyber-glow-border transition-all duration-300">
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-secondary-container"></div>
+<h3 class="font-title-card text-title-card text-text-muted mb-xs flex items-center gap-xs uppercase">
+<span class="material-symbols-outlined text-sm text-secondary-container">data_usage</span>
+                        Logs Analyzed
+                    </h3>
+<div class="font-kpi-stat text-kpi-stat text-text-primary">1.2M</div>
+<div class="mt-sm flex items-center text-xs font-telemetry-mono text-text-muted">
+<span class="text-severity-low mr-1 flex items-center">
+<span class="material-symbols-outlined text-xs">trending_up</span> 14%
+                        </span>
+                        24h throughput
+                    </div>
+</div>
+<!-- KPI 3 -->
+<div class="glass-panel rounded-lg p-md relative overflow-hidden pl-5 group cyber-glow-border transition-all duration-300">
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-severity-low"></div>
+<h3 class="font-title-card text-title-card text-text-muted mb-xs flex items-center gap-xs uppercase">
+<span class="material-symbols-outlined text-sm text-severity-low">health_and_safety</span>
+                        System Health
+                    </h3>
+<div class="font-kpi-stat text-kpi-stat text-severity-low">98%</div>
+<div class="mt-sm flex items-center text-xs font-telemetry-mono text-text-muted">
+<span class="mr-1">All nodes operational</span>
+</div>
+</div>
+</div>
+<!-- Bento Grid Layout for Main Content -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-lg">
+<!-- Primary Panel: AI Forensics (Spans 8 cols on lg) -->
+<section class="lg:col-span-7 xl:col-span-8 glass-panel rounded-xl overflow-hidden flex flex-col cyber-glow-border transition-colors duration-300">
+<div class="p-md border-b border-border-muted bg-surface-container-low flex justify-between items-center">
+<h2 class="font-headline-md text-headline-md text-text-primary flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary ai-glow-text" style="font-variation-settings: 'FILL' 1;">psychology</span>
+                            AI Forensics Insight
+                        </h2>
+<span class="bg-error-container text-on-error-container font-badge-caps text-badge-caps px-2 py-1 rounded-sm uppercase tracking-wider border border-severity-high">Critical Alert</span>
+</div>
+<div class="p-md flex-1 flex flex-col">
+<div class="bg-[rgba(239,68,68,0.08)] border-l-4 border-severity-high p-md rounded-r-DEFAULT mb-md">
+<div class="flex items-start gap-md">
+<span class="material-symbols-outlined text-severity-high mt-xs">flip_camera_ios</span>
+<div>
+<h4 class="font-title-card text-title-card text-severity-high mb-1">Anomaly Detection: Brute Force Attack</h4>
+<p class="font-body-base text-body-base text-text-primary mb-sm">AI Copilot identified a rapid sequence of unauthorized access attempts originating from a distributed botnet targeting <code class="font-telemetry-mono bg-surface p-xs rounded text-primary">Server_A</code>.</p>
+<div class="grid grid-cols-2 gap-sm mb-md font-telemetry-mono text-telemetry-mono text-text-muted">
+<div>Target: <span class="text-text-primary">Server_A (10.4.22.1)</span></div>
+<div>Confidence: <span class="text-severity-high">99.8%</span></div>
+<div>Vector: <span class="text-text-primary">SSH Port 22</span></div>
+<div>Duration: <span class="text-text-primary">3m 12s (Ongoing)</span></div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-auto flex gap-md justify-end">
+<button class="px-md py-sm rounded-DEFAULT border border-border-muted text-text-muted hover:text-text-primary font-body-bold transition-colors">
+                                Dismiss
+                            </button>
+<button class="px-md py-sm rounded-DEFAULT border border-border-muted text-primary hover:bg-surface-hover font-body-bold transition-colors flex items-center gap-xs">
+<span class="material-symbols-outlined text-sm">troubleshoot</span> View Trace
+                            </button>
+<button class="px-md py-sm rounded-DEFAULT bg-[rgba(239,68,68,0.12)] border border-severity-high text-severity-high font-body-bold hover:bg-severity-high hover:text-white transition-all flex items-center gap-xs">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">block</span> Isolate Node
+                            </button>
+</div>
+</div>
+</section>
+<!-- Secondary Panel: Live Telemetry (Spans 4 cols on lg) -->
+<section class="lg:col-span-5 xl:col-span-4 glass-panel rounded-xl overflow-hidden flex flex-col h-[500px]">
+<div class="p-md border-b border-border-muted bg-surface-container-lowest flex justify-between items-center sticky top-0 z-10">
+<h2 class="font-title-card text-title-card text-text-primary flex items-center gap-sm uppercase">
+<span class="material-symbols-outlined text-secondary-container">dynamic_feed</span>
+                            Live Telemetry
+                        </h2>
+<div class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-severity-low animate-pulse"></span>
+<span class="font-telemetry-mono text-telemetry-mono text-text-muted">Live</span>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto bg-surface-container-lowest font-telemetry-mono text-telemetry-mono">
+<!-- Log Entry 1 -->
+<div class="border-b border-border-muted p-sm hover:bg-surface-hover transition-colors flex gap-sm items-start border-l-4 border-l-severity-high bg-[rgba(239,68,68,0.04)]">
+<div class="text-text-dim flex-shrink-0">14:02:11</div>
+<div class="flex-1 break-all">
+<span class="text-severity-high font-bold">[AUTH_FAILURE_BURST]</span> src=192.168.1.105 target=Server_A count=50 msg="Multiple failed logins detected"
+                            </div>
+</div>
+<!-- Log Entry 2 -->
+<div class="border-b border-border-muted p-sm hover:bg-surface-hover transition-colors flex gap-sm items-start border-l-4 border-l-severity-medium">
+<div class="text-text-dim flex-shrink-0">14:02:08</div>
+<div class="flex-1 break-all">
+<span class="text-severity-medium font-bold">[HIGH_LATENCY_WARN]</span> node=db_cluster_2 ms=450 threshold=200 msg="Query execution time exceeded"
+                            </div>
+</div>
+<!-- Log Entry 3 -->
+<div class="border-b border-border-muted p-sm hover:bg-surface-hover transition-colors flex gap-sm items-start border-l-4 border-l-border-muted">
+<div class="text-text-dim flex-shrink-0">14:01:55</div>
+<div class="flex-1 break-all text-text-muted">
+<span class="text-primary">[NODE_SYNC_COMPLETE]</span> node=worker_7 status=ok bytes=1.2G time=4.2s
+                            </div>
+</div>
+<!-- Log Entry 4 -->
+<div class="border-b border-border-muted p-sm hover:bg-surface-hover transition-colors flex gap-sm items-start border-l-4 border-l-border-muted">
+<div class="text-text-dim flex-shrink-0">14:01:42</div>
+<div class="flex-1 break-all text-text-muted">
+<span class="text-primary">[NET_TRAFFIC_NORM]</span> interface=eth0 rx=45Mb/s tx=12Mb/s
+                            </div>
+</div>
+<!-- Log Entry 5 -->
+<div class="border-b border-border-muted p-sm hover:bg-surface-hover transition-colors flex gap-sm items-start border-l-4 border-l-severity-high bg-[rgba(239,68,68,0.04)]">
+<div class="text-text-dim flex-shrink-0">14:01:22</div>
+<div class="flex-1 break-all">
+<span class="text-severity-high font-bold">[AUTH_FAILURE]</span> src=192.168.1.105 target=Server_A user=root
+                            </div>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+</body></html>
