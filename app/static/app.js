@@ -1251,11 +1251,24 @@ function showToast(message, type = 'info') {
 function setupAirGappedToggle() {
   const cb = document.getElementById('airgap-toggle-checkbox');
   const label = document.getElementById('airgap-toggle-label');
+  const banner = document.getElementById('airgap-banner');
   if (!cb) return;
+
+  if (isAirGappedMode) {
+    cb.checked = true;
+    if (banner) banner.style.display = 'inline-flex';
+    if (label) {
+      label.style.borderColor = 'var(--accent-hover)';
+      label.style.color = '#ffffff';
+    }
+  }
 
   const updateState = () => {
     isAirGappedMode = cb.checked;
     cb.setAttribute('aria-checked', isAirGappedMode ? 'true' : 'false');
+    if (banner) {
+      banner.style.display = isAirGappedMode ? 'inline-flex' : 'none';
+    }
     showToast(`Air-Gapped Mode ${isAirGappedMode ? 'ENABLED (Local Engine Forced)' : 'DISABLED (Cloud AI Active)'}`, 'success');
     if (label) {
       if (isAirGappedMode) {
