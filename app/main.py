@@ -67,7 +67,8 @@ app.include_router(ingest.router)
 app.include_router(dashboard.router)
 app.include_router(copilot.router)
 
-static_dir = Path(__file__).parent / "static"
+frontend_dist = Path(__file__).parent.parent / "frontend" / "dist"
+legacy_static = Path(__file__).parent / "static"
 
 CACHE_PREVENTION_HEADERS = {
     "Cache-Control": "no-cache, no-store, must-revalidate",
@@ -75,25 +76,44 @@ CACHE_PREVENTION_HEADERS = {
     "Expires": "0",
 }
 
+def serve_spa_page():
+    if frontend_dist.exists() and (frontend_dist / "index.html").exists():
+        return FileResponse(frontend_dist / "index.html", headers=CACHE_PREVENTION_HEADERS)
+    return FileResponse(legacy_static / "index.html", headers=CACHE_PREVENTION_HEADERS)
+
 @app.get("/", response_class=FileResponse, tags=["SaaS Landing Page"])
 async def get_landing_page():
-    """Serves the SaaS Landing Page."""
-    return FileResponse(static_dir / "landing.html", headers=CACHE_PREVENTION_HEADERS)
+    if frontend_dist.exists() and (frontend_dist / "index.html").exists():
+        return FileResponse(frontend_dist / "index.html", headers=CACHE_PREVENTION_HEADERS)
+    return FileResponse(legacy_static / "landing.html", headers=CACHE_PREVENTION_HEADERS)
 
 @app.get("/login", response_class=FileResponse, tags=["Authentication UI"])
 async def get_login_page():
-    """Serves the Login UI."""
-    return FileResponse(static_dir / "login.html", headers=CACHE_PREVENTION_HEADERS)
+    return serve_spa_page()
 
 @app.get("/register", response_class=FileResponse, tags=["Authentication UI"])
 async def get_register_page():
-    """Serves the Registration UI."""
-    return FileResponse(static_dir / "register.html", headers=CACHE_PREVENTION_HEADERS)
+    return serve_spa_page()
 
 @app.get("/dashboard", response_class=FileResponse, tags=["Dashboard UI"])
 async def get_dashboard_ui():
-    """Serves the main SOC Dashboard frontend index.html."""
-    return FileResponse(static_dir / "index.html", headers=CACHE_PREVENTION_HEADERS)
+    return serve_spa_page()
+
+@app.get("/log-explorer", response_class=FileResponse, tags=["Log Explorer UI"])
+async def get_log_explorer_ui():
+    return serve_spa_page()
+
+@app.get("/forensics", response_class=FileResponse, tags=["Forensics UI"])
+async def get_forensics_ui():
+    return serve_spa_page()
+
+@app.get("/threat-intel", response_class=FileResponse, tags=["Threat Intel UI"])
+async def get_threat_intel_ui():
+    return serve_spa_page()
+
+@app.get("/settings", response_class=FileResponse, tags=["Settings UI"])
+async def get_settings_ui():
+    return serve_spa_page()
 
 @app.get("/health", tags=["Health"])
 async def health_check():
@@ -110,7 +130,9 @@ async def get_metrics():
     }
 
 # Mount Static Assets at root (must be after API routes to avoid path collisions)
-if static_dir.exists():
-    app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
+if frontend_dist.exists():
+    app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="static")
+elif legacy_static.exists():
+    app.mount("/", StaticFiles(directory=legacy_static, html=True), name="static")
 
 
