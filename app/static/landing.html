@@ -1016,6 +1016,108 @@
     .readiness-badge img {
       filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);
     }
+
+    /* Purposeful Motion & Reveal On Scroll Design System */
+    .reveal-on-scroll {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform;
+    }
+
+    .reveal-on-scroll.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Staggered Delay Utilities */
+    .stagger-child-1 { transition-delay: 0.07s; }
+    .stagger-child-2 { transition-delay: 0.14s; }
+    .stagger-child-3 { transition-delay: 0.21s; }
+    .stagger-child-4 { transition-delay: 0.28s; }
+    .stagger-child-5 { transition-delay: 0.35s; }
+    .stagger-child-6 { transition-delay: 0.42s; }
+
+    /* Hero Staggered Entrance (Above the Fold) */
+    @keyframes heroFadeSlideUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero-animate-badge {
+      animation: heroFadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0ms both;
+    }
+    .hero-animate-title {
+      animation: heroFadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 120ms both;
+    }
+    .hero-animate-subtitle {
+      animation: heroFadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 240ms both;
+    }
+    .hero-animate-cta {
+      animation: heroFadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 360ms both;
+    }
+
+    /* Restrained Hover Micro-Interactions */
+    .merkle-step-card,
+    .usecase-card,
+    .readiness-badge,
+    .feature-card,
+    .preview-kpi-card {
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .merkle-step-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent-hover);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    .usecase-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent-hover);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .readiness-badge:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-hover);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .preview-kpi-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-hover);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Accessibility: Respect prefers-reduced-motion OS preference */
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+      .reveal-on-scroll {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+      }
+      .hero-animate-badge,
+      .hero-animate-title,
+      .hero-animate-subtitle,
+      .hero-animate-cta {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1040,18 +1142,18 @@
     </header>
 
     <main class="hero-wrapper" id="main-content">
-      <div class="hero-badge">
+      <div class="hero-badge hero-animate-badge">
         <img src="/vendor/icons/git-branch.svg" alt="" class="badge-icon" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
         CRYPTOGRAPHIC MERKLE FORENSIC INTEGRITY
       </div>
 
-      <h1 class="hero-title">Zero-Loss Forensics meets <span>Explainable AI</span> Security</h1>
+      <h1 class="hero-title hero-animate-title">Zero-Loss Forensics meets <span>Explainable AI</span> Security</h1>
 
-      <p class="hero-subtitle">
+      <p class="hero-subtitle hero-animate-subtitle">
         LOG AI ingests, normalizes, and audits security events in real-time across enterprise log vendors with cryptographic SHA-256 Merkle tree auditability and client-side browser verification.
       </p>
 
-      <div class="cta-group">
+      <div class="cta-group hero-animate-cta">
         <a href="/register" class="btn-primary" aria-label="Get Started Free">
           <img src="/vendor/icons/shield.svg" alt="" width="16" height="16" style="filter: invert(100%);">
           Get Started Free
@@ -1063,7 +1165,7 @@
       </div>
 
       <!-- Interactive SHA-256 Merkle Tree Diagram Card -->
-      <section class="merkle-demo-card" aria-label="Interactive Merkle Tree Forensic Diagram">
+      <section class="merkle-demo-card reveal-on-scroll" aria-label="Interactive Merkle Tree Forensic Diagram">
         <div class="merkle-card-header">
           <div class="merkle-header-left">
             <img src="/vendor/icons/lock.svg" alt="" width="18" height="18" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
@@ -1155,7 +1257,7 @@
         <!-- Part 0B: Scannable 4-Step Merkle Explanation Layout -->
         <div class="merkle-explanation-box">
           <div class="merkle-steps-grid">
-            <div class="merkle-step-card">
+            <div class="merkle-step-card reveal-on-scroll stagger-child-1">
               <div class="step-card-header">
                 <img src="/vendor/icons/database.svg" alt="" width="16" height="16">
                 <span class="step-card-title">1. Hash at Ingestion</span>
@@ -1163,7 +1265,7 @@
               <p class="step-card-desc">Raw log events are SHA-256 hashed immediately before parsing (zero data loss by design).</p>
             </div>
 
-            <div class="merkle-step-card">
+            <div class="merkle-step-card reveal-on-scroll stagger-child-2">
               <div class="step-card-header">
                 <img src="/vendor/icons/git-branch.svg" alt="" width="16" height="16">
                 <span class="step-card-title">2. Chain into Root</span>
@@ -1171,7 +1273,7 @@
               <p class="step-card-desc">Leaf hashes combine recursively into an immutable, verifiable single Merkle Root.</p>
             </div>
 
-            <div class="merkle-step-card">
+            <div class="merkle-step-card reveal-on-scroll stagger-child-3">
               <div class="step-card-header">
                 <img src="/vendor/icons/alert-triangle.svg" alt="" width="16" height="16">
                 <span class="step-card-title">3. Tamper Avalanche</span>
@@ -1179,7 +1281,7 @@
               <p class="step-card-desc">Altering even a single stored character breaks the root hash with an instant avalanche effect.</p>
             </div>
 
-            <div class="merkle-step-card">
+            <div class="merkle-step-card reveal-on-scroll stagger-child-4">
               <div class="step-card-header">
                 <img src="/vendor/icons/lock.svg" alt="" width="16" height="16">
                 <span class="step-card-title">4. Verify Client-Side</span>
@@ -1195,7 +1297,7 @@
       </section>
 
       <!-- SECTION 1: ANIMATED PIPELINE STEPPER -->
-      <section id="pipeline-architecture" class="landing-section" aria-label="Ingestion and Analysis Pipeline Stepper">
+      <section id="pipeline-architecture" class="landing-section reveal-on-scroll" aria-label="Ingestion and Analysis Pipeline Stepper">
         <div class="section-header">
           <span class="section-tag font-mono">PIPELINE ARCHITECTURE</span>
           <h2 class="section-title">6-Stage Zero-Loss Telemetry Processing</h2>
@@ -1244,7 +1346,7 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
       </section>
 
       <!-- SECTION 2: INTERACTIVE PROTOTYPE PREVIEW -->
-      <section id="console-preview" class="landing-section" aria-label="Interactive Prototype Preview">
+      <section id="console-preview" class="landing-section reveal-on-scroll" aria-label="Interactive Prototype Preview">
         <div class="section-header">
           <span class="section-tag font-mono">SOC CONSOLE PREVIEW</span>
           <h2 class="section-title">Telemetry Output &amp; Console Intelligence</h2>
@@ -1336,7 +1438,7 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
       </section>
 
       <!-- SECTION 3: ROI / EFFICIENCY ESTIMATOR -->
-      <section id="financial-impact" class="landing-section" aria-label="ROI and Efficiency Estimator">
+      <section id="financial-impact" class="landing-section reveal-on-scroll" aria-label="ROI and Efficiency Estimator">
         <div class="section-header">
           <span class="section-tag font-mono">FINANCIAL IMPACT ESTIMATOR</span>
           <h2 class="section-title">Calculate SOC Efficiency &amp; MTTR Reduction</h2>
@@ -1391,7 +1493,7 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
       </section>
 
       <!-- SECTION 4: USE CASES -->
-      <section id="perimeter-targets" class="landing-section" aria-label="Perimeter Security Use Cases">
+      <section id="perimeter-targets" class="landing-section reveal-on-scroll" aria-label="Perimeter Security Use Cases">
         <div class="section-header">
           <span class="section-tag font-mono">PERIMETER TARGETS</span>
           <h2 class="section-title">Supported Perimeter Security Appliances</h2>
@@ -1399,7 +1501,7 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
         </div>
 
         <div class="usecase-grid">
-          <div class="usecase-card">
+          <div class="usecase-card reveal-on-scroll stagger-child-1">
             <div class="uc-header">
               <img src="/vendor/icons/shield.svg" alt="" width="20" height="20">
               <span class="uc-tag font-mono">FIREWALL</span>
@@ -1408,7 +1510,7 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
             <p class="uc-desc">Connection flood detection and ACL deny policy violations across outside access groups to spot stealthy port scans.</p>
           </div>
 
-          <div class="usecase-card">
+          <div class="usecase-card reveal-on-scroll stagger-child-2">
             <div class="uc-header">
               <img src="/vendor/icons/lock.svg" alt="" width="20" height="20">
               <span class="uc-tag font-mono">VPN GATEWAY</span>
@@ -1417,7 +1519,7 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
             <p class="uc-desc">SSL VPN authentication brute-force monitoring and perimeter policy bypass detection with geographic anomaly tracking.</p>
           </div>
 
-          <div class="usecase-card">
+          <div class="usecase-card reveal-on-scroll stagger-child-3">
             <div class="uc-header">
               <img src="/vendor/icons/activity.svg" alt="" width="20" height="20">
               <span class="uc-tag font-mono">IDS / IPS</span>
@@ -1426,7 +1528,7 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
             <p class="uc-desc">ET Malware signature alert parsing and automated correlation of IDS payload signatures with firewall drop events.</p>
           </div>
 
-          <div class="usecase-card">
+          <div class="usecase-card reveal-on-scroll stagger-child-4">
             <div class="uc-header">
               <img src="/vendor/icons/git-branch.svg" alt="" width="20" height="20">
               <span class="uc-tag font-mono">PERIMETER</span>
@@ -1435,7 +1537,7 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
             <p class="uc-desc">Edge packet filter deny log tracking and state table exhaustion detection before internal infrastructure impact.</p>
           </div>
 
-          <div class="usecase-card">
+          <div class="usecase-card reveal-on-scroll stagger-child-5">
             <div class="uc-header">
               <img src="/vendor/icons/database.svg" alt="" width="20" height="20">
               <span class="uc-tag font-mono">REGISTRY</span>
@@ -1444,7 +1546,7 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
             <p class="uc-desc">Dynamic fallback parser extracting structured key-value pairs (CEF, Key=Value, JSON) for any custom perimeter log stream.</p>
           </div>
 
-          <div class="usecase-card">
+          <div class="usecase-card reveal-on-scroll stagger-child-6">
             <div class="uc-header">
               <img src="/vendor/icons/cpu.svg" alt="" width="20" height="20">
               <span class="uc-tag font-mono">ENSEMBLE</span>
@@ -1456,25 +1558,25 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
       </section>
 
       <!-- SECTION 5: ARCHITECTURE / READINESS STRIP -->
-      <section id="architecture-readiness" class="landing-section" aria-label="Architecture and Readiness Specifications" style="margin-bottom: 2rem;">
+      <section id="architecture-readiness" class="landing-section reveal-on-scroll" aria-label="Architecture and Readiness Specifications" style="margin-bottom: 2rem;">
         <div class="readiness-strip">
-          <div class="readiness-badge">
+          <div class="readiness-badge reveal-on-scroll stagger-child-1">
             <img src="/vendor/icons/check-circle.svg" alt="" width="16" height="16">
             <span>OCSF-Aligned Schema</span>
           </div>
-          <div class="readiness-badge">
+          <div class="readiness-badge reveal-on-scroll stagger-child-2">
             <img src="/vendor/icons/check-circle.svg" alt="" width="16" height="16">
             <span>Air-Gapped Deployment Ready</span>
           </div>
-          <div class="readiness-badge">
+          <div class="readiness-badge reveal-on-scroll stagger-child-3">
             <img src="/vendor/icons/check-circle.svg" alt="" width="16" height="16">
             <span>Container-Native (Docker)</span>
           </div>
-          <div class="readiness-badge">
+          <div class="readiness-badge reveal-on-scroll stagger-child-4">
             <img src="/vendor/icons/check-circle.svg" alt="" width="16" height="16" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
             <span>Forensic Chain-of-Custody (SHA-256 Merkle)</span>
           </div>
-          <div class="readiness-badge">
+          <div class="readiness-badge reveal-on-scroll stagger-child-5">
             <img src="/vendor/icons/check-circle.svg" alt="" width="16" height="16">
             <span>Tamper-Evident Audit Log</span>
           </div>
@@ -1482,7 +1584,7 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
       </section>
     </main>
 
-    <footer class="landing-footer" role="contentinfo">
+    <footer class="landing-footer reveal-on-scroll" role="contentinfo">
       <div class="footer-container">
         <div class="footer-grid">
           <!-- COLUMN 1: BRAND & MISSION -->
@@ -1732,9 +1834,9 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
             statusPill.textContent = '[CONNECTED] LIVE API STREAM';
             statusPill.style.color = 'var(--severity-low)';
           }
-          if (eventsEl) eventsEl.textContent = (data.total_events || 0).toLocaleString();
-          if (scoreEl) scoreEl.textContent = (data.avg_threat_score || 0).toFixed(1);
-          if (incsEl) incsEl.textContent = (data.active_incidents || 0).toLocaleString();
+          if (eventsEl) animateNumberCounter(eventsEl, 0, data.total_events || 0, 500, function(v) { return Math.round(v).toLocaleString(); });
+          if (scoreEl) animateNumberCounter(scoreEl, 0, data.avg_threat_score || 0, 500, function(v) { return v.toFixed(1); });
+          if (incsEl) animateNumberCounter(incsEl, 0, data.active_incidents || 0, 500, function(v) { return Math.round(v).toLocaleString(); });
 
           // If user is authenticated and has ingested data, upgrade sample stream to real live event rows
           var evRes = await fetch('/api/v1/dashboard/events/recent?limit=4', {
@@ -1780,7 +1882,7 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
       }
     })();
 
-    // 3. ROI Estimator Script
+    // 3. ROI Estimator Script with Smooth Counter Animations
     (function initROICalculator() {
       var sliderVol = document.getElementById('slider-volume');
       var sliderDev = document.getElementById('slider-devices');
@@ -1789,6 +1891,10 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
       var resHours = document.getElementById('res-hours');
       var resMTTR = document.getElementById('res-mttr');
       var resSavings = document.getElementById('res-savings');
+
+      var prevHours = 0;
+      var prevMTTR = 0;
+      var prevSavings = 0;
 
       function updateTrackFill(slider) {
         if (!slider) return;
@@ -1813,13 +1919,17 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
         if (valDev) valDev.textContent = dev.toLocaleString();
 
         var anomaliesPerDay = vol * 0.001;
-        var hoursSavedMonth = (anomaliesPerDay * 0.85 * 3.5 * 30) / 60;
-        var mttrReduction = Math.min(85, 35 + (dev * 0.8));
-        var costSavingsMonth = hoursSavedMonth * 65;
+        var targetHours = (anomaliesPerDay * 0.85 * 3.5 * 30) / 60;
+        var targetMTTR = Math.min(85, 35 + (dev * 0.8));
+        var targetSavings = targetHours * 65;
 
-        if (resHours) resHours.textContent = hoursSavedMonth.toFixed(1) + ' hrs';
-        if (resMTTR) resMTTR.textContent = mttrReduction.toFixed(1) + '%';
-        if (resSavings) resSavings.textContent = '$' + Math.round(costSavingsMonth).toLocaleString() + ' / mo';
+        if (resHours) animateNumberCounter(resHours, prevHours, targetHours, 400, function(v) { return v.toFixed(1) + ' hrs'; });
+        if (resMTTR) animateNumberCounter(resMTTR, prevMTTR, targetMTTR, 400, function(v) { return v.toFixed(1) + '%'; });
+        if (resSavings) animateNumberCounter(resSavings, prevSavings, targetSavings, 400, function(v) { return '$' + Math.round(v).toLocaleString() + ' / mo'; });
+
+        prevHours = targetHours;
+        prevMTTR = targetMTTR;
+        prevSavings = targetSavings;
       }
 
       if (sliderVol && sliderDev) {
@@ -1828,6 +1938,71 @@ SHA-256 Leaf Digest: f2b259a563db460ee9d7b9ddf5b18d8927d2418067626ab5602e15a409a
         updateROI();
       }
     })();
+
+    // 4. Scroll-Triggered Reveal & Motion Controller
+    (function initMotionSystem() {
+      var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var revealElements = document.querySelectorAll('.reveal-on-scroll');
+
+      if (prefersReduced || !('IntersectionObserver' in window)) {
+        revealElements.forEach(function(el) {
+          el.classList.add('is-visible');
+        });
+        return;
+      }
+
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            // Unobserve so animation never re-triggers or flickers when scrolling back up
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        root: null,
+        rootMargin: '0px 0px -40px 0px',
+        threshold: 0.08
+      });
+
+      revealElements.forEach(function(el) {
+        observer.observe(el);
+      });
+    })();
+
+    // 5. Smooth Number Counter Animation Utility
+    function animateNumberCounter(element, startVal, endVal, duration, formatter) {
+      if (!element) return;
+      var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReduced || Math.abs(endVal - startVal) < 0.001) {
+        element.textContent = formatter(endVal);
+        return;
+      }
+
+      var startTime = null;
+      if (element._animFrameId) {
+        cancelAnimationFrame(element._animFrameId);
+      }
+
+      function step(timestamp) {
+        if (!startTime) startTime = timestamp;
+        var elapsed = timestamp - startTime;
+        var progress = Math.min(elapsed / duration, 1);
+        // Cubic ease-out curve
+        var easeProgress = 1 - Math.pow(1 - progress, 3);
+        var currentVal = startVal + (endVal - startVal) * easeProgress;
+        element.textContent = formatter(currentVal);
+
+        if (progress < 1) {
+          element._animFrameId = requestAnimationFrame(step);
+        } else {
+          element._animFrameId = null;
+          element.textContent = formatter(endVal);
+        }
+      }
+
+      element._animFrameId = requestAnimationFrame(step);
+    }
   </script>
 </body>
 </html>
