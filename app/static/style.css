@@ -3178,6 +3178,32 @@ body.light-mode input[type="range"]::-moz-range-thumb {
   letter-spacing: 0.05em;
 }
 
+.error-banner {
+  display: none;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid #ef4444;
+  color: #ffb4ab;
+  font-size: 0.82rem;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.success-banner {
+  display: none;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid #10b981;
+  color: #6ffbbe;
+  font-size: 0.82rem;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
+  text-align: center;
+  font-weight: 600;
+}
+
 /* Light Mode Overrides for Cyber-Void Auth System */
 body.light-mode .auth-radial-bg {
   background: radial-gradient(circle at center, rgba(15, 23, 42, 0.08) 0%, transparent 65%), #e4ebe4 !important;
@@ -3222,4 +3248,16 @@ body.light-mode .btn-cyber-secondary {
 body.light-mode .btn-cyber-secondary:hover {
   background: #b0c4b1 !important;
   color: #08120b !important;
+}
+
+body.light-mode .error-banner {
+  background: rgba(127, 29, 29, 0.12) !important;
+  border-color: #7f1d1d !important;
+  color: #7f1d1d !important;
+}
+
+body.light-mode .success-banner {
+  background: rgba(2, 44, 34, 0.12) !important;
+  border-color: #022c22 !important;
+  color: #022c22 !important;
 }
