@@ -210,93 +210,98 @@
           </div>
         </section>
 
-        <!-- ZERO-LOSS INGESTION PIPELINE STATUS -->
-        <section class="pipeline-track-card" aria-label="Zero-Loss Pipeline Status Tracker" style="margin-bottom: 2rem;">
-          <div class="pipeline-track-header">
-            <span class="pipeline-track-title">ZERO-LOSS REAL-TIME TELEMETRY PIPELINE</span>
-            <span id="pipeline-status-badge" class="pipeline-track-badge font-mono">READY &bull; IDLE STREAM</span>
+        <!-- 3. ZERO-LOSS INGESTION PIPELINE STATUS STEPPER -->
+        <section class="glass-panel-card" aria-label="Zero-Loss Pipeline Status Tracker" style="margin-bottom: 2rem; max-width: none; padding: 1.5rem;">
+          <div class="pipeline-track-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div class="auth-icon-box" style="width: 32px; height: 32px; border-radius: 6px; margin-bottom: 0;">
+                <img src="/vendor/icons/activity.svg" alt="" width="16" height="16" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
+              </div>
+              <span class="pipeline-track-title" style="font-family: var(--font-mono); font-size: 0.85rem; font-weight: 800; color: var(--text-main); letter-spacing: 0.05em;">ZERO-LOSS REAL-TIME TELEMETRY PIPELINE</span>
+            </div>
+            <span id="pipeline-status-badge" class="pipeline-track-badge font-mono" style="font-size: 0.72rem; font-weight: 700; color: var(--severity-low); background: var(--severity-low-bg); border: 1px solid var(--severity-low-border); padding: 4px 10px; border-radius: 20px;">READY &bull; IDLE STREAM</span>
           </div>
-          <div class="pipeline-steps-wrapper">
+          <div class="pipeline-steps-wrapper" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
             <div class="pipeline-step-node active" id="p-step-1">
-              <div class="step-node-num">01</div>
+              <div class="step-node-num font-mono">01</div>
               <div class="step-node-label">Stream Ingest</div>
             </div>
             <div class="pipeline-step-connector"></div>
             <div class="pipeline-step-node" id="p-step-2">
-              <div class="step-node-num">02</div>
+              <div class="step-node-num font-mono">02</div>
               <div class="step-node-label">Merkle Hashing</div>
             </div>
             <div class="pipeline-step-connector"></div>
             <div class="pipeline-step-node" id="p-step-3">
-              <div class="step-node-num">03</div>
+              <div class="step-node-num font-mono">03</div>
               <div class="step-node-label">Vendor Parsing</div>
             </div>
             <div class="pipeline-step-connector"></div>
             <div class="pipeline-step-node" id="p-step-4">
-              <div class="step-node-num">04</div>
+              <div class="step-node-num font-mono">04</div>
               <div class="step-node-label">ML &amp; Rule Engine</div>
             </div>
             <div class="pipeline-step-connector"></div>
             <div class="pipeline-step-node" id="p-step-5">
-              <div class="step-node-num">05</div>
+              <div class="step-node-num font-mono">05</div>
               <div class="step-node-label">Correlation</div>
             </div>
             <div class="pipeline-step-connector"></div>
             <div class="pipeline-step-node" id="p-step-6">
-              <div class="step-node-num">06</div>
+              <div class="step-node-num font-mono">06</div>
               <div class="step-node-label">XAI Insights</div>
             </div>
           </div>
         </section>
 
-        <!-- INCIDENT-FIRST HERO VIEW -->
+        <!-- 1. CORRELATED SECURITY INCIDENTS SECTION -->
         <section aria-label="Correlated Active Incidents Section" style="margin-bottom: 2rem;">
           <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
-            <div style="display: flex; align-items: flex-start; gap: 12px;">
-              <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
-                <img src="/vendor/icons/git-branch.svg" alt="" width="18" height="18" style="filter: invert(65%) sepia(80%) saturate(1000%) hue-rotate(5deg);">
+            <div style="display: flex; align-items: flex-start; gap: 14px;">
+              <div class="auth-icon-box" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; margin-bottom: 0;">
+                <img src="/vendor/icons/git-branch.svg" alt="" width="20" height="20" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
               </div>
               <div>
-                <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25; letter-spacing: -0.01em;">
                   Correlated Security Incidents
                 </h2>
-                <p style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                <p style="font-size: 0.83rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
                   Real-time automated incident clustering and MITRE ATT&amp;CK tactic mapping.
                 </p>
               </div>
             </div>
-            <span id="incidents-count-badge" class="font-mono" style="font-size: 0.78rem; color: var(--text-muted); background: var(--bg-slate); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 4px;">
+            <span id="incidents-count-badge" class="font-mono" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); background: var(--bg-dark); border: 1px solid var(--border-color); padding: 5px 12px; border-radius: 6px;">
               0 Correlated Incidents
             </span>
           </div>
 
           <div id="incidents-grid-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 1.25rem;">
-            <div style="grid-column: 1 / -1; background: var(--bg-slate); border: 1px solid var(--border-color); border-radius: 8px; padding: 2.5rem; text-align: center; color: var(--text-muted);">
-              <img src="/vendor/icons/check-circle.svg" alt="" width="28" height="28" style="filter: invert(65%) sepia(70%) saturate(1000%) hue-rotate(120deg); margin-bottom: 0.5rem;">
-              <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-main);">No Active Incidents</div>
-              <div style="font-size: 0.82rem; margin-top: 4px;">All telemetry nominal. Trigger a simulation or upload logs to analyze incident clusters.</div>
+            <div class="glass-panel-card" style="grid-column: 1 / -1; max-width: none; padding: 2.5rem; text-align: center; color: var(--text-muted);">
+              <img src="/vendor/icons/check-circle.svg" alt="" width="32" height="32" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg); margin-bottom: 0.5rem;">
+              <div style="font-size: 0.98rem; font-weight: 700; color: var(--text-main);">No Active Incidents</div>
+              <div style="font-size: 0.82rem; margin-top: 4px; color: var(--text-muted);">All telemetry nominal. Trigger a simulation or upload logs to analyze incident clusters.</div>
             </div>
           </div>
         </section>
 
-        <!-- TELEMETRY EVENT STREAM TABLE -->
-        <section class="panel-card feature-accent-command" aria-label="Live Telemetry Event Stream">
+        <!-- 2. LIVE TELEMETRY EVENT STREAM TABLE -->
+        <section class="glass-panel-card" aria-label="Live Telemetry Event Stream" style="padding: 1.75rem; max-width: none;">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
-            <div style="display: flex; align-items: flex-start; gap: 12px;">
-              <div style="width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
-                <img src="/vendor/icons/database.svg" alt="" width="18" height="18" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+            <div style="display: flex; align-items: flex-start; gap: 14px;">
+              <div class="auth-icon-box" style="width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0; margin-bottom: 0;">
+                <img src="/vendor/icons/database.svg" alt="" width="20" height="20" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
               </div>
               <div>
-                <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25;">
+                <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25; letter-spacing: -0.01em;">
                   Live Telemetry Event Stream &amp; Merkle Audit Trail
                 </h2>
-                <p id="table-count-badge" style="font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
+                <p id="table-count-badge" style="font-size: 0.83rem; color: var(--text-muted); margin: 4px 0 0 0; font-family: var(--font-sans);">
                   Showing 0 of 0 events &bull; Click row for raw evidence
                 </p>
               </div>
             </div>
           </div>
-          <div class="table-responsive">
+          <div class="table-responsive" style="border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
             <table class="event-table">
               <thead>
                 <tr>
@@ -313,8 +318,8 @@
               <tbody id="event-stream-body">
                 <tr class="empty-state-row">
                   <td colspan="8" style="text-align: center; padding: 2.5rem 1.5rem; color: var(--text-muted);">
-                    <img src="/vendor/icons/shield.svg" alt="" width="22" height="22" style="opacity: 0.4; display: block; margin: 0 auto 0.5rem;">
-                    <div style="font-family: var(--font-sans); font-size: 0.82rem; font-weight: 400; color: var(--text-muted); line-height: 1.5;">
+                    <img src="/vendor/icons/shield.svg" alt="" width="24" height="24" style="opacity: 0.4; display: block; margin: 0 auto 0.5rem; filter: invert(60%);">
+                    <div style="font-family: var(--font-sans); font-size: 0.83rem; font-weight: 400; color: var(--text-muted); line-height: 1.5;">
                       System Secure. No anomalies detected. Upload a .LOG file or run a simulation to begin analysis.
                     </div>
                   </td>
@@ -627,36 +632,38 @@ conditions:
     </main>
 
     <!-- INCIDENT DETAIL DRILL-IN MODAL / PANEL -->
-    <div id="incident-detail-modal" role="dialog" aria-label="Incident Detail Drill-In Modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 2000; align-items: center; justify-content: center; padding: 2rem;">
-      <div style="background: var(--bg-slate); border: 1px solid var(--border-color); border-radius: 12px; width: 100%; max-width: 900px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.5);">
-        <div style="background: var(--bg-dark); padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="/vendor/icons/git-branch.svg" alt="" width="20" height="20" style="filter: invert(60%) sepia(60%) saturate(1200%) hue-rotate(220deg);">
+    <div id="incident-detail-modal" role="dialog" aria-label="Incident Detail Drill-In Modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(12px); z-index: 2000; align-items: center; justify-content: center; padding: 2rem;">
+      <div class="glass-panel-card" style="max-width: 920px; width: 100%; max-height: 88vh; display: flex; flex-direction: column; overflow: hidden; padding: 0; border: 1px solid var(--border-color); border-radius: 14px; box-shadow: 0 25px 60px rgba(0,0,0,0.6);">
+        <div style="background: var(--bg-dark); padding: 1.15rem 1.75rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="auth-icon-box" style="width: 36px; height: 36px; border-radius: 8px; margin-bottom: 0;">
+              <img src="/vendor/icons/git-branch.svg" alt="" width="18" height="18" style="filter: invert(48%) sepia(85%) saturate(1450%) hue-rotate(170deg);">
+            </div>
             <div>
-              <h3 id="inc-detail-id" class="font-mono" style="color: var(--text-main); font-size: 1rem; margin: 0; font-weight: 700;">INCIDENT DRILL-IN</h3>
-              <span id="inc-detail-ip" class="font-mono" style="color: var(--accent-hover); font-size: 0.8rem;">IP: 0.0.0.0</span>
+              <h3 id="inc-detail-id" class="font-mono" style="color: var(--text-main); font-size: 1.05rem; margin: 0; font-weight: 800; letter-spacing: -0.01em;">INCIDENT DRILL-IN</h3>
+              <span id="inc-detail-ip" class="font-mono" style="color: var(--accent-hover); font-size: 0.82rem; font-weight: 700;">IP: 0.0.0.0</span>
             </div>
           </div>
-          <button onclick="closeIncidentDetail()" aria-label="Close Incident Detail Modal" style="background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; padding: 0 6px;">&times;</button>
+          <button onclick="closeIncidentDetail()" aria-label="Close Incident Detail Modal" style="background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; padding: 0 6px; font-weight: 700;">&times;</button>
         </div>
 
-        <div style="padding: 1.5rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 1.5rem;">
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; background: var(--bg-dark); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+        <div style="padding: 1.75rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 1.5rem;">
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; background: var(--bg-dark); padding: 1.15rem; border-radius: 10px; border: 1px solid var(--border-color);">
             <div>
-              <div style="font-size: 0.72rem; color: var(--text-muted);">EVENT COUNT</div>
-              <div id="inc-detail-count" class="font-mono" style="font-size: 1.2rem; font-weight: 700; color: var(--text-main);">0 events</div>
+              <div style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em;">EVENT COUNT</div>
+              <div id="inc-detail-count" class="font-mono" style="font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin-top: 2px;">0 events</div>
             </div>
             <div>
-              <div style="font-size: 0.72rem; color: var(--text-muted);">MAX THREAT SCORE</div>
-              <div id="inc-detail-score" class="font-mono" style="font-size: 1.2rem; font-weight: 700; color: var(--severity-high);">0.0</div>
+              <div style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em;">MAX THREAT SCORE</div>
+              <div id="inc-detail-score" class="font-mono" style="font-size: 1.25rem; font-weight: 800; color: var(--severity-high); margin-top: 2px;">0.0</div>
             </div>
             <div>
-              <div style="font-size: 0.72rem; color: var(--text-muted);">SEVERITY LEVEL</div>
-              <div id="inc-detail-level" class="font-mono" style="font-size: 1.2rem; font-weight: 700; color: var(--severity-high);">HIGH</div>
+              <div style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em;">SEVERITY LEVEL</div>
+              <div id="inc-detail-level" class="font-mono" style="font-size: 1.25rem; font-weight: 800; color: var(--severity-high); margin-top: 2px;">HIGH</div>
             </div>
             <div>
-              <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px;">INCIDENT STATUS</div>
-              <select id="inc-detail-status-select" aria-label="Incident Status Dropdown Selector" style="background: var(--bg-slate); border: 1px solid var(--border-color); color: var(--text-main); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; width: 100%;">
+              <div style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em; margin-bottom: 4px;">INCIDENT STATUS</div>
+              <select id="inc-detail-status-select" aria-label="Incident Status Dropdown Selector" style="background: var(--bg-slate); border: 1px solid var(--border-color); color: var(--text-main); padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; width: 100%; outline: none;">
                 <option value="New">New</option>
                 <option value="Investigating">Investigating</option>
                 <option value="Resolved">Resolved</option>
@@ -666,13 +673,13 @@ conditions:
           </div>
 
           <div>
-            <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem;">MITRE ATT&amp;CK TACTIC KILL-CHAIN SEQUENCE</div>
+            <div style="font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em; margin-bottom: 0.5rem;">MITRE ATT&amp;CK TACTIC KILL-CHAIN SEQUENCE</div>
             <div id="inc-detail-mitre-seq" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
           </div>
 
           <div>
-            <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem;">CORRELATED MEMBER EVENTS &amp; XAI ATTRIBUTION</div>
-            <div class="table-responsive" style="border: 1px solid var(--border-color); border-radius: 6px;">
+            <div style="font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em; margin-bottom: 0.5rem;">CORRELATED MEMBER EVENTS &amp; XAI ATTRIBUTION</div>
+            <div class="table-responsive" style="border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
               <table class="event-table" style="font-size: 0.8rem;">
                 <thead>
                   <tr>

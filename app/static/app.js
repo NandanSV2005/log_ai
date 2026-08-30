@@ -1653,7 +1653,7 @@ function renderIncidentCard(inc) {
   const tacticsHtml = tactics.map(t => `<span class="badge-mitre" style="font-size: 0.7rem;"><img src="/vendor/icons/shield.svg" alt="" width="10" height="10" style="vertical-align: middle; margin-right: 3px;">${escapeHtml(t)}</span>`).join(' ');
 
   return `
-    <div class="${cardPulseClass}" role="button" tabindex="0" onclick="openIncidentDetail('${escapeJs(incId)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openIncidentDetail('${escapeJs(incId)}');}" aria-label="Incident from ${escapeHtml(ip)}, ${escapeHtml(level)} severity, ${count} events" style="background: var(--bg-slate); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; display: flex; flex-direction: column; gap: 12px; transition: all 0.15s ease; cursor: pointer;">
+    <div class="glass-panel-card ${cardPulseClass}" role="button" tabindex="0" onclick="openIncidentDetail('${escapeJs(incId)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openIncidentDetail('${escapeJs(incId)}');}" aria-label="Incident from ${escapeHtml(ip)}, ${escapeHtml(level)} severity, ${count} events" style="padding: 1.25rem; display: flex; flex-direction: column; gap: 12px; transition: all 0.18s ease; cursor: pointer; max-width: none;">
       <div style="display: flex; justify-content: space-between; align-items: flex-start;">
         <div>
           <div class="font-mono" style="font-size: 0.72rem; color: var(--text-muted);">${escapeHtml(incId.substring(0, 18))}...</div>
@@ -1665,21 +1665,21 @@ function renderIncidentCard(inc) {
       </div>
 
       <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--text-muted);">
-        <span>Events: <strong style="color: #ffffff;">${count}</strong></span>
+        <span>Events: <strong style="color: var(--text-main);">${count}</strong></span>
         <span class="status-pill status-${status.toLowerCase()}" style="font-size: 0.72rem;">${escapeHtml(status)}</span>
       </div>
 
       ${tactics.length > 0 ? `<div style="display: flex; gap: 4px; flex-wrap: wrap;">${tacticsHtml}</div>` : ''}
 
-      <button onclick="event.stopPropagation(); openIncidentDetail('${escapeJs(incId)}')" class="btn-primary" aria-label="Inspect Incident ${escapeHtml(incId)}" style="width: 100%; justify-content: center; padding: 8px; font-size: 0.8rem; margin-top: 4px;">
+      <button onclick="event.stopPropagation(); openIncidentDetail('${escapeJs(incId)}')" class="btn-cyber-primary" aria-label="Inspect Incident ${escapeHtml(incId)}" style="width: 100%; justify-content: center; padding: 8px; font-size: 0.8rem; margin-top: 4px;">
         <img src="/vendor/icons/git-branch.svg" alt="" width="14" height="14" style="filter: invert(100%);">
-        Inspect Incident
+        <span>Inspect Incident</span>
       </button>
     </div>
   `;
 }
 
-window.openIncidentDetail = function (incidentId) {
+window.openIncidentDetail = async function (incidentId) {
   const inc = currentIncidentsList.find(i => i.incident_id === incidentId);
   if (!inc) return;
 
@@ -1720,9 +1720,9 @@ window.openIncidentDetail = function (incidentId) {
     }
   }
 
-  if (bodyEl) {
-    const events = inc.events || [];
-    if (events.length === 0) {
+  const renderEvents = (events) => {
+    if (!bodyEl) return;
+    if (!events || events.length === 0) {
       bodyEl.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No member events registered.</td></tr>`;
     } else {
       bodyEl.innerHTML = events.map(evt => {
@@ -1753,9 +1753,33 @@ window.openIncidentDetail = function (incidentId) {
         `;
       }).join('');
     }
+  };
+
+  let events = inc.events || [];
+  if (events.length === 0 && currentEventsList && currentEventsList.length > 0) {
+    const memberHashes = new Set(inc.event_hashes || inc.member_event_hashes || []);
+    events = currentEventsList.filter(e => {
+      const h = e.raw_event_hash || e.payload_hash || '';
+      return (memberHashes.size > 0 && memberHashes.has(h)) || (e.source_ip && e.source_ip === inc.source_ip);
+    });
   }
 
+  renderEvents(events);
   modal.style.display = 'flex';
+
+  try {
+    const res = await fetch(`/api/v1/dashboard/incidents/${encodeURIComponent(incidentId)}`, { headers: getAuthHeaders() });
+    if (res.ok) {
+      const detailData = await res.json();
+      const fetchedEvents = detailData.events || (detailData.incident && detailData.incident.events) || [];
+      if (fetchedEvents.length > 0) {
+        inc.events = fetchedEvents;
+        renderEvents(fetchedEvents);
+      }
+    }
+  } catch (err) {
+    console.error('Error fetching detailed incident events:', err);
+  }
 };
 
 window.closeIncidentDetail = function () {
