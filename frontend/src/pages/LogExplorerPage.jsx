@@ -77,10 +77,10 @@ export function LogExplorerPage() {
     return matchesSearch && matchesSeverity;
   });
 
-  // Calculate live filter counts
-  const criticalCount = events.filter((e) => (e.threat_level || '').toUpperCase() === 'HIGH').length || 1245;
-  const warnCount = events.filter((e) => (e.threat_level || '').toUpperCase() === 'MEDIUM').length || 8432;
-  const infoCount = events.filter((e) => (e.threat_level || '').toUpperCase() === 'LOW').length || 45000;
+  // Calculate live filter counts directly from events
+  const criticalCount = events.filter((e) => (e.threat_level || '').toUpperCase() === 'HIGH').length;
+  const warnCount = events.filter((e) => (e.threat_level || '').toUpperCase() === 'MEDIUM').length;
+  const infoCount = events.filter((e) => (e.threat_level || '').toUpperCase() === 'LOW').length;
 
   return (
     <div className="flex flex-col space-y-6 animate-in fade-in duration-300">
@@ -331,10 +331,10 @@ export function LogExplorerPage() {
                           </td>
 
                           <td className="p-3 pr-4 align-top text-text-primary text-[11px] leading-relaxed break-all">
-                            <span className="text-text-primary font-mono">
-                              {evt.original_event || evt.raw_payload || `%ASA-4-106023: Deny tcp src ${evt.source_ip || '192.168.1.100'} dst inside:10.0.0.50/80`}
-                            </span>
-                          </td>
+                              <span className="truncate max-w-xs font-mono">
+                                {evt.original_event || evt.raw_payload || `Security Event Log: ${evt.event_type || 'Ingestion Payload'}`}
+                              </span>
+                            </td>
                         </tr>
 
                         {/* Expanded State Log Detail & AI Attribution Panel */}
@@ -356,11 +356,11 @@ export function LogExplorerPage() {
                                     </button>
                                   </div>
                                   <div className="text-emerald-400 space-y-1 text-[11px] leading-relaxed">
-                                    <div><span className="text-sky-400">"event_type"</span>: <span className="text-emerald-400">"{evt.event_type || 'cisco_asa'}"</span>,</div>
-                                    <div><span className="text-sky-400">"src_ip"</span>: <span className="text-emerald-400">"{evt.source_ip || '192.168.1.100'}"</span>,</div>
-                                    <div><span className="text-sky-400">"threat_level"</span>: <span className="text-rose-400">"{evt.threat_level || 'HIGH'}"</span>,</div>
-                                    <div><span className="text-sky-400">"threat_score"</span>: <span className="text-amber-400">{evt.threat_score?.toFixed(1) || 88.5}</span>,</div>
-                                    <div><span className="text-sky-400">"mitre_tactic"</span>: <span className="text-emerald-400">"{evt.mitre_tactic || 'T1110'}"</span></div>
+                                    <div><span className="text-sky-400">"event_type"</span>: <span className="text-emerald-400">"{evt.event_type || 'normalized'}"</span>,</div>
+                                    <div><span className="text-sky-400">"src_ip"</span>: <span className="text-emerald-400">"{evt.source_ip || 'N/A'}"</span>,</div>
+                                    <div><span className="text-sky-400">"threat_level"</span>: <span className="text-rose-400">"{evt.threat_level || 'LOW'}"</span>,</div>
+                                    <div><span className="text-sky-400">"threat_score"</span>: <span className="text-amber-400">{evt.threat_score !== undefined ? evt.threat_score.toFixed(1) : 0.0}</span>,</div>
+                                    <div><span className="text-sky-400">"mitre_tactic"</span>: <span className="text-emerald-400">"{evt.mitre_tactic || 'N/A'}"</span></div>
                                   </div>
                                 </div>
 

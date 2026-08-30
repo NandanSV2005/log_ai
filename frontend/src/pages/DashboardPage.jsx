@@ -6,8 +6,8 @@ export function DashboardPage({ pollingInterval }) {
   const navigate = useNavigate();
   const [activeSubTab, setActiveSubTab] = useState('overview'); // 'overview' | 'add-log'
   const [stats, setStats] = useState({
-    total_events_ingested: 1240500,
-    threat_level_counts: { HIGH: 12, MEDIUM: 28, LOW: 145 },
+    total_events_ingested: 0,
+    threat_level_counts: { HIGH: 0, MEDIUM: 0, LOW: 0 },
     vendor_parser_counts: {},
   });
   const [incidents, setIncidents] = useState([]);
@@ -170,13 +170,12 @@ export function DashboardPage({ pollingInterval }) {
                 Active Threats
               </h3>
               <div className="text-3xl font-extrabold font-mono text-rose-500">
-                {stats.threat_level_counts?.HIGH ?? 12}
+                {stats.threat_level_counts?.HIGH ?? 0}
               </div>
               <div className="mt-2 flex items-center text-[11px] font-mono text-text-muted">
                 <span className="text-rose-500 mr-1 flex items-center font-bold">
-                  <span className="material-symbols-outlined text-xs">trending_up</span> +3
+                  <span className="material-symbols-outlined text-xs">warning</span> High Severity
                 </span>
-                vs last hour
               </div>
             </div>
 
@@ -188,13 +187,12 @@ export function DashboardPage({ pollingInterval }) {
                 Logs Analyzed
               </h3>
               <div className="text-3xl font-extrabold font-mono text-text-primary">
-                {stats.total_events_ingested > 0 ? (stats.total_events_ingested / 1000000).toFixed(1) + 'M' : '1.2M'}
+                {stats.total_events_ingested > 0 ? stats.total_events_ingested.toLocaleString() : '0'}
               </div>
               <div className="mt-2 flex items-center text-[11px] font-mono text-text-muted">
                 <span className="text-emerald-400 mr-1 flex items-center font-bold">
-                  <span className="material-symbols-outlined text-xs">trending_up</span> 14%
+                  <span className="material-symbols-outlined text-xs">check_circle</span> Ingested Events
                 </span>
-                24h throughput
               </div>
             </div>
 
@@ -234,20 +232,26 @@ export function DashboardPage({ pollingInterval }) {
                     <span className="material-symbols-outlined text-rose-500 text-2xl mt-0.5">flip_camera_ios</span>
                     <div className="space-y-2 flex-1">
                       <h4 className="text-sm font-bold text-rose-400">
-                        Anomaly Detection: {topIncident ? `Cluster #${topIncident.incident_id.substring(0, 8)}` : 'Brute Force Attack'}
+                        Anomaly Detection: {topIncident ? `Cluster #${topIncident.incident_id.substring(0, 8)}` : 'Telemetry Baseline Nominal'}
                       </h4>
                       <p className="text-xs text-text-primary leading-relaxed">
-                        AI Copilot identified a rapid sequence of unauthorized access attempts originating from a distributed botnet targeting{' '}
-                        <code className="font-mono bg-surface px-2 py-0.5 rounded text-primary border border-border-muted">
-                          {topIncident ? topIncident.source_ip : 'Server_A (10.4.22.1)'}
-                        </code>.
+                        {topIncident ? (
+                          <>
+                            AI Copilot identified a rapid sequence of security anomaly attempts targeting{' '}
+                            <code className="font-mono bg-surface px-2 py-0.5 rounded text-primary border border-border-muted">
+                              {topIncident.source_ip}
+                            </code>.
+                          </>
+                        ) : (
+                          'No critical threat clusters currently active. System telemetry operations are nominal.'
+                        )}
                       </p>
 
                       <div className="grid grid-cols-2 gap-2 pt-2 font-mono text-xs text-text-muted">
-                        <div>Target: <span className="text-text-primary font-bold">{topIncident ? topIncident.source_ip : 'Server_A (10.4.22.1)'}</span></div>
-                        <div>Confidence: <span className="text-rose-400 font-bold">{topIncident ? `${topIncident.max_threat_score.toFixed(1)}%` : '99.8%'}</span></div>
-                        <div>Vector: <span className="text-text-primary font-bold">SSH Port 22</span></div>
-                        <div>Duration: <span className="text-text-primary font-bold">3m 12s (Ongoing)</span></div>
+                        <div>Target: <span className="text-text-primary font-bold">{topIncident ? topIncident.source_ip : 'None'}</span></div>
+                        <div>Confidence: <span className="text-rose-400 font-bold">{topIncident ? `${topIncident.max_threat_score.toFixed(1)}%` : 'N/A'}</span></div>
+                        <div>Vector: <span className="text-text-primary font-bold">{topIncident?.mitre_tactics?.[0] || 'Nominal'}</span></div>
+                        <div>Status: <span className="text-text-primary font-bold">{topIncident ? 'Active Alert' : 'Healthy'}</span></div>
                       </div>
                     </div>
                   </div>
@@ -316,10 +320,10 @@ export function DashboardPage({ pollingInterval }) {
                         </div>
                         <div className="flex-1 break-all text-[11px] leading-relaxed">
                           <span className={`font-bold mr-1 ${isHigh ? 'text-rose-400' : isMed ? 'text-amber-400' : 'text-emerald-400'}`}>
-                            [{evt.event_type ? evt.event_type.toUpperCase() : 'AUTH_FAILURE_BURST'}]
+                            [{evt.event_type ? evt.event_type.toUpperCase() : 'TELEMETRY'}]
                           </span>
                           <span className="text-text-primary">
-                            src={evt.source_ip || '192.168.1.105'} target={evt.target_host || 'Server_A'} msg="{evt.mitre_tactic || 'Security Telemetry Ingest'}"
+                            src={evt.source_ip || 'N/A'} target={evt.target_host || 'Host'} msg="{evt.mitre_tactic || evt.original_event || 'Normalized Event'}"
                           </span>
                         </div>
                       </div>
