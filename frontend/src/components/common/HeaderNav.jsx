@@ -157,7 +157,7 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
             }
           >
             <span className="material-symbols-outlined text-lg">terminal</span>
-            <span>Forensics & Rule Studio</span>
+            <span>Rule Studio</span>
           </NavLink>
 
           <NavLink
