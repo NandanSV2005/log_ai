@@ -147,7 +147,7 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
           </NavLink>
 
           <NavLink
-            to="/forensics"
+            to="/rule-studio"
             className={({ isActive }) =>
               `flex items-center gap-2 px-4 py-2 rounded-md transition-all whitespace-nowrap ${
                 isActive
