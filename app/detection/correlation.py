@@ -88,6 +88,7 @@ class Incident(BaseModel):
     mitre_tactics: List[str] = Field(default_factory=list, description="Ordered kill chain sequence of MITRE tactics seen")
     status: str = Field(default="New", description="Workflow state: New, Investigating, Resolved, or Dismissed")
     event_hashes: List[str] = Field(default_factory=list, description="List of raw SHA-256 event hashes in this incident")
+    owner_username: Optional[str] = Field(default=None, description="Tenant username owning this incident cluster")
 
     def to_dict(self) -> Dict[str, Any]:
         """Returns dictionary representation of the incident."""
@@ -102,6 +103,7 @@ class Incident(BaseModel):
             "mitre_tactics": self.mitre_tactics,
             "status": self.status,
             "event_hashes": self.event_hashes,
+            "owner_username": self.owner_username,
         }
 
 
@@ -117,7 +119,7 @@ class IncidentEngine:
         """
         self.window_seconds = window_seconds
         self.incidents: Dict[str, Incident] = {}
-        self.active_ip_incidents: Dict[str, str] = {}  # source_ip -> latest incident_id
+        self.active_ip_incidents: Dict[str, str] = {}  # f"{source_ip}:{owner_username}" -> latest incident_id
 
     def process_event(self, event: UnifiedEvent) -> Incident:
         """
@@ -125,6 +127,7 @@ class IncidentEngine:
         Updates incident metrics incrementally in O(1) time.
         """
         source_ip = event.source_ip or "0.0.0.0"
+        event_owner = getattr(event, "owner_username", None)
         event_ts_str = _format_timestamp(event.timestamp)
         event_ts_val = _parse_timestamp(event.timestamp)
 
@@ -135,10 +138,11 @@ class IncidentEngine:
         threat_score = getattr(event, "threat_score", 0.0) or 0.0
         mitre_tactic = getattr(event, "mitre_tactic", None)
 
-        active_inc_id = self.active_ip_incidents.get(source_ip)
+        active_key = f"{source_ip}:{event_owner}"
+        active_inc_id = self.active_ip_incidents.get(active_key)
         existing_incident: Optional[Incident] = self.incidents.get(active_inc_id) if active_inc_id else None
 
-        if existing_incident:
+        if existing_incident and existing_incident.owner_username == event_owner:
             last_seen_val = _parse_timestamp(existing_incident.last_seen)
             time_delta = event_ts_val - last_seen_val
 
@@ -163,7 +167,7 @@ class IncidentEngine:
                 return existing_incident
 
         # Otherwise create a new Incident
-        deterministic_src = f"{source_ip}_{event_ts_str}".encode("utf-8")
+        deterministic_src = f"{source_ip}_{event_ts_str}_{event_owner}".encode("utf-8")
         incident_id = f"inc_{hashlib.sha256(deterministic_src).hexdigest()[:16]}"
 
         tactics = [mitre_tactic] if mitre_tactic else []
@@ -181,17 +185,22 @@ class IncidentEngine:
             mitre_tactics=tactics,
             status=getattr(event, "status", "New") or "New",
             event_hashes=hashes,
+            owner_username=event_owner,
         )
 
         self.incidents[incident_id] = new_incident
-        self.active_ip_incidents[source_ip] = incident_id
+        self.active_ip_incidents[active_key] = incident_id
 
         return new_incident
 
-    def get_incidents(self, limit: int = 50) -> List[Dict[str, Any]]:
-        """Returns all incidents sorted by max_threat_score desc, sliced to limit."""
+    def get_incidents(self, limit: int = 50, owner_username: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Returns incidents sorted by max_threat_score desc, sliced to limit, strictly filtered by owner_username if provided."""
+        all_incidents = self.incidents.values()
+        if owner_username:
+            all_incidents = [inc for inc in all_incidents if inc.owner_username == owner_username]
+
         sorted_incidents = sorted(
-            self.incidents.values(),
+            all_incidents,
             key=lambda inc: (inc.max_threat_score, _parse_timestamp(inc.last_seen)),
             reverse=True,
         )

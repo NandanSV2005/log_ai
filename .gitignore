@@ -37,6 +37,8 @@ data/raw/*
 !data/raw/.gitkeep
 data/normalized/*
 !data/normalized/.gitkeep
+data/reports/*
+!data/reports/.gitkeep
 
 
 # IDE & Editor

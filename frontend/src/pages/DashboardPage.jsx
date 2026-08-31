@@ -4,7 +4,7 @@ import { api } from '../services/api';
 
 export function DashboardPage({ pollingInterval }) {
   const navigate = useNavigate();
-  const [activeSubTab, setActiveSubTab] = useState('overview'); // 'overview' | 'add-log'
+  const [activeSubTab, setActiveSubTab] = useState('overview'); // 'overview' | 'add-log' | 'reports'
   const [stats, setStats] = useState({
     total_events_ingested: 0,
     threat_level_counts: { HIGH: 0, MEDIUM: 0, LOW: 0 },
@@ -12,6 +12,7 @@ export function DashboardPage({ pollingInterval }) {
   });
   const [incidents, setIncidents] = useState([]);
   const [recentEvents, setRecentEvents] = useState([]);
+  const [savedReports, setSavedReports] = useState([]);
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [incidentDetailEvents, setIncidentDetailEvents] = useState([]);
   
@@ -23,24 +24,31 @@ export function DashboardPage({ pollingInterval }) {
   const [formatOverride, setFormatOverride] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Saved Report Creation State
+  const [reportTitle, setReportTitle] = useState('');
+  const [reportSummary, setReportSummary] = useState('');
+  const [reportMessage, setReportMessage] = useState('');
+
   // Sample preset payloads for quick injection
   const PRESET_PAYLOADS = {
-    cisco: `%ASA-4-106023: Deny tcp src outside:192.168.1.100/54321 dst inside:10.0.0.50/80 by access-group "outside_acl" [result="Denied"]`,
-    fortinet: `date=2026-08-30 time=14:20:05 devname="FG100D" devid="FG100D3G15800001" logid="0000000013" type="utm" subtype="virus" eventtype="signature text" level="warning" vd="root" msg="File infected." action="passthrough" service="HTTP" srcip=192.168.1.105 dstip=172.16.0.4`,
+    cisco: `%ASA-4-106023: Deny tcp src outside:198.51.100.44/54321 dst inside:10.0.0.50/80 by access-group "outside_acl" [result="Denied"]`,
+    fortinet: `date=2026-08-30 time=14:20:05 devname="FG100D" devid="FG100D3G15800001" logid="0000000013" type="utm" subtype="virus" eventtype="signature text" level="warning" vd="root" msg="File infected." action="passthrough" service="HTTP" srcip=203.0.113.88 dstip=172.16.0.4`,
     suricata: `08/30/2026-14:21:00.123456 [**] [1:2001219:15] ET SCAN Potential SSH Scan OUTBOUND [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.1.200:44321 -> 10.0.0.1:22`,
     win_event: `<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event"><System font="JetBrains Mono"><EventID>4625</EventID><TimeCreated SystemTime="2026-08-30T14:22:00.000Z"/><Computer>DC-01.SOC.INTERNAL</Computer></System><EventData><Data Name="TargetUserName">Administrator</Data><Data Name="WorkstationName">WORKSTATION-X</Data><Data Name="IpAddress">192.168.1.188</Data></EventData></Event>`,
   };
 
   const fetchDashboardData = async () => {
     try {
-      const [statsData, incidentsData, eventsData] = await Promise.all([
+      const [statsData, incidentsData, eventsData, reportsData] = await Promise.all([
         api.getStats(),
         api.getIncidents(10),
         api.getRecentEvents(50),
+        api.getSavedReports(),
       ]);
       if (statsData) setStats(statsData);
       if (incidentsData?.incidents) setIncidents(incidentsData.incidents);
       if (eventsData?.events) setRecentEvents(eventsData.events);
+      if (reportsData?.reports) setSavedReports(reportsData.reports);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
     }
@@ -118,7 +126,47 @@ export function DashboardPage({ pollingInterval }) {
     }
   };
 
+  const handleSaveReportSubmit = async (e) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const title = reportTitle || formData.get('reportTitle') || 'Custom SOC Security Report';
+    const summary = reportSummary || formData.get('reportSummary') || 'Telemetry posture analysis report.';
+
+    try {
+      const res = await api.saveReport(title, summary, stats);
+      setReportMessage('Security report saved successfully!');
+      setReportTitle('');
+      setReportSummary('');
+      fetchDashboardData();
+    } catch (err) {
+      setReportMessage(`Save Error: ${err.message}`);
+    }
+  };
+
   const topIncident = incidents.length > 0 ? incidents[0] : null;
+
+  // DYNAMIC THREAT-DRIVEN SYSTEM HEALTH CALCULATION (ISSUE 6)
+  const highThreatsCount = stats.threat_level_counts?.HIGH || 0;
+  const medThreatsCount = stats.threat_level_counts?.MEDIUM || 0;
+  const maxThreatScore = incidents.length > 0 ? Math.max(...incidents.map((i) => i.max_threat_score || 0)) : 0;
+
+  let healthPercent = 100;
+  let healthStatusText = '● All Systems Healthy';
+  let healthColorClass = 'text-emerald-400';
+  let healthBarClass = 'bg-emerald-500';
+
+  if (highThreatsCount >= 5 || maxThreatScore >= 80) {
+    healthPercent = 64;
+    healthStatusText = '▲ Critical Threat Cluster Active';
+    healthColorClass = 'text-rose-500';
+    healthBarClass = 'bg-rose-500';
+  } else if (highThreatsCount > 0 || medThreatsCount > 3 || maxThreatScore >= 50) {
+    healthPercent = 82;
+    healthStatusText = '▲ Elevated Anomaly Alert';
+    healthColorClass = 'text-amber-400';
+    healthBarClass = 'bg-amber-500';
+  }
 
   return (
     <div className="space-y-6">
@@ -144,6 +192,7 @@ export function DashboardPage({ pollingInterval }) {
           </button>
 
           <button
+            id="add-data-log-tab-btn"
             onClick={() => setActiveSubTab('add-log')}
             className={`px-4 py-2 rounded-lg font-bold transition-all flex items-center gap-2 ${
               activeSubTab === 'add-log'
@@ -153,6 +202,19 @@ export function DashboardPage({ pollingInterval }) {
           >
             <span className="material-symbols-outlined text-base">cloud_upload</span>
             <span>Add Data Log</span>
+          </button>
+
+          <button
+            id="saved-reports-tab-btn"
+            onClick={() => setActiveSubTab('reports')}
+            className={`px-4 py-2 rounded-lg font-bold transition-all flex items-center gap-2 ${
+              activeSubTab === 'reports'
+                ? 'bg-primary text-surface-lowest shadow-md'
+                : 'text-text-muted hover:text-text-primary hover:bg-surface-hover'
+            }`}
+          >
+            <span className="material-symbols-outlined text-base">description</span>
+            <span>Saved Reports ({savedReports.length})</span>
           </button>
         </div>
       </header>
@@ -196,16 +258,18 @@ export function DashboardPage({ pollingInterval }) {
               </div>
             </div>
 
-            {/* KPI 3: System Health */}
+            {/* KPI 3: Threat-Driven System Health (ISSUE 6) */}
             <div className="glass-panel rounded-xl p-5 relative overflow-hidden pl-5 group transition-all duration-300">
-              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-emerald-500"></div>
+              <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${healthBarClass}`}></div>
               <h3 className="text-xs font-mono font-bold text-text-muted mb-1 flex items-center gap-1.5 uppercase tracking-wider">
-                <span className="material-symbols-outlined text-sm text-emerald-400">health_and_safety</span>
+                <span className={`material-symbols-outlined text-sm ${healthColorClass}`}>health_and_safety</span>
                 System Health
               </h3>
-              <div className="text-3xl font-extrabold font-mono text-emerald-400">98%</div>
+              <div className={`text-3xl font-extrabold font-mono ${healthColorClass}`}>
+                {healthPercent}%
+              </div>
               <div className="mt-2 flex items-center text-[11px] font-mono text-text-muted">
-                <span className="mr-1 text-emerald-400">● All nodes operational</span>
+                <span className={`mr-1 font-bold ${healthColorClass}`}>{healthStatusText}</span>
               </div>
             </div>
           </div>
@@ -222,7 +286,7 @@ export function DashboardPage({ pollingInterval }) {
                   <span>AI Forensics Insight</span>
                 </h2>
                 <span className="bg-rose-500/15 text-rose-400 font-mono text-[10px] font-bold px-2.5 py-1 rounded border border-rose-500/40 uppercase tracking-wider">
-                  Critical Alert
+                  {topIncident ? 'Critical Alert' : 'Nominal Baseline'}
                 </span>
               </div>
 
@@ -603,6 +667,112 @@ export function DashboardPage({ pollingInterval }) {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* SUBPAGE 3: SAVED REPORTS (USER-ISOLATED FEATURE - ISSUE 2) */}
+      {activeSubTab === 'reports' && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          {/* Create & Save Security Report Form */}
+          <div className="glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-xl">
+            <div className="flex items-center gap-3 border-b border-border-muted pb-3">
+              <div className="w-9 h-9 rounded-lg bg-primary/15 text-primary border border-primary/30 flex items-center justify-center">
+                <span className="material-symbols-outlined text-xl">bookmark_add</span>
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-text-primary">Save Current Telemetry Security Report</h2>
+                <p className="text-xs text-text-muted">Persist custom security audit report snapshot bound to your user account</p>
+              </div>
+            </div>
+
+            {reportMessage && (
+              <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs font-mono text-emerald-400 flex items-center gap-2">
+                <span className="material-symbols-outlined text-sm">check_circle</span>
+                <span>{reportMessage}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSaveReportSubmit} className="space-y-3">
+              <div>
+                <label className="block text-xs font-mono text-text-muted mb-1 font-bold">Report Title:</label>
+                <input
+                  type="text"
+                  name="reportTitle"
+                  value={reportTitle}
+                  onChange={(e) => setReportTitle(e.target.value)}
+                  placeholder="e.g. Q3 SOC Perimeter Security & Incident Audit"
+                  className="input-cyber w-full rounded-xl py-2 px-3 text-xs font-mono bg-surface-dim border-border-muted"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-mono text-text-muted mb-1 font-bold">Summary / Observations:</label>
+                <textarea
+                  rows={3}
+                  name="reportSummary"
+                  value={reportSummary}
+                  onChange={(e) => setReportSummary(e.target.value)}
+                  placeholder="Executive summary of key threat scores, anomaly bursts, and containment actions..."
+                  className="input-cyber w-full p-3 text-xs font-mono bg-surface-dim border-border-muted resize-none rounded-xl"
+                />
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  id="save-report-submit-btn"
+                  type="submit"
+                  className="btn-primary px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-sm">save</span>
+                  <span>Save Report to Account</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* User's Saved Reports List */}
+          <div className="glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-xl">
+            <div className="flex items-center justify-between border-b border-border-muted pb-3">
+              <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary text-xl">folder_special</span>
+                <span>Your Saved Security Reports ({savedReports.length})</span>
+              </h2>
+              <span className="font-mono text-[10px] text-text-muted bg-surface px-2 py-0.5 rounded border border-border-muted">
+                ISOLATED TO CURRENT USER
+              </span>
+            </div>
+
+            {savedReports.length > 0 ? (
+              <div className="space-y-3">
+                {savedReports.map((rpt, idx) => (
+                  <div
+                    key={rpt.report_id || idx}
+                    className="p-4 rounded-xl bg-surface-dim border border-border-muted space-y-2 font-mono text-xs hover:border-primary transition-colors"
+                  >
+                    <div className="flex justify-between items-start">
+                      <h3 className="font-bold text-sm text-text-primary">{rpt.title}</h3>
+                      <span className="text-[10px] text-text-muted">
+                        {(rpt.created_at || '').substring(0, 10)} UTC
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-text-muted leading-relaxed font-sans">{rpt.summary}</p>
+                    {rpt.stats_snapshot && (
+                      <div className="flex gap-3 pt-2 text-[10px] text-text-muted border-t border-border-muted/50">
+                        <span>Total Events: <strong className="text-text-primary">{rpt.stats_snapshot.total_events_ingested || 0}</strong></span>
+                        <span>High Threats: <strong className="text-rose-400">{rpt.stats_snapshot.threat_level_counts?.HIGH || 0}</strong></span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 text-center text-text-muted font-mono text-xs">
+                <span className="material-symbols-outlined text-3xl mb-2 text-text-muted">description</span>
+                <p>No saved reports found for your account.</p>
+                <p className="text-[10px] text-text-dim mt-1">Use the form above to save a custom security report.</p>
+              </div>
+            )}
           </div>
         </div>
       )}

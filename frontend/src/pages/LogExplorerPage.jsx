@@ -19,6 +19,7 @@ export function LogExplorerPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('Last 15m');
   const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 15;
 
   const fetchEvents = async () => {
     setIsLoading(true);
@@ -54,7 +55,7 @@ export function LogExplorerPage() {
 
   const handleExportCsv = async () => {
     try {
-      await api.exportCSV();
+      await api.exportCsv();
     } catch (err) {
       alert(`Export Failed: ${err.message}`);
     }
@@ -119,14 +120,15 @@ export function LogExplorerPage() {
           <div className="flex items-center bg-surface-dim border border-border-muted rounded-xl px-3 py-1.5 gap-2 text-xs font-mono">
             <span className="material-symbols-outlined text-text-muted text-sm">schedule</span>
             <select
+              id="log-explorer-time-select"
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value)}
-              className="bg-transparent text-text-primary border-none focus:outline-none font-mono"
+              className="bg-surface-dim text-text-primary border border-border-muted rounded-lg px-2 py-0.5 focus:outline-none font-mono text-xs"
             >
-              <option value="Last 15m">Last 15m</option>
-              <option value="Last 1h">Last 1h</option>
-              <option value="Last 24h">Last 24h</option>
-              <option value="All Time">All Time</option>
+              <option value="Last 15m" className="bg-surface-dim text-text-primary">Last 15m</option>
+              <option value="Last 1h" className="bg-surface-dim text-text-primary">Last 1h</option>
+              <option value="Last 24h" className="bg-surface-dim text-text-primary">Last 24h</option>
+              <option value="All Time" className="bg-surface-dim text-text-primary">All Time</option>
             </select>
           </div>
 
@@ -403,33 +405,40 @@ export function LogExplorerPage() {
             </table>
           </div>
 
-          {/* Table Pagination Controls */}
-          <div className="p-3 border-t border-border-muted flex justify-center items-center gap-3 bg-surface-dim font-mono text-xs">
-            <button
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              className="p-1 rounded hover:bg-surface-hover text-text-muted disabled:opacity-40"
-            >
-              <span className="material-symbols-outlined text-base">chevron_left</span>
-            </button>
-            <div className="flex gap-1">
-              <button className="w-6 h-6 rounded bg-primary text-surface-lowest font-bold text-xs flex items-center justify-center">
-                1
+          {/* Table Pagination Controls (Rendered ONLY when totalPages > 1) */}
+          {Math.ceil(filteredEvents.length / PAGE_SIZE) > 1 && (
+            <div className="p-3 border-t border-border-muted flex justify-center items-center gap-3 bg-surface-dim font-mono text-xs">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                className="p-1 rounded hover:bg-surface-hover text-text-muted disabled:opacity-40"
+              >
+                <span className="material-symbols-outlined text-base">chevron_left</span>
               </button>
-              <button className="w-6 h-6 rounded hover:bg-surface-hover text-text-muted text-xs flex items-center justify-center">
-                2
-              </button>
-              <button className="w-6 h-6 rounded hover:bg-surface-hover text-text-muted text-xs flex items-center justify-center">
-                3
+              <div className="flex gap-1">
+                {Array.from({ length: Math.ceil(filteredEvents.length / PAGE_SIZE) }, (_, i) => i + 1).map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`w-6 h-6 rounded text-xs flex items-center justify-center font-bold ${
+                      currentPage === pageNum
+                        ? 'bg-primary text-surface-lowest'
+                        : 'hover:bg-surface-hover text-text-muted'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+              </div>
+              <button
+                disabled={currentPage >= Math.ceil(filteredEvents.length / PAGE_SIZE)}
+                onClick={() => setCurrentPage((p) => Math.min(Math.ceil(filteredEvents.length / PAGE_SIZE), p + 1))}
+                className="p-1 rounded hover:bg-surface-hover text-text-primary disabled:opacity-40"
+              >
+                <span className="material-symbols-outlined text-base">chevron_right</span>
               </button>
             </div>
-            <button
-              onClick={() => setCurrentPage((p) => p + 1)}
-              className="p-1 rounded hover:bg-surface-hover text-text-primary"
-            >
-              <span className="material-symbols-outlined text-base">chevron_right</span>
-            </button>
-          </div>
+          )}
         </div>
       </div>
 

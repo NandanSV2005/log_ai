@@ -58,19 +58,8 @@ class GeoIPResolver:
 
         try:
             ip_obj = ipaddress.ip_address(ip_str.strip())
-            is_private = ip_obj.is_private or ip_obj.is_loopback
 
-            if is_private:
-                return {
-                    "lat": 37.7749,
-                    "lng": -122.4194,
-                    "city": "Internal LAN Node",
-                    "country": "Private Subnet",
-                    "country_code": "LAN",
-                    "is_private": True,
-                }
-
-            # Check pre-compiled CIDR ranges
+            # Check pre-compiled CIDR ranges in offline DB first
             for lat, lng, city, country, code, network in OFFLINE_GEOIP_DB:
                 if ip_obj in network:
                     return {
@@ -81,6 +70,17 @@ class GeoIPResolver:
                         "country_code": code,
                         "is_private": False,
                     }
+
+            # Check if genuinely unmapped private or loopback IP
+            if ip_obj.is_private or ip_obj.is_loopback:
+                return {
+                    "lat": 37.7749,
+                    "lng": -122.4194,
+                    "city": "Internal LAN Node",
+                    "country": "Private Subnet",
+                    "country_code": "LAN",
+                    "is_private": True,
+                }
 
             # Deterministic offline fallback for any public IP address
             hash_val = sum(int(b) for b in ip_obj.packed)

@@ -23,6 +23,19 @@ limiter = Limiter(key_func=get_remote_address)
 
 router = APIRouter(prefix="/api/v1", tags=["Log Ingestion"])
 
+def _get_username(user: Optional[object]) -> str:
+    if not user:
+        return "default_user"
+    if hasattr(user, "username") and getattr(user, "username"):
+        return str(getattr(user, "username"))
+    if isinstance(user, dict):
+        u = user.get("username") or user.get("sub")
+        if u:
+            return str(u)
+    if isinstance(user, str) and not user.startswith("<"):
+        return user
+    return "default_user"
+
 class IngestResponse(BaseModel):
     ingestion_id: str = Field(..., description="Unique forensic identifier for the ingestion request")
     status: str = Field("accepted", description="Ingestion processing status")
@@ -108,11 +121,15 @@ async def ingest_logs(
     merkle_root = audit_merkle_tree.get_root_hash()
 
     # 5. Enqueue for asynchronous background parsing (Instant 202 response)
+    username = _get_username(current_user)
+
+    # 6. Dispatch async parsing task to worker queue
     task = IngestionTask(
         ingestion_id=ingestion_id,
         raw_payload=raw_str,
         detected_format=detected_format,
         raw_file_path=str(raw_file_path),
+        owner_username=username,
     )
     await queue_manager.enqueue_task(task)
 
@@ -168,8 +185,10 @@ async def ingest_log_file(
     dynamic_parser = DynamicParser()
     unified_events = dynamic_parser.parse(raw_str)
 
+    username = _get_username(current_user)
     enriched_events = anomaly_engine.evaluate_events(unified_events)
     for event in enriched_events:
+        event.owner_username = username
         event.xai_explanation = xai_explainer.generate_explanation(event)
         incident_engine.process_event(event)
 

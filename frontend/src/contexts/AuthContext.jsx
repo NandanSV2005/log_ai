@@ -10,6 +10,8 @@ export function AuthProvider({ children }) {
   const loginUser = async (user, pass) => {
     const res = await api.login(user, pass);
     if (res.access_token) {
+      localStorage.setItem('token', res.access_token);
+      localStorage.setItem('username', user);
       setToken(res.access_token);
       setUsername(user);
     }
@@ -19,6 +21,8 @@ export function AuthProvider({ children }) {
   const logoutUser = () => {
     setToken(null);
     setUsername('');
+    localStorage.clear();
+    sessionStorage.clear();
     api.logout();
   };
 

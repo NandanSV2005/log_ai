@@ -53,7 +53,7 @@ export function ForensicsPage() {
           </div>
 
           <button
-            onClick={() => api.exportCSV()}
+            onClick={() => api.exportCsv()}
             className="btn-secondary px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm"
           >
             <span className="material-symbols-outlined text-sm">download</span>

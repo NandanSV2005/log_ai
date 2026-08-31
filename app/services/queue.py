@@ -23,6 +23,7 @@ class IngestionTask:
     raw_payload: str
     detected_format: str
     raw_file_path: str
+    owner_username: Optional[str] = None
 
 class LogIngestQueueManager:
     def __init__(self, maxsize: int = settings.QUEUE_MAX_SIZE):
@@ -106,6 +107,9 @@ class LogIngestQueueManager:
         try:
             # 1. Parse raw payload into normalized UnifiedEvent models via DynamicParser
             unified_events = self.dynamic_parser.parse(task.raw_payload)
+            for event in unified_events:
+                if task.owner_username:
+                    event.owner_username = task.owner_username
             
             # 2. Enrich events with Anomaly Detection & Threat Scoring (ML + Rules)
             enriched_events = anomaly_engine.evaluate_events(unified_events)

@@ -65,8 +65,8 @@ export const api = {
   },
 
   logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
+    localStorage.clear();
+    sessionStorage.clear();
     window.location.href = '/login';
   },
 
@@ -132,6 +132,22 @@ export const api = {
     a.click();
     a.remove();
     window.URL.revokeObjectURL(url);
+  },
+
+  async saveReport(title, summary, statsSnapshot = null) {
+    const res = await fetch(`${API_BASE_URL}/api/v1/dashboard/reports/save`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ title, summary, stats_snapshot: statsSnapshot }),
+    });
+    return await handleResponse(res);
+  },
+
+  async getSavedReports() {
+    const res = await fetch(`${API_BASE_URL}/api/v1/dashboard/reports`, {
+      headers: getAuthHeaders(),
+    });
+    return await handleResponse(res);
   },
 
   async resetData() {

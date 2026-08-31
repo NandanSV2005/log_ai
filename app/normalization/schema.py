@@ -47,6 +47,10 @@ class UnifiedEvent(BaseModel):
         default="",
         description="Plain-English XAI explanation of threat score and anomaly signals",
     )
+    owner_username: Optional[str] = Field(
+        default=None,
+        description="Authenticated owner username for tenant data isolation",
+    )
     feature_attribution: list[dict] = Field(
         default_factory=list,
         description="ML feature attribution breakdown with baseline z-scores and descriptions",

@@ -19,13 +19,14 @@ export function ThreatIntelPage({ airGapped }) {
 
   // Helper to convert lat/lng to SVG 1000x500 screen coordinates
   const convertLatLngToXY = (lat, lng) => {
-    const x = ((lng + 180) * (1000 / 360)) % 1000;
-    const y = (90 - lat) * (500 / 180);
+    const latitude = typeof lat === 'number' && !isNaN(lat) ? lat : 20;
+    const longitude = typeof lng === 'number' && !isNaN(lng) ? lng : 0;
+    const x = ((longitude + 180) * (1000 / 360)) % 1000;
+    const y = (90 - latitude) * (500 / 180);
     return { x: Math.max(20, Math.min(980, x)), y: Math.max(20, Math.min(480, y)) };
   };
 
   const fetchThreatIntelData = async () => {
-    setIsLoading(true);
     try {
       const [statsRes, incidentsRes, eventsRes] = await Promise.all([
         api.getStats(),
@@ -41,18 +42,19 @@ export function ThreatIntelPage({ airGapped }) {
 
       // Perform real dynamic GeoIP resolution for events with source IPs
       const markers = await Promise.all(
-        eventsList.slice(0, 15).map(async (evt) => {
-          const ip = evt.source_ip || '192.168.1.1';
+        eventsList.slice(0, 20).map(async (evt) => {
+          const ip = evt.source_ip;
+          if (!ip) return null;
           try {
             const geo = await api.lookupGeoIp(ip);
-            const coords = convertLatLngToXY(geo.lat || 37.77, geo.lng || -122.41);
+            const coords = convertLatLngToXY(geo.lat, geo.lng);
             return {
               ip,
               city: geo.city || 'Unknown',
               country: geo.country || 'Global',
               code: geo.country_code || 'UN',
-              lat: geo.lat,
-              lng: geo.lng,
+              lat: geo.lat || 0,
+              lng: geo.lng || 0,
               x: coords.x,
               y: coords.y,
               threat_level: evt.threat_level || 'LOW',
@@ -75,6 +77,8 @@ export function ThreatIntelPage({ airGapped }) {
 
   useEffect(() => {
     fetchThreatIntelData();
+    const interval = setInterval(fetchThreatIntelData, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleSearchLookup = async (e) => {
@@ -90,7 +94,7 @@ export function ThreatIntelPage({ airGapped }) {
 
   const handleExportCSV = async () => {
     try {
-      await api.exportCSV();
+      await api.exportCsv();
     } catch (err) {
       alert(`Export Error: ${err.message}`);
     }

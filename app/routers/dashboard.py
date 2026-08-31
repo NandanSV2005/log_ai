@@ -1,8 +1,10 @@
 import json
 import io
 import csv
+import uuid
+import datetime
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from fastapi import APIRouter, Query, Response, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from app.storage.normalized_writer import normalized_storage_manager
@@ -13,6 +15,15 @@ from app.routers.auth import get_current_user
 from app.services.geoip import geoip_resolver
 
 router = APIRouter(prefix="/api/v1/dashboard", tags=["Dashboard"])
+
+def _get_username(user: Optional[Any]) -> str:
+    if not user:
+        return "default_user"
+    if hasattr(user, "username") and getattr(user, "username"):
+        return str(getattr(user, "username"))
+    if isinstance(user, dict):
+        return user.get("username") or user.get("sub") or "default_user"
+    return str(user)
 
 @router.get("/geoip/lookup/{ip}")
 async def lookup_geoip(ip: str, current_user=Depends(get_current_user)):
@@ -44,8 +55,8 @@ async def reset_dashboard_data(current_user=Depends(get_current_user)):
         "deleted_files": deleted_files,
     }
 
-def _read_all_normalized_records() -> List[Dict[str, Any]]:
-    """Reads all normalized event dictionaries across JSONL files in storage_dir."""
+def _read_all_normalized_records(owner_username: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Reads all normalized event dictionaries across JSONL files in storage_dir, filtered by owner_username."""
     storage_dir = normalized_storage_manager.storage_dir
     if not storage_dir.exists():
         return []
@@ -60,6 +71,14 @@ def _read_all_normalized_records() -> List[Dict[str, Any]]:
                     line_str = line.strip()
                     if line_str:
                         data = json.loads(line_str)
+                        # User Data Isolation: If owner_username is provided, strictly include matching tenant records only
+                        rec_owner = data.get("owner_username")
+                        if owner_username:
+                            if rec_owner != owner_username:
+                                continue
+                        else:
+                            if not rec_owner or str(rec_owner).startswith("<"):
+                                continue
                         records.append(data)
         except Exception:
             continue
@@ -75,7 +94,8 @@ async def get_recent_events(
     Returns the most recent normalized UnifiedEvent records (up to limit, default 100),
     including XAI explanations and Merkle audit hashes.
     """
-    all_records = _read_all_normalized_records()
+    username = _get_username(current_user)
+    all_records = _read_all_normalized_records(owner_username=username)
 
     # Sort descending by timestamp string
     all_records.sort(key=lambda r: str(r.get("timestamp", "")), reverse=True)
@@ -103,7 +123,8 @@ async def get_dashboard_stats(current_user=Depends(get_current_user)):
     - threat_level_counts (HIGH, MEDIUM, LOW)
     - vendor_parser_counts (cisco_asa, fortinet, suricata, pfsense, syslog, cef, etc.)
     """
-    all_records = _read_all_normalized_records()
+    username = _get_username(current_user)
+    all_records = _read_all_normalized_records(owner_username=username)
 
     total_events = len(all_records)
     threat_counts = {"HIGH": 0, "MEDIUM": 0, "LOW": 0}
@@ -145,10 +166,11 @@ async def get_dashboard_stats(current_user=Depends(get_current_user)):
 @router.get("/export/csv")
 async def export_threat_report_csv(current_user=Depends(get_current_user)):
     """
-    Compiles all ingested events where threat_level is HIGH or MEDIUM into CSV format.
+    Compiles all ingested events where threat_level is HIGH or MEDIUM into CSV format for the current user.
     Columns: Timestamp, Source_IP, Threat_Level, Threat_Score, MITRE_Tactic, Parser, Merkle_Hash, XAI_Explanation
     """
-    all_records = _read_all_normalized_records()
+    username = _get_username(current_user)
+    all_records = _read_all_normalized_records(owner_username=username)
     high_med_records = [
         r for r in all_records
         if str(r.get("threat_level", "")).upper() in ("HIGH", "MEDIUM")
@@ -217,6 +239,7 @@ async def update_event_status(
             detail=f"Event with ID '{event_id}' not found",
         )
 
+    username = _get_username(current_user)
     jsonl_files = list(storage_dir.glob("normalized_*.jsonl"))
     found = False
     updated_event = None
@@ -232,6 +255,9 @@ async def update_event_status(
                 line_str = line.strip()
                 if line_str:
                     record = json.loads(line_str)
+                    if record.get("owner_username") != username:
+                        new_lines.append(line)
+                        continue
                     raw_hash = record.get("raw_event_hash") or record.get("payload_hash") or ""
                     # Match against raw_event_hash, payload_hash, or event_id string
                     if raw_hash == event_id or record.get("event_id") == event_id or (raw_hash and event_id in raw_hash):
@@ -265,17 +291,19 @@ async def update_event_status(
     }
 
 
-def _ensure_incidents_hydrated():
-    """If incident_engine has no active tracking state, hydrate from stored JSONL events."""
-    if not incident_engine.incidents:
-        all_records = _read_all_normalized_records()
-        all_records.sort(key=lambda r: str(r.get("timestamp", "")))
-        for record in all_records:
-            try:
-                event = UnifiedEvent(**record)
-                incident_engine.process_event(event)
-            except Exception:
-                continue
+def _ensure_incidents_hydrated(owner_username: Optional[str] = None):
+    """If incident_engine has no active tracking state for owner_username, hydrate from stored JSONL events."""
+    if owner_username:
+        has_user_incidents = any(inc.owner_username == owner_username for inc in incident_engine.incidents.values())
+        if not has_user_incidents:
+            all_records = _read_all_normalized_records(owner_username=owner_username)
+            all_records.sort(key=lambda r: str(r.get("timestamp", "")))
+            for record in all_records:
+                try:
+                    event = UnifiedEvent(**record)
+                    incident_engine.process_event(event)
+                except Exception:
+                    continue
 
 
 @router.get("/incidents", response_model=Dict[str, Any])
@@ -284,15 +312,69 @@ async def get_incidents(
     current_user=Depends(get_current_user),
 ):
     """
-    Returns aggregated incident clusters sorted by max_threat_score descending.
+    Returns aggregated incident clusters sorted by max_threat_score descending for current user.
     """
-    _ensure_incidents_hydrated()
-    incidents = incident_engine.get_incidents(limit=limit)
+    username = _get_username(current_user)
+    _ensure_incidents_hydrated(owner_username=username)
+    user_incidents = incident_engine.get_incidents(limit=limit, owner_username=username)
+    
     return {
-        "count": len(incidents),
-        "total_available": len(incident_engine.incidents),
-        "incidents": incidents,
+        "count": len(user_incidents),
+        "total_available": len(user_incidents),
+        "incidents": user_incidents,
     }
+
+class SavedReportRequest(BaseModel):
+    title: str = Field(..., description="Report title")
+    summary: str = Field(..., description="Report summary / findings")
+    stats_snapshot: Optional[Dict[str, Any]] = Field(default=None)
+
+@router.post("/reports/save")
+async def save_report(
+    body: SavedReportRequest,
+    current_user=Depends(get_current_user),
+):
+    """Saves a generated security report to disk for the current user."""
+    username = _get_username(current_user)
+    reports_dir = Path("data/reports")
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    file_path = reports_dir / f"reports_{username}.json"
+    
+    existing = []
+    if file_path.exists():
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                existing = json.load(f)
+        except Exception:
+            existing = []
+            
+    report_entry = {
+        "report_id": uuid.uuid4().hex,
+        "title": body.title,
+        "summary": body.summary,
+        "stats_snapshot": body.stats_snapshot,
+        "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "owner_username": username,
+    }
+    existing.insert(0, report_entry)
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(existing, f, indent=2)
+        
+    return {"status": "success", "message": "Report saved successfully.", "report": report_entry}
+
+@router.get("/reports")
+async def get_saved_reports(current_user=Depends(get_current_user)):
+    """Retrieves saved reports isolated to current user."""
+    username = _get_username(current_user)
+    file_path = Path("data/reports") / f"reports_{username}.json"
+    if not file_path.exists():
+        return {"count": 0, "reports": []}
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            reports = json.load(f)
+            return {"count": len(reports), "reports": reports}
+    except Exception:
+        return {"count": 0, "reports": []}
 
 
 @router.get("/incidents/{incident_id}", response_model=Dict[str, Any])
@@ -303,16 +385,17 @@ async def get_incident_detail(
     """
     Returns full details for a specific Incident including all correlated member events.
     """
-    _ensure_incidents_hydrated()
+    username = _get_username(current_user)
+    _ensure_incidents_hydrated(owner_username=username)
     incident = incident_engine.get_incident_by_id(incident_id)
-    if not incident:
+    if not incident or incident.owner_username != username:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Incident with ID '{incident_id}' not found",
         )
 
     member_hashes = set(incident.event_hashes)
-    all_records = _read_all_normalized_records()
+    all_records = _read_all_normalized_records(owner_username=username)
     member_events = [
         r for r in all_records
         if (r.get("raw_event_hash") in member_hashes or r.get("payload_hash") in member_hashes)
@@ -350,9 +433,10 @@ async def update_incident_status(
             detail=f"Invalid status '{body.status}'. Allowed values: New, Investigating, Resolved, Dismissed",
         )
 
-    _ensure_incidents_hydrated()
+    username = _get_username(current_user)
+    _ensure_incidents_hydrated(owner_username=username)
     incident = incident_engine.get_incident_by_id(incident_id)
-    if not incident:
+    if not incident or incident.owner_username != username:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Incident with ID '{incident_id}' not found",

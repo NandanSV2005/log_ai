@@ -182,7 +182,8 @@ def test_api_incidents_endpoints_success(auth_headers):
         threat_score=90.0,
         threat_level="HIGH",
         mitre_tactic="Initial Access",
-        original_event="SSH attack"
+        original_event="SSH attack",
+        owner_username="correlation_test_analyst",
     )
     e2 = UnifiedEvent(
         timestamp=(base_time + datetime.timedelta(minutes=2)).isoformat(),
@@ -191,7 +192,8 @@ def test_api_incidents_endpoints_success(auth_headers):
         threat_score=40.0,
         threat_level="MEDIUM",
         mitre_tactic="Persistence",
-        original_event="Cron job added"
+        original_event="Cron job added",
+        owner_username="correlation_test_analyst",
     )
 
     inc = incident_engine.process_event(e1)
