@@ -318,10 +318,10 @@ export function LandingPage() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-8 text-xs font-mono font-bold tracking-wider text-text-muted">
-          <Link to="/threat-intel" className="hover:text-primary transition-colors">THREAT INTEL</Link>
-          <Link to="/log-explorer" className="hover:text-primary transition-colors">LOG EXPLORER</Link>
-          <Link to="/forensics" className="hover:text-primary transition-colors">FORENSICS</Link>
-          <Link to="/dashboard" className="hover:text-primary transition-colors">COMMAND CENTER</Link>
+          <Link to="/threat-intel" className="hover:text-primary transition-colors">THREATS</Link>
+          <Link to="/log-explorer" className="hover:text-primary transition-colors">TELEMETRY</Link>
+          <Link to="/forensics" className="hover:text-primary transition-colors">EVIDENCE</Link>
+          <Link to="/dashboard" className="hover:text-primary transition-colors">CONSOLE</Link>
         </nav>
 
         <div className="flex items-center gap-3">

@@ -20,7 +20,7 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
   }, []);
 
   return (
-    <header className="w-full bg-surface border-b border-border-muted sticky top-0 z-40 shadow-sm transition-colors duration-200">
+    <header className="w-full bg-surface opacity-100 border-b border-border-muted sticky top-0 z-50 shadow-md backdrop-blur-none transition-colors duration-200">
       {/* Top Navbar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Brand Logo */}

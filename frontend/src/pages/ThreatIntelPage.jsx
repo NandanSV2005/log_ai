@@ -180,13 +180,21 @@ export function ThreatIntelPage() {
               {/* New Zealand */}
               <path d="M 960,360 C 970,355 975,370 968,385 C 960,400 950,405 952,390 C 953,375 955,365 960,360 Z" />
             </g>
+            {/* Threat Vector Connecting Curved Paths */}
+            <g stroke={theme === 'sage' ? 'rgba(113, 131, 85, 0.4)' : 'rgba(167, 139, 250, 0.35)'} strokeWidth="1" strokeDasharray="3 3" fill="none">
+              {geoThreatMarkers.map((m, i) => {
+                const midX = (m.x + 500) / 2;
+                const midY = Math.min(m.y, 250) - 30;
+                return <path key={i} d={`M ${m.x} ${m.y} Q ${midX} ${midY} 500 250`} />;
+              })}
+            </g>
           </svg>
 
-          {/* Real Dynamic GeoIP Threat Markers Overlay */}
+          {/* Precision Geospatial Threat Node Markers Overlay */}
           {geoThreatMarkers.map((marker, idx) => {
             const isHigh = marker.threat_level === 'HIGH';
             const isMed = marker.threat_level === 'MEDIUM';
-            const colorClass = isHigh ? 'bg-rose-500 text-rose-400 border-rose-500' : isMed ? 'bg-amber-500 text-amber-400 border-amber-500' : 'bg-emerald-400 text-emerald-400 border-emerald-400';
+            const dotBg = isHigh ? 'bg-rose-500' : isMed ? 'bg-amber-500' : 'bg-emerald-400';
             const isSelected = selectedMarker?.ip === marker.ip;
 
             return (
@@ -197,11 +205,19 @@ export function ThreatIntelPage() {
                 style={{ left: `${(marker.x / 1000) * 100}%`, top: `${(marker.y / 500) * 100}%` }}
               >
                 <div className="relative flex items-center justify-center">
-                  <div className={`w-4 h-4 rounded-full ${colorClass.split(' ')[0]} opacity-75 animate-ping absolute`}></div>
-                  <div className={`w-3 h-3 rounded-full ${colorClass.split(' ')[0]} border-2 border-white/80 shadow-md`}></div>
+                  {/* Micro Pulse Ring */}
+                  <div className={`w-3.5 h-3.5 rounded-full ${dotBg} opacity-30 animate-ping absolute`}></div>
+                  
+                  {/* Precise Node Pinhead */}
+                  <div className={`w-2.5 h-2.5 rounded-full ${dotBg} ring-2 ring-surface border border-white/90 shadow-sm`}></div>
+                  
+                  {/* Selected Reticle Target */}
+                  {isSelected && (
+                    <div className="w-5 h-5 rounded-full border border-primary animate-pulse absolute -inset-1 pointer-events-none"></div>
+                  )}
                 </div>
 
-                {/* Marker Hover Badge */}
+                {/* Marker Hover / Click Tooltip Badge */}
                 <div className="hidden group-hover:block absolute left-1/2 -translate-x-1/2 bottom-5 whitespace-nowrap bg-surface-dim border border-border-muted px-2.5 py-1 rounded-lg shadow-xl font-mono text-[10px] z-30">
                   <div className="font-bold text-text-primary">{marker.ip}</div>
                   <div className="text-text-muted">{marker.city}, {marker.country}</div>
