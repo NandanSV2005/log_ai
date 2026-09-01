@@ -80,6 +80,10 @@
   --terminal-text-dim: #49543e;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: var(--color-bg-dim);
   color: var(--color-text-main);

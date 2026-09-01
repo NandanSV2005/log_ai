@@ -318,10 +318,10 @@ export function LandingPage() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-8 text-xs font-mono font-bold tracking-wider text-text-muted">
-          <Link to="/threat-intel" className="hover:text-primary transition-colors">THREATS</Link>
-          <Link to="/log-explorer" className="hover:text-primary transition-colors">TELEMETRY</Link>
-          <Link to="/forensics" className="hover:text-primary transition-colors">EVIDENCE</Link>
-          <Link to="/dashboard" className="hover:text-primary transition-colors">CONSOLE</Link>
+          <a href="#pipeline" className="hover:text-primary transition-colors">PIPELINE</a>
+          <a href="#capabilities" className="hover:text-primary transition-colors">CAPABILITIES</a>
+          <a href="#topology" className="hover:text-primary transition-colors">TOPOLOGY</a>
+          <a href="#estimator" className="hover:text-primary transition-colors">ESTIMATOR</a>
         </nav>
 
         <div className="flex items-center gap-3">
@@ -468,7 +468,7 @@ export function LandingPage() {
         </div>
 
         {/* CHAPTER 02: 6-STAGE ZERO-LOSS TELEMETRY PIPELINE (GOLD STANDARD INTERACTION MODEL) */}
-        <section className="max-w-7xl mx-auto px-6 py-16 border-b border-border-muted space-y-8">
+        <section id="pipeline" className="max-w-7xl mx-auto px-6 py-16 border-b border-border-muted space-y-8 scroll-mt-24">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-border-muted pb-4">
             <div>
               <div className="text-xs font-mono text-text-muted uppercase tracking-widest">[ CHAPTER 02 // PIPELINE ARCHITECTURE ]</div>
@@ -535,7 +535,7 @@ export function LandingPage() {
         </section>
 
         {/* CHAPTER 03: INTERACTIVE SECURITY CAPABILITIES SHOWCASE */}
-        <section className="max-w-7xl mx-auto px-6 py-16 border-b border-border-muted space-y-8">
+        <section id="capabilities" className="max-w-7xl mx-auto px-6 py-16 border-b border-border-muted space-y-8 scroll-mt-24">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-border-muted pb-4">
             <div>
               <div className="text-xs font-mono text-text-muted uppercase tracking-widest">[ CHAPTER 03 // PLATFORM CAPABILITIES ]</div>
@@ -654,7 +654,7 @@ export function LandingPage() {
         </section>
 
         {/* CHAPTER 04: INTERACTIVE SYSTEM ARCHITECTURE TOPOLOGY */}
-        <section className="max-w-7xl mx-auto px-6 py-16 border-b border-border-muted space-y-8">
+        <section id="topology" className="max-w-7xl mx-auto px-6 py-16 border-b border-border-muted space-y-8 scroll-mt-24">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-border-muted pb-4">
             <div>
               <div className="text-xs font-mono text-text-muted uppercase tracking-widest">[ CHAPTER 04 // SYSTEM TOPOLOGY ]</div>
@@ -722,7 +722,7 @@ export function LandingPage() {
         </section>
 
         {/* CHAPTER 05: FINANCIAL IMPACT ESTIMATOR */}
-        <section className="max-w-7xl mx-auto px-6 py-16 space-y-8">
+        <section id="estimator" className="max-w-7xl mx-auto px-6 py-16 space-y-8 scroll-mt-24">
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <div className="text-xs font-mono text-text-muted uppercase tracking-widest">[ CHAPTER 05 // FINANCIAL ESTIMATOR ]</div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
