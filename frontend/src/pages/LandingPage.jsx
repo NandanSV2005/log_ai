@@ -5,7 +5,7 @@ import { useTheme } from '../contexts/ThemeContext';
 export function LandingPage() {
   const { theme, setTheme } = useTheme();
 
-  // 1. 6-Stage Telemetry Processing Pipeline Hover/Click State
+  // 1. 6-Stage Processing Pipeline Hover/Click State
   const [activePipelineStage, setActivePipelineStage] = useState(1);
 
   // 2. Interactive Feature Capabilities Tour Hover/Click State
@@ -18,12 +18,12 @@ export function LandingPage() {
   const [logVolume, setLogVolume] = useState(500000);
   const [devicesMonitored, setDevicesMonitored] = useState(25);
 
-  // Calculations for Financial Impact Estimator
+  // Calculations for Financial Impact Estimator (Formulas 100% UNCHANGED)
   const hoursSaved = ((logVolume * 0.001 * 0.85 * 3.5 * 30) / 60).toFixed(1);
   const mttrReduction = Math.min(85, (50 + devicesMonitored * 0.2)).toFixed(1);
   const monthlySavings = (hoursSaved * 65).toLocaleString('en-US', { maximumFractionDigits: 0 });
 
-  // Ticker items for live SOC telemetry feel
+  // Ticker items for live log event feed
   const TICKER_ITEMS = [
     { type: 'ALERT', color: 'text-rose-400', text: '[ALERT] Connection Flood detected on Edge Firewall (Cisco ASA)' },
     { type: 'INFO', color: 'text-text-muted', text: '[INFO] OCSF 1.1 Schema Normalization Pipeline Active' },
@@ -32,270 +32,270 @@ export function LandingPage() {
     { type: 'ALERT', color: 'text-rose-400', text: '[ALERT] Multiple failed SSH auth attempts - MITRE T1110' },
   ];
 
-  // 6-Stage Telemetry Processing Pipeline Data
+  // 6-Stage Telemetry Processing Pipeline Data (Simplified Plain English Copy)
   const PIPELINE_STAGES = [
     {
       id: 1,
       num: '01',
-      name: 'Raw Ingestion',
-      title: 'Stage 1: Raw Payload Wire Capture & SHA-256 Merkle Hashing',
+      name: 'Receive Logs',
+      title: 'Stage 1: Receive Raw Logs & Hash Payloads',
       filepath: 'app/storage/raw_writer.py',
-      desc: 'Raw log payloads are captured byte-for-byte at the network edge and immediately hashed with SHA-256 before any parsing occurs, establishing an unbroken forensic chain of custody with zero information loss.',
+      desc: 'Raw logs are collected from network devices and immediately given a tamper-proof SHA-256 fingerprint before processing, ensuring complete data accuracy.',
       payload: '%ASA-4-106023: Deny tcp src outside:185.220.100.22/51422 dst inside:10.0.0.10/80 by access-group "outside_acl"',
       digest: 'a4ea94c43d9dc8c7753255ca0d6e2bb2093560056c170d2f992edb7d36071e3f',
-      techBadge: 'Zero-Loss Capture',
+      techBadge: 'Zero-Loss Ingestion',
     },
     {
       id: 2,
       num: '02',
-      name: 'Dynamic Parsing',
-      title: 'Stage 2: Vendor Format Auto-Detection & Key-Value Extraction',
+      name: 'Identify Format',
+      title: 'Stage 2: Automatic Format Identification',
       filepath: 'app/parsers/dynamic_parser.py',
-      desc: 'Dynamic extractors identify Cisco ASA, Fortinet, Suricata, and pfSense payloads automatically, converting unstructured syslog text into structured key-value attributes.',
+      desc: 'Stitch automatically recognizes log formats from Cisco, Fortinet, Suricata, and pfSense, extracting key values like IP addresses, ports, and actions.',
       payload: 'Detected Format: Cisco ASA | Action: DENY | Protocol: TCP | SrcIP: 185.220.100.22 | DstIP: 10.0.0.10 | DstPort: 80',
       digest: '3c8e92ba8712df649f109281a8ef1284561029e8471b6501928471209e847120',
-      techBadge: 'Multi-Vendor Parsing',
+      techBadge: 'Format Detector',
     },
     {
       id: 3,
       num: '03',
-      name: 'OCSF Normalization',
-      title: 'Stage 3: OCSF 1.1 Schema Mapping & Field Standardization',
+      name: 'Organize Fields',
+      title: 'Stage 3: Organize Fields with OCSF Standards',
       filepath: 'app/normalization/schema.py',
-      desc: 'Normalizes arbitrary security events into standard OCSF 1.1 UnifiedEvent objects with standardized ISO timestamps, severity tiers, IP types, and device metadata.',
+      desc: 'Converts raw log fields into standard OCSF 1.1 formats with consistent names, timestamps, and severity levels so all systems speak the same language.',
       payload: 'UnifiedEvent(event_type="cisco_asa:deny", severity="Warning", threat_level="MEDIUM", threat_score=65.0, status="New")',
       digest: '7a910284712b6501928471209e847120f2b259a563db460ee9d7b9ddf5b18d89',
-      techBadge: 'OCSF 1.1 Standard',
+      techBadge: 'Unified Schema',
     },
     {
       id: 4,
       num: '04',
-      name: 'Anomaly Detection',
-      title: 'Stage 4: Isolation Forest Anomaly Scoring & Rules Engine',
+      name: 'Detect Threats',
+      title: 'Stage 4: Detect Suspicious Activity & Anomalies',
       filepath: 'app/detection/anomaly_engine.py',
-      desc: 'Evaluates connection velocity, payload entropy, and rule triggers against pre-trained ML baseline vectors to generate normalized threat scores (0.0 - 100.0).',
+      desc: 'Evaluates traffic volume, connection patterns, and security rules against baseline activity to calculate an easy-to-understand threat score (0 to 100).',
       payload: 'Threat Score: 65.0 (MEDIUM) | Triggers: ["repeated_deny", "external_source"] | Feature Attribution: action_code (+4.84 z-score)',
       digest: '9f7fe12c98001dcace31357795d410458710a892bfecdac00aee45bce0a96915',
-      techBadge: 'ML Anomaly Engine',
+      techBadge: 'Smart Threat Scoring',
     },
     {
       id: 5,
       num: '05',
-      name: 'Graph Correlation',
-      title: 'Stage 5: Multi-Vector Graph Incident Aggregation',
+      name: 'Group Incidents',
+      title: 'Stage 5: Group Related Alerts into Incidents',
       filepath: 'app/detection/correlation.py',
-      desc: 'Correlates related security events across 15-minute sliding windows sharing offending source IPs, clustering individual telemetry alerts into unified attack timelines.',
+      desc: 'Groups related alerts that happen within a 15-minute window and share source IPs into single incident timelines, cutting through alert noise.',
       payload: 'Incident Cluster #inc_a81b5b: Source IP 185.220.100.22 | Events Count: 12 | MITRE Tactics: ["T1110 - Brute Force"]',
       digest: '488480b6ca3f120649476bb2499f7fc43fbe08c16bec56b1d74517b1c38e7477',
-      techBadge: '15-Min Graph Window',
+      techBadge: 'Alert Correlator',
     },
     {
       id: 6,
       num: '06',
-      name: 'XAI Remediation',
-      title: 'Stage 6: Explainable AI Feature Attribution & Playbook Guidance',
+      name: 'Recommend Actions',
+      title: 'Stage 6: Clear Explanations & Action Steps',
       filepath: 'app/xai/explainer.py',
-      desc: 'Generates transparent feature attribution breakdowns and 3-step mitigation playbooks for active security incidents without black-box opacity.',
+      desc: 'Provides clear explanations for why an alert fired along with 3 step-by-step mitigation actions analysts can take immediately.',
       payload: 'XAI Attribution: "Threat score 65.0 driven by action_code z-score (+4.84) and IP denial count. Remediation: Block 185.220.100.22 at firewall."',
       digest: '551029e8471b6501928471209e847120f2b259a563db460ee9d7b9ddf5b18d89',
-      techBadge: 'Explainable AI',
+      techBadge: 'Containment Guidance',
     },
   ];
 
   const activePipelineObj = PIPELINE_STAGES.find((s) => s.id === activePipelineStage) || PIPELINE_STAGES[0];
 
-  // Interactive Security Capabilities Data (Hover / Click Driven)
+  // Interactive Security Capabilities Data (Simplified Plain English Copy)
   const CAPABILITIES_DATA = [
     {
       id: 'ingestion',
-      name: 'Telemetry Ingestion',
+      name: 'Collect System Logs',
       icon: 'speed',
       badge: 'HIGH-THROUGHPUT',
-      title: 'Wire-Speed Log Capture & Compression',
-      desc: 'High-speed edge log ingestion capturing syslog streams from Cisco, Fortinet, Suricata, and pfSense with zero packet loss.',
-      problem: 'Eliminates silent ingestion drops and uncompressed storage bottlenecks.',
-      connection: 'Feeds raw byte streams directly into SHA-256 Merkle leaf hashing.',
+      title: 'High-Speed Log Capture & Storage',
+      desc: 'Collects log streams from Cisco, Fortinet, Suricata, and pfSense devices continuously without dropping events.',
+      problem: 'Solves lost events and uncompressed log storage clutter.',
+      connection: 'Sends raw log bytes directly into forensic tamper hashing.',
       metrics: [
         { label: 'Throughput', val: '4.2M EPS' },
         { label: 'Latency', val: '< 2.5ms' },
         { label: 'Format', val: 'Syslog/CEF' },
       ],
-      flow: ['Raw Network Stream', 'Edge Listener', 'Gzip Storage Writer', 'SHA-256 Hash Leaf'],
+      flow: ['Log Sources', 'Edge Listener', 'Storage Writer', 'SHA-256 Hash'],
       route: '/dashboard',
     },
     {
       id: 'normalization',
-      name: 'OCSF Normalization',
+      name: 'Organize Log Fields',
       icon: 'schema',
       badge: 'OCSF 1.1 SCHEMA',
-      title: 'Unified Field Standardization & Mapping',
-      desc: 'Transforms fragmented vendor log attributes into unified OCSF 1.1 schemas with consistent severity levels and ISO timestamps.',
-      problem: 'Solves inconsistent field naming across multi-vendor security appliances.',
-      connection: 'Provides standardized dictionary objects for Isolation Forest ML scoring.',
+      title: 'Standardize Fields Across Systems',
+      desc: 'Translates different vendor log terms into standard OCSF 1.1 fields with consistent names and timestamps.',
+      problem: 'Fixes confusing field names across different security vendors.',
+      connection: 'Prepares standardized data for threat scoring algorithms.',
       metrics: [
         { label: 'Schema', val: 'OCSF 1.1' },
         { label: 'Parsers', val: '6 Appliances' },
         { label: 'Precision', val: '100% Mapping' },
       ],
-      flow: ['Unstructured Text', 'Dynamic Regex', 'OCSF Field Mapping', 'UnifiedEvent Object'],
+      flow: ['Raw Text Log', 'Format Identification', 'Standard Mapping', 'Unified Event'],
       route: '/log-explorer',
     },
     {
       id: 'detection',
-      name: 'Anomaly Detection',
+      name: 'Detect Anomalies',
       icon: 'psychology',
-      badge: 'ISOLATION FOREST',
-      title: 'Autonomous Behavior Scoring & Heuristics',
-      desc: 'Evaluates payload entropy, connection velocity, and port scan heuristics against pre-trained ML behavior baselines.',
-      problem: 'Reduces false-positive alert fatigue while catching stealth zero-day attacks.',
-      connection: 'Generates normalized threat scores (0-100) and severity classifications.',
+      badge: 'SMART DETECTION',
+      title: 'Automatic Behavior & Threat Scoring',
+      desc: 'Checks traffic patterns and connection bursts against baseline activity to spot unusual behavior automatically.',
+      problem: 'Cuts out false alarm fatigue while identifying stealthy threats.',
+      connection: 'Calculates clear threat scores from 0.0 to 100.0.',
       metrics: [
-        { label: 'MTTD', val: '1.4s' },
+        { label: 'Detection Speed', val: '1.4s' },
         { label: 'Engine', val: 'Isolation Forest' },
         { label: 'Scoring', val: '0.0 - 100.0' },
       ],
-      flow: ['Normalized Event', 'Feature Extraction', 'Z-Score Attribution', 'Threat Score Output'],
+      flow: ['Organized Event', 'Pattern Analysis', 'Score Calculation', 'Threat Score Output'],
       route: '/dashboard',
     },
     {
       id: 'correlation',
-      name: 'Event Correlation',
+      name: 'Group Related Alerts',
       icon: 'hub',
-      badge: '15-MIN SLIDING GRAPH',
-      title: 'Multi-Vector Incident Aggregation',
-      desc: 'Correlates related security alerts across 15-minute sliding windows sharing offending IP entities into unified attack timelines.',
-      problem: 'Consolidates hundreds of isolated alerts into a single actionable incident cluster.',
-      connection: 'Triggers automated incident creation and MITRE ATT&CK tactic tagging.',
+      badge: 'ALERT GROUPING',
+      title: 'Combine Related Events into Incidents',
+      desc: 'Bundles related alerts over 15-minute windows that share source IP addresses into a single incident timeline.',
+      problem: 'Turns hundreds of individual alerts into one manageable incident.',
+      connection: 'Triggers incident timelines and recommended containment steps.',
       metrics: [
         { label: 'Window', val: '15 Mins' },
         { label: 'Clustering', val: 'IP Graph' },
-        { label: 'Reduction', val: '85% Fewer Alerts' },
+        { label: 'Alert Reduction', val: '85% Fewer Alerts' },
       ],
-      flow: ['Single Alert Stream', 'IP Entity Matcher', 'Sliding Time Window', 'Incident Cluster'],
+      flow: ['Single Alert Stream', 'IP Matching', 'Time Window', 'Incident Timeline'],
       route: '/dashboard',
     },
     {
       id: 'threat-intel',
-      name: 'Threat Intelligence',
+      name: 'Map Threat Locations',
       icon: 'public',
-      badge: 'DYNAMIC GEOIP',
-      title: 'Live Vector World Map & GeoIP Resolution',
-      desc: 'Resolves IP subnets offline to precise lat/lng coordinates and plots attack markers over vector world map geometry.',
-      problem: 'Provides spatial attack origin visibility without external API key dependencies.',
-      connection: 'Visualizes perimeter threat concentration for SOC analysts.',
+      badge: 'GEOGRAPHIC MAP',
+      title: 'Interactive World Threat Map',
+      desc: 'Looks up IP subnets offline to map threat locations directly on an interactive vector world map.',
+      problem: 'Gives visual origin clarity without relying on third-party cloud APIs.',
+      connection: 'Displays threat origins across global perimeter locations.',
       metrics: [
-        { label: 'Resolution', val: 'Subnet GeoIP' },
+        { label: 'Lookup', val: 'Subnet GeoIP' },
         { label: 'Mode', val: 'Offline Sovereign' },
         { label: 'Projection', val: 'Equirectangular' },
       ],
-      flow: ['Attacker IP', 'Offline Subnet Lookup', 'Coordinate Math', 'Map Vector Marker'],
+      flow: ['Attacker IP', 'Subnet Lookup', 'Location Math', 'Map Marker'],
       route: '/threat-intel',
     },
     {
       id: 'forensics',
-      name: 'Digital Forensics',
+      name: 'Verify Audit Chains',
       icon: 'verified',
-      badge: 'SHA-256 MERKLE',
-      title: 'Cryptographic Chain of Custody & Audit Verification',
-      desc: 'Verifies log payload immutability using SHA-256 Merkle tree leaf hashing, with built-in tamper detection simulation.',
-      problem: 'Ensures court-admissible audit integrity and tamper detection.',
-      connection: 'Provides cryptographic proof of raw log payload authenticity.',
+      badge: 'TAMPER PROOF',
+      title: 'Cryptographic Log Verification',
+      desc: 'Verifies that log files have not been changed or altered using cryptographic SHA-256 Merkle tree hashing.',
+      problem: 'Guarantees trustworthy, tamper-proof logs for audit compliance.',
+      connection: 'Provides mathematical proof that log records are authentic.',
       metrics: [
         { label: 'Hashing', val: 'SHA-256 Merkle' },
-        { label: 'Audit Result', val: 'Tamper-Evident' },
+        { label: 'Audit Verdict', val: 'Tamper-Evident' },
         { label: 'Verification', val: 'WebCrypto API' },
       ],
-      flow: ['Raw Payload', 'SHA-256 Hashing', 'Merkle Tree Root', 'Audit Verdict'],
+      flow: ['Raw Payload', 'SHA-256 Hash', 'Merkle Root', 'Audit Verdict'],
       route: '/forensics',
     },
     {
       id: 'response',
-      name: 'Incident Response',
+      name: 'Investigate & Contain',
       icon: 'shield',
-      badge: 'XAI PLAYBOOKS',
-      title: 'Explainable AI Feature Attribution & Containment',
-      desc: 'Generates transparent feature attribution breakdowns and 3-step firewall mitigation commands for active security incidents.',
-      problem: 'Eliminates black-box ML opacity and accelerates incident response containment.',
+      badge: 'ACTION STEPS',
+      title: 'Clear Incident Explanations & Action Steps',
+      desc: 'Shows exactly why an alert was triggered and provides ready-to-use firewall blocking commands.',
+      problem: 'Removes mystery from AI scoring and speeds up incident containment.',
       connection: 'Equips analysts with immediate firewall block syntax.',
       metrics: [
-        { label: 'XAI Model', val: 'Feature Z-Score' },
+        { label: 'Explanation', val: 'Clear Drivers' },
         { label: 'Playbook', val: '3-Step Mitigation' },
-        { label: 'MTTR', val: '80% Reduction' },
+        { label: 'MTTR', val: '80% Faster' },
       ],
-      flow: ['Incident Trigger', 'Top Feature Analysis', 'Playbook Generation', 'Analyst Containment'],
+      flow: ['Incident Trigger', 'Root Cause Analysis', 'Action Steps', 'Firewall Block'],
       route: '/dashboard',
     },
     {
       id: 'reporting',
-      name: 'Security Reporting',
+      name: 'Export Security Reports',
       icon: 'description',
-      badge: 'EXECUTIVE & AUDIT',
-      title: 'Tenant-Isolated Reports & CSV Exports',
-      desc: 'Generates exportable executive security reports and structured CSV datasets isolated to active user tenant boundaries.',
-      problem: 'Streamlines compliance reporting for auditors and SOC management.',
-      connection: 'Archives incident timelines into permanent documentation.',
+      badge: 'REPORTS & EXPORTS',
+      title: 'Executive Reports & CSV Exports',
+      desc: 'Generates exportable summary reports and CSV log files filtered strictly to your organization.',
+      problem: 'Makes audit reporting simple for management and compliance teams.',
+      connection: 'Saves incident histories for permanent record-keeping.',
       metrics: [
-        { label: 'Isolation', val: 'Tenant Strict' },
-        { label: 'Export', val: 'CSV & Audit PDF' },
+        { label: 'Privacy', val: 'Strict Isolation' },
+        { label: 'Format', val: 'CSV & Audit Report' },
         { label: 'Compliance', val: 'SOC 2 Ready' },
       ],
-      flow: ['Tenant Scope', 'Filter Aggregation', 'Report Generation', 'CSV Export'],
+      flow: ['Tenant Scope', 'Filter Data', 'Generate Report', 'CSV Download'],
       route: '/dashboard',
     },
   ];
 
   const activeCapabilityObj = CAPABILITIES_DATA.find((c) => c.id === activeFeature) || CAPABILITIES_DATA[0];
 
-  // Interactive System Architecture Data (Hover / Click Driven)
+  // Interactive System Architecture Data (Simplified Plain English Copy)
   const ARCHITECTURE_NODES = [
     {
       id: 'sources',
       name: 'Log Sources',
-      type: 'ENTRY NODE',
-      desc: 'Enterprise network appliances sending raw syslog packets via UDP/TCP port 514 or raw API endpoints.',
+      type: 'ENTRY POINT',
+      desc: 'Network firewalls, VPNs, and gateways sending log messages over standard network protocols.',
       components: ['Cisco ASA Firewall', 'Fortinet FortiGate VPN', 'Suricata IDS/IPS', 'pfSense Gateway'],
     },
     {
       id: 'ingestion',
-      name: 'Ingestion Layer',
-      type: 'STREAM ENGINE',
-      desc: 'High-throughput edge log capture writing raw compressed payload archives while hashing SHA-256 digests.',
-      components: ['Raw Writer Service', 'SHA-256 Leaf Hasher', 'Gzip Storage Manager'],
+      name: 'Log Collection',
+      type: 'COLLECTION ENGINE',
+      desc: 'Receives high-speed log streams, writes raw data to storage, and generates SHA-256 hashes.',
+      components: ['Raw Log Listener', 'SHA-256 Hasher', 'Storage Manager'],
     },
     {
       id: 'normalize',
-      name: 'Normalization Layer',
-      type: 'SCHEMA STANDARD',
-      desc: 'Vendor format auto-detection engine mapping raw key-value pairs into standard OCSF 1.1 UnifiedEvent schema.',
-      components: ['Dynamic Vendor Parser', 'OCSF Field Transformer', 'Schema Validator'],
+      name: 'Field Normalization',
+      type: 'FORMAT STANDARDIZER',
+      desc: 'Identifies vendor log formats and maps raw attributes into standard OCSF 1.1 fields.',
+      components: ['Format Identifier', 'Field Mapping Module', 'Data Validator'],
     },
     {
       id: 'detection',
-      name: 'Detection Engine',
-      type: 'ML SCORING',
-      desc: 'Isolation Forest machine learning engine computing entropy and connection velocity anomaly scores.',
-      components: ['Isolation Forest Model', 'Heuristic Rule Evaluator', 'Feature Z-Score Engine'],
+      name: 'Threat Detection',
+      type: 'SCORING ENGINE',
+      desc: 'Evaluates event patterns and rule triggers to assign clear 0-100 threat scores.',
+      components: ['Anomaly Detector', 'Security Rules Engine', 'Score Calculator'],
     },
     {
       id: 'correlate',
-      name: 'Correlation Engine',
-      type: 'GRAPH CLUSTERING',
-      desc: 'Multi-vector incident aggregator grouping alerts across 15-minute sliding windows sharing IP entities.',
-      components: ['15-Min Graph Window', 'IP Entity Matcher', 'Incident Cluster Creator'],
+      name: 'Alert Grouping',
+      type: 'EVENT AGGREGATOR',
+      desc: 'Combines related alerts sharing source IPs into unified incident timelines.',
+      components: ['15-Min Time Window', 'IP Address Matcher', 'Incident Aggregator'],
     },
     {
       id: 'intelligence',
-      name: 'Threat Intelligence',
-      type: 'SPATIAL RESOLUTION',
-      desc: 'Offline GeoIP resolver mapping IP subnets to geographic coordinates and vector map markers.',
-      components: ['Offline GeoIP DB', 'Equirectangular Map Projection', 'Threat Marker Overlay'],
+      name: 'Geographic Mapping',
+      type: 'LOCATION RESOLVER',
+      desc: 'Maps IP addresses to geographic coordinates for display on the threat map.',
+      components: ['Offline GeoIP DB', 'World Map Projection', 'Map Pin Overlay'],
     },
     {
       id: 'response',
-      name: 'XAI Response',
-      type: 'MITIGATION PLAYBOOK',
-      desc: 'Explainable AI explainer delivering top feature attribution z-scores and step-by-step mitigation commands.',
-      components: ['XAI Explainer Module', '3-Step Playbook Generator', 'SOC Command Center'],
+      name: 'Action & Containment',
+      type: 'REMEDIATION STEPS',
+      desc: 'Provides clear root-cause explanations and step-by-step firewall block commands.',
+      components: ['Explanation Engine', '3-Step Action Guide', 'SOC Command Center'],
     },
   ];
 
@@ -317,6 +317,7 @@ export function LandingPage() {
           </span>
         </Link>
 
+        {/* Navbar Anchor Links for Landing Page Sections */}
         <nav className="hidden md:flex items-center gap-8 text-xs font-mono font-bold tracking-wider text-text-muted">
           <a href="#pipeline" className="hover:text-primary transition-colors">PIPELINE</a>
           <a href="#capabilities" className="hover:text-primary transition-colors">CAPABILITIES</a>
@@ -366,22 +367,22 @@ export function LandingPage() {
 
       <main className="flex-grow relative z-10 pb-24 md:pb-0">
         
-        {/* CHAPTER 01: HERO INTELLIGENCE BRIEFING */}
+        {/* CHAPTER 01: HERO BRIEFING (SIMPLIFIED PLAIN ENGLISH COPY) */}
         <section className="max-w-7xl mx-auto px-6 py-12 md:py-16 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center border-b border-border-muted">
           
-          {/* Editorial Headline & Strategic Narrative (Span 7) */}
+          {/* Editorial Headline & Product Value */}
           <div className="lg:col-span-7 space-y-6">
             <div className="inline-flex items-center gap-2 bg-surface-dim px-3.5 py-1 rounded-full border border-border-muted font-mono text-[11px]">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span className="font-bold text-text-primary uppercase tracking-widest">[ BRIEFING // VOL. 2026-09 ]</span>
+              <span className="font-bold text-text-primary uppercase tracking-widest">[ STITCH PLATFORM // OVERVIEW ]</span>
             </div>
 
             <h1 className="text-4xl sm:text-6xl font-extrabold text-text-primary tracking-tight leading-none font-sans">
-              Command the <span className="text-primary underline decoration-primary/40 underline-offset-8">Sage Intelligence</span>
+              Make Your System Logs <span className="text-primary underline decoration-primary/40 underline-offset-8">Work for You</span>
             </h1>
 
             <p className="text-base sm:text-lg text-text-muted leading-relaxed font-sans max-w-2xl">
-              A sovereign telemetry intelligence engine unifying multi-vendor log streams, OCSF 1.1 field normalization, and explainable ML anomaly scoring into real-time threat visibility.
+              Stitch brings your security logs together, organizes them automatically, highlights suspicious activity, and helps your team investigate incidents faster.
             </p>
 
             <div className="flex flex-wrap gap-4 pt-2 font-mono text-xs font-bold">
@@ -389,44 +390,44 @@ export function LandingPage() {
                 to="/dashboard"
                 className="btn-primary px-6 py-3 rounded-xl flex items-center gap-2 shadow-lg"
               >
-                <span>[ ENTER SOC CONSOLE ]</span>
+                <span>[ ACCESS PLATFORM ]</span>
                 <span className="material-symbols-outlined text-sm">arrow_forward</span>
               </Link>
-              <Link
-                to="/threat-intel"
+              <a
+                href="#pipeline"
                 className="btn-secondary px-6 py-3 rounded-xl flex items-center gap-2"
               >
-                <span>[ EXPLORE THREAT MAP ]</span>
-                <span className="material-symbols-outlined text-sm">public</span>
-              </Link>
+                <span>[ SEE HOW IT WORKS ]</span>
+                <span className="material-symbols-outlined text-sm">arrow_downward</span>
+              </a>
             </div>
           </div>
 
-          {/* Interactive Live Telemetry Evidence & Signal Propagation (Span 5) */}
+          {/* Interactive Live Log Stream Display */}
           <div className="lg:col-span-5 glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-2xl relative overflow-hidden">
             <div className="flex justify-between items-center border-b border-border-muted pb-3 font-mono text-xs">
-              <span className="font-bold text-text-primary uppercase tracking-wider">[ SIGNAL PROPAGATION MATRIX ]</span>
+              <span className="font-bold text-text-primary uppercase tracking-wider">[ LIVE SYSTEM LOG STREAM ]</span>
               <span className="text-emerald-400 font-bold">STREAM ACTIVE</span>
             </div>
 
             {/* Signal Flow Diagram */}
             <div className="space-y-3 font-mono text-xs">
               <div className="p-3 rounded-xl bg-surface-dim border border-border-muted flex justify-between items-center">
-                <span className="text-text-muted">Edge Ingestion Stream:</span>
+                <span className="text-text-muted">Log Collection Speed:</span>
                 <span className="text-emerald-400 font-bold">4.2M EPS</span>
               </div>
               <div className="p-3 rounded-xl bg-surface-dim border border-border-muted flex justify-between items-center">
-                <span className="text-text-muted">OCSF Field Mapping:</span>
+                <span className="text-text-muted">Field Organization:</span>
                 <span className="text-primary font-bold">100% Unified</span>
               </div>
               <div className="p-3 rounded-xl bg-surface-dim border border-border-muted flex justify-between items-center">
-                <span className="text-text-muted">Anomaly Threat Scoring:</span>
+                <span className="text-text-muted">Detection Response:</span>
                 <span className="text-rose-400 font-bold">1.4s Latency</span>
               </div>
             </div>
 
             <div className="p-3 rounded-xl bg-surface-dim border border-border-muted text-center font-mono text-[10px] text-text-dim">
-              [ ANNOTATION: CONTINUOUS MULTI-VENDOR TELEMETRY PIPELINE ]
+              [ ANNOTATION: AUTOMATIC LOG COLLECTION & THREAT SCORING ]
             </div>
           </div>
 
@@ -435,24 +436,24 @@ export function LandingPage() {
         {/* Supporting Metrics Bar */}
         <section className="max-w-7xl mx-auto px-6 py-8 grid grid-cols-2 md:grid-cols-4 gap-4 border-b border-border-muted">
           <div className="p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-center">
-            <div className="text-[10px] text-text-dim uppercase tracking-wider">[ INGESTION ENGINE ]</div>
+            <div className="text-[10px] text-text-dim uppercase tracking-wider">[ LOG PROCESSING ]</div>
             <div className="text-xl font-bold text-text-primary mt-1">OCSF 1.1</div>
-            <div className="text-[10px] text-emerald-400 mt-0.5">Unified Schema</div>
+            <div className="text-[10px] text-emerald-400 mt-0.5">Unified Fields</div>
           </div>
           <div className="p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-center">
-            <div className="text-[10px] text-text-dim uppercase tracking-wider">[ DETECTION LATENCY ]</div>
+            <div className="text-[10px] text-text-dim uppercase tracking-wider">[ DETECTION SPEED ]</div>
             <div className="text-xl font-bold text-secondary mt-1">1.4s</div>
             <div className="text-[10px] text-text-muted mt-0.5">Real-Time Scoring</div>
           </div>
           <div className="p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-center">
-            <div className="text-[10px] text-text-dim uppercase tracking-wider">[ MERKLE INTEGRITY ]</div>
+            <div className="text-[10px] text-text-dim uppercase tracking-wider">[ DATA INTEGRITY ]</div>
             <div className="text-xl font-bold text-text-primary mt-1">SHA-256</div>
-            <div className="text-[10px] text-emerald-400 mt-0.5">Merkle Verified</div>
+            <div className="text-[10px] text-emerald-400 mt-0.5">Tamper-Proof Audit</div>
           </div>
           <div className="p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-center">
-            <div className="text-[10px] text-text-dim uppercase tracking-wider">[ CORRELATION WINDOW ]</div>
+            <div className="text-[10px] text-text-dim uppercase tracking-wider">[ ALERT GROUPING ]</div>
             <div className="text-xl font-bold text-primary mt-1">15 MIN</div>
-            <div className="text-[10px] text-text-muted mt-0.5">Multi-Vector Graph</div>
+            <div className="text-[10px] text-text-muted mt-0.5">Correlated Events</div>
           </div>
         </section>
 
@@ -467,17 +468,17 @@ export function LandingPage() {
           </div>
         </div>
 
-        {/* CHAPTER 02: 6-STAGE ZERO-LOSS TELEMETRY PIPELINE (GOLD STANDARD INTERACTION MODEL) */}
+        {/* CHAPTER 02: HOW YOUR LOGS BECOME USEFUL DATA */}
         <section id="pipeline" className="max-w-7xl mx-auto px-6 py-16 border-b border-border-muted space-y-8 scroll-mt-24">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-border-muted pb-4">
             <div>
-              <div className="text-xs font-mono text-text-muted uppercase tracking-widest">[ CHAPTER 02 // PIPELINE ARCHITECTURE ]</div>
+              <div className="text-xs font-mono text-text-muted uppercase tracking-widest">[ CHAPTER 02 // HOW IT WORKS ]</div>
               <h2 className="text-2xl sm:text-4xl font-extrabold text-text-primary tracking-tight mt-1">
-                6-Stage Zero-Loss Telemetry Processing Pipeline
+                How Your Logs Become Useful Data
               </h2>
             </div>
             <p className="text-xs text-text-muted font-sans max-w-md">
-              Hover over, tap, or focus any stage to inspect real-time processing mechanics and cryptographic SHA-256 Merkle digests.
+              Logs arrive from different systems in different formats. Stitch identifies the format, reads the information, organizes the fields, and checks the data before making it available for search and analysis.
             </p>
           </div>
 
@@ -524,7 +525,7 @@ export function LandingPage() {
               <p className="text-xs sm:text-sm text-text-muted leading-relaxed font-sans">{activePipelineObj.desc}</p>
 
               <div className="p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-xs space-y-2">
-                <div className="text-text-dim text-[10px] uppercase tracking-wider">[ PAYLOAD TRANSFORMATION SAMPLE ]</div>
+                <div className="text-text-dim text-[10px] uppercase tracking-wider">[ SAMPLE LOG TRANSFORMATION ]</div>
                 <div className="text-text-primary font-bold">{activePipelineObj.payload}</div>
                 <div className="text-emerald-400 text-[11px] pt-1">
                   <span className="text-text-muted">SHA-256 Digest:</span> {activePipelineObj.digest}
@@ -534,17 +535,17 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* CHAPTER 03: INTERACTIVE SECURITY CAPABILITIES SHOWCASE */}
+        {/* CHAPTER 03: EVERYTHING YOU NEED TO MONITOR YOUR SYSTEMS */}
         <section id="capabilities" className="max-w-7xl mx-auto px-6 py-16 border-b border-border-muted space-y-8 scroll-mt-24">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-border-muted pb-4">
             <div>
-              <div className="text-xs font-mono text-text-muted uppercase tracking-widest">[ CHAPTER 03 // PLATFORM CAPABILITIES ]</div>
+              <div className="text-xs font-mono text-text-muted uppercase tracking-widest">[ CHAPTER 03 // WHAT YOU CAN DO ]</div>
               <h2 className="text-2xl sm:text-4xl font-extrabold text-text-primary tracking-tight mt-1">
-                Interactive Security Capabilities Showcase
+                Everything You Need to Monitor Your Systems
               </h2>
             </div>
             <p className="text-xs text-text-muted font-sans max-w-md">
-              Explore platform features using hover, tap, or focus. Content updates dynamically without page jumping.
+              Explore what you can do with Stitch using hover, tap, or focus. Select any feature to see how it works.
             </p>
           </div>
 
@@ -611,7 +612,7 @@ export function LandingPage() {
 
               {/* Technical Event Flow Steps */}
               <div className="space-y-2 font-mono">
-                <div className="text-[10px] text-text-dim uppercase tracking-wider">[ TECHNICAL EVENT FLOW ]</div>
+                <div className="text-[10px] text-text-dim uppercase tracking-wider">[ FEATURE WORKFLOW ]</div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-center">
                   {activeCapabilityObj.flow.map((step, i) => (
                     <div key={i} className="p-2.5 rounded-lg bg-surface border border-border-muted space-y-1">
@@ -644,7 +645,7 @@ export function LandingPage() {
                 <div className="p-3.5 rounded-xl bg-surface-dim border border-border-muted space-y-1">
                   <div className="text-primary font-bold flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-sm">hub</span>
-                    <span>SOC Workflow Connection</span>
+                    <span>Platform Connection</span>
                   </div>
                   <p className="text-text-muted font-sans text-xs">{activeCapabilityObj.connection}</p>
                 </div>
@@ -653,17 +654,17 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* CHAPTER 04: INTERACTIVE SYSTEM ARCHITECTURE TOPOLOGY */}
+        {/* CHAPTER 04: SEE HOW EVERYTHING CONNECTS */}
         <section id="topology" className="max-w-7xl mx-auto px-6 py-16 border-b border-border-muted space-y-8 scroll-mt-24">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-border-muted pb-4">
             <div>
-              <div className="text-xs font-mono text-text-muted uppercase tracking-widest">[ CHAPTER 04 // SYSTEM TOPOLOGY ]</div>
+              <div className="text-xs font-mono text-text-muted uppercase tracking-widest">[ CHAPTER 04 // HOW STITCH WORKS ]</div>
               <h2 className="text-2xl sm:text-4xl font-extrabold text-text-primary tracking-tight mt-1">
-                Interactive System Architecture
+                See How Everything Connects
               </h2>
             </div>
             <p className="text-xs text-text-muted font-sans max-w-md">
-              Hover over or focus any topology node to inspect its internal modules and operational responsibilities.
+              See how logs move through Stitch, from collection and processing to detection and investigation.
             </p>
           </div>
 
@@ -701,7 +702,7 @@ export function LandingPage() {
                   <h3 className="text-lg font-bold text-text-primary mt-0.5">{activeArchObj.name}</h3>
                 </div>
                 <span className="px-3 py-1 rounded bg-surface-dim border border-border-muted text-xs text-emerald-400 font-bold">
-                  ACTIVE PIPELINE COMPONENT
+                  ACTIVE COMPONENT
                 </span>
               </div>
 
@@ -721,15 +722,15 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* CHAPTER 05: FINANCIAL IMPACT ESTIMATOR */}
+        {/* CHAPTER 05: SEE HOW MUCH TIME STITCH CAN SAVE */}
         <section id="estimator" className="max-w-7xl mx-auto px-6 py-16 space-y-8 scroll-mt-24">
           <div className="text-center max-w-2xl mx-auto space-y-2">
-            <div className="text-xs font-mono text-text-muted uppercase tracking-widest">[ CHAPTER 05 // FINANCIAL ESTIMATOR ]</div>
+            <div className="text-xs font-mono text-text-muted uppercase tracking-widest">[ CHAPTER 05 // SEE THE IMPACT ]</div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
-              Calculate SOC Efficiency & MTTR Reduction
+              See How Much Time Stitch Can Save
             </h2>
             <p className="text-xs text-text-muted leading-relaxed font-sans">
-              Estimate analyst time saved and incident response acceleration based on your perimeter footprint.
+              Adjust the inputs to estimate how much analyst time your team could save by reducing manual log analysis and speeding up investigations.
             </p>
           </div>
 
@@ -749,7 +750,7 @@ export function LandingPage() {
                     step="10000"
                     value={logVolume}
                     onChange={(e) => setLogVolume(Number(e.target.value))}
-                    className="w-full h-2 bg-surface-dim rounded-lg appearance-none cursor-pointer accent-primary"
+                    className="w-full cursor-pointer accent-primary"
                   />
                   <div className="flex justify-between text-[10px] font-mono text-text-muted mt-1">
                     <span>10K</span>
@@ -769,7 +770,7 @@ export function LandingPage() {
                     max="500"
                     value={devicesMonitored}
                     onChange={(e) => setDevicesMonitored(Number(e.target.value))}
-                    className="w-full h-2 bg-surface-dim rounded-lg appearance-none cursor-pointer accent-primary"
+                    className="w-full cursor-pointer accent-primary"
                   />
                   <div className="flex justify-between text-[10px] font-mono text-text-muted mt-1">
                     <span>1</span>
