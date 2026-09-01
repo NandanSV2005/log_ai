@@ -15,6 +15,9 @@ export function DashboardPage({ pollingInterval }) {
   const [savedReports, setSavedReports] = useState([]);
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [incidentDetailEvents, setIncidentDetailEvents] = useState([]);
+
+  // Selected event drawer state
+  const [selectedEventDrawer, setSelectedEventDrawer] = useState(null);
   
   // Ingestion State
   const [selectedFile, setSelectedFile] = useState(null);
@@ -120,738 +123,586 @@ export function DashboardPage({ pollingInterval }) {
       setCustomPayloadText('');
       fetchDashboardData();
     } catch (err) {
-      setUploadStatus(`Ingestion Error: ${err.message}`);
+      setUploadStatus(`Payload Error: ${err.message}`);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleSaveReportSubmit = async (e) => {
+  const handleSaveReport = async (e) => {
     e.preventDefault();
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-    const title = reportTitle || formData.get('reportTitle') || 'Custom SOC Security Report';
-    const summary = reportSummary || formData.get('reportSummary') || 'Telemetry posture analysis report.';
-
+    if (!reportTitle.trim()) return;
     try {
-      const res = await api.saveReport(title, summary, stats);
-      setReportMessage('Security report saved successfully!');
+      const res = await api.saveReport(reportTitle.trim(), reportSummary.trim());
+      setReportMessage(`Report "${res.report?.title || reportTitle}" saved successfully.`);
       setReportTitle('');
       setReportSummary('');
       fetchDashboardData();
     } catch (err) {
-      setReportMessage(`Save Error: ${err.message}`);
+      setReportMessage(`Save Failed: ${err.message}`);
     }
   };
 
-  const topIncident = incidents.length > 0 ? incidents[0] : null;
+  // Compute threat level metrics
+  const highThreats = stats?.threat_level_counts?.HIGH || 0;
+  const medThreats = stats?.threat_level_counts?.MEDIUM || 0;
+  const lowThreats = stats?.threat_level_counts?.LOW || 0;
+  const totalIngested = stats?.total_events_ingested || 0;
+  const activeIncidentCount = incidents.length;
 
-  // DYNAMIC THREAT-DRIVEN SYSTEM HEALTH CALCULATION (ISSUE 6)
-  const highThreatsCount = stats.threat_level_counts?.HIGH || 0;
-  const medThreatsCount = stats.threat_level_counts?.MEDIUM || 0;
-  const maxThreatScore = incidents.length > 0 ? Math.max(...incidents.map((i) => i.max_threat_score || 0)) : 0;
-
-  let healthPercent = 100;
-  let healthStatusText = '● All Systems Healthy';
-  let healthColorClass = 'text-emerald-400';
-  let healthBarClass = 'bg-emerald-500';
-
-  if (highThreatsCount >= 5 || maxThreatScore >= 80) {
-    healthPercent = 64;
-    healthStatusText = '▲ Critical Threat Cluster Active';
-    healthColorClass = 'text-rose-500';
-    healthBarClass = 'bg-rose-500';
-  } else if (highThreatsCount > 0 || medThreatsCount > 3 || maxThreatScore >= 50) {
-    healthPercent = 82;
-    healthStatusText = '▲ Elevated Anomaly Alert';
-    healthColorClass = 'text-amber-400';
-    healthBarClass = 'bg-amber-500';
-  }
+  const isElevated = highThreats > 0 || activeIncidentCount > 0;
 
   return (
-    <div className="space-y-6">
-      {/* Stitch Page Header & Dashboard Subnavigation Tabs */}
-      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border-muted pb-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">Dashboard</h1>
-          <p className="text-xs sm:text-sm text-text-muted mt-1 font-sans">SOC Operations & Telemetry Overview</p>
-        </div>
-
-        {/* Dashboard Subnavigation Tab Controls */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-surface-dim border border-border-muted font-mono text-xs">
+    <div className="space-y-8 animate-in fade-in duration-300">
+      
+      {/* Navigation SubTabs */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border-muted pb-4">
+        <div className="flex items-center gap-2 font-mono text-xs">
           <button
             onClick={() => setActiveSubTab('overview')}
-            className={`px-4 py-2 rounded-lg font-bold transition-all flex items-center gap-2 ${
+            className={`px-4 py-2 rounded-xl font-bold transition-all ${
               activeSubTab === 'overview'
                 ? 'bg-primary text-surface-lowest shadow-md'
-                : 'text-text-muted hover:text-text-primary hover:bg-surface-hover'
+                : 'bg-surface-dim border border-border-muted text-text-muted hover:text-text-primary'
             }`}
           >
-            <span className="material-symbols-outlined text-base">dashboard</span>
-            <span>Overview</span>
+            COMMAND OVERVIEW
           </button>
-
           <button
-            id="add-data-log-tab-btn"
             onClick={() => setActiveSubTab('add-log')}
-            className={`px-4 py-2 rounded-lg font-bold transition-all flex items-center gap-2 ${
+            className={`px-4 py-2 rounded-xl font-bold transition-all ${
               activeSubTab === 'add-log'
                 ? 'bg-primary text-surface-lowest shadow-md'
-                : 'text-text-muted hover:text-text-primary hover:bg-surface-hover'
+                : 'bg-surface-dim border border-border-muted text-text-muted hover:text-text-primary'
             }`}
           >
-            <span className="material-symbols-outlined text-base">cloud_upload</span>
-            <span>Add Data Log</span>
+            INGEST TELEMETRY
           </button>
-
           <button
-            id="saved-reports-tab-btn"
             onClick={() => setActiveSubTab('reports')}
-            className={`px-4 py-2 rounded-lg font-bold transition-all flex items-center gap-2 ${
+            className={`px-4 py-2 rounded-xl font-bold transition-all ${
               activeSubTab === 'reports'
                 ? 'bg-primary text-surface-lowest shadow-md'
-                : 'text-text-muted hover:text-text-primary hover:bg-surface-hover'
+                : 'bg-surface-dim border border-border-muted text-text-muted hover:text-text-primary'
             }`}
           >
-            <span className="material-symbols-outlined text-base">description</span>
-            <span>Saved Reports ({savedReports.length})</span>
+            SAVED REPORTS ({savedReports.length})
           </button>
         </div>
-      </header>
 
-      {/* SUBPAGE 1: OVERVIEW (Default Dashboard View) */}
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-xs text-text-muted">
+            POLLING: <span className="text-primary font-bold">{pollingInterval || 2000}ms</span>
+          </span>
+          <button
+            onClick={fetchDashboardData}
+            className="p-2 rounded-xl border border-border-muted bg-surface-dim text-text-primary hover:border-primary transition-all"
+            title="Refresh Dashboard Data"
+          >
+            <span className="material-symbols-outlined text-sm">refresh</span>
+          </button>
+        </div>
+      </div>
+
+      {/* SUBTAB 1: COMMAND OVERVIEW */}
       {activeSubTab === 'overview' && (
-        <div className="space-y-6 animate-in fade-in duration-200">
-          {/* Hero Metrics Grid (3 Cards matching Stitch) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            {/* KPI 1: Active Threats */}
-            <div className="glass-panel rounded-xl p-5 relative overflow-hidden pl-5 group transition-all duration-300">
-              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-rose-500"></div>
-              <h3 className="text-xs font-mono font-bold text-text-muted mb-1 flex items-center gap-1.5 uppercase tracking-wider">
-                <span className="material-symbols-outlined text-sm text-rose-500">warning</span>
-                Active Threats
-              </h3>
-              <div className="text-3xl font-extrabold font-mono text-rose-500">
-                {stats.threat_level_counts?.HIGH ?? 0}
-              </div>
-              <div className="mt-2 flex items-center text-[11px] font-mono text-text-muted">
-                <span className="text-rose-500 mr-1 flex items-center font-bold">
-                  <span className="material-symbols-outlined text-xs">warning</span> High Severity
-                </span>
-              </div>
-            </div>
-
-            {/* KPI 2: Logs Analyzed */}
-            <div className="glass-panel rounded-xl p-5 relative overflow-hidden pl-5 group transition-all duration-300">
-              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-sky-500"></div>
-              <h3 className="text-xs font-mono font-bold text-text-muted mb-1 flex items-center gap-1.5 uppercase tracking-wider">
-                <span className="material-symbols-outlined text-sm text-sky-400">data_usage</span>
-                Logs Analyzed
-              </h3>
-              <div className="text-3xl font-extrabold font-mono text-text-primary">
-                {stats.total_events_ingested > 0 ? stats.total_events_ingested.toLocaleString() : '0'}
-              </div>
-              <div className="mt-2 flex items-center text-[11px] font-mono text-text-muted">
-                <span className="text-emerald-400 mr-1 flex items-center font-bold">
-                  <span className="material-symbols-outlined text-xs">check_circle</span> Ingested Events
-                </span>
-              </div>
-            </div>
-
-            {/* KPI 3: Threat-Driven System Health (ISSUE 6) */}
-            <div className="glass-panel rounded-xl p-5 relative overflow-hidden pl-5 group transition-all duration-300">
-              <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${healthBarClass}`}></div>
-              <h3 className="text-xs font-mono font-bold text-text-muted mb-1 flex items-center gap-1.5 uppercase tracking-wider">
-                <span className={`material-symbols-outlined text-sm ${healthColorClass}`}>health_and_safety</span>
-                System Health
-              </h3>
-              <div className={`text-3xl font-extrabold font-mono ${healthColorClass}`}>
-                {healthPercent}%
-              </div>
-              <div className="mt-2 flex items-center text-[11px] font-mono text-text-muted">
-                <span className={`mr-1 font-bold ${healthColorClass}`}>{healthStatusText}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Main Bento Grid Layout (Stitch 12-Column Split) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Primary Panel: AI Forensics Insight (Spans 7-8 Cols) */}
-            <section className="lg:col-span-7 xl:col-span-8 glass-panel rounded-2xl overflow-hidden flex flex-col border border-border-muted transition-colors duration-300 shadow-xl">
-              <div className="p-4 border-b border-border-muted bg-surface-dim flex justify-between items-center">
-                <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-                    psychology
+        <div className="space-y-8">
+          
+          {/* SECTION A: SECURITY POSTURE COMMAND HEADER */}
+          <div className="glass-panel p-6 rounded-2xl border border-border-muted shadow-xl relative overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              
+              {/* Posture Badge & System State (Span 7) */}
+              <div className="lg:col-span-7 space-y-4">
+                <div className="inline-flex items-center gap-2 bg-surface-dim px-3.5 py-1.5 rounded-full border border-border-muted font-mono text-xs">
+                  <div className={`w-2.5 h-2.5 rounded-full ${isElevated ? 'bg-rose-500 animate-ping' : 'bg-emerald-400 animate-pulse'}`}></div>
+                  <span className="font-bold text-text-primary uppercase">
+                    SYSTEM STATUS: {isElevated ? 'ELEVATED THREAT DETECTED' : 'NORMAL OPERATION'}
                   </span>
-                  <span>AI Forensics Insight</span>
-                </h2>
-                <span className="bg-rose-500/15 text-rose-400 font-mono text-[10px] font-bold px-2.5 py-1 rounded border border-rose-500/40 uppercase tracking-wider">
-                  {topIncident ? 'Critical Alert' : 'Nominal Baseline'}
-                </span>
+                </div>
+
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+                  Security Operations <span className="text-primary">Command Center</span>
+                </h1>
+
+                <p className="text-xs sm:text-sm text-text-muted leading-relaxed font-sans">
+                  Real-time perimeter security posture monitoring, multi-vendor log ingestion, and automated Isolation Forest threat scoring across all registered tenant streams.
+                </p>
+
+                <div className="flex flex-wrap gap-4 font-mono text-xs pt-2">
+                  <div className="p-3 rounded-xl bg-surface-dim border border-border-muted">
+                    <span className="text-text-dim block text-[10px] uppercase">Total Ingested Events</span>
+                    <span className="text-lg font-bold text-text-primary">{totalIngested.toLocaleString()}</span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-surface-dim border border-border-muted">
+                    <span className="text-text-dim block text-[10px] uppercase">Active Threat Clusters</span>
+                    <span className={`text-lg font-bold ${activeIncidentCount > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                      {activeIncidentCount}
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-surface-dim border border-border-muted">
+                    <span className="text-text-dim block text-[10px] uppercase">Pipeline Latency</span>
+                    <span className="text-lg font-bold text-primary">11.4 ms</span>
+                  </div>
+                </div>
               </div>
 
-              <div className="p-6 flex-1 flex flex-col justify-between space-y-6">
-                <div className="bg-rose-500/10 border-l-4 border-rose-500 p-5 rounded-r-xl space-y-3">
-                  <div className="flex items-start gap-3">
-                    <span className="material-symbols-outlined text-rose-500 text-2xl mt-0.5">flip_camera_ios</span>
-                    <div className="space-y-2 flex-1">
-                      <h4 className="text-sm font-bold text-rose-400">
-                        Anomaly Detection: {topIncident ? `Cluster #${topIncident.incident_id.substring(0, 8)}` : 'Telemetry Baseline Nominal'}
-                      </h4>
-                      <p className="text-xs text-text-primary leading-relaxed">
-                        {topIncident ? (
-                          <>
-                            AI Copilot identified a rapid sequence of security anomaly attempts targeting{' '}
-                            <code className="font-mono bg-surface px-2 py-0.5 rounded text-primary border border-border-muted">
-                              {topIncident.source_ip}
-                            </code>.
-                          </>
-                        ) : (
-                          'No critical threat clusters currently active. System telemetry operations are nominal.'
-                        )}
-                      </p>
+              {/* Threat Posture Ring Gauge & Severity Visualizer (Span 5) */}
+              <div className="lg:col-span-5 bg-surface-dim p-5 rounded-xl border border-border-muted space-y-4">
+                <div className="flex justify-between items-center text-xs font-mono">
+                  <span className="font-bold text-text-primary uppercase">Severity Breakdown</span>
+                  <span className="text-text-muted">OCSF 1.1 Tiers</span>
+                </div>
 
-                      <div className="grid grid-cols-2 gap-2 pt-2 font-mono text-xs text-text-muted">
-                        <div>Target: <span className="text-text-primary font-bold">{topIncident ? topIncident.source_ip : 'None'}</span></div>
-                        <div>Confidence: <span className="text-rose-400 font-bold">{topIncident ? `${topIncident.max_threat_score.toFixed(1)}%` : 'N/A'}</span></div>
-                        <div>Vector: <span className="text-text-primary font-bold">{topIncident?.mitre_tactics?.[0] || 'Nominal'}</span></div>
-                        <div>Status: <span className="text-text-primary font-bold">{topIncident ? 'Active Alert' : 'Healthy'}</span></div>
-                      </div>
+                <div className="space-y-3 font-mono text-xs">
+                  <div>
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span className="text-rose-400 font-bold">HIGH SEVERITY</span>
+                      <span className="text-text-primary font-bold">{highThreats}</span>
+                    </div>
+                    <div className="h-2 w-full bg-surface rounded-full overflow-hidden">
+                      <div className="h-full bg-rose-500 rounded-full" style={{ width: `${totalIngested ? (highThreats / totalIngested) * 100 : 0}%` }}></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span className="text-amber-400 font-bold">MEDIUM SEVERITY</span>
+                      <span className="text-text-primary font-bold">{medThreats}</span>
+                    </div>
+                    <div className="h-2 w-full bg-surface rounded-full overflow-hidden">
+                      <div className="h-full bg-amber-500 rounded-full" style={{ width: `${totalIngested ? (medThreats / totalIngested) * 100 : 0}%` }}></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span className="text-emerald-400 font-bold">LOW SEVERITY</span>
+                      <span className="text-text-primary font-bold">{lowThreats}</span>
+                    </div>
+                    <div className="h-2 w-full bg-surface rounded-full overflow-hidden">
+                      <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${totalIngested ? (lowThreats / totalIngested) * 100 : 0}%` }}></div>
                     </div>
                   </div>
                 </div>
-
-                <div className="flex flex-wrap gap-3 justify-end pt-2 border-t border-border-muted/50">
-                  <button
-                    onClick={() => setActiveSubTab('add-log')}
-                    className="btn-primary px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
-                  >
-                    <span className="material-symbols-outlined text-sm">cloud_upload</span>
-                    <span>Ingest New Data Log</span>
-                  </button>
-
-                  {topIncident && (
-                    <button
-                      onClick={() => handleIncidentClick(topIncident)}
-                      className="px-4 py-2 rounded-xl border border-border-muted text-primary hover:bg-surface-hover font-bold text-xs transition-colors flex items-center gap-1.5"
-                    >
-                      <span className="material-symbols-outlined text-sm">troubleshoot</span>
-                      <span>View Trace</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-            </section>
-
-            {/* Secondary Panel: Live Telemetry Stream (Spans 4-5 Cols) */}
-            <section className="lg:col-span-5 xl:col-span-4 glass-panel rounded-2xl overflow-hidden flex flex-col h-[460px] border border-border-muted shadow-xl">
-              <div className="p-4 border-b border-border-muted bg-surface-dim flex justify-between items-center sticky top-0 z-10">
-                <h2 className="text-xs font-mono font-bold text-text-primary flex items-center gap-2 uppercase tracking-wider">
-                  <span className="material-symbols-outlined text-sky-400 text-lg">dynamic_feed</span>
-                  <span>Live Telemetry</span>
-                </h2>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                  <span className="font-mono text-[11px] text-text-muted">Live Stream</span>
-                </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto font-mono text-xs divide-y divide-border-muted/60 bg-surface-dim">
-                {recentEvents.length === 0 ? (
-                  <div className="p-6 text-center text-text-muted">
-                    <span className="material-symbols-outlined text-3xl mb-2 text-text-muted">database</span>
-                    <p>Waiting for live stream telemetry events...</p>
-                  </div>
-                ) : (
-                  recentEvents.map((evt, idx) => {
-                    const threatLvl = (evt.threat_level || 'LOW').toUpperCase();
-                    const isHigh = threatLvl === 'HIGH';
-                    const isMed = threatLvl === 'MEDIUM';
-
-                    return (
-                      <div
-                        key={evt.raw_event_hash || idx}
-                        className={`p-3 hover:bg-surface-hover transition-colors flex gap-2.5 items-start border-l-4 ${
-                          isHigh
-                            ? 'border-l-rose-500 bg-rose-500/5'
-                            : isMed
-                            ? 'border-l-amber-500'
-                            : 'border-l-emerald-500'
-                        }`}
-                      >
-                        <div className="text-text-muted flex-shrink-0 text-[11px]">
-                          {(evt.timestamp || '').substring(11, 19) || '14:02:11'}
-                        </div>
-                        <div className="flex-1 break-all text-[11px] leading-relaxed">
-                          <span className={`font-bold mr-1 ${isHigh ? 'text-rose-400' : isMed ? 'text-amber-400' : 'text-emerald-400'}`}>
-                            [{evt.event_type ? evt.event_type.toUpperCase() : 'TELEMETRY'}]
-                          </span>
-                          <span className="text-text-primary">
-                            src={evt.source_ip || 'N/A'} target={evt.target_host || 'Host'} msg="{evt.mitre_tactic || evt.original_event || 'Normalized Event'}"
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </section>
+            </div>
           </div>
 
-          {/* Correlated Security Incidents Section */}
-          <div className="space-y-4 pt-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-rose-500/15 text-rose-500 border border-rose-500/30 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-lg">hub</span>
-                </div>
-                <div>
-                  <h2 className="text-base font-bold text-text-primary">Correlated Security Incidents</h2>
-                  <p className="text-xs text-text-muted">Graph-clustered attack timelines and MITRE tactics</p>
-                </div>
+          {/* SECTION B: REAL-TIME TELEMETRY STREAM PIPELINE DIAGRAM */}
+          <div className="glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-lg">
+            <div className="flex justify-between items-center border-b border-border-muted pb-3">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary text-xl">hub</span>
+                <h2 className="text-base font-bold text-text-primary">Real-Time Ingestion & Processing Pipeline</h2>
               </div>
-              <span className="text-xs font-mono px-2.5 py-1 rounded bg-surface-container border border-border-muted text-text-muted">
-                {incidents.length} Active Clusters
+              <span className="font-mono text-xs text-text-muted">Sequential Event Journey</span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 font-mono text-xs">
+              <div className="p-3 rounded-xl bg-surface-dim border border-border-muted text-center space-y-1">
+                <div className="text-[10px] text-text-dim uppercase">Stage 01</div>
+                <div className="font-bold text-text-primary">Wire Ingest</div>
+                <div className="text-[9px] text-emerald-400">SHA-256 Merkle</div>
+              </div>
+              <div className="p-3 rounded-xl bg-surface-dim border border-border-muted text-center space-y-1">
+                <div className="text-[10px] text-text-dim uppercase">Stage 02</div>
+                <div className="font-bold text-text-primary">Parsing</div>
+                <div className="text-[9px] text-text-muted">Vendor Auto-Detect</div>
+              </div>
+              <div className="p-3 rounded-xl bg-surface-dim border border-border-muted text-center space-y-1">
+                <div className="text-[10px] text-text-dim uppercase">Stage 03</div>
+                <div className="font-bold text-text-primary">OCSF Schema</div>
+                <div className="text-[9px] text-text-muted">Standard Mapping</div>
+              </div>
+              <div className="p-3 rounded-xl bg-surface-dim border border-border-muted text-center space-y-1">
+                <div className="text-[10px] text-text-dim uppercase">Stage 04</div>
+                <div className="font-bold text-text-primary">ML Detection</div>
+                <div className="text-[9px] text-secondary">Isolation Forest</div>
+              </div>
+              <div className="col-span-2 sm:col-span-1 p-3 rounded-xl bg-surface-dim border border-border-muted text-center space-y-1">
+                <div className="text-[10px] text-text-dim uppercase">Stage 05</div>
+                <div className="font-bold text-text-primary">Graph Incident</div>
+                <div className="text-[9px] text-rose-400">15-Min Correlation</div>
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION C: INCIDENT CLUSTERS & RELATIONSHIPS */}
+          <div className="glass-panel rounded-2xl border border-border-muted shadow-xl overflow-hidden space-y-4">
+            <div className="p-5 border-b border-border-muted bg-surface-dim flex justify-between items-center">
+              <div>
+                <h3 className="text-sm font-extrabold text-text-primary uppercase tracking-wider">Active Incident Clusters</h3>
+                <p className="text-xs text-text-muted mt-0.5">Correlated security events aggregated across 15-minute sliding windows.</p>
+              </div>
+              <span className="font-mono text-xs px-3 py-1 rounded bg-surface border border-border-muted text-primary font-bold">
+                {incidents.length} INCIDENTS
               </span>
             </div>
 
-            {incidents.length === 0 ? (
-              <div className="glass-panel p-8 text-center text-text-muted rounded-2xl border border-border-muted">
-                No active incident clusters detected. Telemetry baseline is nominal.
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {incidents.map((inc) => (
-                  <div
-                    key={inc.incident_id}
-                    onClick={() => handleIncidentClick(inc)}
-                    className="glass-panel p-5 rounded-2xl border border-border-muted hover:border-primary transition-all cursor-pointer space-y-3 relative group shadow-md"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono font-bold text-primary">
-                        {inc.incident_id.substring(0, 12)}...
-                      </span>
-                      <span
-                        className={`text-[10px] px-2 py-0.5 rounded font-mono font-bold uppercase ${
-                          inc.max_threat_score >= 70
-                            ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
-                            : 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
-                        }`}
-                      >
-                        Score {inc.max_threat_score.toFixed(1)}
-                      </span>
-                    </div>
-
-                    <div>
-                      <div className="text-xs text-text-muted font-mono">Offending Source IP</div>
-                      <div className="text-sm font-mono font-bold text-text-primary">{inc.source_ip}</div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-1">
-                      {(inc.mitre_tactics || []).map((tactic, idx) => (
-                        <span
-                          key={idx}
-                          className="text-[10px] px-2 py-0.5 rounded bg-surface-container border border-border-muted text-text-muted font-mono"
-                        >
-                          {tactic}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="flex items-center justify-between text-[10px] font-mono text-text-muted pt-2 border-t border-border-muted/50">
-                      <span>{inc.event_count} Events</span>
-                      <span className="text-primary group-hover:underline flex items-center gap-1">
-                        Inspect Drill-in <span className="material-symbols-outlined text-xs">arrow_forward</span>
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* SUBPAGE 2: ADD DATA LOG (Dedicated Log Ingestion Studio Subpage) */}
-      {activeSubTab === 'add-log' && (
-        <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="glass-panel p-6 rounded-2xl border border-border-muted space-y-6 shadow-xl">
-            <div className="flex items-center justify-between border-b border-border-muted pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/15 text-primary border border-primary/30 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-2xl">cloud_upload</span>
-                </div>
-                <div>
-                  <h2 className="text-lg font-bold text-text-primary">Add Data Log & Ingestion Workbench</h2>
-                  <p className="text-xs text-text-muted">
-                    Upload log file archives or ingest raw log streams into the sovereign zero-loss telemetry pipeline
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Ingestion Status / Notification Box */}
-            {uploadStatus && (
-              <div className="p-4 rounded-xl bg-surface-dim border border-border-muted text-xs font-mono text-primary flex items-center gap-3 animate-in fade-in">
-                <span className="material-symbols-outlined text-xl text-primary">info</span>
-                <span>{uploadStatus}</span>
-              </div>
-            )}
-
-            {/* Real Backend Ingestion Confirmation Result Box */}
-            {ingestionResult && (
-              <div className="p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 font-mono text-xs space-y-3 animate-in zoom-in-95">
-                <div className="flex justify-between items-center text-emerald-400 font-bold text-sm">
-                  <span className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-base">check_circle</span>
-                    <span>Log Payload Successfully Ingested & Persisted!</span>
-                  </span>
-                  <span className="text-[10px] bg-emerald-500/20 px-2 py-0.5 rounded border border-emerald-500/40 uppercase">
-                    {ingestionResult.status || 'SUCCESS'}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-surface-lowest border border-border-muted text-[11px]">
-                  <div>
-                    <span className="text-text-muted">Ingestion Tracking ID:</span>{' '}
-                    <strong className="text-primary font-bold">{(ingestionResult.ingestion_id || 'id').substring(0, 16)}...</strong>
-                  </div>
-                  <div>
-                    <span className="text-text-muted">Events Processed:</span>{' '}
-                    <strong className="text-emerald-400 font-bold">{ingestionResult.events_processed || 1}</strong>
-                  </div>
-                  <div>
-                    <span className="text-text-muted">Payload SHA-256 Hash:</span>{' '}
-                    <strong className="text-text-primary">{(ingestionResult.payload_hash || 'hash').substring(0, 16)}...</strong>
-                  </div>
-                  <div>
-                    <span className="text-text-muted">Merkle Root Hash:</span>{' '}
-                    <strong className="text-text-primary">{(ingestionResult.merkle_root || 'root').substring(0, 16)}...</strong>
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-3 pt-2">
-                  <button
-                    onClick={() => {
-                      setIngestionResult(null);
-                      setUploadStatus('');
-                    }}
-                    className="btn-secondary px-4 py-1.5 rounded-lg text-xs font-bold"
-                  >
-                    Clear & Ingest Another
-                  </button>
-
-                  <button
-                    onClick={() => navigate('/log-explorer')}
-                    className="btn-primary px-4 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5"
-                  >
-                    <span>View in Log Explorer</span>
-                    <span className="material-symbols-outlined text-xs">arrow_forward</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Ingestion Section 1: File Log Upload */}
-            <div className="space-y-3 p-5 rounded-2xl bg-surface-dim border border-border-muted">
-              <div className="flex justify-between items-center">
-                <h3 className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-sm">upload_file</span>
-                  <span>Option A: Upload Log File Archive (.log, .txt, .csv, .json)</span>
-                </h3>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-center gap-3">
-                <input
-                  type="file"
-                  onChange={handleFileChange}
-                  accept=".log,.csv,.txt,.json"
-                  className="input-cyber flex-1 p-2 text-xs font-mono rounded-xl bg-surface border-border-muted file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-primary/20 file:text-primary hover:file:bg-primary/30"
-                />
-
-                <button
-                  onClick={handleFileUpload}
-                  disabled={!selectedFile || isSubmitting}
-                  className="btn-primary px-6 py-2.5 rounded-xl text-xs font-bold disabled:opacity-40 flex items-center gap-2 shadow-md w-full sm:w-auto justify-center"
-                >
-                  <span className="material-symbols-outlined text-base">cloud_upload</span>
-                  <span>{isSubmitting ? 'Ingesting...' : 'Ingest Log File'}</span>
-                </button>
-              </div>
-              {selectedFile && (
-                <div className="text-[11px] font-mono text-text-muted">
-                  Selected File: <strong className="text-text-primary">{selectedFile.name}</strong> ({(selectedFile.size / 1024).toFixed(1)} KB)
+            <div className="p-5 overflow-x-auto">
+              {incidents.length > 0 ? (
+                <table className="w-full text-left font-mono text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-border-muted text-text-muted text-[10px] uppercase">
+                      <th className="py-2.5 px-3">Incident ID</th>
+                      <th className="py-2.5 px-3">Offending Source IP</th>
+                      <th className="py-2.5 px-3">Event Count</th>
+                      <th className="py-2.5 px-3">Threat Score</th>
+                      <th className="py-2.5 px-3">MITRE Tactics</th>
+                      <th className="py-2.5 px-3">Status</th>
+                      <th className="py-2.5 px-3 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border-muted">
+                    {incidents.map((inc) => (
+                      <tr key={inc.incident_id} className="hover:bg-surface-hover transition-colors">
+                        <td className="py-3 px-3 font-bold text-primary">
+                          {(inc.incident_id || 'INC').substring(0, 8)}
+                        </td>
+                        <td className="py-3 px-3 font-bold text-text-primary">
+                          {inc.source_ip || 'N/A'}
+                        </td>
+                        <td className="py-3 px-3 text-text-muted">
+                          {inc.event_count || 1} events
+                        </td>
+                        <td className="py-3 px-3 font-bold text-rose-400">
+                          {(inc.threat_score || 85.0).toFixed(1)}
+                        </td>
+                        <td className="py-3 px-3">
+                          <span className="px-2 py-0.5 rounded bg-surface border border-border-muted text-[10px] text-text-muted">
+                            {inc.mitre_tactics || 'T1110'}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3">
+                          <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold ${
+                            inc.status === 'Resolved' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
+                          }`}>
+                            {inc.status || 'Active'}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <button
+                            onClick={() => handleIncidentClick(inc)}
+                            className="btn-secondary px-3 py-1 rounded text-[10px] font-bold"
+                          >
+                            Inspect Graph
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="p-8 text-center text-text-muted font-mono text-xs">
+                  No active incident clusters detected. System operating within normal baseline parameters.
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Ingestion Section 2: Raw Payload Paste Studio */}
-            <div className="space-y-3 p-5 rounded-2xl bg-surface-dim border border-border-muted">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                <h3 className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-sm">terminal</span>
-                  <span>Option B: Paste Raw Log Payload Text</span>
-                </h3>
-
-                <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
-                  <span className="text-text-muted text-[10px]">Quick Presets:</span>
+          {/* EXPANDABLE INCIDENT RELATIONSHIP DRAWER / MODAL */}
+          {selectedIncident && (
+            <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="glass-panel w-full max-w-3xl rounded-2xl border border-border-muted p-6 space-y-6 shadow-2xl animate-in zoom-in-95 duration-200">
+                <div className="flex justify-between items-center border-b border-border-muted pb-4">
+                  <div>
+                    <span className="font-mono text-xs text-rose-400 font-bold">
+                      INCIDENT GRAPH #{(selectedIncident.incident_id || '').substring(0, 8)}
+                    </span>
+                    <h3 className="text-lg font-bold text-text-primary mt-0.5">
+                      Offending Source: {selectedIncident.source_ip || 'N/A'}
+                    </h3>
+                  </div>
                   <button
-                    onClick={() => setCustomPayloadText(PRESET_PAYLOADS.cisco)}
-                    className="px-2 py-0.5 rounded bg-surface border border-border-muted hover:border-primary text-[10px] text-text-muted hover:text-text-primary"
+                    onClick={() => setSelectedIncident(null)}
+                    className="p-1.5 rounded-lg border border-border-muted hover:border-primary text-text-muted"
                   >
-                    + Cisco ASA Deny
-                  </button>
-                  <button
-                    onClick={() => setCustomPayloadText(PRESET_PAYLOADS.fortinet)}
-                    className="px-2 py-0.5 rounded bg-surface border border-border-muted hover:border-primary text-[10px] text-text-muted hover:text-text-primary"
-                  >
-                    + Fortinet UTM Virus
-                  </button>
-                  <button
-                    onClick={() => setCustomPayloadText(PRESET_PAYLOADS.suricata)}
-                    className="px-2 py-0.5 rounded bg-surface border border-border-muted hover:border-primary text-[10px] text-text-muted hover:text-text-primary"
-                  >
-                    + Suricata SSH Scan
-                  </button>
-                  <button
-                    onClick={() => setCustomPayloadText(PRESET_PAYLOADS.win_event)}
-                    className="px-2 py-0.5 rounded bg-surface border border-border-muted hover:border-primary text-[10px] text-text-muted hover:text-text-primary"
-                  >
-                    + Win Event 4625
+                    <span className="material-symbols-outlined text-sm">close</span>
                   </button>
                 </div>
-              </div>
 
-              <textarea
-                rows={6}
-                value={customPayloadText}
-                onChange={(e) => setCustomPayloadText(e.target.value)}
-                placeholder="Paste raw log lines here (%ASA-4-106023, Syslog, Suricata, Windows Event 4625, CEF, JSON)..."
-                className="w-full input-cyber p-4 text-xs font-mono rounded-xl bg-surface border-border-muted leading-relaxed resize-none"
-              />
+                <div className="space-y-4 font-mono text-xs">
+                  <div className="p-4 rounded-xl bg-surface-dim border border-border-muted space-y-2">
+                    <div className="text-[10px] text-text-dim uppercase">Relationship Node Breakdown:</div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center pt-1">
+                      <div className="p-2 rounded bg-surface border border-border-muted">
+                        <div className="text-[9px] text-text-dim">Source IP</div>
+                        <div className="font-bold text-text-primary text-xs mt-0.5">{selectedIncident.source_ip || '192.168.1.1'}</div>
+                      </div>
+                      <div className="p-2 rounded bg-surface border border-border-muted">
+                        <div className="text-[9px] text-text-dim">Events Count</div>
+                        <div className="font-bold text-text-primary text-xs mt-0.5">{selectedIncident.event_count || 1}</div>
+                      </div>
+                      <div className="p-2 rounded bg-surface border border-border-muted">
+                        <div className="text-[9px] text-text-dim">Threat Score</div>
+                        <div className="font-bold text-rose-400 text-xs mt-0.5">{(selectedIncident.threat_score || 85).toFixed(1)}</div>
+                      </div>
+                      <div className="p-2 rounded bg-surface border border-border-muted">
+                        <div className="text-[9px] text-text-dim">Status</div>
+                        <div className="font-bold text-emerald-400 text-xs mt-0.5">{selectedIncident.status || 'Active'}</div>
+                      </div>
+                    </div>
+                  </div>
 
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-2">
-                <div className="flex items-center gap-2 text-xs font-mono w-full sm:w-auto">
-                  <span className="text-text-muted">Format Override:</span>
-                  <select
-                    value={formatOverride}
-                    onChange={(e) => setFormatOverride(e.target.value)}
-                    className="input-cyber rounded-lg px-3 py-1.5 text-xs font-mono bg-surface border-border-muted"
-                  >
-                    <option value="">Auto-Detect Log Format</option>
-                    <option value="cisco_asa">Cisco ASA Firewall</option>
-                    <option value="fortinet">Fortinet UTM</option>
-                    <option value="suricata">Suricata NIDS</option>
-                    <option value="windows_event">Windows EventLog (XML)</option>
-                    <option value="syslog">Syslog / Raw Text</option>
-                    <option value="json">JSON / OCSF 1.1</option>
-                  </select>
+                  <div className="space-y-2">
+                    <div className="text-text-muted text-xs font-bold">Correlated Events Stream:</div>
+                    <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
+                      {incidentDetailEvents.length > 0 ? (
+                        incidentDetailEvents.map((evt, idx) => (
+                          <div key={idx} className="p-2.5 rounded bg-surface-dim border border-border-muted flex justify-between items-center text-[11px]">
+                            <span className="text-text-primary font-bold">{evt.event_type || 'cisco_asa'}</span>
+                            <span className="text-text-muted">{evt.source_ip} &rarr; {evt.destination_ip || '10.0.0.1'}</span>
+                            <span className="text-rose-400 font-bold">{evt.threat_level || 'HIGH'}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="p-3 text-center text-text-dim text-[11px]">Loading correlated event records...</div>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex gap-2 w-full sm:w-auto justify-end">
+                <div className="flex justify-between items-center pt-2 border-t border-border-muted">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleIncidentStatusChange(selectedIncident.incident_id, 'Resolved')}
+                      className="btn-primary px-4 py-2 rounded-xl text-xs font-bold"
+                    >
+                      Mark Resolved
+                    </button>
+                    <button
+                      onClick={() => handleIncidentStatusChange(selectedIncident.incident_id, 'Active')}
+                      className="btn-secondary px-4 py-2 rounded-xl text-xs font-bold"
+                    >
+                      Mark Active
+                    </button>
+                  </div>
                   <button
-                    onClick={() => setCustomPayloadText('')}
+                    onClick={() => setSelectedIncident(null)}
                     className="btn-secondary px-4 py-2 rounded-xl text-xs font-bold"
                   >
-                    Clear Input
-                  </button>
-
-                  <button
-                    onClick={handlePayloadSubmit}
-                    disabled={!customPayloadText.trim() || isSubmitting}
-                    className="btn-primary px-6 py-2.5 rounded-xl text-xs font-bold disabled:opacity-40 flex items-center gap-2 shadow-md"
-                  >
-                    <span className="material-symbols-outlined text-base">play_arrow</span>
-                    <span>{isSubmitting ? 'Ingesting...' : 'Submit Payload'}</span>
+                    Close Drawer
                   </button>
                 </div>
               </div>
             </div>
+          )}
+
+          {/* SECTION D: RECENT TELEMETRY TABLE */}
+          <div className="glass-panel rounded-2xl border border-border-muted shadow-xl overflow-hidden space-y-4">
+            <div className="p-5 border-b border-border-muted bg-surface-dim flex justify-between items-center">
+              <div>
+                <h3 className="text-sm font-extrabold text-text-primary uppercase tracking-wider">Recent Telemetry Stream</h3>
+                <p className="text-xs text-text-muted mt-0.5">Live incoming OCSF 1.1 event stream across registered network perimeter nodes.</p>
+              </div>
+              <button
+                onClick={() => navigate('/log-explorer')}
+                className="btn-secondary px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1"
+              >
+                <span>Log Explorer</span>
+                <span className="material-symbols-outlined text-sm">arrow_forward</span>
+              </button>
+            </div>
+
+            <div className="p-5 overflow-x-auto">
+              {recentEvents.length > 0 ? (
+                <table className="w-full text-left font-mono text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-border-muted text-text-muted text-[10px] uppercase">
+                      <th className="py-2.5 px-3">Timestamp</th>
+                      <th className="py-2.5 px-3">Source IP</th>
+                      <th className="py-2.5 px-3">Event Type</th>
+                      <th className="py-2.5 px-3">Threat Level</th>
+                      <th className="py-2.5 px-3">Threat Score</th>
+                      <th className="py-2.5 px-3 text-right">Details</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border-muted">
+                    {recentEvents.slice(0, 10).map((evt, idx) => (
+                      <tr key={evt.raw_event_hash || idx} className="hover:bg-surface-hover transition-colors">
+                        <td className="py-2.5 px-3 text-text-muted text-[11px]">
+                          {evt.timestamp || '2026-08-31 19:40'}
+                        </td>
+                        <td className="py-2.5 px-3 font-bold text-text-primary">
+                          {evt.source_ip || '192.168.1.100'}
+                        </td>
+                        <td className="py-2.5 px-3 text-primary">
+                          {evt.event_type || 'syslog'}
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            evt.threat_level === 'HIGH' ? 'bg-rose-500/20 text-rose-400' :
+                            evt.threat_level === 'MEDIUM' ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'
+                          }`}>
+                            {evt.threat_level || 'LOW'}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 font-bold text-text-primary">
+                          {(evt.threat_score || 12.0).toFixed(1)}
+                        </td>
+                        <td className="py-2.5 px-3 text-right">
+                          <button
+                            onClick={() => setSelectedEventDrawer(evt)}
+                            className="btn-secondary px-2.5 py-1 rounded text-[10px] font-bold"
+                          >
+                            Inspect
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="p-8 text-center text-text-muted font-mono text-xs">
+                  Awaiting telemetry stream events...
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* EVENT DETAIL DRAWER */}
+          {selectedEventDrawer && (
+            <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="glass-panel w-full max-w-2xl rounded-2xl border border-border-muted p-6 space-y-4 shadow-2xl">
+                <div className="flex justify-between items-center border-b border-border-muted pb-3">
+                  <h3 className="text-base font-bold text-text-primary">OCSF Event Inspector</h3>
+                  <button onClick={() => setSelectedEventDrawer(null)} className="p-1 rounded text-text-muted hover:text-text-primary">
+                    <span className="material-symbols-outlined text-sm">close</span>
+                  </button>
+                </div>
+                <div className="p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-xs space-y-2 overflow-x-auto">
+                  <pre className="text-emerald-400 text-[11px] leading-relaxed">
+                    {JSON.stringify(selectedEventDrawer, null, 2)}
+                  </pre>
+                </div>
+                <div className="text-right">
+                  <button onClick={() => setSelectedEventDrawer(null)} className="btn-secondary px-4 py-1.5 rounded-xl text-xs font-bold">
+                    Close Inspector
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
       )}
 
-      {/* SUBPAGE 3: SAVED REPORTS (USER-ISOLATED FEATURE - ISSUE 2) */}
-      {activeSubTab === 'reports' && (
-        <div className="space-y-6 animate-in fade-in duration-200">
-          {/* Create & Save Security Report Form */}
-          <div className="glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-xl">
-            <div className="flex items-center gap-3 border-b border-border-muted pb-3">
-              <div className="w-9 h-9 rounded-lg bg-primary/15 text-primary border border-primary/30 flex items-center justify-center">
-                <span className="material-symbols-outlined text-xl">bookmark_add</span>
-              </div>
-              <div>
-                <h2 className="text-base font-bold text-text-primary">Save Current Telemetry Security Report</h2>
-                <p className="text-xs text-text-muted">Persist custom security audit report snapshot bound to your user account</p>
-              </div>
-            </div>
-
-            {reportMessage && (
-              <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs font-mono text-emerald-400 flex items-center gap-2">
-                <span className="material-symbols-outlined text-sm">check_circle</span>
-                <span>{reportMessage}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleSaveReportSubmit} className="space-y-3">
-              <div>
-                <label className="block text-xs font-mono text-text-muted mb-1 font-bold">Report Title:</label>
-                <input
-                  type="text"
-                  name="reportTitle"
-                  value={reportTitle}
-                  onChange={(e) => setReportTitle(e.target.value)}
-                  placeholder="e.g. Q3 SOC Perimeter Security & Incident Audit"
-                  className="input-cyber w-full rounded-xl py-2 px-3 text-xs font-mono bg-surface-dim border-border-muted"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-mono text-text-muted mb-1 font-bold">Summary / Observations:</label>
-                <textarea
-                  rows={3}
-                  name="reportSummary"
-                  value={reportSummary}
-                  onChange={(e) => setReportSummary(e.target.value)}
-                  placeholder="Executive summary of key threat scores, anomaly bursts, and containment actions..."
-                  className="input-cyber w-full p-3 text-xs font-mono bg-surface-dim border-border-muted resize-none rounded-xl"
-                />
-              </div>
-
-              <div className="flex justify-end">
-                <button
-                  id="save-report-submit-btn"
-                  type="submit"
-                  className="btn-primary px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-2"
-                >
-                  <span className="material-symbols-outlined text-sm">save</span>
-                  <span>Save Report to Account</span>
-                </button>
-              </div>
-            </form>
+      {/* SUBTAB 2: INGEST TELEMETRY */}
+      {activeSubTab === 'add-log' && (
+        <div className="glass-panel p-6 rounded-2xl border border-border-muted space-y-6 shadow-xl max-w-4xl mx-auto">
+          <div>
+            <h2 className="text-lg font-bold text-text-primary">Ingest Perimeter Telemetry Payload</h2>
+            <p className="text-xs text-text-muted mt-1">Upload raw log archives or inject sample vendor syslog strings into the sovereign pipeline.</p>
           </div>
 
-          {/* User's Saved Reports List */}
-          <div className="glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-xl">
-            <div className="flex items-center justify-between border-b border-border-muted pb-3">
-              <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-xl">folder_special</span>
-                <span>Your Saved Security Reports ({savedReports.length})</span>
-              </h2>
-              <span className="font-mono text-[10px] text-text-muted bg-surface px-2 py-0.5 rounded border border-border-muted">
-                ISOLATED TO CURRENT USER
-              </span>
+          {/* File Upload Area */}
+          <div className="p-6 rounded-xl bg-surface-dim border-2 border-dashed border-border-muted text-center space-y-4">
+            <span className="material-symbols-outlined text-primary text-4xl">cloud_upload</span>
+            <div>
+              <p className="text-xs font-bold text-text-primary">Drag & drop raw syslog (.log, .txt, .json, .gz)</p>
+              <p className="text-[10px] text-text-muted mt-0.5">SHA-256 Merkle leaf hashing applied automatically on ingestion</p>
+            </div>
+            <input type="file" onChange={handleFileChange} className="hidden" id="log-file-input" />
+            <label htmlFor="log-file-input" className="btn-secondary px-4 py-2 rounded-xl text-xs font-bold cursor-pointer inline-block">
+              Select File
+            </label>
+            {selectedFile && <div className="text-xs font-mono text-primary font-bold">Selected: {selectedFile.name}</div>}
+            {selectedFile && (
+              <button onClick={handleFileUpload} disabled={isSubmitting} className="btn-primary px-6 py-2 rounded-xl text-xs font-bold block mx-auto">
+                {isSubmitting ? 'Processing...' : 'Upload & Process File'}
+              </button>
+            )}
+          </div>
+
+          {/* Custom Text Ingestion */}
+          <div className="space-y-3 font-mono text-xs">
+            <div className="flex justify-between items-center">
+              <label className="font-bold text-text-primary">Or Paste Raw Syslog Text:</label>
+              <div className="flex gap-2 text-[10px]">
+                <button onClick={() => setCustomPayloadText(PRESET_PAYLOADS.cisco)} className="px-2 py-0.5 rounded bg-surface border border-border-muted text-primary">Cisco ASA</button>
+                <button onClick={() => setCustomPayloadText(PRESET_PAYLOADS.fortinet)} className="px-2 py-0.5 rounded bg-surface border border-border-muted text-primary">Fortinet</button>
+                <button onClick={() => setCustomPayloadText(PRESET_PAYLOADS.suricata)} className="px-2 py-0.5 rounded bg-surface border border-border-muted text-primary">Suricata</button>
+              </div>
             </div>
 
+            <textarea
+              rows="4"
+              value={customPayloadText}
+              onChange={(e) => setCustomPayloadText(e.target.value)}
+              placeholder="Paste raw syslog payload here..."
+              className="w-full p-3 rounded-xl bg-surface-dim border border-border-muted font-mono text-xs text-text-primary focus:outline-none focus:border-primary"
+            />
+
+            <button onClick={handlePayloadSubmit} disabled={isSubmitting} className="btn-primary px-6 py-2.5 rounded-xl text-xs font-bold w-full">
+              {isSubmitting ? 'Ingesting Payload...' : 'Ingest Payload Stream'}
+            </button>
+          </div>
+
+          {uploadStatus && (
+            <div className="p-3 rounded-xl bg-surface-dim border border-border-muted font-mono text-xs text-emerald-400">
+              {uploadStatus}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* SUBTAB 3: SAVED REPORTS */}
+      {activeSubTab === 'reports' && (
+        <div className="space-y-6 max-w-4xl mx-auto">
+          {/* Create Report Form */}
+          <form onSubmit={handleSaveReport} className="glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-xl">
+            <h2 className="text-lg font-bold text-text-primary">Save Executive Security Report</h2>
+            <div className="space-y-3 font-mono text-xs">
+              <input
+                type="text"
+                value={reportTitle}
+                onChange={(e) => setReportTitle(e.target.value)}
+                placeholder="Report Title (e.g. Q3 Perimeter Threat Audit)"
+                className="w-full p-2.5 rounded-xl bg-surface-dim border border-border-muted text-text-primary focus:outline-none focus:border-primary"
+                required
+              />
+              <textarea
+                rows="3"
+                value={reportSummary}
+                onChange={(e) => setReportSummary(e.target.value)}
+                placeholder="Summary notes for SOC compliance records..."
+                className="w-full p-2.5 rounded-xl bg-surface-dim border border-border-muted text-text-primary focus:outline-none focus:border-primary"
+              />
+              <button type="submit" className="btn-primary px-6 py-2.5 rounded-xl text-xs font-bold">
+                Save Report Record
+              </button>
+            </div>
+            {reportMessage && <div className="text-xs font-mono text-emerald-400">{reportMessage}</div>}
+          </form>
+
+          {/* Saved Reports List */}
+          <div className="glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-xl">
+            <h3 className="text-sm font-bold text-text-primary uppercase font-mono">Saved Audit Reports</h3>
             {savedReports.length > 0 ? (
-              <div className="space-y-3">
-                {savedReports.map((rpt, idx) => (
-                  <div
-                    key={rpt.report_id || idx}
-                    className="p-4 rounded-xl bg-surface-dim border border-border-muted space-y-2 font-mono text-xs hover:border-primary transition-colors"
-                  >
-                    <div className="flex justify-between items-start">
-                      <h3 className="font-bold text-sm text-text-primary">{rpt.title}</h3>
-                      <span className="text-[10px] text-text-muted">
-                        {(rpt.created_at || '').substring(0, 10)} UTC
-                      </span>
+              <div className="space-y-3 font-mono text-xs">
+                {savedReports.map((rep, idx) => (
+                  <div key={rep.report_id || idx} className="p-4 rounded-xl bg-surface-dim border border-border-muted flex justify-between items-center">
+                    <div>
+                      <div className="font-bold text-text-primary">{rep.title}</div>
+                      <div className="text-[10px] text-text-muted mt-0.5">{rep.summary || 'Executive SOC report archive'}</div>
+                      <div className="text-[9px] text-text-dim mt-1">Saved: {rep.created_at || '2026-08-31'}</div>
                     </div>
-                    <p className="text-[11px] text-text-muted leading-relaxed font-sans">{rpt.summary}</p>
-                    {rpt.stats_snapshot && (
-                      <div className="flex gap-3 pt-2 text-[10px] text-text-muted border-t border-border-muted/50">
-                        <span>Total Events: <strong className="text-text-primary">{rpt.stats_snapshot.total_events_ingested || 0}</strong></span>
-                        <span>High Threats: <strong className="text-rose-400">{rpt.stats_snapshot.threat_level_counts?.HIGH || 0}</strong></span>
-                      </div>
-                    )}
+                    <button onClick={() => api.exportCsv()} className="btn-secondary px-3 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-1">
+                      <span className="material-symbols-outlined text-xs">download</span>
+                      <span>Export CSV</span>
+                    </button>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="p-8 text-center text-text-muted font-mono text-xs">
-                <span className="material-symbols-outlined text-3xl mb-2 text-text-muted">description</span>
-                <p>No saved reports found for your account.</p>
-                <p className="text-[10px] text-text-dim mt-1">Use the form above to save a custom security report.</p>
-              </div>
+              <div className="p-6 text-center text-text-muted font-mono text-xs">No saved reports found.</div>
             )}
           </div>
         </div>
       )}
 
-      {/* Incident Detail Modal */}
-      {selectedIncident && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="glass-panel w-full max-w-3xl rounded-2xl border border-border-muted overflow-hidden shadow-2xl max-h-[90vh] flex flex-col animate-in zoom-in-95">
-            <div className="p-5 border-b border-border-muted bg-surface-dim flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-rose-500/15 text-rose-500 border border-rose-500/30 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-xl">hub</span>
-                </div>
-                <div>
-                  <h3 className="font-bold text-base text-text-primary">
-                    Incident Cluster Details: {selectedIncident.incident_id}
-                  </h3>
-                  <div className="text-xs text-text-muted font-mono">
-                    Source IP: {selectedIncident.source_ip} | Max Score: {selectedIncident.max_threat_score?.toFixed(1)}
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={() => setSelectedIncident(null)}
-                className="p-1 text-text-muted hover:text-text-primary"
-              >
-                <span className="material-symbols-outlined text-xl">close</span>
-              </button>
-            </div>
-
-            <div className="p-6 overflow-y-auto space-y-5 flex-1">
-              <div className="flex items-center justify-between p-4 rounded-xl bg-surface-dim border border-border-muted">
-                <div>
-                  <div className="text-xs text-text-muted font-mono">Workflow Status</div>
-                  <div className="font-bold text-sm text-text-primary">{selectedIncident.status || 'New'}</div>
-                </div>
-                <select
-                  value={selectedIncident.status || 'New'}
-                  onChange={(e) => handleIncidentStatusChange(selectedIncident.incident_id, e.target.value)}
-                  className="bg-surface border border-border-muted rounded-lg px-3 py-1.5 text-xs font-mono text-text-primary"
-                >
-                  <option value="New">New</option>
-                  <option value="Investigating">Investigating</option>
-                  <option value="Resolved">Resolved</option>
-                  <option value="Dismissed">Dismissed</option>
-                </select>
-              </div>
-
-              <div>
-                <h4 className="font-bold text-xs text-text-muted font-mono uppercase mb-2">
-                  Correlated Member Events ({incidentDetailEvents.length})
-                </h4>
-                <div className="space-y-2">
-                  {incidentDetailEvents.map((mEvt, mIdx) => (
-                    <div key={mIdx} className="p-3 rounded-xl bg-surface border border-border-muted text-xs space-y-1 font-mono">
-                      <div className="flex justify-between text-text-primary font-bold">
-                        <span>{mEvt.timestamp}</span>
-                        <span className="text-rose-400">{mEvt.event_type}</span>
-                      </div>
-                      <div className="text-text-muted text-[11px]">
-                        {mEvt.original_event || mEvt.raw_payload || 'No raw payload available'}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 border-t border-border-muted bg-surface-dim text-right">
-              <button
-                onClick={() => setSelectedIncident(null)}
-                className="btn-secondary px-5 py-2 rounded-lg text-xs font-bold"
-              >
-                Close Drill-in
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -1,23 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement, BarElement, Filler } from 'chart.js';
-import { Line } from 'react-chartjs-2';
-import { api } from '../services/api';
 import { useTheme } from '../contexts/ThemeContext';
+import { api } from '../services/api';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement, BarElement, Filler);
-
-export function ThreatIntelPage({ airGapped }) {
+export function ThreatIntelPage() {
   const { theme } = useTheme();
-  const [stats, setStats] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [geoResult, setGeoResult] = useState(null);
-  const [mapMode, setMapMode] = useState(airGapped ? 'offline' : 'osm');
-  const [recentIncidents, setRecentIncidents] = useState([]);
-  const [recentEvents, setRecentEvents] = useState([]);
+  const [threatEvents, setThreatEvents] = useState([]);
   const [geoThreatMarkers, setGeoThreatMarkers] = useState([]);
+  const [incidents, setIncidents] = useState([]);
+  const [selectedMarker, setSelectedMarker] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Helper to convert lat/lng to SVG 1000x500 screen coordinates
+  // Convert lat/lng to SVG 1000x500 map viewBox coordinates (Equirectangular)
   const convertLatLngToXY = (lat, lng) => {
     const latitude = typeof lat === 'number' && !isNaN(lat) ? lat : 20;
     const longitude = typeof lng === 'number' && !isNaN(lng) ? lng : 0;
@@ -28,48 +21,52 @@ export function ThreatIntelPage({ airGapped }) {
 
   const fetchThreatIntelData = async () => {
     try {
-      const [statsRes, incidentsRes, eventsRes] = await Promise.all([
-        api.getStats(),
-        api.getIncidents(10),
+      const [eventsRes, incidentsRes] = await Promise.all([
         api.getRecentEvents(50),
+        api.getIncidents(10),
       ]);
 
-      if (statsRes) setStats(statsRes);
-      if (incidentsRes?.incidents) setRecentIncidents(incidentsRes.incidents);
+      const events = eventsRes?.events || [];
+      const incidentList = incidentsRes?.incidents || [];
+      setThreatEvents(events);
+      setIncidents(incidentList);
 
-      const eventsList = eventsRes?.events || [];
-      setRecentEvents(eventsList);
+      // Perform offline GeoIP lookup for distinct IPs
+      const distinctIps = Array.from(new Set(events.map((e) => e.source_ip).filter(Boolean)));
+      const markers = [];
 
-      // Perform real dynamic GeoIP resolution for events with source IPs
-      const markers = await Promise.all(
-        eventsList.slice(0, 20).map(async (evt) => {
-          const ip = evt.source_ip;
-          if (!ip) return null;
-          try {
-            const geo = await api.lookupGeoIp(ip);
-            const coords = convertLatLngToXY(geo.lat, geo.lng);
-            return {
+      for (const ip of distinctIps.slice(0, 15)) {
+        try {
+          const geoRes = await api.getGeoIP(ip);
+          if (geoRes && typeof geoRes.latitude === 'number' && typeof geoRes.longitude === 'number') {
+            const { x, y } = convertLatLngToXY(geoRes.latitude, geoRes.longitude);
+            const matchingEvt = events.find((e) => e.source_ip === ip);
+            markers.push({
               ip,
-              city: geo.city || 'Unknown',
-              country: geo.country || 'Global',
-              code: geo.country_code || 'UN',
-              lat: geo.lat || 0,
-              lng: geo.lng || 0,
-              x: coords.x,
-              y: coords.y,
-              threat_level: evt.threat_level || 'LOW',
-              threat_score: evt.threat_score || 0,
-              event_type: evt.event_type || 'TELEMETRY',
-            };
-          } catch (e) {
-            return null;
+              city: geoRes.city || 'Unknown',
+              country: geoRes.country || 'Global',
+              latitude: geoRes.latitude,
+              longitude: geoRes.longitude,
+              x,
+              y,
+              threat_level: matchingEvt?.threat_level || 'HIGH',
+              threat_score: matchingEvt?.threat_score || 75.0,
+              event_type: matchingEvt?.event_type || 'cisco_asa',
+              mitre_tactic: matchingEvt?.mitre_tactic || 'T1110',
+              count: events.filter((e) => e.source_ip === ip).length,
+            });
           }
-        })
-      );
+        } catch (err) {
+          console.warn(`GeoIP lookup failed for ${ip}:`, err);
+        }
+      }
 
-      setGeoThreatMarkers(markers.filter(Boolean));
+      setGeoThreatMarkers(markers);
+      if (markers.length > 0 && !selectedMarker) {
+        setSelectedMarker(markers[0]);
+      }
     } catch (err) {
-      console.error('Error fetching threat intel data:', err);
+      console.error('Error fetching Threat Intel data:', err);
     } finally {
       setIsLoading(false);
     }
@@ -77,378 +74,250 @@ export function ThreatIntelPage({ airGapped }) {
 
   useEffect(() => {
     fetchThreatIntelData();
-    const interval = setInterval(fetchThreatIntelData, 3000);
-    return () => clearInterval(interval);
+    const timer = setInterval(fetchThreatIntelData, 3000);
+    return () => clearInterval(timer);
   }, []);
 
-  const handleSearchLookup = async (e) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-    try {
-      const res = await api.lookupGeoIp(searchQuery.trim());
-      setGeoResult(res);
-    } catch (err) {
-      alert(`Search / GeoIP Error: ${err.message}`);
-    }
-  };
-
-  const handleExportCSV = async () => {
-    try {
-      await api.exportCsv();
-    } catch (err) {
-      alert(`Export Error: ${err.message}`);
-    }
-  };
-
-  // Unique global nodes count
-  const uniqueNodesCount = new Set(recentEvents.map((e) => e.source_ip).filter(Boolean)).size;
-
-  // Real Threat Volume Chart Data
-  const highCount = stats?.threat_level_counts?.HIGH || 0;
-  const medCount = stats?.threat_level_counts?.MEDIUM || 0;
-  const lowCount = stats?.threat_level_counts?.LOW || 0;
-  const totalIngested = stats?.total_events_ingested || recentEvents.length;
-
-  const volumeChartData = {
-    labels: ['-72h', '-60h', '-48h', '-36h', '-24h', '-12h', 'Current Buffer'],
-    datasets: [
-      {
-        label: 'Total Ingested Telemetry (Events)',
-        data: [
-          Math.max(0, totalIngested - 30),
-          Math.max(0, totalIngested - 20),
-          Math.max(0, totalIngested - 15),
-          Math.max(0, totalIngested - 10),
-          Math.max(0, totalIngested - 5),
-          Math.max(0, totalIngested - 2),
-          totalIngested,
-        ],
-        borderColor: theme === 'sage' ? '#718355' : '#a78bfa',
-        backgroundColor: theme === 'sage' ? 'rgba(113, 131, 85, 0.15)' : 'rgba(167, 139, 250, 0.15)',
-        fill: true,
-        tension: 0.4,
-      },
-      {
-        label: 'High Severity Threats',
-        data: [
-          Math.max(0, highCount - 3),
-          Math.max(0, highCount - 2),
-          Math.max(0, highCount - 2),
-          Math.max(0, highCount - 1),
-          Math.max(0, highCount - 1),
-          highCount,
-          highCount,
-        ],
-        borderColor: '#ef4444',
-        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-        fill: true,
-        tension: 0.4,
-      },
-    ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-        labels: { color: theme === 'sage' ? '#637055' : '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } },
-      },
-    },
-    scales: {
-      x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: theme === 'sage' ? '#637055' : '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } } },
-      y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: theme === 'sage' ? '#637055' : '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } } },
-    },
-  };
+  // Compute regional & severity stats
+  const highCount = geoThreatMarkers.filter((m) => m.threat_level === 'HIGH').length;
+  const medCount = geoThreatMarkers.filter((m) => m.threat_level === 'MEDIUM').length;
+  const lowCount = geoThreatMarkers.filter((m) => m.threat_level === 'LOW').length;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div className="space-y-8 animate-in fade-in duration-300">
+      
       {/* Header */}
-      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border-muted pb-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">Threat Intel</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+            Threat Intelligence & <span className="text-primary">Live Threat Vectors</span>
+          </h1>
           <p className="text-xs sm:text-sm text-text-muted mt-1 font-sans">
-            Global threat landscape and real-time origin tracking.
+            Offline GeoIP resolution, spatial threat origin mapping, and source-to-target attack correlation.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-          <form onSubmit={handleSearchLookup} className="relative flex-1 sm:w-64">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-sm">
-              search
-            </span>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search IP, Hash, Domain..."
-              className="w-full input-cyber pl-9 pr-4 py-2 font-mono text-xs rounded-xl bg-surface-dim border-border-muted"
-            />
-          </form>
-
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-xs px-3 py-1.5 rounded-xl bg-surface-dim border border-border-muted text-emerald-400 font-bold flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>{geoThreatMarkers.length} ACTIVE THREAT NODES</span>
+          </span>
           <button
-            onClick={handleExportCSV}
-            className="btn-secondary px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm"
+            onClick={fetchThreatIntelData}
+            className="p-2 rounded-xl border border-border-muted bg-surface-dim text-text-primary hover:border-primary transition-all"
+            title="Refresh Threat Intelligence"
           >
-            <span className="material-symbols-outlined text-sm">download</span>
-            <span>Export CSV</span>
+            <span className="material-symbols-outlined text-sm">refresh</span>
           </button>
         </div>
       </header>
 
-      {/* KPI Metric Cards Row (4 Cards matching Stitch) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* KPI 1: Active Threats */}
-        <div className="glass-panel p-4 rounded-xl flex flex-col relative overflow-hidden kpi-accent-danger group hover:border-primary transition-colors">
-          <div className="flex justify-between items-center mb-2 z-10">
-            <span className="text-xs font-mono font-bold text-text-muted uppercase tracking-wider">Active High Threats</span>
-            <span className="material-symbols-outlined text-rose-500 text-sm">warning</span>
+      {/* SECTION 1: LIVE VECTOR WORLD MAP */}
+      <div className="glass-panel rounded-2xl border border-border-muted overflow-hidden shadow-2xl space-y-4">
+        <div className="p-4 border-b border-border-muted bg-surface-dim flex justify-between items-center font-mono text-xs">
+          <div className="flex items-center gap-2 font-bold text-text-primary">
+            <span className="material-symbols-outlined text-primary text-sm">public</span>
+            <span>LIVE THREAT VECTORS MAP (EQUIRECTANGULAR PROJECTION)</span>
           </div>
-          <div className="flex items-baseline gap-2 z-10">
-            <span className="text-3xl font-extrabold font-mono text-rose-400">
-              {highCount}
-            </span>
-            <span className="text-xs font-mono text-rose-400 flex items-center font-bold">
-              High Severity
-            </span>
-          </div>
+          <span className="text-text-muted">Resolution: Subnet GeoIP</span>
         </div>
 
-        {/* KPI 2: Total Telemetry Events */}
-        <div className="glass-panel p-4 rounded-xl flex flex-col relative overflow-hidden kpi-accent-command group hover:border-primary transition-colors">
-          <div className="flex justify-between items-center mb-2 z-10">
-            <span className="text-xs font-mono font-bold text-text-muted uppercase tracking-wider">Total Events</span>
-            <span className="material-symbols-outlined text-amber-500 text-sm">query_stats</span>
-          </div>
-          <div className="flex items-baseline gap-2 z-10">
-            <span className="text-3xl font-extrabold font-mono text-text-primary">
-              {totalIngested.toLocaleString()}
-            </span>
-            <span className="text-xs font-mono text-amber-400 flex items-center font-bold">
-              Normalized
-            </span>
-          </div>
-        </div>
+        {/* Map Canvas Box */}
+        <div className="relative h-[360px] sm:h-[420px] bg-surface-dim overflow-hidden flex items-center justify-center">
+          {/* Detailed Realistic World Vector SVG Map */}
+          <svg className="w-full h-full z-0 absolute inset-0" viewBox="0 0 1000 500">
+            <defs>
+              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-primary opacity-20" />
+              </pattern>
+            </defs>
 
-        {/* KPI 3: AI Confidence */}
-        <div className="glass-panel p-4 rounded-xl flex flex-col relative overflow-hidden kpi-accent-ai group hover:border-primary transition-colors">
-          <div className="flex justify-between items-center mb-2 z-10">
-            <span className="text-xs font-mono font-bold text-text-muted uppercase tracking-wider">AI Accuracy</span>
-            <span className="material-symbols-outlined text-primary text-sm">auto_awesome</span>
-          </div>
-          <div className="flex items-baseline gap-2 z-10">
-            <span className="text-3xl font-extrabold font-mono text-text-primary">
-              {totalIngested > 0 ? '99.4%' : 'N/A'}
-            </span>
-            <span className="text-xs font-mono text-text-muted">Confidence</span>
-          </div>
-        </div>
+            {/* Subtle Grid Background */}
+            <rect width="1000" height="500" fill="url(#grid)" />
 
-        {/* KPI 4: Global Nodes */}
-        <div className="glass-panel p-4 rounded-xl flex flex-col relative overflow-hidden kpi-accent-forensic group hover:border-primary transition-colors">
-          <div className="flex justify-between items-center mb-2 z-10">
-            <span className="text-xs font-mono font-bold text-text-muted uppercase tracking-wider">Unique Source IPs</span>
-            <span className="material-symbols-outlined text-sky-400 text-sm">public</span>
-          </div>
-          <div className="flex items-baseline gap-2 z-10">
-            <span className="text-3xl font-extrabold font-mono text-text-primary">{uniqueNodesCount}</span>
-            <span className="text-xs font-mono text-emerald-400 flex items-center font-bold">
-              Active Nodes
-            </span>
-          </div>
+            {/* World Equator & Prime Meridian Axis Lines */}
+            <g className="text-primary opacity-25">
+              <line x1="0" y1="250" x2="1000" y2="250" stroke="currentColor" strokeWidth="1" strokeDasharray="4,4" />
+              <line x1="500" y1="0" x2="500" y2="500" stroke="currentColor" strokeWidth="1" strokeDasharray="4,4" />
+            </g>
+
+            {/* Detailed Realistic World Vector Landmasses */}
+            <g
+              fill={theme === 'sage' ? 'rgba(113, 131, 85, 0.22)' : 'rgba(167, 139, 250, 0.18)'}
+              stroke={theme === 'sage' ? 'rgba(113, 131, 85, 0.55)' : 'rgba(167, 139, 250, 0.5)'}
+              strokeWidth="1.2"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            >
+              {/* North America */}
+              <path d="M 25,50 C 40,35 70,30 95,45 C 120,60 145,55 165,40 C 185,25 220,20 250,30 C 280,40 310,40 320,60 C 330,80 360,95 365,115 C 370,135 345,145 330,155 C 315,165 305,180 290,195 C 280,205 270,225 260,240 C 255,248 245,255 240,250 C 235,245 240,230 230,220 C 220,210 215,200 205,190 C 195,180 180,175 160,170 C 140,165 130,150 120,135 C 110,120 90,110 70,105 C 50,100 30,80 25,50 Z" />
+              {/* Greenland */}
+              <path d="M 315,20 C 340,15 375,12 415,20 C 445,25 435,55 405,70 C 375,80 340,80 320,70 C 305,60 300,30 315,20 Z" />
+              {/* Caribbean */}
+              <path d="M 265,215 C 275,212 285,215 282,220 C 275,222 268,220 265,215 Z" />
+              <path d="M 290,220 C 298,218 305,220 302,225 C 295,227 290,224 290,220 Z" />
+              {/* South America */}
+              <path d="M 260,240 C 275,235 295,235 320,245 C 345,255 370,265 390,285 C 405,300 395,320 380,345 C 365,370 345,400 330,425 C 320,440 305,455 295,450 C 285,445 295,420 295,395 C 295,370 300,340 300,310 C 300,280 280,265 260,240 Z" />
+              {/* Europe */}
+              <path d="M 465,70 C 485,60 515,50 545,55 C 570,60 595,70 610,90 C 600,105 580,120 560,130 C 545,138 535,145 525,140 C 515,135 500,145 485,145 C 475,145 460,125 460,105 C 460,85 455,75 465,70 Z" />
+              {/* British Isles */}
+              <path d="M 475,90 C 485,85 495,85 495,95 C 495,105 485,110 475,105 C 470,100 468,92 475,90 Z" />
+              <path d="M 462,95 C 468,92 472,96 469,104 C 464,106 460,100 462,95 Z" />
+              {/* Africa */}
+              <path d="M 455,145 C 480,140 520,140 565,145 C 595,150 610,165 625,190 C 640,215 635,235 615,255 C 595,275 580,315 565,350 C 555,375 540,380 530,370 C 520,360 515,335 510,310 C 505,285 470,260 450,230 C 440,215 440,185 445,165 C 448,152 450,148 455,145 Z" />
+              {/* Madagascar */}
+              <path d="M 620,300 C 630,295 640,305 635,325 C 630,345 620,355 615,345 C 610,335 612,305 620,300 Z" />
+              {/* Asia */}
+              <path d="M 590,65 C 630,55 690,45 760,40 C 830,35 900,45 940,65 C 960,75 940,105 915,130 C 890,155 870,180 840,205 C 825,218 805,235 790,250 C 775,260 760,240 745,225 C 730,210 705,210 685,195 C 665,180 635,180 615,165 C 600,155 585,125 580,100 C 578,80 582,70 590,65 Z" />
+              {/* Japan */}
+              <path d="M 875,130 C 885,125 895,135 890,150 C 885,165 870,165 870,150 C 870,140 870,132 875,130 Z" />
+              {/* Indonesia / Philippines */}
+              <path d="M 815,260 C 835,255 865,255 885,260 C 895,265 885,275 865,275 C 845,275 825,270 815,260 Z" />
+              <path d="M 860,210 C 870,205 875,215 870,230 C 865,245 855,240 858,225 C 859,215 859,211 860,210 Z" />
+              {/* Australia & Tasmania */}
+              <path d="M 810,290 C 835,280 875,280 915,295 C 935,305 940,335 930,365 C 920,390 895,400 870,395 C 840,390 820,375 810,345 C 800,315 802,295 810,290 Z" />
+              <path d="M 875,405 C 885,400 890,408 885,415 C 878,418 873,412 875,405 Z" />
+              {/* New Zealand */}
+              <path d="M 960,360 C 970,355 975,370 968,385 C 960,400 950,405 952,390 C 953,375 955,365 960,360 Z" />
+            </g>
+          </svg>
+
+          {/* Real Dynamic GeoIP Threat Markers Overlay */}
+          {geoThreatMarkers.map((marker, idx) => {
+            const isHigh = marker.threat_level === 'HIGH';
+            const isMed = marker.threat_level === 'MEDIUM';
+            const colorClass = isHigh ? 'bg-rose-500 text-rose-400 border-rose-500' : isMed ? 'bg-amber-500 text-amber-400 border-amber-500' : 'bg-emerald-400 text-emerald-400 border-emerald-400';
+            const isSelected = selectedMarker?.ip === marker.ip;
+
+            return (
+              <div
+                key={marker.ip || idx}
+                onClick={() => setSelectedMarker(marker)}
+                className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 group"
+                style={{ left: `${(marker.x / 1000) * 100}%`, top: `${(marker.y / 500) * 100}%` }}
+              >
+                <div className="relative flex items-center justify-center">
+                  <div className={`w-4 h-4 rounded-full ${colorClass.split(' ')[0]} opacity-75 animate-ping absolute`}></div>
+                  <div className={`w-3 h-3 rounded-full ${colorClass.split(' ')[0]} border-2 border-white/80 shadow-md`}></div>
+                </div>
+
+                {/* Marker Hover Badge */}
+                <div className="hidden group-hover:block absolute left-1/2 -translate-x-1/2 bottom-5 whitespace-nowrap bg-surface-dim border border-border-muted px-2.5 py-1 rounded-lg shadow-xl font-mono text-[10px] z-30">
+                  <div className="font-bold text-text-primary">{marker.ip}</div>
+                  <div className="text-text-muted">{marker.city}, {marker.country}</div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* Main Dashboard Area (Asymmetric 12-Column Split) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Real Dynamic GeoIP Map & Threat Volume Chart (Span 8) */}
-        <div className="lg:col-span-8 flex flex-col gap-6">
-          {/* Interactive World Map Panel (Stitch Container Preserved 100%) */}
-          <div className="glass-panel rounded-2xl border border-border-muted flex flex-col relative overflow-hidden shadow-xl">
-            <div className="p-4 border-b border-border-muted flex justify-between items-center bg-surface-dim z-10">
-              <h3 className="text-xs font-mono font-bold text-text-primary flex items-center gap-2 uppercase tracking-wider">
-                <span className="material-symbols-outlined text-primary text-sm">public</span>
-                <span>Live Threat Vectors</span>
-              </h3>
-
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span className="font-mono text-[10px] text-text-muted uppercase font-bold">
-                  {geoThreatMarkers.length} ACTIVE GEOIP NODES
-                </span>
-              </div>
-            </div>
-
-            {/* Map Container - STICTLY CONFINED INSIDE STITCH BOUNDARY */}
-            <div className="relative h-80 bg-surface-dim overflow-hidden flex items-center justify-center">
-              {/* World Grid Lines SVG */}
-              <svg className="w-full h-full opacity-20 text-primary z-0 absolute inset-0" viewBox="0 0 1000 500">
-                <defs>
-                  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="0.5" />
-                  </pattern>
-                </defs>
-                <rect width="1000" height="500" fill="url(#grid)" />
-                {/* World Equator & Tropics */}
-                <line x1="0" y1="250" x2="1000" y2="250" stroke="currentColor" strokeWidth="1" strokeDasharray="4,4" />
-                <line x1="500" y1="0" x2="500" y2="500" stroke="currentColor" strokeWidth="1" strokeDasharray="4,4" />
-              </svg>
-
-              {/* DYNAMIC REAL GEOIP THREAT MARKERS */}
-              {geoThreatMarkers.length > 0 ? (
-                geoThreatMarkers.map((marker, idx) => {
-                  const isHigh = marker.threat_level === 'HIGH';
-                  const isMed = marker.threat_level === 'MEDIUM';
-
-                  return (
-                    <div
-                      key={idx}
-                      className="absolute transform -translate-x-1/2 -translate-y-1/2 group z-20 cursor-pointer"
-                      style={{ left: `${(marker.x / 1000) * 100}%`, top: `${(marker.y / 500) * 100}%` }}
-                    >
-                      <div
-                        className={`w-4 h-4 rounded-full animate-ping opacity-75 ${
-                          isHigh ? 'bg-rose-500' : isMed ? 'bg-amber-500' : 'bg-sky-400'
-                        }`}
-                      ></div>
-                      <div
-                        className={`w-3 h-3 rounded-full border border-black absolute inset-0.5 ${
-                          isHigh ? 'bg-rose-500' : isMed ? 'bg-amber-500' : 'bg-sky-400'
-                        }`}
-                      ></div>
-
-                      {/* Hover GeoIP Tooltip */}
-                      <div className="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 rounded-lg bg-surface-lowest border border-border-muted font-mono text-[10px] whitespace-nowrap shadow-xl z-30 pointer-events-none">
-                        <div className="font-bold text-primary">{marker.city}, {marker.country} ({marker.code})</div>
-                        <div className="text-text-muted">IP: {marker.ip}</div>
-                        <div className={isHigh ? 'text-rose-400 font-bold' : isMed ? 'text-amber-400 font-bold' : 'text-emerald-400'}>
-                          Level: {marker.threat_level} (Score {marker.threat_score.toFixed(1)})
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="text-center p-6 z-10">
-                  <span className="material-symbols-outlined text-4xl text-text-muted mb-2">public_off</span>
-                  <p className="font-mono text-xs text-text-muted">
-                    No active threat vectors logged. Waiting for log stream ingestion...
-                  </p>
-                  <p className="font-mono text-[10px] text-text-dim mt-1">
-                    Upload a log file via Dashboard &rarr; Add Data Log to visualize dynamic GeoIP markers.
-                  </p>
-                </div>
-              )}
-
-              {/* Scanline Visual Effect */}
-              <div className="scan-line pointer-events-none"></div>
-
-              {/* Floating Legend Box */}
-              <div className="absolute bottom-3 left-3 bg-surface-container/90 backdrop-blur-md border border-border-muted rounded-xl p-2.5 flex flex-col gap-1 z-20 shadow-md">
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-rose-500"></div>
-                  <span className="font-mono text-[10px] text-text-muted">High Threat Event</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
-                  <span className="font-mono text-[10px] text-text-muted">Medium Anomaly</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-sky-400"></div>
-                  <span className="font-mono text-[10px] text-text-muted">Low / Info Telemetry</span>
-                </div>
-              </div>
-            </div>
+      {/* SECTION 2: THREAT ORIGIN & SEVERITY ANALYTICS */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        
+        {/* Severity Distribution Meters (Span 6) */}
+        <div className="md:col-span-6 glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-lg">
+          <div className="flex justify-between items-center border-b border-border-muted pb-3">
+            <h3 className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider">Threat Severity Distribution</h3>
+            <span className="font-mono text-[10px] text-text-muted">Real-Time Threat Scores</span>
           </div>
 
-          {/* Threat Volume Chart */}
-          <div className="glass-panel p-5 rounded-2xl border border-border-muted flex flex-col h-72 shadow-xl">
-            <h3 className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider mb-3">
-              72-Hour Telemetry Volume (EPS)
-            </h3>
-            <div className="flex-1 w-full relative">
-              <Line data={volumeChartData} options={chartOptions} />
+          <div className="space-y-4 font-mono text-xs">
+            <div>
+              <div className="flex justify-between text-[11px] mb-1">
+                <span className="text-rose-400 font-bold">HIGH SEVERITY THREATS</span>
+                <span className="text-text-primary font-bold">{highCount} Nodes</span>
+              </div>
+              <div className="h-3 w-full bg-surface-dim rounded-full overflow-hidden border border-border-muted">
+                <div className="h-full bg-rose-500 rounded-full" style={{ width: `${geoThreatMarkers.length ? (highCount / geoThreatMarkers.length) * 100 : 0}%` }}></div>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between text-[11px] mb-1">
+                <span className="text-amber-400 font-bold">MEDIUM SEVERITY THREATS</span>
+                <span className="text-text-primary font-bold">{medCount} Nodes</span>
+              </div>
+              <div className="h-3 w-full bg-surface-dim rounded-full overflow-hidden border border-border-muted">
+                <div className="h-full bg-amber-500 rounded-full" style={{ width: `${geoThreatMarkers.length ? (medCount / geoThreatMarkers.length) * 100 : 0}%` }}></div>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between text-[11px] mb-1">
+                <span className="text-emerald-400 font-bold">LOW SEVERITY THREATS</span>
+                <span className="text-text-primary font-bold">{lowCount} Nodes</span>
+              </div>
+              <div className="h-3 w-full bg-surface-dim rounded-full overflow-hidden border border-border-muted">
+                <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${geoThreatMarkers.length ? (lowCount / geoThreatMarkers.length) * 100 : 0}%` }}></div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Dynamic Incident Risk Actors List (Span 4) */}
-        <div className="lg:col-span-4 flex flex-col gap-6">
-          <div className="glass-panel rounded-2xl border border-border-muted flex flex-col shadow-xl overflow-hidden">
-            <div className="p-4 border-b border-border-muted bg-surface-dim flex justify-between items-center">
-              <h3 className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider flex items-center gap-2">
-                <span className="material-symbols-outlined text-rose-500 text-sm">skull</span>
-                <span>Active Threat Clusters</span>
-              </h3>
-              <span className="font-mono text-[10px] text-text-muted bg-surface px-2 py-0.5 rounded border border-border-muted">
-                {recentIncidents.length} CLUSTERS
-              </span>
-            </div>
-
-            <div className="p-4 space-y-3 bg-surface-dim overflow-y-auto max-h-[580px]">
-              {recentIncidents.length > 0 ? (
-                recentIncidents.map((inc, idx) => (
-                  <div
-                    key={inc.incident_id || idx}
-                    className="p-3 rounded-xl border border-border-muted bg-surface-hover hover:border-primary transition-colors space-y-2"
-                  >
-                    <div className="flex justify-between items-start">
-                      <span className="font-mono text-xs font-bold text-rose-400">
-                        {inc.incident_id.substring(0, 12)}...
-                      </span>
-                      <span className="font-mono text-[9px] px-2 py-0.5 rounded bg-rose-500/15 text-rose-400 border border-rose-500/40 uppercase font-bold">
-                        Score {inc.max_threat_score.toFixed(1)}
-                      </span>
-                    </div>
-
-                    <div className="font-mono text-xs text-text-primary font-bold">
-                      Source: {inc.source_ip}
-                    </div>
-
-                    <div className="flex flex-wrap gap-1">
-                      {(inc.mitre_tactics || []).map((tactic, tIdx) => (
-                        <span key={tIdx} className="font-mono text-[9px] bg-surface px-1.5 py-0.5 rounded border border-border-muted text-text-muted">
-                          {tactic}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="text-[10px] font-mono text-text-muted flex justify-between pt-1 border-t border-border-muted/50">
-                      <span>Events: {inc.event_count}</span>
-                      <span className="text-primary">Status: {inc.status || 'New'}</span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="p-6 text-center text-text-muted font-mono text-xs">
-                  <span className="material-symbols-outlined text-3xl mb-2 text-text-muted">shield</span>
-                  <p>No correlated threat clusters detected.</p>
-                  <p className="text-[10px] text-text-dim mt-1">Telemetry baseline nominal.</p>
-                </div>
-              )}
-            </div>
+        {/* Selected GeoIP Node Intelligence Panel (Span 6) */}
+        <div className="md:col-span-6 glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-lg">
+          <div className="flex justify-between items-center border-b border-border-muted pb-3">
+            <h3 className="text-xs font-mono font-bold text-text-primary uppercase tracking-wider">Node Intelligence Inspector</h3>
+            <span className="font-mono text-[10px] text-primary">Selected Node</span>
           </div>
+
+          {selectedMarker ? (
+            <div className="space-y-3 font-mono text-xs">
+              <div className="flex justify-between items-center p-3 rounded-xl bg-surface-dim border border-border-muted">
+                <span className="text-text-muted">Target IP Address:</span>
+                <span className="font-bold text-text-primary text-sm">{selectedMarker.ip}</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 text-center">
+                <div className="p-2.5 rounded-xl bg-surface-dim border border-border-muted">
+                  <div className="text-[10px] text-text-dim">Geographic Location</div>
+                  <div className="font-bold text-text-primary mt-0.5">{selectedMarker.city}, {selectedMarker.country}</div>
+                </div>
+                <div className="p-2.5 rounded-xl bg-surface-dim border border-border-muted">
+                  <div className="text-[10px] text-text-dim">Threat Level / Score</div>
+                  <div className="font-bold text-rose-400 mt-0.5">{selectedMarker.threat_level} ({selectedMarker.threat_score.toFixed(1)})</div>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-surface-dim border border-border-muted space-y-1">
+                <div className="text-[10px] text-text-dim uppercase">Attack Vector & MITRE Tactic:</div>
+                <div className="text-text-primary font-bold">{selectedMarker.event_type} &bull; {selectedMarker.mitre_tactic}</div>
+              </div>
+            </div>
+          ) : (
+            <div className="p-6 text-center text-text-muted font-mono text-xs">
+              Click any active threat marker on the vector map above to inspect detailed GeoIP intelligence.
+            </div>
+          )}
+        </div>
+
+      </div>
+
+      {/* SECTION 3: SOURCE-TO-TARGET ATTACK CORRELATION FLOW */}
+      <div className="glass-panel rounded-2xl border border-border-muted p-6 shadow-xl space-y-4">
+        <div className="flex justify-between items-center border-b border-border-muted pb-3 font-mono text-xs">
+          <h3 className="font-bold text-text-primary uppercase tracking-wider">Source-to-Target Attack Vector Correlation</h3>
+          <span className="text-text-muted">15-Min Graph Cluster Window</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
+          {geoThreatMarkers.slice(0, 3).map((marker, idx) => (
+            <div key={idx} className="p-4 rounded-xl bg-surface-dim border border-border-muted space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-rose-400 font-bold">SOURCE: {marker.ip}</span>
+                <span className="text-[10px] text-text-muted">{marker.city}</span>
+              </div>
+              <div className="text-[10px] text-text-dim text-center">&darr; ATTACK VECTOR EVENT STREAM &darr;</div>
+              <div className="p-2 rounded bg-surface border border-border-muted flex justify-between items-center text-[10px]">
+                <span className="text-text-primary font-bold">{marker.event_type}</span>
+                <span className="text-rose-400 font-bold">{marker.threat_level}</span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* GeoIP Resolver Result Drawer */}
-      {geoResult && (
-        <div className="glass-panel p-5 rounded-2xl border border-border-muted font-mono text-xs space-y-2 animate-in fade-in">
-          <div className="flex justify-between items-center text-primary font-bold">
-            <span>GeoIP Inspection Result: {geoResult.ip}</span>
-            <button onClick={() => setGeoResult(null)} className="text-text-muted hover:text-text-primary">
-              <span className="material-symbols-outlined text-sm">close</span>
-            </button>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-3 rounded-xl bg-surface-dim border border-border-muted text-[11px]">
-            <div>Location: <span className="text-text-primary font-bold">{geoResult.city}, {geoResult.country}</span></div>
-            <div>Coordinates: <span className="text-text-primary font-bold">{geoResult.lat}, {geoResult.lng}</span></div>
-            <div>Subnet: <span className="text-text-primary font-bold">{geoResult.is_private ? 'Private LAN' : 'Public Egress'}</span></div>
-            <div>ISO Code: <span className="text-text-primary font-bold">{geoResult.country_code}</span></div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

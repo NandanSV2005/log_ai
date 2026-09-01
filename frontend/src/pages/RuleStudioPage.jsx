@@ -70,149 +70,146 @@ action:
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
-      {/* 1. Merkle Hash Audit & Tamper Verification */}
-      <div className="glass-panel p-6 rounded-2xl border border-border-muted space-y-5 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/15 text-primary border border-primary/30 flex items-center justify-center">
-            <span className="material-symbols-outlined text-2xl">verified</span>
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-text-primary">WebCrypto SHA-256 Merkle Audit Chain Studio</h1>
-            <p className="text-xs text-text-muted">Cryptographic proof of payload immutability & avalanche effect tamper detection</p>
-          </div>
+    <div className="space-y-8 animate-in fade-in duration-300">
+      
+      {/* Header */}
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border-muted pb-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+            Rule Studio & <span className="text-primary">Detection Logic Sandbox</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-text-muted mt-1 font-sans">
+            Configure custom YARA/Sigma detection rules, test logic conditions, and verify WebCrypto SHA-256 Merkle chain integrity.
+          </p>
+        </div>
+      </header>
+
+      {/* SECTION 1: DETECTIVE RULE LOGIC PIPELINE DIAGRAM */}
+      <div className="glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-xl">
+        <div className="flex justify-between items-center border-b border-border-muted pb-3 font-mono text-xs">
+          <span className="font-bold text-text-primary uppercase tracking-wider">Detection Engine Execution Pipeline</span>
+          <span className="text-text-muted">Interactive Logic Flow</span>
         </div>
 
-        <div className="space-y-4 pt-2">
-          <div>
-            <label className="block text-xs font-mono text-text-muted mb-2 font-bold">
-              Target Baseline Log Payload SHA-256 Hash or Reference ID:
-            </label>
-            <input
-              type="text"
-              value={merkleInputHash}
-              onChange={(e) => setMerkleInputHash(e.target.value)}
-              className="input-cyber w-full rounded-xl py-2.5 px-3 text-xs font-mono bg-surface-dim border-border-muted"
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 font-mono text-xs text-center">
+          <div className="p-3.5 rounded-xl bg-surface-dim border border-border-muted space-y-1">
+            <div className="text-[10px] text-text-dim uppercase">Phase 01</div>
+            <div className="font-bold text-text-primary">Syslog Trigger</div>
+            <div className="text-[9px] text-text-muted">Wire Capture</div>
+          </div>
+          <div className="p-3.5 rounded-xl bg-surface-dim border border-border-muted space-y-1">
+            <div className="text-[10px] text-text-dim uppercase">Phase 02</div>
+            <div className="font-bold text-text-primary">Condition Evaluation</div>
+            <div className="text-[9px] text-primary">Regex & Key-Values</div>
+          </div>
+          <div className="p-3.5 rounded-xl bg-surface-dim border border-border-muted space-y-1">
+            <div className="text-[10px] text-text-dim uppercase">Phase 03</div>
+            <div className="font-bold text-text-primary">Pattern Match</div>
+            <div className="text-[9px] text-emerald-400">Syntax Validated</div>
+          </div>
+          <div className="p-3.5 rounded-xl bg-surface-dim border border-border-muted space-y-1">
+            <div className="text-[10px] text-text-dim uppercase">Phase 04</div>
+            <div className="font-bold text-secondary">Threat Scoring</div>
+            <div className="text-[9px] text-rose-400">Isolation Forest</div>
+          </div>
+          <div className="col-span-2 sm:col-span-1 p-3.5 rounded-xl bg-surface-dim border border-border-muted space-y-1">
+            <div className="text-[10px] text-text-dim uppercase">Phase 05</div>
+            <div className="font-bold text-emerald-400">Quarantine Action</div>
+            <div className="text-[9px] text-text-muted">MITRE Tactic Tag</div>
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION 2: YARA/SIGMA RULE SANDBOX & SHA-256 MERKLE STUDIO */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        {/* Left Column: YARA/Sigma Rule Testing Sandbox (Span 7) */}
+        <div className="lg:col-span-7 glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-xl">
+          <div className="flex justify-between items-center border-b border-border-muted pb-3 font-mono text-xs">
+            <span className="font-bold text-text-primary uppercase tracking-wider">Detection Rule Authoring Sandbox</span>
+            <span className="text-emerald-400 font-bold">YAML / SIGMA SYNTAX</span>
+          </div>
+
+          <div className="space-y-3 font-mono text-xs">
+            <textarea
+              rows="9"
+              value={yamlRuleText}
+              onChange={(e) => setYamlRuleText(e.target.value)}
+              className="w-full p-3 rounded-xl bg-surface-dim border border-border-muted font-mono text-xs text-text-primary focus:outline-none focus:border-primary leading-relaxed"
             />
-          </div>
 
-          <div className="flex flex-wrap gap-3">
             <button
-              onClick={handleSimulateTamper}
-              disabled={isTampering || !merkleInputHash.trim()}
-              className="px-5 py-2.5 rounded-xl bg-rose-500 text-white font-bold text-xs shadow-md hover:bg-rose-600 transition-all flex items-center gap-2 disabled:opacity-40"
+              onClick={handleTestRule}
+              className="btn-primary px-6 py-2.5 rounded-xl text-xs font-bold w-full"
             >
-              <span className="material-symbols-outlined text-base">warning</span>
-              <span>{isTampering ? 'Executing Avalanche Test...' : 'Simulate Deliberate Log Payload Tampering'}</span>
+              Test & Compile Detection Rule
             </button>
-          </div>
 
-          {/* Tamper Result Box */}
-          {tamperResult && (
-            <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 font-mono text-xs space-y-2 animate-in fade-in">
-              <div className="font-bold text-rose-400 flex items-center gap-2 text-sm">
-                <span className="material-symbols-outlined text-base">error</span>
-                <span>[{tamperResult.status}: {tamperResult.verdict}]</span>
-              </div>
-              <p className="text-text-muted text-[11px]">
-                Executed non-destructive 1-character payload mutation test on scratch buffer.
-              </p>
-              <div className="p-3 rounded-lg bg-surface-lowest border border-border-muted space-y-1 text-[11px]">
-                <div className="text-emerald-400">
-                  <span className="text-text-muted">Original Baseline Hash:</span> {tamperResult.original_hash}
+            {ruleTestResult && (
+              <div className="p-4 rounded-xl bg-surface-dim border border-emerald-500/40 font-mono text-xs space-y-2">
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className="text-emerald-400 font-bold">Compilation Result: {ruleTestResult.status}</span>
+                  <span className="text-text-muted">Time: {ruleTestResult.compilation_time_ms} ms</span>
                 </div>
-                <div className="text-rose-400">
-                  <span className="text-text-muted">Tampered Hash Output:</span> {tamperResult.tampered_hash}
+                <div className="text-text-primary">Matched Records: {ruleTestResult.matched_records_count} events</div>
+                <div className="text-[11px] text-text-muted">Sample Match: {ruleTestResult.sample_match_event}</div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Column: WebCrypto SHA-256 & Audit Tamper Simulation (Span 5) */}
+        <div className="lg:col-span-5 glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-xl">
+          <div className="flex justify-between items-center border-b border-border-muted pb-3 font-mono text-xs">
+            <span className="font-bold text-text-primary uppercase tracking-wider">WebCrypto Merkle Audit Studio</span>
+            <span className="text-primary font-bold">SHA-256 IMMUTABILITY</span>
+          </div>
+
+          <div className="space-y-4 font-mono text-xs">
+            <div>
+              <label className="block text-text-muted mb-1 text-[11px]">Client-Side WebCrypto SHA-256 Calculator:</label>
+              <input
+                type="text"
+                placeholder="Type custom text to compute instant SHA-256..."
+                value={customText}
+                onChange={(e) => computeClientSha256(e.target.value)}
+                className="w-full p-2.5 rounded-xl bg-surface-dim border border-border-muted text-text-primary text-xs focus:outline-none focus:border-primary"
+              />
+              {calculatedHash && (
+                <div className="mt-2 p-2.5 rounded bg-surface border border-border-muted text-emerald-400 text-[10px] break-all font-bold">
+                  Hash: {calculatedHash}
                 </div>
-              </div>
-              <div className="text-[10px] text-text-dim italic">
-                Notice: Single-bit mutation completely altered the 64-character hex hash output (Avalanche Effect proven). Actual forensic disk logs remain 100% untouched.
-              </div>
+              )}
             </div>
-          )}
-        </div>
-      </div>
 
-      {/* 2. Real-Time Client-Side WebCrypto SHA-256 Hash Tool */}
-      <div className="glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-primary/15 text-primary border border-primary/30 flex items-center justify-center">
-            <span className="material-symbols-outlined text-xl">key</span>
-          </div>
-          <div>
-            <h2 className="text-base font-bold text-text-primary">Instant WebCrypto Browser SHA-256 Generator</h2>
-            <p className="text-xs text-text-muted">Compute SHA-256 hash using native browser crypto API</p>
-          </div>
-        </div>
+            <div className="pt-2 space-y-2 border-t border-border-muted">
+              <label className="block text-text-muted text-[11px]">Audit Tamper Simulator:</label>
+              <input
+                type="text"
+                value={merkleInputHash}
+                onChange={(e) => setMerkleInputHash(e.target.value)}
+                className="w-full p-2.5 rounded-xl bg-surface-dim border border-border-muted text-text-primary text-xs focus:outline-none focus:border-primary"
+              />
+              <button
+                onClick={handleSimulateTamper}
+                disabled={isTampering}
+                className="btn-secondary px-4 py-2 rounded-xl text-xs font-bold w-full"
+              >
+                {isTampering ? 'Simulating Audit Check...' : 'Simulate Payload Tamper'}
+              </button>
 
-        <textarea
-          rows={2}
-          value={customText}
-          onChange={(e) => computeClientSha256(e.target.value)}
-          placeholder="Type any raw payload string here to compute instant SHA-256 hash..."
-          className="input-cyber w-full p-3 rounded-xl text-xs font-mono bg-surface-dim border-border-muted resize-none"
-        />
-
-        {calculatedHash && (
-          <div className="p-3 rounded-xl bg-surface-dim border border-border-muted font-mono text-xs flex items-center justify-between">
-            <div>
-              <span className="text-text-muted text-[11px] block">Calculated SHA-256 Digest:</span>
-              <span className="text-primary font-bold">{calculatedHash}</span>
-            </div>
-            <button
-              onClick={() => navigator.clipboard.writeText(calculatedHash)}
-              className="px-2.5 py-1 rounded bg-surface border border-border-muted text-text-muted hover:text-text-primary text-[10px]"
-            >
-              Copy Hash
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* 3. YAML Heuristic Rule Sandbox */}
-      <div className="glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-primary/15 text-primary border border-primary/30 flex items-center justify-center">
-              <span className="material-symbols-outlined text-xl">code</span>
-            </div>
-            <div>
-              <h2 className="text-base font-bold text-text-primary">YAML Heuristic Detection Rule Sandbox</h2>
-              <p className="text-xs text-text-muted">Draft and test custom threat detection rules against telemetry stream</p>
+              {tamperResult && (
+                <div className="p-3 rounded-xl bg-surface-dim border border-rose-500/40 text-[11px] space-y-1">
+                  <div className="text-rose-400 font-bold">Verdict: {tamperResult.verdict}</div>
+                  <div className="text-text-muted text-[10px]">Tampered Hash: {tamperResult.tampered_hash}</div>
+                </div>
+              )}
             </div>
           </div>
-
-          <button
-            onClick={handleTestRule}
-            className="btn-primary px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 shadow-sm"
-          >
-            <span className="material-symbols-outlined text-sm">play_arrow</span>
-            <span>Test Rule Against Buffer</span>
-          </button>
         </div>
 
-        <textarea
-          rows={7}
-          value={yamlRuleText}
-          onChange={(e) => setYamlRuleText(e.target.value)}
-          className="input-cyber w-full p-4 rounded-xl text-xs font-mono bg-surface-dim border-border-muted text-emerald-400 leading-relaxed resize-none"
-        />
-
-        {ruleTestResult && (
-          <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 font-mono text-xs space-y-2 animate-in fade-in">
-            <div className="font-bold text-emerald-400 flex items-center gap-2">
-              <span className="material-symbols-outlined text-base">check_circle</span>
-              <span>Rule Syntax Validated Successfully!</span>
-            </div>
-            <div className="text-text-muted text-[11px]">
-              Evaluated in {ruleTestResult.compilation_time_ms}ms • Matched {ruleTestResult.matched_records_count} active normalized telemetry records in storage buffer.
-            </div>
-            <div className="p-2.5 rounded bg-surface-lowest border border-border-muted text-[11px] text-text-primary">
-              <span className="text-text-muted">Sample Match Event:</span> {ruleTestResult.sample_match_event}
-            </div>
-          </div>
-        )}
       </div>
+
     </div>
   );
 }
