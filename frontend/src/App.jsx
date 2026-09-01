@@ -28,8 +28,8 @@ export default function App() {
   const [pollingInterval, setPollingInterval] = useState(2000);
   const location = useLocation();
 
-  // Check if current route is a public standalone page (Landing, Login, Register)
-  const isPublicRoute = ['/', '/login', '/register'].includes(location.pathname);
+  // Check if current route is a public standalone page (Landing, Login, Register, Signin)
+  const isPublicRoute = ['/', '/login', '/signin', '/register'].includes(location.pathname);
 
   return (
     <div className="min-h-screen bg-background text-text-primary flex flex-col font-sans transition-colors duration-200">
@@ -45,6 +45,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/signin" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
           <Route

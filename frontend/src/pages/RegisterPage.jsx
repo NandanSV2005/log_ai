@@ -1,21 +1,40 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTheme } from '../contexts/ThemeContext';
 import { api } from '../services/api';
 
 export function RegisterPage() {
+  const { theme, setTheme } = useTheme();
   const [usernameInput, setUsernameInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
+  const [isAccountCreated, setIsAccountCreated] = useState(false);
+  const [createdUsername, setCreatedUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
-    setSuccessMsg('');
 
+    const trimmedUser = usernameInput.trim();
+    if (!trimmedUser) {
+      setErrorMsg('Username is required.');
+      return;
+    }
+    if (trimmedUser.length < 3) {
+      setErrorMsg('Username must be at least 3 characters.');
+      return;
+    }
+    if (!passwordInput) {
+      setErrorMsg('Password is required.');
+      return;
+    }
+    if (passwordInput.length < 4) {
+      setErrorMsg('Password must be at least 4 characters.');
+      return;
+    }
     if (passwordInput !== confirmPassword) {
       setErrorMsg('Passwords do not match.');
       return;
@@ -23,13 +42,11 @@ export function RegisterPage() {
 
     setIsLoading(true);
     try {
-      await api.register(usernameInput.trim(), passwordInput);
-      setSuccessMsg('Operator registered successfully! Redirecting to login...');
-      setTimeout(() => {
-        navigate('/login');
-      }, 1500);
+      const res = await api.register(trimmedUser, passwordInput);
+      setCreatedUsername(res.username || trimmedUser);
+      setIsAccountCreated(true);
     } catch (err) {
-      setErrorMsg(err.message || 'Registration failed. Username may already exist.');
+      setErrorMsg(err.message || 'Registration failed. Username may already be registered.');
     } finally {
       setIsLoading(false);
     }
@@ -37,113 +54,151 @@ export function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-background text-text-primary flex flex-col justify-between font-sans relative overflow-hidden">
+      {/* Brand Header Nav */}
       <header className="w-full h-16 flex items-center justify-between px-6 max-w-7xl mx-auto z-10">
         <Link to="/" className="flex items-center gap-2 font-extrabold text-xl text-primary tracking-tight">
           <span className="material-symbols-outlined text-primary text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
             security
           </span>
-          <span>LOG AI</span>
+          <span className="font-serif text-text-primary">LOG AI</span>
         </Link>
-        <div className="text-text-muted text-xs font-mono">SOC Operator Provisioning</div>
+        <button
+          onClick={() => setTheme(theme === 'dark' ? 'sage' : 'dark')}
+          className="px-3 py-1.5 rounded-lg border border-border-muted bg-surface-dim text-xs font-mono font-bold flex items-center gap-2 text-text-primary"
+        >
+          <span className="material-symbols-outlined text-sm">palette</span>
+          <span>{theme === 'dark' ? 'CYBER VOID' : 'SAGE GREEN'}</span>
+        </button>
       </header>
 
+      {/* Main Registration Form Container */}
       <main className="flex-1 flex items-center justify-center p-4 z-10">
-        <div className="glass-panel w-full max-w-md rounded-2xl p-8 border border-border-muted shadow-2xl relative">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-surface-container border border-border-muted mb-4 text-primary shadow-sm">
-              <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-                person_add
-              </span>
+        <div className="glass-panel w-full max-w-md rounded-2xl p-8 border border-border-muted shadow-2xl relative space-y-6">
+          
+          {/* Header Title */}
+          <div className="text-center space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-dim border border-border-muted font-mono text-[10px] text-text-muted uppercase tracking-widest">
+              [ ACCOUNT PROVISIONING ]
             </div>
-            <h1 className="text-2xl font-bold text-text-primary mb-2">Operator Registration</h1>
-            <p className="text-xs text-text-muted">Create a new SOC Operator account.</p>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+              Create Account
+            </h1>
+            <p className="text-xs text-text-muted font-sans">
+              Register a new security operator account to access sovereign SOC telemetry.
+            </p>
           </div>
 
-          {errorMsg && (
-            <div className="mb-6 p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-mono flex items-start gap-2">
-              <span className="material-symbols-outlined text-sm mt-0.5">error</span>
-              <span>{errorMsg}</span>
-            </div>
-          )}
+          {/* Controlled State 1: Account Created Success Confirmation */}
+          {isAccountCreated ? (
+            <div className="space-y-6 text-center animate-in fade-in zoom-in-95 duration-200">
+              <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-3">
+                <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center mx-auto">
+                  <span className="material-symbols-outlined text-2xl">check_circle</span>
+                </div>
+                <h2 className="text-lg font-mono font-bold text-emerald-400 uppercase tracking-wider">
+                  ACCOUNT CREATED
+                </h2>
+                <p className="text-xs text-text-muted leading-relaxed font-sans">
+                  Workspace account for <strong className="text-text-primary font-mono">{createdUsername}</strong> has been created successfully.
+                </p>
+                <p className="text-[11px] text-text-dim font-mono">
+                  Sign in with your credentials to enter the intelligence platform.
+                </p>
+              </div>
 
-          {successMsg && (
-            <div className="mb-6 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono flex items-start gap-2">
-              <span className="material-symbols-outlined text-sm mt-0.5">check_circle</span>
-              <span>{successMsg}</span>
+              <button
+                onClick={() => navigate('/login')}
+                className="btn-primary w-full rounded-xl py-3 text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg"
+              >
+                <span>Continue to Sign In</span>
+                <span className="material-symbols-outlined text-sm">arrow_forward</span>
+              </button>
             </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-text-primary mb-2" htmlFor="username">
-                New Operator Username
-              </label>
-              <input
-                id="username"
-                type="text"
-                required
-                value={usernameInput}
-                onChange={(e) => setUsernameInput(e.target.value)}
-                placeholder="operator_name"
-                className="input-cyber w-full rounded-lg py-2.5 px-3 text-xs font-mono bg-surface-dim border-border-muted"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-text-primary mb-2" htmlFor="password">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                required
-                value={passwordInput}
-                onChange={(e) => setPasswordInput(e.target.value)}
-                placeholder="••••••••••••"
-                className="input-cyber w-full rounded-lg py-2.5 px-3 text-xs font-mono bg-surface-dim border-border-muted"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-text-primary mb-2" htmlFor="confirmPassword">
-                Confirm Password
-              </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                required
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••••••"
-                className="input-cyber w-full rounded-lg py-2.5 px-3 text-xs font-mono bg-surface-dim border-border-muted"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="btn-primary w-full rounded-lg py-3 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-md hover:scale-[1.01] transition-all disabled:opacity-50 mt-6"
-            >
-              {isLoading ? (
-                <>
-                  <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>
-                  <span>Registering...</span>
-                </>
-              ) : (
-                <>
-                  <span>Create Account</span>
-                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                </>
+          ) : (
+            /* Controlled State 2: Registration Form */
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {errorMsg && (
+                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-mono flex items-start gap-2">
+                  <span className="material-symbols-outlined text-sm mt-0.5">error</span>
+                  <span>{errorMsg}</span>
+                </div>
               )}
-            </button>
-          </form>
 
-          <div className="mt-6 text-center text-xs text-text-muted">
-            Already have an account?{' '}
-            <Link to="/login" className="text-primary font-bold hover:underline">
-              Sign In
-            </Link>
-          </div>
+              <div>
+                <label className="block text-xs font-mono font-bold text-text-primary mb-1.5" htmlFor="username">
+                  Operator Username
+                </label>
+                <input
+                  id="username"
+                  type="text"
+                  required
+                  value={usernameInput}
+                  onChange={(e) => setUsernameInput(e.target.value)}
+                  placeholder="analyst_smith"
+                  autoComplete="username"
+                  className="input-cyber w-full rounded-xl py-2.5 px-3 text-xs font-mono bg-surface-dim border-border-muted focus:outline-none focus:border-primary"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-mono font-bold text-text-primary mb-1.5" htmlFor="password">
+                  Account Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  required
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  placeholder="••••••••••••"
+                  autoComplete="new-password"
+                  className="input-cyber w-full rounded-xl py-2.5 px-3 text-xs font-mono bg-surface-dim border-border-muted focus:outline-none focus:border-primary"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-mono font-bold text-text-primary mb-1.5" htmlFor="confirmPassword">
+                  Confirm Password
+                </label>
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  autoComplete="new-password"
+                  className="input-cyber w-full rounded-xl py-2.5 px-3 text-xs font-mono bg-surface-dim border-border-muted focus:outline-none focus:border-primary"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="btn-primary w-full rounded-xl py-3 text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-md hover:scale-[1.01] transition-all disabled:opacity-50 mt-6"
+              >
+                {isLoading ? (
+                  <>
+                    <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                    <span>Creating Account...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Create Account</span>
+                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  </>
+                )}
+              </button>
+
+              <div className="pt-2 text-center text-xs font-mono text-text-muted">
+                Already registered?{' '}
+                <Link to="/login" className="text-primary font-bold hover:underline">
+                  Sign In
+                </Link>
+              </div>
+            </form>
+          )}
+
         </div>
       </main>
 

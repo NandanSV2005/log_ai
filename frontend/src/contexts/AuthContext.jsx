@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { api } from '../services/api';
 
 const AuthContext = createContext();
@@ -6,6 +6,10 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem('token') || null);
   const [username, setUsername] = useState(() => localStorage.getItem('username') || '');
+
+  // Compute user role dynamically based on backend username context
+  const role = username && username.toLowerCase() === 'admin' ? 'ADMIN' : 'ANALYST';
+  const isAdmin = role === 'ADMIN';
 
   const loginUser = async (user, pass) => {
     const res = await api.login(user, pass);
@@ -29,7 +33,17 @@ export function AuthProvider({ children }) {
   const isAuthenticated = Boolean(token);
 
   return (
-    <AuthContext.Provider value={{ token, username, isAuthenticated, loginUser, logoutUser }}>
+    <AuthContext.Provider
+      value={{
+        token,
+        username,
+        role,
+        isAdmin,
+        isAuthenticated,
+        loginUser,
+        logoutUser,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

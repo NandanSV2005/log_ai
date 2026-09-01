@@ -4,7 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 
 export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
-  const { username, logoutUser } = useAuth();
+  const { username, role, isAdmin, logoutUser } = useAuth();
   const { theme } = useTheme();
   const navigate = useNavigate();
   const [utcTime, setUtcTime] = useState('');
@@ -43,6 +43,18 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
 
         {/* Global Controls & Status */}
         <div className="flex items-center gap-3 text-xs font-mono">
+          {/* Admin Role Indicator Badge */}
+          <div className={`hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-md border font-bold ${
+            isAdmin
+              ? 'bg-rose-500/15 text-rose-400 border-rose-500/40'
+              : 'bg-surface-container text-text-muted border-border-muted'
+          }`}>
+            <span className="material-symbols-outlined text-xs">
+              {isAdmin ? 'admin_panel_settings' : 'badge'}
+            </span>
+            <span>ROLE: {role}</span>
+          </div>
+
           {/* Polling Badge */}
           <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-container border border-border-muted text-text-muted">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
