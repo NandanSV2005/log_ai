@@ -28,6 +28,9 @@ export function AuthProvider({ children }) {
     localStorage.clear();
     sessionStorage.clear();
     api.logout();
+    if (window.location.pathname !== '/') {
+      window.location.href = '/';
+    }
   };
 
   const isAuthenticated = Boolean(token);
