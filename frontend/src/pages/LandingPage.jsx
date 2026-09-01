@@ -37,7 +37,7 @@ export function LandingPage() {
     {
       id: 1,
       num: '01',
-      name: 'Ingestion',
+      name: 'Raw Ingestion',
       title: 'Stage 1: Raw Payload Wire Capture & SHA-256 Merkle Hashing',
       filepath: 'app/storage/raw_writer.py',
       desc: 'Raw log payloads are captured byte-for-byte at the network edge and immediately hashed with SHA-256 before any parsing occurs, establishing an unbroken forensic chain of custody with zero information loss.',
@@ -48,7 +48,7 @@ export function LandingPage() {
     {
       id: 2,
       num: '02',
-      name: 'Parsing',
+      name: 'Dynamic Parsing',
       title: 'Stage 2: Vendor Format Auto-Detection & Key-Value Extraction',
       filepath: 'app/parsers/dynamic_parser.py',
       desc: 'Dynamic extractors identify Cisco ASA, Fortinet, Suricata, and pfSense payloads automatically, converting unstructured syslog text into structured key-value attributes.',
@@ -59,7 +59,7 @@ export function LandingPage() {
     {
       id: 3,
       num: '03',
-      name: 'Normalization',
+      name: 'OCSF Normalization',
       title: 'Stage 3: OCSF 1.1 Schema Mapping & Field Standardization',
       filepath: 'app/normalization/schema.py',
       desc: 'Normalizes arbitrary security events into standard OCSF 1.1 UnifiedEvent objects with standardized ISO timestamps, severity tiers, IP types, and device metadata.',
@@ -70,7 +70,7 @@ export function LandingPage() {
     {
       id: 4,
       num: '04',
-      name: 'Detection',
+      name: 'Anomaly Detection',
       title: 'Stage 4: Isolation Forest Anomaly Scoring & Rules Engine',
       filepath: 'app/detection/anomaly_engine.py',
       desc: 'Evaluates connection velocity, payload entropy, and rule triggers against pre-trained ML baseline vectors to generate normalized threat scores (0.0 - 100.0).',
@@ -81,7 +81,7 @@ export function LandingPage() {
     {
       id: 5,
       num: '05',
-      name: 'Correlation',
+      name: 'Graph Correlation',
       title: 'Stage 5: Multi-Vector Graph Incident Aggregation',
       filepath: 'app/detection/correlation.py',
       desc: 'Correlates related security events across 15-minute sliding windows sharing offending source IPs, clustering individual telemetry alerts into unified attack timelines.',
@@ -92,7 +92,7 @@ export function LandingPage() {
     {
       id: 6,
       num: '06',
-      name: 'Remediation',
+      name: 'XAI Remediation',
       title: 'Stage 6: Explainable AI Feature Attribution & Playbook Guidance',
       filepath: 'app/xai/explainer.py',
       desc: 'Generates transparent feature attribution breakdowns and 3-step mitigation playbooks for active security incidents without black-box opacity.',
@@ -180,7 +180,6 @@ export function LandingPage() {
       icon: 'public',
       badge: 'DYNAMIC GEOIP',
       title: 'Live Vector World Map & GeoIP Resolution',
-      summary: 'Map active attack vectors onto an interactive vector world map with real-time GeoIP coordinates and threat severity indicators.',
       desc: 'Resolves IP subnets offline to precise lat/lng coordinates and plots attack markers over vector world map geometry.',
       problem: 'Provides spatial attack origin visibility without external API key dependencies.',
       connection: 'Visualizes perimeter threat concentration for SOC analysts.',
@@ -306,35 +305,39 @@ export function LandingPage() {
     <div className="bg-background text-text-primary antialiased min-h-screen flex flex-col relative overflow-x-hidden font-sans">
       <div className="scan-overlay"></div>
 
-      {/* Top Navbar */}
-      <header className="w-full h-16 bg-background border-b border-border-muted hidden md:flex justify-between items-center px-6 max-w-7xl mx-auto relative z-20">
+      {/* Editorial Navigation Header */}
+      <header className="w-full bg-background border-b border-border-muted relative z-20 py-4 px-6 max-w-7xl mx-auto flex justify-between items-center">
         <Link to="/" className="font-extrabold text-xl text-primary tracking-tighter flex items-center gap-2">
           <span className="material-symbols-outlined text-primary text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
             security
           </span>
-          <span>LOG AI</span>
+          <span className="font-serif tracking-normal text-text-primary">LOG AI</span>
+          <span className="text-[10px] font-mono border border-border-muted px-2 py-0.5 rounded text-text-muted">
+            EDITORIAL BRIEFING
+          </span>
         </Link>
 
-        <nav className="flex items-center gap-6 text-sm font-medium text-text-muted">
-          <Link to="/threat-intel" className="hover:text-primary transition-colors">Threat Intel</Link>
-          <Link to="/log-explorer" className="hover:text-primary transition-colors">Log Explorer</Link>
-          <Link to="/forensics" className="hover:text-primary transition-colors">Forensics</Link>
-          <Link to="/dashboard" className="hover:text-primary transition-colors">Command Center</Link>
+        <nav className="hidden md:flex items-center gap-8 text-xs font-mono font-bold tracking-wider text-text-muted">
+          <Link to="/threat-intel" className="hover:text-primary transition-colors">THREAT INTEL</Link>
+          <Link to="/log-explorer" className="hover:text-primary transition-colors">LOG EXPLORER</Link>
+          <Link to="/forensics" className="hover:text-primary transition-colors">FORENSICS</Link>
+          <Link to="/dashboard" className="hover:text-primary transition-colors">COMMAND CENTER</Link>
         </nav>
 
         <div className="flex items-center gap-3">
           <button
             onClick={() => setTheme(theme === 'dark' ? 'sage' : 'dark')}
-            className="px-3 py-1.5 rounded-lg border border-border-muted bg-surface-container text-xs font-mono font-bold flex items-center gap-2 hover:border-primary transition-all text-text-primary"
+            className="px-3.5 py-1.5 rounded-lg border border-border-muted bg-surface-dim text-xs font-mono font-bold flex items-center gap-2 hover:border-primary transition-all text-text-primary"
+            aria-label="Toggle visual theme mode"
           >
             <span className="material-symbols-outlined text-sm">palette</span>
             <span>{theme === 'dark' ? 'CYBER VOID' : 'SAGE GREEN'}</span>
           </button>
 
-          <Link to="/login" className="btn-secondary px-4 py-1.5 rounded-lg text-xs font-bold">
+          <Link to="/login" className="btn-secondary px-4 py-1.5 rounded-lg text-xs font-bold font-mono">
             Sign In
           </Link>
-          <Link to="/dashboard" className="btn-primary px-4 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1">
+          <Link to="/dashboard" className="btn-primary px-4 py-1.5 rounded-lg text-xs font-bold font-mono flex items-center gap-1">
             <span>SOC Console</span>
             <span className="material-symbols-outlined text-sm">arrow_forward</span>
           </Link>
@@ -342,7 +345,7 @@ export function LandingPage() {
       </header>
 
       {/* Mobile Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-surface-container border-t border-border-muted z-40 md:hidden flex justify-around py-2 px-1 shadow-md">
+      <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-border-muted z-40 md:hidden flex justify-around py-2 px-1 shadow-md">
         <Link to="/threat-intel" className="flex flex-col items-center text-text-muted hover:text-primary">
           <span className="material-symbols-outlined text-xl">security</span>
           <span className="text-[10px] font-mono mt-1">Intel</span>
@@ -363,133 +366,156 @@ export function LandingPage() {
 
       <main className="flex-grow relative z-10 pb-24 md:pb-0">
         
-        {/* HERO SECTION — Product Value & Capability Showcase */}
-        <section className="relative min-h-[620px] flex flex-col justify-center items-center overflow-hidden px-4 text-center py-12">
-          {/* Authentic Stitch Background Image Layer */}
-          <div
-            className={`absolute inset-0 z-0 ${
-              theme === 'sage' ? 'opacity-15 mix-blend-multiply' : 'opacity-35 mix-blend-screen'
-            }`}
-            style={{
-              backgroundImage:
-                "url('https://lh3.googleusercontent.com/aida-public/AB6AXuB8S2Qg245nw_HTuz2z_1HAFvI_uOZzTAqhRg2nI7CPKTXrXtVhQmkBe9GVjIdobqaom0DfUDMAPpCeuU8Pt_TW22GeTUAx1kQs4HbBn5r0of637-XKI8wod359PGV_7oAodswanWeQQJGQ3xwINTDW5q8c3YLijIiIeXa0-3d70sAQHhXDgipdmupMSzDXqPcDvJzA17tlQFTzwK_8a-MygDqo9XleANw7qqDJlfV-uohTzjG1rKlP')",
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-          ></div>
-
-          <div className="z-10 max-w-4xl mx-auto glass-panel p-8 sm:p-12 rounded-2xl border border-border-muted shadow-2xl relative">
-            <div className="inline-flex items-center gap-2 mb-6 bg-surface-dim px-4 py-1.5 rounded-full border border-border-muted">
-              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-              <span className="font-mono text-xs text-text-primary tracking-wide uppercase font-bold">
-                OCSF 1.1 UNIFIED TELEMETRY & ANOMALY ENGINE
-              </span>
+        {/* CHAPTER 01: HERO INTELLIGENCE BRIEFING */}
+        <section className="max-w-7xl mx-auto px-6 py-12 md:py-16 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center border-b border-border-muted">
+          
+          {/* Editorial Headline & Strategic Narrative (Span 7) */}
+          <div className="lg:col-span-7 space-y-6">
+            <div className="inline-flex items-center gap-2 bg-surface-dim px-3.5 py-1 rounded-full border border-border-muted font-mono text-[11px]">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="font-bold text-text-primary uppercase tracking-widest">[ BRIEFING // VOL. 2026-09 ]</span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl font-extrabold text-text-primary mb-6 tracking-tight leading-tight">
-              Command Your <span className="text-primary">Security Telemetry</span> & Autonomous Threat Intelligence
+            <h1 className="text-4xl sm:text-6xl font-extrabold text-text-primary tracking-tight leading-none font-sans">
+              Command the <span className="text-primary underline decoration-primary/40 underline-offset-8">Sage Intelligence</span>
             </h1>
 
-            <p className="text-sm sm:text-base text-text-muted mb-8 max-w-2xl mx-auto leading-relaxed font-sans">
-              Log AI ingests raw security logs from Cisco, Fortinet, Suricata, and pfSense appliances, normalizes events into standard OCSF schema, and detects threats using explainable ML anomaly scoring.
+            <p className="text-base sm:text-lg text-text-muted leading-relaxed font-sans max-w-2xl">
+              A sovereign telemetry intelligence engine unifying multi-vendor log streams, OCSF 1.1 field normalization, and explainable ML anomaly scoring into real-time threat visibility.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-wrap gap-4 pt-2 font-mono text-xs font-bold">
               <Link
                 to="/dashboard"
-                className="btn-primary px-8 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-lg"
+                className="btn-primary px-6 py-3 rounded-xl flex items-center gap-2 shadow-lg"
               >
-                <span>Enter SOC Console</span>
+                <span>[ ENTER SOC CONSOLE ]</span>
                 <span className="material-symbols-outlined text-sm">arrow_forward</span>
               </Link>
               <Link
                 to="/threat-intel"
-                className="btn-secondary px-8 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
+                className="btn-secondary px-6 py-3 rounded-xl flex items-center gap-2"
               >
-                <span>Explore Threat Map</span>
+                <span>[ EXPLORE THREAT MAP ]</span>
                 <span className="material-symbols-outlined text-sm">public</span>
               </Link>
             </div>
           </div>
 
-          {/* Supporting Metrics Bar */}
-          <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 relative z-10 w-full px-4">
-            <div className="glass-panel p-4 rounded-xl border border-border-muted text-center">
-              <div className="text-[10px] font-mono text-text-muted uppercase">Ingestion Engine</div>
-              <div className="text-xl font-mono font-bold text-text-primary">OCSF 1.1</div>
-              <div className="text-[10px] text-emerald-400 mt-0.5">Unified Schema</div>
+          {/* Interactive Live Telemetry Evidence & Signal Propagation (Span 5) */}
+          <div className="lg:col-span-5 glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-2xl relative overflow-hidden">
+            <div className="flex justify-between items-center border-b border-border-muted pb-3 font-mono text-xs">
+              <span className="font-bold text-text-primary uppercase tracking-wider">[ SIGNAL PROPAGATION MATRIX ]</span>
+              <span className="text-emerald-400 font-bold">STREAM ACTIVE</span>
             </div>
-            <div className="glass-panel p-4 rounded-xl border border-border-muted text-center">
-              <div className="text-[10px] font-mono text-text-muted uppercase">Avg Detection Latency</div>
-              <div className="text-xl font-mono font-bold text-secondary">1.4s</div>
-              <div className="text-[10px] text-text-muted mt-0.5">Real-Time Scoring</div>
+
+            {/* Signal Flow Diagram */}
+            <div className="space-y-3 font-mono text-xs">
+              <div className="p-3 rounded-xl bg-surface-dim border border-border-muted flex justify-between items-center">
+                <span className="text-text-muted">Edge Ingestion Stream:</span>
+                <span className="text-emerald-400 font-bold">4.2M EPS</span>
+              </div>
+              <div className="p-3 rounded-xl bg-surface-dim border border-border-muted flex justify-between items-center">
+                <span className="text-text-muted">OCSF Field Mapping:</span>
+                <span className="text-primary font-bold">100% Unified</span>
+              </div>
+              <div className="p-3 rounded-xl bg-surface-dim border border-border-muted flex justify-between items-center">
+                <span className="text-text-muted">Anomaly Threat Scoring:</span>
+                <span className="text-rose-400 font-bold">1.4s Latency</span>
+              </div>
             </div>
-            <div className="glass-panel p-4 rounded-xl border border-border-muted text-center">
-              <div className="text-[10px] font-mono text-text-muted uppercase">Forensic Chain</div>
-              <div className="text-xl font-mono font-bold text-text-primary">SHA-256</div>
-              <div className="text-[10px] text-emerald-400 mt-0.5">Merkle Verified</div>
-            </div>
-            <div className="glass-panel p-4 rounded-xl border border-border-muted text-center">
-              <div className="text-[10px] font-mono text-text-muted uppercase">Correlation Window</div>
-              <div className="text-xl font-mono font-bold text-primary">15 Min</div>
-              <div className="text-[10px] text-text-muted mt-0.5">Multi-Vector Graph</div>
+
+            <div className="p-3 rounded-xl bg-surface-dim border border-border-muted text-center font-mono text-[10px] text-text-dim">
+              [ ANNOTATION: CONTINUOUS MULTI-VENDOR TELEMETRY PIPELINE ]
             </div>
           </div>
 
-          {/* Marquee Ticker */}
-          <div className="w-full bg-surface border-y border-border-muted overflow-hidden h-10 flex items-center mt-8 relative z-10">
-            <div className="animate-marquee-smooth font-mono text-xs text-text-muted gap-8">
-              {[...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS].map((item, idx) => (
-                <span key={idx} className={`whitespace-nowrap ${item.color} font-medium`}>
-                  {item.text}
-                </span>
-              ))}
-            </div>
+        </section>
+
+        {/* Supporting Metrics Bar */}
+        <section className="max-w-7xl mx-auto px-6 py-8 grid grid-cols-2 md:grid-cols-4 gap-4 border-b border-border-muted">
+          <div className="p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-center">
+            <div className="text-[10px] text-text-dim uppercase tracking-wider">[ INGESTION ENGINE ]</div>
+            <div className="text-xl font-bold text-text-primary mt-1">OCSF 1.1</div>
+            <div className="text-[10px] text-emerald-400 mt-0.5">Unified Schema</div>
+          </div>
+          <div className="p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-center">
+            <div className="text-[10px] text-text-dim uppercase tracking-wider">[ DETECTION LATENCY ]</div>
+            <div className="text-xl font-bold text-secondary mt-1">1.4s</div>
+            <div className="text-[10px] text-text-muted mt-0.5">Real-Time Scoring</div>
+          </div>
+          <div className="p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-center">
+            <div className="text-[10px] text-text-dim uppercase tracking-wider">[ MERKLE INTEGRITY ]</div>
+            <div className="text-xl font-bold text-text-primary mt-1">SHA-256</div>
+            <div className="text-[10px] text-emerald-400 mt-0.5">Merkle Verified</div>
+          </div>
+          <div className="p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-center">
+            <div className="text-[10px] text-text-dim uppercase tracking-wider">[ CORRELATION WINDOW ]</div>
+            <div className="text-xl font-bold text-primary mt-1">15 MIN</div>
+            <div className="text-[10px] text-text-muted mt-0.5">Multi-Vector Graph</div>
           </div>
         </section>
 
-        {/* SECTION 1: 6-STAGE ZERO-LOSS TELEMETRY PROCESSING PIPELINE (REFERENCE HOVER PATTERN) */}
-        <section className="max-w-7xl mx-auto px-4 py-16 border-t border-border-muted space-y-8">
-          <div className="text-center max-w-2xl mx-auto space-y-2">
-            <div className="text-xs font-mono text-text-muted uppercase tracking-widest">Reference Interaction Model</div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary">6-Stage Zero-Loss Telemetry Processing Pipeline</h2>
-            <p className="text-xs sm:text-sm text-text-muted leading-relaxed">
-              Hover over or click any stage below to inspect real-time processing details, SHA-256 Merkle hashes, and payload transformations.
+        {/* Ticker Stream */}
+        <div className="w-full bg-surface border-b border-border-muted overflow-hidden h-10 flex items-center relative z-10">
+          <div className="animate-marquee-smooth font-mono text-xs text-text-muted gap-8">
+            {[...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS].map((item, idx) => (
+              <span key={idx} className={`whitespace-nowrap ${item.color} font-medium`}>
+                {item.text}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* CHAPTER 02: 6-STAGE ZERO-LOSS TELEMETRY PIPELINE (GOLD STANDARD INTERACTION MODEL) */}
+        <section className="max-w-7xl mx-auto px-6 py-16 border-b border-border-muted space-y-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-border-muted pb-4">
+            <div>
+              <div className="text-xs font-mono text-text-muted uppercase tracking-widest">[ CHAPTER 02 // PIPELINE ARCHITECTURE ]</div>
+              <h2 className="text-2xl sm:text-4xl font-extrabold text-text-primary tracking-tight mt-1">
+                6-Stage Zero-Loss Telemetry Processing Pipeline
+              </h2>
+            </div>
+            <p className="text-xs text-text-muted font-sans max-w-md">
+              Hover over, tap, or focus any stage to inspect real-time processing mechanics and cryptographic SHA-256 Merkle digests.
             </p>
           </div>
 
-          <div className="max-w-5xl mx-auto space-y-6">
-            {/* Interactive Stage Buttons (Hover/Click Activated) */}
+          <div className="space-y-6">
+            {/* Interactive Stage Selector Bar */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 font-mono text-xs">
               {PIPELINE_STAGES.map((stage) => {
                 const isActive = activePipelineStage === stage.id;
                 return (
                   <button
                     key={stage.id}
+                    tabIndex={0}
                     onMouseEnter={() => setActivePipelineStage(stage.id)}
                     onClick={() => setActivePipelineStage(stage.id)}
-                    className={`p-3.5 rounded-xl border font-bold transition-all duration-150 text-left flex flex-col justify-between h-20 ${
+                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setActivePipelineStage(stage.id)}
+                    className={`p-4 rounded-xl border text-left flex flex-col justify-between h-24 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary ${
                       isActive
-                        ? 'bg-primary text-surface-lowest border-primary shadow-lg scale-105'
+                        ? 'bg-primary text-surface-lowest border-primary shadow-xl scale-105 font-bold'
                         : 'bg-surface border-border-muted text-text-muted hover:text-text-primary hover:border-primary/50'
                     }`}
+                    aria-label={`Select Stage ${stage.num}: ${stage.name}`}
                   >
-                    <span className="text-[10px] opacity-70">{stage.num}</span>
-                    <span className="text-xs font-extrabold">{stage.name}</span>
+                    <span className="text-[10px] opacity-75">{stage.num}</span>
+                    <span className="text-xs font-extrabold leading-tight">{stage.name}</span>
                   </button>
                 );
               })}
             </div>
 
-            {/* Active Stage Content Display Card */}
-            <div className="glass-panel p-6 sm:p-8 rounded-2xl border border-border-muted space-y-4 transition-all duration-200 shadow-xl">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border-muted pb-4">
+            {/* Active Stage Detail Panel */}
+            <div className="glass-panel p-6 sm:p-8 rounded-2xl border border-border-muted space-y-4 shadow-2xl transition-all duration-200">
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-border-muted pb-4 font-mono">
                 <h3 className="text-lg font-bold text-text-primary">{activePipelineObj.title}</h3>
-                <div className="flex gap-2 items-center">
-                  <span className="px-2.5 py-1 rounded bg-surface-dim border border-border-muted font-mono text-[10px] text-emerald-400 font-bold">
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-1 rounded bg-surface-dim border border-border-muted text-[10px] text-emerald-400 font-bold">
                     {activePipelineObj.techBadge}
                   </span>
-                  <span className="px-3 py-1 rounded bg-surface-dim border border-border-muted font-mono text-xs text-primary">
+                  <span className="px-3 py-1 rounded bg-surface-dim border border-border-muted text-xs text-primary">
                     {activePipelineObj.filepath}
                   </span>
                 </div>
@@ -498,41 +524,48 @@ export function LandingPage() {
               <p className="text-xs sm:text-sm text-text-muted leading-relaxed font-sans">{activePipelineObj.desc}</p>
 
               <div className="p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-xs space-y-2">
-                <div className="text-text-dim text-[10px] uppercase">Payload Sample Transformation:</div>
+                <div className="text-text-dim text-[10px] uppercase tracking-wider">[ PAYLOAD TRANSFORMATION SAMPLE ]</div>
                 <div className="text-text-primary font-bold">{activePipelineObj.payload}</div>
                 <div className="text-emerald-400 text-[11px] pt-1">
-                  <span className="text-text-muted">SHA-256 Leaf Digest:</span> {activePipelineObj.digest}
+                  <span className="text-text-muted">SHA-256 Digest:</span> {activePipelineObj.digest}
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* SECTION 2: INTERACTIVE SECURITY CAPABILITIES TOUR (HOVER & CLICK DRIVEN) */}
-        <section className="max-w-7xl mx-auto px-4 py-16 border-t border-border-muted space-y-10">
-          <div className="text-center max-w-2xl mx-auto space-y-2">
-            <div className="text-xs font-mono text-text-muted uppercase tracking-widest">Interactive Platform Capabilities</div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary">Explore What Stitch SOC Engine Does</h2>
-            <p className="text-xs sm:text-sm text-text-muted leading-relaxed">
-              Hover over or click any capability on the left to dynamically inspect visual workflows, key technical concepts, and supporting performance metrics.
+        {/* CHAPTER 03: INTERACTIVE SECURITY CAPABILITIES SHOWCASE */}
+        <section className="max-w-7xl mx-auto px-6 py-16 border-b border-border-muted space-y-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-border-muted pb-4">
+            <div>
+              <div className="text-xs font-mono text-text-muted uppercase tracking-widest">[ CHAPTER 03 // PLATFORM CAPABILITIES ]</div>
+              <h2 className="text-2xl sm:text-4xl font-extrabold text-text-primary tracking-tight mt-1">
+                Interactive Security Capabilities Showcase
+              </h2>
+            </div>
+            <p className="text-xs text-text-muted font-sans max-w-md">
+              Explore platform features using hover, tap, or focus. Content updates dynamically without page jumping.
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* Interactive Feature Navigation Bar (Span 4) */}
+            {/* Interactive Capability Selector Bar (Span 4) */}
             <div className="lg:col-span-4 flex flex-col gap-2">
               {CAPABILITIES_DATA.map((cap) => {
                 const isSelected = activeFeature === cap.id;
                 return (
                   <button
                     key={cap.id}
+                    tabIndex={0}
                     onMouseEnter={() => setActiveFeature(cap.id)}
                     onClick={() => setActiveFeature(cap.id)}
-                    className={`p-3.5 rounded-xl border text-left transition-all duration-150 flex items-center justify-between group ${
+                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setActiveFeature(cap.id)}
+                    className={`p-3.5 rounded-xl border text-left transition-all duration-150 flex items-center justify-between group focus:outline-none focus:ring-2 focus:ring-primary ${
                       isSelected
                         ? 'bg-surface-container border-primary shadow-lg ring-1 ring-primary/40'
                         : 'bg-surface-dim border-border-muted hover:border-primary/40 hover:bg-surface-hover'
                     }`}
+                    aria-label={`Select capability: ${cap.name}`}
                   >
                     <div className="flex items-center gap-3">
                       <div
@@ -557,7 +590,7 @@ export function LandingPage() {
               })}
             </div>
 
-            {/* Feature Dynamic Interactive Content Panel (Span 8) */}
+            {/* Capability Detail Panel (Span 8) */}
             <div className="lg:col-span-8 glass-panel rounded-2xl p-6 sm:p-8 border border-border-muted shadow-2xl space-y-6">
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 border-b border-border-muted pb-4">
                 <div>
@@ -565,21 +598,21 @@ export function LandingPage() {
                     <span className="material-symbols-outlined text-primary text-xl">{activeCapabilityObj.icon}</span>
                     <h3 className="text-lg font-bold text-text-primary">{activeCapabilityObj.title}</h3>
                   </div>
-                  <p className="text-xs text-text-muted">{activeCapabilityObj.desc}</p>
+                  <p className="text-xs text-text-muted font-sans">{activeCapabilityObj.desc}</p>
                 </div>
                 <Link
                   to={activeCapabilityObj.route}
-                  className="btn-secondary px-4 py-2 rounded-xl text-xs font-bold self-start sm:self-auto flex items-center gap-1.5"
+                  className="btn-secondary px-4 py-2 rounded-xl text-xs font-mono font-bold self-start sm:self-auto flex items-center gap-1.5"
                 >
                   <span>Open Feature</span>
                   <span className="material-symbols-outlined text-sm">open_in_new</span>
                 </Link>
               </div>
 
-              {/* Technical Workflow Flow Steps */}
-              <div className="space-y-2">
-                <div className="text-[10px] font-mono text-text-dim uppercase tracking-wider">Technical Event Flow:</div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono text-xs text-center">
+              {/* Technical Event Flow Steps */}
+              <div className="space-y-2 font-mono">
+                <div className="text-[10px] text-text-dim uppercase tracking-wider">[ TECHNICAL EVENT FLOW ]</div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-center">
                   {activeCapabilityObj.flow.map((step, i) => (
                     <div key={i} className="p-2.5 rounded-lg bg-surface border border-border-muted space-y-1">
                       <div className="text-[9px] text-text-dim">STEP 0{i + 1}</div>
@@ -589,7 +622,7 @@ export function LandingPage() {
                 </div>
               </div>
 
-              {/* Dynamic Feature Performance Metrics Row */}
+              {/* Performance Metrics */}
               <div className="grid grid-cols-3 gap-3 font-mono text-center pt-1">
                 {activeCapabilityObj.metrics.map((m, i) => (
                   <div key={i} className="p-3 rounded-xl bg-surface-dim border border-border-muted">
@@ -620,31 +653,38 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* SECTION 3: INTERACTIVE SYSTEM ARCHITECTURE VISUALIZATION (HOVER & CLICK DRIVEN) */}
-        <section className="max-w-7xl mx-auto px-4 py-16 border-t border-border-muted space-y-10">
-          <div className="text-center max-w-2xl mx-auto space-y-2">
-            <div className="text-xs font-mono text-text-muted uppercase tracking-widest">End-to-End System Topology</div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary">Interactive System Architecture</h2>
-            <p className="text-xs sm:text-sm text-text-muted leading-relaxed">
-              Hover over or click any component node in the pipeline below to inspect its operational layer, components, and responsibilities.
+        {/* CHAPTER 04: INTERACTIVE SYSTEM ARCHITECTURE TOPOLOGY */}
+        <section className="max-w-7xl mx-auto px-6 py-16 border-b border-border-muted space-y-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-border-muted pb-4">
+            <div>
+              <div className="text-xs font-mono text-text-muted uppercase tracking-widest">[ CHAPTER 04 // SYSTEM TOPOLOGY ]</div>
+              <h2 className="text-2xl sm:text-4xl font-extrabold text-text-primary tracking-tight mt-1">
+                Interactive System Architecture
+              </h2>
+            </div>
+            <p className="text-xs text-text-muted font-sans max-w-md">
+              Hover over or focus any topology node to inspect its internal modules and operational responsibilities.
             </p>
           </div>
 
           <div className="max-w-5xl mx-auto space-y-8">
-            {/* Architecture Interactive Node Diagram */}
+            {/* Topology Node Buttons */}
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 font-mono text-xs">
               {ARCHITECTURE_NODES.map((node) => {
                 const isSelected = activeArchNode === node.id;
                 return (
                   <button
                     key={node.id}
+                    tabIndex={0}
                     onMouseEnter={() => setActiveArchNode(node.id)}
                     onClick={() => setActiveArchNode(node.id)}
-                    className={`p-3 rounded-xl border font-bold text-center transition-all duration-150 flex flex-col justify-between h-20 ${
+                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setActiveArchNode(node.id)}
+                    className={`p-3 rounded-xl border font-bold text-center flex flex-col justify-between h-20 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary ${
                       isSelected
                         ? 'bg-primary text-surface-lowest border-primary shadow-xl scale-105 ring-2 ring-primary/40'
                         : 'bg-surface border-border-muted text-text-muted hover:text-text-primary hover:border-primary/50'
                     }`}
+                    aria-label={`Select Topology Node: ${node.name}`}
                   >
                     <span className="text-[9px] opacity-70 uppercase">{node.type}</span>
                     <span className="text-xs font-extrabold leading-tight">{node.name}</span>
@@ -653,8 +693,8 @@ export function LandingPage() {
               })}
             </div>
 
-            {/* Active Architecture Node Detail Display Card */}
-            <div className="glass-panel p-6 sm:p-8 rounded-2xl border border-border-muted space-y-4 shadow-xl">
+            {/* Architecture Detail Box */}
+            <div className="glass-panel p-6 sm:p-8 rounded-2xl border border-border-muted space-y-4 shadow-2xl">
               <div className="flex justify-between items-center border-b border-border-muted pb-3 font-mono">
                 <div>
                   <span className="text-[10px] text-primary uppercase font-bold tracking-wider">{activeArchObj.type}</span>
@@ -668,7 +708,7 @@ export function LandingPage() {
               <p className="text-xs sm:text-sm text-text-muted leading-relaxed font-sans">{activeArchObj.desc}</p>
 
               <div className="space-y-2 font-mono text-xs">
-                <div className="text-[10px] text-text-dim uppercase">Internal Component Modules:</div>
+                <div className="text-[10px] text-text-dim uppercase tracking-wider">[ INTERNAL COMPONENT MODULES ]</div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {activeArchObj.components.map((c, i) => (
                     <div key={i} className="p-2.5 rounded-lg bg-surface-dim border border-border-muted text-center font-bold text-text-primary text-[11px]">
@@ -681,17 +721,19 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* SECTION 4: FINANCIAL IMPACT & SOC EFFICIENCY ESTIMATOR */}
-        <section className="max-w-7xl mx-auto px-4 py-16 border-t border-border-muted space-y-8">
+        {/* CHAPTER 05: FINANCIAL IMPACT ESTIMATOR */}
+        <section className="max-w-7xl mx-auto px-6 py-16 space-y-8">
           <div className="text-center max-w-2xl mx-auto space-y-2">
-            <div className="text-xs font-mono text-text-muted uppercase tracking-widest">Financial Impact Estimator</div>
-            <h2 className="text-2xl font-bold text-text-primary">Calculate SOC Efficiency & MTTR Reduction</h2>
-            <p className="text-xs text-text-muted leading-relaxed">
+            <div className="text-xs font-mono text-text-muted uppercase tracking-widest">[ CHAPTER 05 // FINANCIAL ESTIMATOR ]</div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+              Calculate SOC Efficiency & MTTR Reduction
+            </h2>
+            <p className="text-xs text-text-muted leading-relaxed font-sans">
               Estimate analyst time saved and incident response acceleration based on your perimeter footprint.
             </p>
           </div>
 
-          <div className="glass-panel rounded-2xl p-8 max-w-4xl mx-auto border border-border-muted shadow-xl">
+          <div className="glass-panel rounded-2xl p-8 max-w-4xl mx-auto border border-border-muted shadow-2xl">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
               {/* Sliders */}
               <div className="space-y-6">
@@ -760,17 +802,17 @@ export function LandingPage() {
 
       </main>
 
-      {/* Footer */}
+      {/* Editorial Footer */}
       <footer className="w-full py-8 border-t border-border-muted bg-surface-dim text-center text-text-dim text-xs font-mono">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="font-extrabold text-base text-text-primary">LOG AI</div>
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="font-extrabold text-base text-text-primary font-serif">LOG AI INTELLIGENCE ENGINE</div>
           <div className="flex gap-4">
             <Link to="/login" className="hover:text-primary transition-colors">Sign In</Link>
             <Link to="/register" className="hover:text-primary transition-colors">Register</Link>
             <Link to="/threat-intel" className="hover:text-primary transition-colors">Threat Intel</Link>
             <Link to="/dashboard" className="hover:text-primary transition-colors">SOC Console</Link>
           </div>
-          <div>© 2026 Log AI Security Engine. All rights reserved.</div>
+          <div>© 2026 Log AI Engine. All rights reserved.</div>
         </div>
       </footer>
     </div>
