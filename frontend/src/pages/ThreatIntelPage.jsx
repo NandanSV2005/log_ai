@@ -25,22 +25,22 @@ export function ThreatIntelPage() {
       center: [20, 0],
       zoom: 2,
       minZoom: 2,
-      maxZoom: 18,
+      maxZoom: 16,
       zoomControl: false,
-      attributionControl: false,
+      attributionControl: true,
     });
 
     mapInstanceRef.current = map;
 
-    // Tile Layer based on theme
+    // Tile Layer based on theme (Esri World Canvas: 100% No API Key, No Tokens, No Watermarks)
     const tileUrl =
       theme === 'sage'
-        ? 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
-        : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+        ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
+        : 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
 
     const tiles = L.tileLayer(tileUrl, {
-      subdomains: 'abcd',
-      maxZoom: 19,
+      attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+      maxZoom: 16,
     }).addTo(map);
 
     tileLayerRef.current = tiles;
@@ -63,8 +63,8 @@ export function ThreatIntelPage() {
 
     const tileUrl =
       theme === 'sage'
-        ? 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
-        : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+        ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}'
+        : 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
 
     tileLayerRef.current.setUrl(tileUrl);
   }, [theme]);
@@ -292,7 +292,7 @@ export function ThreatIntelPage() {
         <div className="p-4 border-b border-border-muted bg-surface-dim flex flex-wrap justify-between items-center font-mono text-xs gap-2">
           <div className="flex items-center gap-2 font-bold text-text-primary">
             <span className="material-symbols-outlined text-primary text-sm">public</span>
-            <span>REAL GEOGRAPHIC THREAT MAP (CARTODB DARK MATTER)</span>
+            <span>REAL GEOGRAPHIC THREAT MAP (ESRI WORLD CANVAS)</span>
           </div>
 
           <div className="flex items-center gap-3 text-[11px]">

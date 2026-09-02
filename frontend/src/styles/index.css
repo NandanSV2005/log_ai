@@ -40,6 +40,23 @@
   --terminal-text-dim: #64748b;
 }
 
+/* Leaflet Attribution Bar Styling */
+.leaflet-control-attribution {
+  background: var(--color-surface-dim) !important;
+  color: var(--color-text-dim) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 6px !important;
+  font-family: monospace !important;
+  font-size: 9px !important;
+  padding: 2px 6px !important;
+  margin: 8px !important;
+}
+
+.leaflet-control-attribution a {
+  color: var(--color-primary) !important;
+  text-decoration: none !important;
+}
+
 :root[data-theme="sage"] {
   --color-bg-dim: #fafaf5;
   --color-bg-surface: #ffffff;
