@@ -429,7 +429,9 @@ class AnomalyEngine:
 
         threat_score = round(float(np.clip(threat_score, 0.0, 100.0)), 2)
 
-        if threat_score >= 70.0:
+        if threat_score >= 90.0:
+            threat_level = "CRITICAL"
+        elif threat_score >= 70.0:
             threat_level = "HIGH"
         elif threat_score >= 35.0:
             threat_level = "MEDIUM"

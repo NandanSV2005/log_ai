@@ -78,9 +78,15 @@ async def ask_copilot(
         try:
             answer_text = None
             prompt = (
-                "You are an elite SOC Analyst.\n"
+                "You are an elite Security Operations Center (SOC) Analyst.\n"
+                "Follow these severity assessment guidelines when answering:\n"
+                "1. Use 5 consistent severity levels: INFO, LOW, MEDIUM, HIGH, CRITICAL.\n"
+                "2. Base severity on observable evidence (what happened, affected systems/users, attempt volume, malicious intent indicators).\n"
+                "3. Do NOT overclassify: generic keywords like 'error', 'failed', or 'denied' do not automatically mean HIGH or CRITICAL.\n"
+                "4. Distinguish routine isolated events (INFO/LOW) from coordinated attacks or privilege escalation (MEDIUM/HIGH/CRITICAL).\n"
+                "5. Provide concise, professional, evidence-backed answers citing specific IPs, tactics, and log context without buzzwords.\n\n"
                 f"Here are the recent security logs:\n{logs_str}\n\n"
-                f"Answer the user's question concisely and professionally:\n{question}"
+                f"Answer the user's question:\n{question}"
             )
 
             try:
@@ -165,18 +171,22 @@ def _evaluate_copilot_fallback(question: str, recent_events: List[Dict[str, Any]
 
     # Intent 2: How Many / Count / Quantitative Metrics Inquiry (Prioritized over general 'high' keyword)
     if any(k in q_lower for k in ["how many", "count", "number of", "total events", "statistics"]):
+        crit_cnt = sum(1 for e in recent_events if str(e.get("threat_level", "")).upper() == "CRITICAL")
         high_cnt = sum(1 for e in recent_events if str(e.get("threat_level", "")).upper() == "HIGH")
         med_cnt = sum(1 for e in recent_events if str(e.get("threat_level", "")).upper() == "MEDIUM")
         low_cnt = sum(1 for e in recent_events if str(e.get("threat_level", "")).upper() == "LOW")
+        info_cnt = sum(1 for e in recent_events if str(e.get("threat_level", "")).upper() == "INFO")
         unique_ips = len(set(e.get("source_ip") for e in recent_events if e.get("source_ip")))
         total_inc = len(incident_engine.incidents)
 
         return (
             f"**TELEMETRY METRICS & COUNTS:**\n\n"
             f"• **Total Analyzed Events:** {len(recent_events)}\n"
+            f"• **Critical Severity Alerts:** {crit_cnt}\n"
             f"• **High Severity Alerts:** {high_cnt}\n"
             f"• **Medium Severity Alerts:** {med_cnt}\n"
-            f"• **Low / Benign Events:** {low_cnt}\n"
+            f"• **Low Severity Events:** {low_cnt}\n"
+            f"• **Informational Events:** {info_cnt}\n"
             f"• **Unique Source IPs:** {unique_ips}\n"
             f"• **Correlated Incidents:** {total_inc}\n"
         )
@@ -227,34 +237,36 @@ def _evaluate_copilot_fallback(question: str, recent_events: List[Dict[str, Any]
 
     # Intent 5: High / Critical Threat Inquiry
     if any(k in q_lower for k in ["high severity", "high threat", "critical", "severe", "severity"]):
-        high_events = [e for e in recent_events if str(e.get("threat_level", "")).upper() == "HIGH" or e.get("threat_score", 0.0) >= 70.0]
-        if high_events:
-            ips = list(set(e.get("source_ip", "N/A") for e in high_events))
-            tactics = list(set(e.get("mitre_tactic", "Threat Anomaly") for e in high_events if e.get("mitre_tactic")))
+        severe_events = [e for e in recent_events if str(e.get("threat_level", "")).upper() in ("HIGH", "CRITICAL") or e.get("threat_score", 0.0) >= 70.0]
+        if severe_events:
+            ips = list(set(e.get("source_ip", "N/A") for e in severe_events))
+            tactics = list(set(e.get("mitre_tactic", "Threat Anomaly") for e in severe_events if e.get("mitre_tactic")))
             return (
-                f"**CRITICAL THREAT ANALYSIS:**\n\n"
-                f"Found **{len(high_events)} HIGH-severity alert(s)** in recent telemetry:\n"
+                f"**SECURITY INCIDENT ANALYSIS:**\n\n"
+                f"Found **{len(severe_events)} HIGH/CRITICAL severity alert(s)** in recent telemetry:\n"
                 f"• **Offending Source IPs:** {', '.join(ips)}\n"
                 f"• **MITRE Attack Vectors:** {', '.join(tactics)}\n"
-                f"• **Peak Threat Score:** {max(e.get('threat_score', 0.0) for e in high_events):.1f}\n\n"
+                f"• **Peak Threat Score:** {max(e.get('threat_score', 0.0) for e in severe_events):.1f}\n\n"
                 f"**Action Required:** Immediate quarantine of host IPs {', '.join(ips[:3])} recommended."
             )
         else:
             return (
                 "**THREAT LEVEL ASSESSOR:**\n\n"
-                "No HIGH-severity threats (threat score >= 70.0) were detected in the recent telemetry buffer. "
+                "No HIGH or CRITICAL severity threats (threat score >= 70.0) were detected in recent telemetry. "
                 "System threat posture is currently nominal to moderate."
             )
 
     # Default Fallback (Last Resort)
+    crit_threats = [e for e in recent_events if str(e.get("threat_level", "")).upper() == "CRITICAL"]
     high_threats = [e for e in recent_events if str(e.get("threat_level", "")).upper() == "HIGH"]
     med_threats = [e for e in recent_events if str(e.get("threat_level", "")).upper() == "MEDIUM"]
 
     return (
         f"**SOC Analyst Assessment for:** *'{question}'*\n\n"
         f"Analyzed **{len(recent_events)}** recent log records across normalized storage:\n"
+        f"• **Critical Severity Threats:** {len(crit_threats)}\n"
         f"• **High Severity Threats:** {len(high_threats)}\n"
         f"• **Medium Severity Alerts:** {len(med_threats)}\n"
-        f"• **Primary Vectors:** {high_threats[0].get('mitre_tactic', 'T1110 Brute Force') if high_threats else 'System Nominal'}\n\n"
-        f"**Recommendation:** Check high-risk IP addresses in perimeter firewall rules, review active incident status dropdowns in Executive Command, and execute 3-step remediation playbooks for any unresolved alerts."
+        f"• **Primary Vectors:** {(crit_threats or high_threats or [{}])[0].get('mitre_tactic', 'System Nominal')}\n\n"
+        f"**Recommendation:** Check high-risk IP addresses in perimeter firewall rules, review active incident status dropdowns in Executive Command, and execute remediation playbooks for unresolved alerts."
     )

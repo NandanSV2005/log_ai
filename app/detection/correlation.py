@@ -65,13 +65,19 @@ def _format_timestamp(ts: Union[datetime.datetime, str]) -> str:
     return str(ts)
 
 
-def _determine_threat_level(score: float) -> str:
-    """Returns threat level string based on score thresholds."""
-    if score >= 70.0:
+def _determine_threat_level(score: float, level_hint: Optional[str] = None) -> str:
+    """Returns threat level string based on standard score thresholds."""
+    if level_hint and level_hint.upper() in ("INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL"):
+        return level_hint.upper()
+    if score >= 90.0:
+        return "CRITICAL"
+    elif score >= 70.0:
         return "HIGH"
     elif score >= 35.0:
         return "MEDIUM"
-    return "LOW"
+    elif score >= 15.0:
+        return "LOW"
+    return "INFO"
 
 
 class Incident(BaseModel):
@@ -156,7 +162,7 @@ class IncidentEngine:
 
                 if threat_score > existing_incident.max_threat_score:
                     existing_incident.max_threat_score = round(threat_score, 2)
-                    existing_incident.max_threat_level = _determine_threat_level(threat_score)
+                    existing_incident.max_threat_level = _determine_threat_level(threat_score, getattr(event, "threat_level", None))
 
                 if mitre_tactic and mitre_tactic not in existing_incident.mitre_tactics:
                     existing_incident.mitre_tactics.append(mitre_tactic)
@@ -181,7 +187,7 @@ class IncidentEngine:
             last_seen=event_ts_str,
             event_count=1,
             max_threat_score=max_score,
-            max_threat_level=_determine_threat_level(max_score),
+            max_threat_level=_determine_threat_level(max_score, getattr(event, "threat_level", None)),
             mitre_tactics=tactics,
             status=getattr(event, "status", "New") or "New",
             event_hashes=hashes,
