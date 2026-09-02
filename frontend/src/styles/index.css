@@ -40,23 +40,6 @@
   --terminal-text-dim: #64748b;
 }
 
-/* Leaflet Attribution Bar Styling */
-.leaflet-control-attribution {
-  background: var(--color-surface-dim) !important;
-  color: var(--color-text-dim) !important;
-  border: 1px solid var(--color-border) !important;
-  border-radius: 6px !important;
-  font-family: monospace !important;
-  font-size: 9px !important;
-  padding: 2px 6px !important;
-  margin: 8px !important;
-}
-
-.leaflet-control-attribution a {
-  color: var(--color-primary) !important;
-  text-decoration: none !important;
-}
-
 :root[data-theme="sage"] {
   --color-bg-dim: #fafaf5;
   --color-bg-surface: #ffffff;
@@ -286,25 +269,3 @@ input[type="range"]:focus::-moz-range-thumb {
 .kpi-accent-command { border-left: 3px solid var(--color-severity-medium); }
 .kpi-accent-ai { border-left: 3px solid var(--color-primary); }
 .kpi-accent-forensic { border-left: 3px solid var(--color-secondary); }
-
-/* Lightweight IntersectionObserver Scroll Reveal Utilities */
-.reveal-on-scroll {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform;
-}
-
-.reveal-on-scroll.is-revealed {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .reveal-on-scroll {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-}
-
