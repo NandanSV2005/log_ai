@@ -286,3 +286,25 @@ input[type="range"]:focus::-moz-range-thumb {
 .kpi-accent-command { border-left: 3px solid var(--color-severity-medium); }
 .kpi-accent-ai { border-left: 3px solid var(--color-primary); }
 .kpi-accent-forensic { border-left: 3px solid var(--color-secondary); }
+
+/* Lightweight IntersectionObserver Scroll Reveal Utilities */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-on-scroll.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-on-scroll {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
