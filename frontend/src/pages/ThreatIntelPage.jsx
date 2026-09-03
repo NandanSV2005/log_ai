@@ -90,15 +90,25 @@ export function ThreatIntelPage() {
 
       for (const ip of distinctIps) {
         try {
-          const geoRes = await api.getGeoIP(ip);
+          const geoLookupFn = api.lookupGeoIp || api.getGeoIP;
+          const geoRes = geoLookupFn ? await geoLookupFn(ip) : null;
+          const lat = geoRes?.lat ?? geoRes?.latitude;
+          const lng = geoRes?.lng ?? geoRes?.longitude;
+          const isPrivate = geoRes?.is_private === true;
+
           if (
             geoRes &&
-            typeof geoRes.latitude === 'number' &&
-            typeof geoRes.longitude === 'number' &&
-            !isNaN(geoRes.latitude) &&
-            !isNaN(geoRes.longitude)
+            !isPrivate &&
+            typeof lat === 'number' &&
+            typeof lng === 'number' &&
+            !isNaN(lat) &&
+            !isNaN(lng)
           ) {
-            resolvedMap.set(ip, geoRes);
+            resolvedMap.set(ip, {
+              ...geoRes,
+              latitude: lat,
+              longitude: lng,
+            });
           } else {
             unmapped += events.filter((e) => e.source_ip === ip).length;
           }

@@ -33,6 +33,19 @@ export function LogExplorerPage() {
     fetchEvents();
   }, []);
 
+  // Listen for Escape key to close event inspect details modal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setSelectedEventDrawer(null);
+      }
+    };
+    if (selectedEventDrawer) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedEventDrawer]);
+
   const handleSeverityToggle = (level) => {
     setSelectedSeverities((prev) => ({ ...prev, [level]: !prev[level] }));
   };
@@ -266,15 +279,27 @@ export function LogExplorerPage() {
 
       {/* EVENT INSPECTOR DRAWER MODAL */}
       {selectedEventDrawer && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="glass-panel w-full max-w-3xl rounded-2xl border border-border-muted p-6 space-y-4 shadow-2xl animate-in zoom-in-95 duration-200">
+        <div
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedEventDrawer(null);
+          }}
+        >
+          <div
+            className="glass-panel w-full max-w-3xl rounded-2xl border border-border-muted p-6 space-y-4 shadow-2xl animate-in zoom-in-95 duration-200 cursor-default"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex justify-between items-center border-b border-border-muted pb-3 font-mono">
               <div>
                 <span className="text-xs text-primary font-bold">OCSF 1.1 UNIFIED EVENT RECORD</span>
                 <h3 className="text-base font-bold text-text-primary mt-0.5">Source: {selectedEventDrawer.source_ip || '192.168.1.100'}</h3>
               </div>
-              <button onClick={() => setSelectedEventDrawer(null)} className="p-1 rounded text-text-muted hover:text-text-primary">
-                <span className="material-symbols-outlined text-sm">close</span>
+              <button
+                onClick={() => setSelectedEventDrawer(null)}
+                aria-label="Close event details"
+                className="p-1.5 rounded-lg bg-surface-dim hover:bg-surface-hover border border-border-muted text-text-muted hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-primary transition-all flex items-center justify-center cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-xl">close</span>
               </button>
             </div>
 
@@ -294,7 +319,10 @@ export function LogExplorerPage() {
               <span className="font-mono text-[10px] text-text-muted">
                 SHA-256 Digest: {(selectedEventDrawer.raw_event_hash || '').substring(0, 16)}...
               </span>
-              <button onClick={() => setSelectedEventDrawer(null)} className="btn-secondary px-4 py-1.5 rounded-xl text-xs font-bold">
+              <button
+                onClick={() => setSelectedEventDrawer(null)}
+                className="btn-secondary px-4 py-1.5 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-primary"
+              >
                 Close Inspector
               </button>
             </div>

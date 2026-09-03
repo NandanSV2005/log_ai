@@ -173,6 +173,10 @@ export const api = {
     return await handleResponse(res);
   },
 
+  async getGeoIP(ip) {
+    return this.lookupGeoIp(ip);
+  },
+
   // Copilot API
   async askCopilot(question, forceOffline = false) {
     const res = await fetch(`${API_BASE_URL}/api/v1/copilot/ask`, {
