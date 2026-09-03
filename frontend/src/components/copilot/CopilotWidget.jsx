@@ -61,13 +61,14 @@ export function CopilotWidget({ airGapped }) {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="flex items-center gap-2 px-4 py-3 rounded-full bg-primary text-surface-lowest font-bold shadow-[0_0_20px_rgba(167,139,250,0.4)] hover:brightness-110 transition-all transform hover:scale-105"
+          className="btn-copilot flex items-center gap-2.5 px-4 py-3 rounded-xl font-mono text-xs tracking-wide cursor-pointer select-none"
+          aria-label="Open AI SOC Copilot assistant"
         >
-          <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+          <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>
             psychology
           </span>
-          <span>AI SOC Copilot</span>
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+          <span className="font-bold uppercase tracking-wider">AI SOC Copilot</span>
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
         </button>
       )}
 
