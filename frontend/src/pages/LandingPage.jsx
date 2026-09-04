@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
+import { StitchBrandMark } from '../components/common/StitchBrandMark';
 
 export function LandingPage() {
   const { theme, setTheme } = useTheme();
@@ -299,19 +300,15 @@ export function LandingPage() {
     },
   ];
 
-  const activeArchObj = ARCHITECTURE_NODES.find((a) => a.id === activeArchNode) || ARCHITECTURE_NODES[0];
-
   return (
     <div className="bg-background text-text-primary antialiased min-h-screen flex flex-col relative overflow-x-hidden font-sans">
       <div className="scan-overlay"></div>
 
       {/* Editorial Navigation Header */}
       <header className="w-full bg-background border-b border-border-muted relative z-20 py-4 px-6 max-w-7xl mx-auto flex justify-between items-center">
-        <Link to="/" className="font-extrabold text-xl text-primary tracking-tighter flex items-center gap-2">
-          <span className="material-symbols-outlined text-primary text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-            security
-          </span>
-          <span className="font-serif tracking-normal text-text-primary">LOG AI</span>
+        <Link to="/" className="font-extrabold text-xl text-primary tracking-tighter flex items-center gap-2.5">
+          <StitchBrandMark className="w-6 h-6 text-primary" />
+          <span className="font-mono tracking-tight text-text-primary">STITCH</span>
           <span className="text-[10px] font-mono border border-border-muted px-2 py-0.5 rounded text-text-muted">
             EDITORIAL BRIEFING
           </span>
@@ -805,14 +802,14 @@ export function LandingPage() {
       {/* Editorial Footer */}
       <footer className="w-full py-8 border-t border-border-muted bg-surface-dim text-center text-text-dim text-xs font-mono">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="font-extrabold text-base text-text-primary font-serif">LOG AI INTELLIGENCE ENGINE</div>
+          <div className="font-extrabold text-base text-text-primary font-mono">STITCH INTELLIGENCE ENGINE</div>
           <div className="flex gap-4">
             <Link to="/login" className="hover:text-primary transition-colors">Sign In</Link>
             <Link to="/register" className="hover:text-primary transition-colors">Register</Link>
             <Link to="/threat-intel" className="hover:text-primary transition-colors">Threat Intel</Link>
             <Link to="/dashboard" className="hover:text-primary transition-colors">SOC Console</Link>
           </div>
-          <div>© 2026 Log AI Engine. All rights reserved.</div>
+          <div>© 2026 STITCH Security Engine. All rights reserved.</div>
         </div>
       </footer>
     </div>

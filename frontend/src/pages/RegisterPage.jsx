@@ -1,52 +1,60 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { api } from '../services/api';
+import { StitchBrandMark } from '../components/common/StitchBrandMark';
 
 export function RegisterPage() {
-  const { theme, setTheme } = useTheme();
   const [usernameInput, setUsernameInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [roleInput, setRoleInput] = useState('ANALYST');
+  const [secretKeyInput, setSecretKeyInput] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
-  const [isAccountCreated, setIsAccountCreated] = useState(false);
-  const [createdUsername, setCreatedUsername] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const { registerUser } = useAuth();
+  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
+    setSuccessMsg('');
 
-    const trimmedUser = usernameInput.trim();
-    if (!trimmedUser) {
-      setErrorMsg('Username is required.');
+    if (!usernameInput || !passwordInput || !confirmPassword) {
+      setErrorMsg('Please fill in all required account fields.');
       return;
     }
-    if (trimmedUser.length < 3) {
-      setErrorMsg('Username must be at least 3 characters.');
-      return;
-    }
-    if (!passwordInput) {
-      setErrorMsg('Password is required.');
-      return;
-    }
-    if (passwordInput.length < 4) {
-      setErrorMsg('Password must be at least 4 characters.');
-      return;
-    }
+
     if (passwordInput !== confirmPassword) {
       setErrorMsg('Passwords do not match.');
       return;
     }
 
+    if (passwordInput.length < 6) {
+      setErrorMsg('Password must be at least 6 characters.');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const res = await api.register(trimmedUser, passwordInput);
-      setCreatedUsername(res.username || trimmedUser);
-      setIsAccountCreated(true);
+      const res = await registerUser({
+        username: usernameInput,
+        password: passwordInput,
+        role: roleInput,
+        adminSecretKey: secretKeyInput,
+      });
+
+      if (res.success) {
+        setSuccessMsg(res.message || 'Operator account registered successfully!');
+        setTimeout(() => navigate('/login'), 1500);
+      } else {
+        setErrorMsg(res.message || 'Registration failed.');
+      }
     } catch (err) {
-      setErrorMsg(err.message || 'Registration failed. Username may already be registered.');
+      setErrorMsg(err.message || 'Registration error occurred.');
     } finally {
       setIsLoading(false);
     }
@@ -56,11 +64,9 @@ export function RegisterPage() {
     <div className="min-h-screen bg-background text-text-primary flex flex-col justify-between font-sans relative overflow-hidden">
       {/* Brand Header Nav */}
       <header className="w-full h-16 flex items-center justify-between px-6 max-w-7xl mx-auto z-10">
-        <Link to="/" className="flex items-center gap-2 font-extrabold text-xl text-primary tracking-tight">
-          <span className="material-symbols-outlined text-primary text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-            security
-          </span>
-          <span className="font-serif text-text-primary">LOG AI</span>
+        <Link to="/" className="flex items-center gap-2.5 font-extrabold text-xl text-primary tracking-tight">
+          <StitchBrandMark className="w-6 h-6 text-primary" />
+          <span className="font-mono text-text-primary tracking-tight">STITCH</span>
         </Link>
         <button
           onClick={() => setTheme(theme === 'dark' ? 'sage' : 'dark')}
@@ -203,7 +209,7 @@ export function RegisterPage() {
       </main>
 
       <footer className="w-full py-4 text-center text-text-dim text-[10px] font-mono border-t border-border-muted/40">
-        © 2026 LOG AI Security Engine. Authorized Personnel Only.
+        © 2026 STITCH Security Engine. Authorized Personnel Only.
       </footer>
     </div>
   );

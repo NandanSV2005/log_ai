@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import { StitchBrandMark } from '../components/common/StitchBrandMark';
 
 export function LoginPage() {
-  const { theme, setTheme } = useTheme();
   const [usernameInput, setUsernameInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { loginUser } = useAuth();
+  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -31,11 +32,9 @@ export function LoginPage() {
     <div className="min-h-screen bg-background text-text-primary flex flex-col justify-between font-sans relative overflow-hidden">
       {/* Brand Header Nav */}
       <header className="w-full h-16 flex items-center justify-between px-6 max-w-7xl mx-auto z-10">
-        <Link to="/" className="flex items-center gap-2 font-extrabold text-xl text-primary tracking-tight">
-          <span className="material-symbols-outlined text-primary text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-            security
-          </span>
-          <span className="font-serif text-text-primary">LOG AI</span>
+        <Link to="/" className="flex items-center gap-2.5 font-extrabold text-xl text-primary tracking-tight">
+          <StitchBrandMark className="w-6 h-6 text-primary" />
+          <span className="font-mono text-text-primary tracking-tight">STITCH</span>
         </Link>
         <button
           onClick={() => setTheme(theme === 'dark' ? 'sage' : 'dark')}
@@ -141,7 +140,7 @@ export function LoginPage() {
       </main>
 
       <footer className="w-full py-4 text-center text-text-dim text-[10px] font-mono border-t border-border-muted/40">
-        © 2026 LOG AI Security Engine. Authorized Personnel Only.
+        © 2026 STITCH Security Engine. Authorized Personnel Only.
       </footer>
     </div>
   );

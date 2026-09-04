@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { StitchBrandMark } from './StitchBrandMark';
 
 export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
   const { username, role, isAdmin, logoutUser } = useAuth();
@@ -26,13 +27,11 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
         {/* Brand Logo */}
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/dashboard')}>
           <div className="w-9 h-9 rounded-lg bg-surface-container border border-border-muted flex items-center justify-center text-primary shadow-sm">
-            <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-              security
-            </span>
+            <StitchBrandMark className="w-5 h-5 text-primary" />
           </div>
           <div>
             <div className="font-extrabold text-lg text-text-primary tracking-tight flex items-center gap-2">
-              LOG AI
+              STITCH
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary-fixed-dim/20 text-primary border border-primary/30 uppercase font-mono font-bold">
                 {theme === 'sage' ? 'SAGE GREEN' : 'CYBER VOID'}
               </span>

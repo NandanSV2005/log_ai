@@ -138,7 +138,7 @@ async def test_frontend_pages_and_security_headers(client: AsyncClient):
     res = await client.get("/")
     assert res.status_code == 200
     assert "text/html" in res.headers.get("content-type", "").lower()
-    assert "LOG AI" in res.text
+    assert "STITCH" in res.text
 
     login_res = await client.get("/login")
     assert login_res.status_code == 200
