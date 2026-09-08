@@ -366,3 +366,55 @@ input[type="range"]:focus::-moz-range-thumb {
 .kpi-accent-command { border-left: 3px solid var(--color-severity-medium); }
 .kpi-accent-ai { border-left: 3px solid var(--color-primary); }
 .kpi-accent-forensic { border-left: 3px solid var(--color-secondary); }
+
+/* Editorial Tech Grid Background Pattern */
+.bg-tech-grid {
+  background-image: radial-gradient(var(--color-border) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Radar Sweep Keyframe */
+@keyframes radar-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-radar-sweep {
+  animation: radar-sweep 6s linear infinite;
+  transform-origin: center center;
+}
+
+/* Pulse Keyframes */
+@keyframes node-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(2.2);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+}
+
+.animate-node-ping {
+  animation: node-ping 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Gauge Circle Animations */
+.gauge-circle-bg {
+  stroke: var(--color-surface-variant);
+}
+
+.gauge-circle-fill {
+  stroke: var(--color-primary);
+  transition: stroke-dashoffset 0.5s ease-in-out;
+}
+

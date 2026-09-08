@@ -1,22 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { StitchBrandMark } from '../components/common/StitchBrandMark';
+import { api } from '../services/api';
 
 export function LandingPage() {
   const { theme, setTheme } = useTheme();
   const [isLandingMenuOpen, setIsLandingMenuOpen] = useState(false);
 
-  // 1. 6-Stage Processing Pipeline Hover/Click State
+  // 1. Pipeline Stage Selection
   const [activePipelineStage, setActivePipelineStage] = useState(1);
 
-  // 2. Interactive Feature Capabilities Tour Hover/Click State
-  const [activeFeature, setActiveFeature] = useState('ingestion');
-
-  // 3. Interactive System Architecture Node Hover/Click State
-  const [activeArchNode, setActiveArchNode] = useState('ingestion');
-
-  // 4. Financial Impact Estimator State
+  // 2. Financial Impact Estimator State
   const [logVolume, setLogVolume] = useState(500000);
   const [devicesMonitored, setDevicesMonitored] = useState(25);
 
@@ -25,16 +20,76 @@ export function LandingPage() {
   const mttrReduction = Math.min(85, (50 + devicesMonitored * 0.2)).toFixed(1);
   const monthlySavings = (hoursSaved * 65).toLocaleString('en-US', { maximumFractionDigits: 0 });
 
-  // Ticker items for live log event feed
-  const TICKER_ITEMS = [
-    { type: 'ALERT', color: 'text-rose-400', text: '[ALERT] Connection Flood detected on Edge Firewall (Cisco ASA)' },
-    { type: 'INFO', color: 'text-text-muted', text: '[INFO] OCSF 1.1 Schema Normalization Pipeline Active' },
-    { type: 'WARN', color: 'text-amber-400', text: '[WARN] Anomaly in egress traffic volume (IP: 185.220.100.22)' },
-    { type: 'INFO', color: 'text-emerald-400', text: '[INFO] SHA-256 Merkle Chain Integrity: VERIFIED (Zero Tampering)' },
-    { type: 'ALERT', color: 'text-rose-400', text: '[ALERT] Multiple failed SSH auth attempts - MITRE T1110' },
+  // Radar Interactive Selection
+  const [activeRadarNode, setActiveRadarNode] = useState({
+    id: 1,
+    ip: '185.220.100.22',
+    device: 'Cisco ASA Edge',
+    x: 70,
+    y: 32,
+    severity: 'HIGH',
+    score: 88.5,
+    proto: 'TCP/51422',
+    rule: 'MITRE T1110 (Brute Force)',
+    action: 'AUTO_BLOCKED'
+  });
+
+  // Live Telemetry Stats & Events (Graceful fallback if unauthenticated public access)
+  const [stats, setStats] = useState({
+    total_events: 4200000,
+    active_threats: 14,
+    avg_threat_score: 68.4,
+    pipeline_latency: '1.1ms'
+  });
+
+  const [recentEvents, setRecentEvents] = useState([
+    { id: 'evt-01', timestamp: '2026-09-08 11:42:01', vendor: 'cisco_asa', action: 'DENY', src_ip: '185.220.100.22', dst_port: 80, severity: 'HIGH', threat_score: 88.5 },
+    { id: 'evt-02', timestamp: '2026-09-08 11:41:58', vendor: 'fortigate', action: 'PASS', src_ip: '192.168.1.105', dst_port: 443, severity: 'LOW', threat_score: 12.0 },
+    { id: 'evt-03', timestamp: '2026-09-08 11:41:52', vendor: 'suricata', action: 'ALERT', src_ip: '45.33.32.156', dst_port: 22, severity: 'HIGH', threat_score: 94.2 },
+    { id: 'evt-04', timestamp: '2026-09-08 11:41:45', vendor: 'pfsense', action: 'BLOCK', src_ip: '10.0.0.50', dst_port: 53, severity: 'MEDIUM', threat_score: 55.4 },
+    { id: 'evt-05', timestamp: '2026-09-08 11:41:39', vendor: 'cef_syslog', action: 'DENY', src_ip: '198.51.100.14', dst_port: 8080, severity: 'HIGH', threat_score: 82.1 },
+  ]);
+
+  // Attempt live API fetch on component mount
+  useEffect(() => {
+    let mounted = true;
+    async function loadData() {
+      try {
+        const fetchedStats = await api.getStats();
+        if (mounted && fetchedStats) {
+          setStats({
+            total_events: fetchedStats.total_events || fetchedStats.events_analyzed || 4200000,
+            active_threats: fetchedStats.active_incidents || fetchedStats.active_threats || 14,
+            avg_threat_score: fetchedStats.avg_threat_score || 68.4,
+            pipeline_latency: '1.1ms'
+          });
+        }
+      } catch (err) {
+        // Silent fallback for public unauthenticated visitors
+      }
+
+      try {
+        const fetchedEvents = await api.getRecentEvents(10);
+        if (mounted && Array.isArray(fetchedEvents) && fetchedEvents.length > 0) {
+          setRecentEvents(fetchedEvents);
+        }
+      } catch (err) {
+        // Silent fallback
+      }
+    }
+    loadData();
+    return () => { mounted = false; };
+  }, []);
+
+  // Radar Interactive Nodes Array
+  const RADAR_NODES = [
+    { id: 1, ip: '185.220.100.22', device: 'Cisco ASA Edge', x: 70, y: 32, severity: 'HIGH', score: 88.5, proto: 'TCP/51422', rule: 'MITRE T1110 (Brute Force)', action: 'AUTO_BLOCKED' },
+    { id: 2, ip: '192.168.1.105', device: 'FortiGate FW', x: 28, y: 65, severity: 'MEDIUM', score: 62.0, proto: 'UDP/53', rule: 'DNS Tunneling Anomaly', action: 'MONITORED' },
+    { id: 3, ip: '10.0.0.50', device: 'Suricata IDS', x: 62, y: 76, severity: 'LOW', score: 24.1, proto: 'HTTP/80', rule: 'Standard GET /health', action: 'CLEARED' },
+    { id: 4, ip: '45.33.32.156', device: 'pfSense Cluster', x: 36, y: 24, severity: 'HIGH', score: 94.2, proto: 'SSH/22', rule: 'Credential Stuffing', action: 'CONTAINED' },
   ];
 
-  // 6-Stage Log Processing Pipeline Data (Verified against actual backend modules)
+  // Pipeline Stages Data
   const PIPELINE_STAGES = [
     {
       id: 1,
@@ -42,7 +97,7 @@ export function LandingPage() {
       name: 'Receive Logs',
       title: 'Stage 1: Raw Log Capture & Cryptographic Hashing',
       filepath: 'app/storage/raw_writer.py',
-      desc: 'Raw log payloads are collected from network devices at the edge and immediately assigned a SHA-256 cryptographic digest before parsing to ensure tamper-proof data integrity.',
+      desc: 'Raw log payloads are collected from edge devices and immediately assigned a SHA-256 cryptographic digest before parsing to ensure tamper-proof data integrity.',
       payload: '%ASA-4-106023: Deny tcp src outside:185.220.100.22/51422 dst inside:10.0.0.10/80 by access-group "outside_acl"',
       digest: 'a4ea94c43d9dc8c7753255ca0d6e2bb2093560056c170d2f992edb7d36071e3f',
       techBadge: 'Zero-Loss Capture',
@@ -98,800 +153,707 @@ export function LandingPage() {
       title: 'Stage 6: Explainable AI & Mitigation Playbooks',
       filepath: 'app/xai/explainer.py',
       desc: 'Delivers transparent feature attribution breakdowns and 3-step firewall mitigation commands for active security incidents without black-box opacity.',
-      payload: 'XAI Attribution: "Threat score 65.0 driven by action_code z-score (+4.84) and IP denial count. Remediation: Block 185.220.100.22 at firewall."',
-      digest: '551029e8471b6501928471209e847120f2b259a563db460ee9d7b9ddf5b18d89',
+      payload: 'Mitigation Plan: 1. iptables -A INPUT -s 185.220.100.22 -j DROP | 2. Revoke active JWT tokens | 3. Push policy update to Cisco ASA',
+      digest: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
       techBadge: 'Explainable AI',
     },
   ];
 
-  const activePipelineObj = PIPELINE_STAGES.find((s) => s.id === activePipelineStage) || PIPELINE_STAGES[0];
-
-  // Interactive Security Capabilities Data (Verified against actual application UI and API capabilities)
-  const CAPABILITIES_DATA = [
-    {
-      id: 'ingestion',
-      name: 'Collect System Logs',
-      icon: 'speed',
-      badge: 'HIGH-THROUGHPUT',
-      title: 'High-Speed Edge Log Capture',
-      desc: 'Captures continuous syslog streams from Cisco, Fortinet, Suricata, and pfSense perimeter devices with zero dropped records.',
-      problem: 'Prevents silent log drops during high-volume traffic bursts.',
-      connection: 'Pipes raw log byte streams directly into SHA-256 Merkle leaf hashing.',
-      metrics: [
-        { label: 'Throughput', val: '4.2M EPS' },
-        { label: 'Latency', val: '< 2.5ms' },
-        { label: 'Format', val: 'Syslog/CEF' },
-      ],
-      flow: ['Perimeter Appliance', 'Edge Listener', 'Storage Writer', 'SHA-256 Digest'],
-      route: '/dashboard',
-    },
-    {
-      id: 'normalization',
-      name: 'Organize Log Fields',
-      icon: 'schema',
-      badge: 'OCSF 1.1 SCHEMA',
-      title: 'Standardize Fields Across Vendors',
-      desc: 'Converts fragmented multi-vendor log attributes into standardized OCSF 1.1 field objects with consistent timestamps.',
-      problem: 'Resolves conflicting field names across multi-vendor firewall logs.',
-      connection: 'Provides structured key-value inputs for machine learning anomaly scoring.',
-      metrics: [
-        { label: 'Schema', val: 'OCSF 1.1' },
-        { label: 'Parsers', val: '6 Appliances' },
-        { label: 'Precision', val: '100% Mapping' },
-      ],
-      flow: ['Raw Log Text', 'Format Identification', 'OCSF Field Mapping', 'Unified Event'],
-      route: '/log-explorer',
-    },
-    {
-      id: 'detection',
-      name: 'Detect Anomalies',
-      icon: 'psychology',
-      badge: 'ISOLATION FOREST',
-      title: 'Machine Learning Anomaly Scoring',
-      desc: 'Evaluates payload entropy, connection velocity, and port scan heuristics against pre-trained ML behavior baselines.',
-      problem: 'Cuts through alert noise while detecting stealth zero-day attacks.',
-      connection: 'Generates normalized threat scores ranging from 0.0 to 100.0.',
-      metrics: [
-        { label: 'Detection Latency', val: '1.4s' },
-        { label: 'Engine', val: 'Isolation Forest' },
-        { label: 'Scoring', val: '0.0 - 100.0' },
-      ],
-      flow: ['Normalized Event', 'Feature Extraction', 'Z-Score Attribution', 'Threat Score Output'],
-      route: '/dashboard',
-    },
-    {
-      id: 'correlation',
-      name: 'Group Related Alerts',
-      icon: 'hub',
-      badge: '15-MIN SLIDING GRAPH',
-      title: 'Multi-Vector Alert Correlation',
-      desc: 'Clusters related security alerts across 15-minute sliding windows sharing offending IP entities into single incident timelines.',
-      problem: 'Consolidates hundreds of isolated alerts into a single actionable incident.',
-      connection: 'Triggers incident timelines and MITRE ATT&CK tactic tags.',
-      metrics: [
-        { label: 'Window', val: '15 Mins' },
-        { label: 'Clustering', val: 'IP Graph' },
-        { label: 'Reduction', val: '85% Fewer Alerts' },
-      ],
-      flow: ['Single Alert Stream', 'IP Entity Matcher', 'Sliding Window', 'Incident Timeline'],
-      route: '/dashboard',
-    },
-    {
-      id: 'threat-intel',
-      name: 'Map Threat Locations',
-      icon: 'public',
-      badge: 'GEOGRAPHIC MAP',
-      title: 'Interactive World Threat Map',
-      desc: 'Resolves IP subnets offline to geographic coordinates and displays threat markers over vector world map geometry.',
-      problem: 'Provides spatial attack origin visibility without cloud API key dependencies.',
-      connection: 'Visualizes perimeter threat concentration for SOC analysts.',
-      metrics: [
-        { label: 'Lookup', val: 'Subnet GeoIP' },
-        { label: 'Mode', val: 'Offline Sovereign' },
-        { label: 'Projection', val: 'Equirectangular' },
-      ],
-      flow: ['Attacker IP', 'Subnet Lookup', 'Coordinate Math', 'Map Vector Marker'],
-      route: '/threat-intel',
-    },
-    {
-      id: 'forensics',
-      name: 'Verify Audit Chains',
-      icon: 'verified',
-      badge: 'SHA-256 MERKLE',
-      title: 'Cryptographic Log Verification',
-      desc: 'Verifies log payload immutability using SHA-256 Merkle tree leaf hashing, complete with built-in tamper detection simulation.',
-      problem: 'Ensures court-admissible audit integrity and tamper detection.',
-      connection: 'Provides cryptographic proof of raw log payload authenticity.',
-      metrics: [
-        { label: 'Hashing', val: 'SHA-256 Merkle' },
-        { label: 'Audit Verdict', val: 'Tamper-Evident' },
-        { label: 'Verification', val: 'WebCrypto API' },
-      ],
-      flow: ['Raw Payload', 'SHA-256 Hashing', 'Merkle Root', 'Audit Verdict'],
-      route: '/forensics',
-    },
-    {
-      id: 'response',
-      name: 'Investigate & Contain',
-      icon: 'shield',
-      badge: 'XAI PLAYBOOKS',
-      title: 'Explainable AI Feature Attribution & Containment',
-      desc: 'Delivers transparent feature attribution z-scores and 3-step firewall mitigation commands for active security incidents.',
-      problem: 'Eliminates black-box ML opacity and accelerates incident response.',
-      connection: 'Equips analysts with immediate firewall block syntax.',
-      metrics: [
-        { label: 'XAI Model', val: 'Feature Z-Score' },
-        { label: 'Playbook', val: '3-Step Mitigation' },
-        { label: 'MTTR', val: '80% Reduction' },
-      ],
-      flow: ['Incident Trigger', 'Top Feature Analysis', 'Playbook Generation', 'Analyst Containment'],
-      route: '/dashboard',
-    },
-    {
-      id: 'reporting',
-      name: 'Export Security Reports',
-      icon: 'description',
-      badge: 'EXECUTIVE & AUDIT',
-      title: 'Tenant-Isolated Reports & CSV Exports',
-      desc: 'Generates exportable summary reports and structured CSV datasets isolated to active user tenant boundaries.',
-      problem: 'Streamlines compliance reporting for management and auditors.',
-      connection: 'Archives incident timelines into permanent documentation.',
-      metrics: [
-        { label: 'Isolation', val: 'Tenant Strict' },
-        { label: 'Export', val: 'CSV & Audit Report' },
-        { label: 'Compliance', val: 'SOC 2 Ready' },
-      ],
-      flow: ['Tenant Scope', 'Filter Aggregation', 'Report Generation', 'CSV Download'],
-      route: '/dashboard',
-    },
+  // Perimeter Appliance Cards Data
+  const APPLIANCES = [
+    { name: 'Cisco ASA Firewall', format: 'CEF / Syslog', speed: '1.2M EPS', parser: 'cisco_asa:deny', status: 'ACTIVE' },
+    { name: 'Fortinet FortiGate', format: 'KV Pair Log', speed: '980K EPS', parser: 'fortigate:traffic', status: 'ACTIVE' },
+    { name: 'Suricata IDS/IPS', format: 'EVE JSON', speed: '850K EPS', parser: 'suricata:eve', status: 'ACTIVE' },
+    { name: 'pfSense Filterlog', format: 'CSV Stream', speed: '620K EPS', parser: 'pfsense:filterlog', status: 'ACTIVE' },
+    { name: 'CEF Standard', format: 'Common Event', speed: '450K EPS', parser: 'cef:generic', status: 'ACTIVE' },
+    { name: 'Enterprise Cross-Ingest', format: 'Multi-Vendor', speed: '4.2M EPS', parser: 'ocsf:unified', status: 'ACTIVE' },
   ];
 
-  const activeCapabilityObj = CAPABILITIES_DATA.find((c) => c.id === activeFeature) || CAPABILITIES_DATA[0];
-
-  // Interactive System Architecture Data (Verified against actual backend components)
-  const ARCHITECTURE_NODES = [
-    {
-      id: 'sources',
-      name: 'Log Sources',
-      type: 'ENTRY POINT',
-      desc: 'Perimeter network appliances sending raw syslog streams over UDP/TCP port 514 or REST API endpoints.',
-      components: ['Cisco ASA Firewall', 'Fortinet FortiGate VPN', 'Suricata IDS/IPS', 'pfSense Gateway'],
-    },
-    {
-      id: 'ingestion',
-      name: 'Log Collection',
-      type: 'INGESTION ENGINE',
-      desc: 'High-throughput edge log capture writing raw compressed payload archives while hashing SHA-256 digests.',
-      components: ['Raw Writer Service', 'SHA-256 Leaf Hasher', 'Gzip Storage Manager'],
-    },
-    {
-      id: 'normalize',
-      name: 'Field Normalization',
-      type: 'SCHEMA STANDARDIZER',
-      desc: 'Vendor format auto-detection engine mapping raw key-value pairs into standard OCSF 1.1 UnifiedEvent objects.',
-      components: ['Dynamic Vendor Parser', 'OCSF Field Transformer', 'Schema Validator'],
-    },
-    {
-      id: 'detection',
-      name: 'Threat Detection',
-      type: 'ML SCORING ENGINE',
-      desc: 'Isolation Forest machine learning engine computing entropy and connection velocity anomaly scores.',
-      components: ['Isolation Forest Model', 'Heuristic Rule Evaluator', 'Feature Z-Score Engine'],
-    },
-    {
-      id: 'correlate',
-      name: 'Alert Grouping',
-      type: 'GRAPH CORRELATION',
-      desc: 'Multi-vector incident aggregator grouping alerts across 15-minute sliding windows sharing IP entities.',
-      components: ['15-Min Graph Window', 'IP Entity Matcher', 'Incident Cluster Creator'],
-    },
-    {
-      id: 'intelligence',
-      name: 'Geographic Mapping',
-      type: 'GEOIP RESOLVER',
-      desc: 'Offline GeoIP resolver mapping IP subnets to geographic coordinates and vector map markers.',
-      components: ['Offline GeoIP DB', 'Equirectangular Projection', 'Threat Marker Overlay'],
-    },
-    {
-      id: 'response',
-      name: 'Action & Containment',
-      type: 'REMEDIATION PLAYBOOK',
-      desc: 'Explainable AI explainer delivering top feature attribution z-scores and step-by-step mitigation commands.',
-      components: ['XAI Explainer Module', '3-Step Playbook Generator', 'SOC Command Center'],
-    },
-  ];
-
-  const activeArchObj = ARCHITECTURE_NODES.find((a) => a.id === activeArchNode) || ARCHITECTURE_NODES[0];
+  const currentStageData = PIPELINE_STAGES.find(s => s.id === activePipelineStage) || PIPELINE_STAGES[0];
 
   return (
-    <div className="bg-background text-text-primary antialiased min-h-screen flex flex-col relative overflow-x-hidden font-sans">
-      <div className="scan-overlay"></div>
-
-      {/* Editorial Navigation Header */}
-      <header className="w-full bg-background border-b border-border-muted relative z-20 py-4 px-4 sm:px-6 max-w-7xl mx-auto flex justify-between items-center">
-        <Link to="/" className="font-extrabold text-xl text-primary tracking-tighter flex items-center gap-2.5">
-          <StitchBrandMark className="w-6 h-6 text-primary" />
-          <span className="font-mono tracking-tight text-text-primary">STITCH</span>
-          <span className="hidden sm:inline-block text-[10px] font-mono border border-border-muted px-2 py-0.5 rounded text-text-muted">
-            EDITORIAL BRIEFING
-          </span>
-        </Link>
-
-        {/* Desktop Navbar Anchor Links */}
-        <nav className="hidden md:flex items-center gap-8 text-xs font-mono font-bold tracking-wider text-text-muted">
-          <a href="#pipeline" className="hover:text-primary transition-colors">PIPELINE</a>
-          <a href="#capabilities" className="hover:text-primary transition-colors">CAPABILITIES</a>
-          <a href="#topology" className="hover:text-primary transition-colors">TOPOLOGY</a>
-          <a href="#estimator" className="hover:text-primary transition-colors">ESTIMATOR</a>
-        </nav>
-
-        {/* Header Action Controls */}
-        <div className="hidden sm:flex items-center gap-3">
-          <button
-            onClick={() => setTheme(theme === 'dark' ? 'sage' : 'dark')}
-            className="px-3.5 py-1.5 rounded-lg border border-border-muted bg-surface-dim text-xs font-mono font-bold flex items-center gap-2 hover:border-primary transition-all text-text-primary touch-target"
-            aria-label="Toggle visual theme mode"
-          >
-            <span className="material-symbols-outlined text-sm">palette</span>
-            <span>{theme === 'dark' ? 'CYBER VOID' : 'SAGE GREEN'}</span>
-          </button>
-
-          <Link to="/login" className="btn-secondary px-4 py-1.5 rounded-lg text-xs font-bold font-mono touch-target">
-            Sign In
-          </Link>
-          <Link to="/dashboard" className="btn-primary px-4 py-1.5 rounded-lg text-xs font-bold font-mono flex items-center gap-1 touch-target">
-            <span>SOC Console</span>
-            <span className="material-symbols-outlined text-sm">arrow_forward</span>
-          </Link>
-        </div>
-
-        {/* Mobile Header Menu Trigger */}
-        <div className="flex sm:hidden items-center gap-2">
-          <button
-            onClick={() => setIsLandingMenuOpen(!isLandingMenuOpen)}
-            className="p-2 rounded-lg bg-surface border border-border-muted text-text-primary hover:text-primary touch-target"
-            aria-label={isLandingMenuOpen ? 'Close menu' : 'Open menu'}
-          >
-            <span className="material-symbols-outlined text-2xl">
-              {isLandingMenuOpen ? 'close' : 'menu'}
+    <div className="min-h-screen bg-[var(--color-bg-dim)] text-[var(--color-text-main)] font-sans flex flex-col selection:bg-[var(--color-primary)] selection:text-[#0f131c]">
+      
+      {/* ========================================================================= */}
+      {/* 1. TOP HEADER NAVIGATION BAR                                              */}
+      {/* ========================================================================= */}
+      <header className="sticky top-0 z-50 bg-[var(--color-bg-dim)]/90 backdrop-blur-md border-b border-[var(--color-border)] px-4 lg:px-8 py-3 transition-colors duration-200">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          
+          {/* Brand Mark & Monospace System Status Badge */}
+          <div className="flex items-center space-x-3">
+            <Link to="/" className="flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] rounded px-1 py-0.5">
+              <StitchBrandMark size={28} />
+              <span className="font-mono text-sm tracking-wider font-bold uppercase text-[var(--color-text-main)]">
+                LOG <span className="text-[var(--color-primary)]">//</span> AI
+              </span>
+            </Link>
+            <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono border border-[var(--color-border)] bg-[var(--color-surface-hover)] text-[var(--color-text-muted)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block mr-1.5 animate-pulse"></span>
+              SYSTEM: ONLINE | 4.2M EPS
             </span>
-          </button>
+          </div>
+
+          {/* Center Navigation Links (Desktop) */}
+          <nav className="hidden md:flex items-center space-x-6 font-mono text-xs text-[var(--color-text-muted)]">
+            <a href="#pipeline" className="hover:text-[var(--color-primary)] transition-colors py-1">PIPELINE</a>
+            <a href="#capabilities" className="hover:text-[var(--color-primary)] transition-colors py-1">CAPABILITIES</a>
+            <a href="#topology" className="hover:text-[var(--color-primary)] transition-colors py-1">TOPOLOGY</a>
+            <a href="#estimator" className="hover:text-[var(--color-primary)] transition-colors py-1">ESTIMATOR</a>
+          </nav>
+
+          {/* Right Action Controls */}
+          <div className="flex items-center space-x-3">
+            {/* Theme Toggle Button */}
+            <button
+              onClick={() => setTheme(theme === 'dark' ? 'sage' : 'dark')}
+              className="px-2.5 py-1 text-xs font-mono border border-[var(--color-border)] rounded bg-[var(--color-bg-surface)] hover:border-[var(--color-primary)] text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-all flex items-center space-x-1.5"
+              title="Toggle Editorial Theme (Sage Green / Cyber Void)"
+            >
+              <span className="w-2 h-2 rounded-full bg-[var(--color-primary)] inline-block"></span>
+              <span className="uppercase">{theme === 'dark' ? 'CYBER VOID' : 'SAGE GREEN'}</span>
+            </button>
+
+            {/* Auth Link */}
+            <Link
+              to="/login"
+              className="hidden sm:inline-block font-mono text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors px-2 py-1"
+            >
+              SIGN IN
+            </Link>
+
+            {/* SOC Console CTA */}
+            <Link
+              to="/dashboard"
+              className="btn-primary font-mono text-xs px-3.5 py-1.5 rounded flex items-center space-x-1"
+            >
+              <span>OPEN SOC CONSOLE</span>
+              <span className="text-[10px]">→</span>
+            </Link>
+
+            {/* Mobile Hamburger Toggle */}
+            <button
+              onClick={() => setIsLandingMenuOpen(!isLandingMenuOpen)}
+              className="md:hidden p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] border border-[var(--color-border)] rounded bg-[var(--color-bg-surface)]"
+              aria-label="Toggle navigation menu"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {isLandingMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          </div>
         </div>
 
-        {/* Mobile Landing Dropdown Menu */}
+        {/* Mobile Navigation Drawer */}
         {isLandingMenuOpen && (
-          <div className="sm:hidden fixed inset-x-0 top-16 bg-surface/95 border-b border-border-muted backdrop-blur-lg p-4 z-50 space-y-3 font-mono text-xs">
-            <div className="grid grid-cols-2 gap-2 text-center">
-              <a
-                href="#pipeline"
-                onClick={() => setIsLandingMenuOpen(false)}
-                className="p-2.5 rounded-lg bg-surface-dim border border-border-muted text-text-primary font-bold touch-target"
-              >
-                PIPELINE
-              </a>
-              <a
-                href="#capabilities"
-                onClick={() => setIsLandingMenuOpen(false)}
-                className="p-2.5 rounded-lg bg-surface-dim border border-border-muted text-text-primary font-bold touch-target"
-              >
-                CAPABILITIES
-              </a>
-              <a
-                href="#topology"
-                onClick={() => setIsLandingMenuOpen(false)}
-                className="p-2.5 rounded-lg bg-surface-dim border border-border-muted text-text-primary font-bold touch-target"
-              >
-                TOPOLOGY
-              </a>
-              <a
-                href="#estimator"
-                onClick={() => setIsLandingMenuOpen(false)}
-                className="p-2.5 rounded-lg bg-surface-dim border border-border-muted text-text-primary font-bold touch-target"
-              >
-                ESTIMATOR
-              </a>
-            </div>
-
-            <div className="pt-2 border-t border-border-muted flex flex-col gap-2">
-              <button
-                onClick={() => setTheme(theme === 'dark' ? 'sage' : 'dark')}
-                className="w-full p-2.5 rounded-lg border border-border-muted bg-surface-dim text-text-primary font-bold flex items-center justify-center gap-2 touch-target"
-              >
-                <span className="material-symbols-outlined text-base">palette</span>
-                <span>{theme === 'dark' ? 'CYBER VOID' : 'SAGE GREEN'}</span>
-              </button>
-
-              <div className="flex gap-2">
-                <Link
-                  to="/login"
-                  onClick={() => setIsLandingMenuOpen(false)}
-                  className="flex-1 btn-secondary p-2.5 rounded-lg text-center font-bold touch-target"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  to="/dashboard"
-                  onClick={() => setIsLandingMenuOpen(false)}
-                  className="flex-1 btn-primary p-2.5 rounded-lg text-center font-bold touch-target"
-                >
-                  SOC Console
-                </Link>
-              </div>
+          <div className="md:hidden mt-3 pt-3 border-t border-[var(--color-border)] flex flex-col space-y-2 font-mono text-xs text-[var(--color-text-muted)]">
+            <a href="#pipeline" onClick={() => setIsLandingMenuOpen(false)} className="px-2 py-1 hover:text-[var(--color-primary)]">PIPELINE</a>
+            <a href="#capabilities" onClick={() => setIsLandingMenuOpen(false)} className="px-2 py-1 hover:text-[var(--color-primary)]">CAPABILITIES</a>
+            <a href="#topology" onClick={() => setIsLandingMenuOpen(false)} className="px-2 py-1 hover:text-[var(--color-primary)]">TOPOLOGY</a>
+            <a href="#estimator" onClick={() => setIsLandingMenuOpen(false)} className="px-2 py-1 hover:text-[var(--color-primary)]">ESTIMATOR</a>
+            <div className="pt-2 border-t border-[var(--color-border)] flex items-center justify-between px-2">
+              <Link to="/login" onClick={() => setIsLandingMenuOpen(false)} className="hover:text-[var(--color-text-main)]">SIGN IN</Link>
+              <Link to="/register" onClick={() => setIsLandingMenuOpen(false)} className="text-[var(--color-primary)] font-bold">CREATE ACCOUNT</Link>
             </div>
           </div>
         )}
       </header>
 
-      {/* Mobile Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-border-muted z-40 md:hidden flex justify-around py-2 px-1 shadow-md">
-        <Link to="/threat-intel" className="flex flex-col items-center text-text-muted hover:text-primary touch-target">
-          <span className="material-symbols-outlined text-xl">security</span>
-          <span className="text-[10px] font-mono mt-0.5">Intel</span>
-        </Link>
-        <Link to="/log-explorer" className="flex flex-col items-center text-text-muted hover:text-primary touch-target">
-          <span className="material-symbols-outlined text-xl">database</span>
-          <span className="text-[10px] font-mono mt-0.5">Logs</span>
-        </Link>
-        <Link to="/forensics" className="flex flex-col items-center text-text-muted hover:text-primary touch-target">
-          <span className="material-symbols-outlined text-xl">verified</span>
-          <span className="text-[10px] font-mono mt-0.5">Forensics</span>
-        </Link>
-        <Link to="/dashboard" className="flex flex-col items-center text-text-muted hover:text-primary touch-target">
-          <span className="material-symbols-outlined text-xl">dashboard</span>
-          <span className="text-[10px] font-mono mt-0.5">Command</span>
-        </Link>
-      </nav>
-
-      <main className="flex-grow relative z-10 pb-24 md:pb-0">
-        
-        {/* CHAPTER 01: HERO BRIEFING */}
-        <section className="max-w-7xl mx-auto px-6 py-12 md:py-16 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center border-b border-border-muted">
+      {/* ========================================================================= */}
+      {/* 2. HERO SECTION & INTERACTIVE VECTOR RADAR (Reference Composition)        */}
+      {/* ========================================================================= */}
+      <section className="relative px-4 lg:px-8 pt-8 pb-16 border-b border-[var(--color-border)] bg-tech-grid">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           
-          {/* Editorial Headline & Value Proposition */}
-          <div className="lg:col-span-7 space-y-6">
-            <div className="inline-flex items-center gap-2 bg-surface-dim px-3.5 py-1 rounded-full border border-border-muted font-mono text-[11px]">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span className="font-bold text-text-primary uppercase tracking-widest">[ SECURITY LOG PLATFORM ]</span>
+          {/* Left Column: Editorial Hero Copy & CTAs */}
+          <div className="lg:col-span-6 space-y-6">
+            
+            {/* Eyebrow Badge */}
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded border border-[var(--color-border)] bg-[var(--color-bg-card)] font-mono text-xs text-[var(--color-primary)]">
+              <span className="w-2 h-2 rounded-full bg-[var(--color-primary)] animate-ping"></span>
+              <span>AUTONOMOUS TELEMETRY PIPELINE // 4.2M EPS</span>
             </div>
 
-            <h1 className="text-4xl sm:text-6xl font-extrabold text-text-primary tracking-tight leading-none font-sans">
-              Make Your System Logs <span className="text-primary underline decoration-primary/40 underline-offset-8">Work for You</span>
+            {/* Headline */}
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[var(--color-text-main)] leading-tight">
+              Autonomous Threat Ingestion &amp; Detection
             </h1>
 
-            <p className="text-base sm:text-lg text-text-muted leading-relaxed font-sans max-w-2xl">
-              Bring your security logs together in one place, organize them automatically into standard fields, detect suspicious activity, and investigate incidents faster.
+            {/* Subheadline */}
+            <p className="text-sm sm:text-base text-[var(--color-text-muted)] leading-relaxed max-w-xl">
+              Real-time SOC telemetry processing, OCSF 1.1 schema normalization, and explainable Isolation Forest anomaly scoring in a unified zero-trust pipeline.
             </p>
 
-            <div className="flex flex-wrap gap-4 pt-2 font-mono text-xs font-bold">
-              <Link
-                to="/dashboard"
-                className="btn-primary px-6 py-3 rounded-xl flex items-center gap-2 shadow-lg"
-              >
-                <span>[ ACCESS PLATFORM ]</span>
-                <span className="material-symbols-outlined text-sm">arrow_forward</span>
-              </Link>
+            {/* CTA Action Buttons */}
+            <div className="flex flex-wrap gap-3 pt-2">
               <a
                 href="#pipeline"
-                className="btn-secondary px-6 py-3 rounded-xl flex items-center gap-2"
+                className="btn-primary font-mono text-xs px-5 py-2.5 rounded flex items-center space-x-2 shadow-sm"
               >
-                <span>[ SEE HOW IT WORKS ]</span>
-                <span className="material-symbols-outlined text-sm">arrow_downward</span>
+                <span>Launch Interactive Demo</span>
+                <span>↓</span>
+              </a>
+              <a
+                href="#topology"
+                className="btn-secondary font-mono text-xs px-5 py-2.5 rounded flex items-center space-x-2"
+              >
+                <span>Inspect Architecture</span>
+                <span>→</span>
               </a>
             </div>
-          </div>
 
-          {/* Live System Log Flow Status Panel */}
-          <div className="lg:col-span-5 glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-2xl relative overflow-hidden">
-            <div className="flex justify-between items-center border-b border-border-muted pb-3 font-mono text-xs">
-              <span className="font-bold text-text-primary uppercase tracking-wider">[ LIVE LOG PROCESSING METRICS ]</span>
-              <span className="text-emerald-400 font-bold">STREAM ACTIVE</span>
-            </div>
-
-            <div className="space-y-3 font-mono text-xs">
-              <div className="p-3 rounded-xl bg-surface-dim border border-border-muted flex justify-between items-center">
-                <span className="text-text-muted">Log Collection Speed:</span>
-                <span className="text-emerald-400 font-bold">4.2M EPS</span>
+            {/* Micro Specs Bar */}
+            <div className="pt-4 border-t border-[var(--color-border)] grid grid-cols-3 gap-2 font-mono text-[11px] text-[var(--color-text-muted)]">
+              <div>
+                <span className="block text-[var(--color-text-dim)] uppercase">LATENCY</span>
+                <span className="font-bold text-[var(--color-text-main)]">&lt; 1.2ms</span>
               </div>
-              <div className="p-3 rounded-xl bg-surface-dim border border-border-muted flex justify-between items-center">
-                <span className="text-text-muted">OCSF Field Mapping:</span>
-                <span className="text-primary font-bold">100% Unified</span>
+              <div>
+                <span className="block text-[var(--color-text-dim)] uppercase">SCHEMA</span>
+                <span className="font-bold text-[var(--color-text-main)]">OCSF 1.1</span>
               </div>
-              <div className="p-3 rounded-xl bg-surface-dim border border-border-muted flex justify-between items-center">
-                <span className="text-text-muted">Anomaly Detection Speed:</span>
-                <span className="text-rose-400 font-bold">1.4s Latency</span>
+              <div>
+                <span className="block text-[var(--color-text-dim)] uppercase">INTEGRITY</span>
+                <span className="font-bold text-[var(--color-text-main)]">SHA-256</span>
               </div>
             </div>
+          </div>
 
-            <div className="p-3 rounded-xl bg-surface-dim border border-border-muted text-center font-mono text-[10px] text-text-dim">
-              [ ANNOTATION: AUTOMATIC LOG COLLECTION & THREAT SCORING ]
+          {/* Right Column: Interactive Editorial Radar Scanner (Matches Reference Screenshot) */}
+          <div className="lg:col-span-6 relative">
+            <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg p-4 sm:p-6 shadow-xl relative overflow-hidden">
+              
+              {/* Radar Header Info Bar */}
+              <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)] mb-4 font-mono text-xs">
+                <div className="flex items-center space-x-2 text-[var(--color-text-muted)]">
+                  <span className="text-[var(--color-primary)]">●</span>
+                  <span>PERIMETER RADAR TELEMETRY</span>
+                </div>
+                <div className="text-[10px] text-[var(--color-text-dim)] uppercase tracking-wider">
+                  DEG: 0° - 360° | ACTIVE RETICLE
+                </div>
+              </div>
+
+              {/* Vector Radar Canvas Area */}
+              <div className="relative aspect-square max-w-[420px] mx-auto border border-[var(--color-border)] rounded-full bg-[var(--color-surface-lowest)] flex items-center justify-center overflow-hidden">
+                
+                {/* Concentric Rings */}
+                <div className="absolute inset-4 rounded-full border border-[var(--color-border)]/60"></div>
+                <div className="absolute inset-16 rounded-full border border-[var(--color-border)]/50"></div>
+                <div className="absolute inset-28 rounded-full border border-[var(--color-border)]/40"></div>
+                <div className="absolute inset-40 rounded-full border border-[var(--color-border)]/30"></div>
+
+                {/* Radar Axis Lines */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="w-full h-[1px] bg-[var(--color-border)]"></div>
+                  <div className="h-full w-[1px] bg-[var(--color-border)] absolute"></div>
+                </div>
+
+                {/* Radar Axis Degree Marks */}
+                <span className="absolute top-2 font-mono text-[9px] text-[var(--color-text-dim)]">0°</span>
+                <span className="absolute right-2 font-mono text-[9px] text-[var(--color-text-dim)]">90°</span>
+                <span className="absolute bottom-2 font-mono text-[9px] text-[var(--color-text-dim)]">180°</span>
+                <span className="absolute left-2 font-mono text-[9px] text-[var(--color-text-dim)]">270°</span>
+
+                {/* Sweeping Radar Beam */}
+                <div className="absolute inset-0 animate-radar-sweep pointer-events-none origin-center">
+                  <div className="w-1/2 h-1/2 bg-gradient-to-br from-[var(--color-primary)]/25 to-transparent origin-bottom-right"></div>
+                </div>
+
+                {/* Interactive Radar Threat Nodes */}
+                {RADAR_NODES.map((node) => {
+                  const isSelected = activeRadarNode.id === node.id;
+                  const isHigh = node.severity === 'HIGH';
+                  return (
+                    <button
+                      key={node.id}
+                      onClick={() => setActiveRadarNode(node)}
+                      style={{ left: `${node.x}%`, top: `${node.y}%` }}
+                      className={`absolute -translate-x-1/2 -translate-y-1/2 p-1.5 rounded-full transition-all focus:outline-none ${
+                        isSelected ? 'scale-125 z-20' : 'hover:scale-110 z-10'
+                      }`}
+                      title={`Inspect ${node.ip}`}
+                    >
+                      <span className={`relative flex h-4 w-4 items-center justify-center`}>
+                        <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                          isHigh ? 'bg-rose-500' : 'bg-amber-500'
+                        }`}></span>
+                        <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${
+                          isHigh ? 'bg-rose-500' : 'bg-amber-400'
+                        }`}></span>
+                      </span>
+                    </button>
+                  );
+                })}
+
+                {/* Reticle Target Overlay */}
+                <div className="absolute top-3 left-3 pointer-events-none bg-[var(--color-bg-dim)]/80 border border-[var(--color-border)] px-2 py-1 rounded font-mono text-[10px] text-[var(--color-text-muted)]">
+                  TARGET: <span className="text-[var(--color-text-main)] font-bold">{activeRadarNode.ip}</span>
+                </div>
+              </div>
+
+              {/* Active Radar Node Detail Panel */}
+              <div className="mt-4 p-3 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded font-mono text-xs space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[var(--color-text-muted)]">IP: <strong className="text-[var(--color-text-main)]">{activeRadarNode.ip}</strong></span>
+                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                    activeRadarNode.severity === 'HIGH' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                  }`}>
+                    {activeRadarNode.severity} ({activeRadarNode.score})
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[11px] text-[var(--color-text-muted)]">
+                  <span>DEVICE: {activeRadarNode.device}</span>
+                  <span>PROTO: {activeRadarNode.proto}</span>
+                </div>
+                <div className="text-[10px] text-[var(--color-text-dim)] truncate border-t border-[var(--color-border)] pt-1">
+                  RULE: {activeRadarNode.rule} → <span className="text-[var(--color-primary)]">{activeRadarNode.action}</span>
+                </div>
+              </div>
+
+              {/* 3 Metric Cards Under Radar */}
+              <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-[var(--color-border)] font-mono text-center">
+                <div className="p-2 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded">
+                  <div className="text-[9px] text-[var(--color-text-dim)] uppercase">STATUS</div>
+                  <div className="text-xs font-bold text-emerald-400">OPTIMAL</div>
+                </div>
+                <div className="p-2 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded">
+                  <div className="text-[9px] text-[var(--color-text-dim)] uppercase">PARSER</div>
+                  <div className="text-xs font-bold text-[var(--color-primary)]">4.2M EPS</div>
+                </div>
+                <div className="p-2 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded">
+                  <div className="text-[9px] text-[var(--color-text-dim)] uppercase">ACCURACY</div>
+                  <div className="text-xs font-bold text-[var(--color-text-main)]">99.4%</div>
+                </div>
+              </div>
+
             </div>
           </div>
 
-        </section>
+        </div>
+      </section>
 
-        {/* Supporting Metrics Bar */}
-        <section className="max-w-7xl mx-auto px-6 py-8 grid grid-cols-2 md:grid-cols-4 gap-4 border-b border-border-muted">
-          <div className="p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-center">
-            <div className="text-[10px] text-text-dim uppercase tracking-wider">[ LOG FORMAT ]</div>
-            <div className="text-xl font-bold text-text-primary mt-1">OCSF 1.1</div>
-            <div className="text-[10px] text-emerald-400 mt-0.5">Unified Schema</div>
-          </div>
-          <div className="p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-center">
-            <div className="text-[10px] text-text-dim uppercase tracking-wider">[ DETECTION SPEED ]</div>
-            <div className="text-xl font-bold text-secondary mt-1">1.4s</div>
-            <div className="text-[10px] text-text-muted mt-0.5">Real-Time Scoring</div>
-          </div>
-          <div className="p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-center">
-            <div className="text-[10px] text-text-dim uppercase tracking-wider">[ DATA INTEGRITY ]</div>
-            <div className="text-xl font-bold text-text-primary mt-1">SHA-256</div>
-            <div className="text-[10px] text-emerald-400 mt-0.5">Merkle Verified</div>
-          </div>
-          <div className="p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-center">
-            <div className="text-[10px] text-text-dim uppercase tracking-wider">[ ALERT GROUPING ]</div>
-            <div className="text-xl font-bold text-primary mt-1">15 MIN</div>
-            <div className="text-[10px] text-text-muted mt-0.5">Correlated Events</div>
-          </div>
-        </section>
-
-        {/* Ticker Stream */}
-        <div className="w-full bg-surface border-b border-border-muted overflow-hidden h-10 flex items-center relative z-10">
-          <div className="animate-marquee-smooth font-mono text-xs text-text-muted gap-8">
-            {[...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS].map((item, idx) => (
-              <span key={idx} className={`whitespace-nowrap ${item.color} font-medium`}>
-                {item.text}
+      {/* ========================================================================= */}
+      {/* 3. CONTINUOUS TICKER STREAM FOR LIVE ALERTS                               */}
+      {/* ========================================================================= */}
+      <div className="bg-[var(--color-bg-surface)] border-b border-[var(--color-border)] overflow-hidden py-2 font-mono text-xs">
+        <div className="animate-marquee-smooth flex items-center space-x-8">
+          {[...recentEvents, ...recentEvents].map((evt, idx) => (
+            <div key={`${evt.id}-${idx}`} className="flex items-center space-x-2 whitespace-nowrap">
+              <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                evt.severity === 'HIGH' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+              }`}>
+                [{evt.severity}]
               </span>
-            ))}
+              <span className="text-[var(--color-text-muted)]">[{evt.timestamp}]</span>
+              <span className="text-[var(--color-text-main)] font-semibold">{evt.vendor}:</span>
+              <span className="text-[var(--color-text-dim)]">{evt.action} src:{evt.src_ip} dstPort:{evt.dst_port}</span>
+              <span className="text-[var(--color-primary)]">Score: {evt.threat_score}</span>
+              <span className="text-[var(--color-border)]">|</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 4. CHAPTER 1: END-TO-END ZERO-LOSS PIPELINE (#pipeline)                   */}
+      {/* ========================================================================= */}
+      <section id="pipeline" className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full">
+        <div className="space-y-2 mb-10">
+          <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase">
+            CHAPTER 01 // END-TO-END TELEMETRY
           </div>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text-main)]">
+            Zero-Loss Processing &amp; Cryptographic Pipeline
+          </h2>
+          <p className="text-sm text-[var(--color-text-muted)] max-w-2xl">
+            From edge device arrival to explainable SOC playbooks in 6 deterministic stages.
+          </p>
         </div>
 
-        {/* CHAPTER 02: HOW YOUR LOGS BECOME USEFUL DATA */}
-        <section id="pipeline" className="max-w-7xl mx-auto px-6 py-16 border-b border-border-muted space-y-8 scroll-mt-24">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-border-muted pb-4">
-            <div>
-              <div className="text-xs font-mono text-text-muted uppercase tracking-widest">[ CHAPTER 02 // HOW IT WORKS ]</div>
-              <h2 className="text-2xl sm:text-4xl font-extrabold text-text-primary tracking-tight mt-1">
-                How Your Logs Become Useful Data
-              </h2>
-            </div>
-            <p className="text-xs text-text-muted font-sans max-w-md">
-              Logs arrive from different systems in different formats. Stitch identifies the format, reads the information, organizes the fields, and checks the data before making it available for search and analysis.
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            {/* Interactive Stage Selector Bar */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 font-mono text-xs overflow-x-auto pb-2 custom-scrollbar-touch">
-              {PIPELINE_STAGES.map((stage) => {
-                const isActive = activePipelineStage === stage.id;
-                return (
-                  <button
-                    key={stage.id}
-                    tabIndex={0}
-                    onMouseEnter={() => setActivePipelineStage(stage.id)}
-                    onClick={() => setActivePipelineStage(stage.id)}
-                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setActivePipelineStage(stage.id)}
-                    className={`p-3.5 sm:p-4 rounded-xl border text-left flex flex-col justify-between h-24 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary touch-target ${
-                      isActive
-                        ? 'bg-primary text-surface-lowest border-primary shadow-xl scale-105 font-bold'
-                        : 'bg-surface border-border-muted text-text-muted hover:text-text-primary hover:border-primary/50'
-                    }`}
-                    aria-label={`Select Stage ${stage.num}: ${stage.name}`}
-                  >
-                    <span className="text-[10px] opacity-75">{stage.num}</span>
-                    <span className="text-xs font-extrabold leading-tight">{stage.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Active Stage Detail Panel */}
-            <div className="glass-panel p-4 sm:p-8 rounded-2xl border border-border-muted space-y-4 shadow-2xl transition-all duration-200">
-              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-border-muted pb-4 font-mono">
-                <h3 className="text-base sm:text-lg font-bold text-text-primary">{activePipelineObj.title}</h3>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-2.5 py-1 rounded bg-surface-dim border border-border-muted text-[10px] text-emerald-400 font-bold">
-                    {activePipelineObj.techBadge}
-                  </span>
-                  <span className="px-2.5 py-1 rounded bg-surface-dim border border-border-muted text-[11px] sm:text-xs text-primary break-all">
-                    {activePipelineObj.filepath}
+        {/* 6 Stage Cards Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {PIPELINE_STAGES.map((stage) => {
+            const isActive = stage.id === activePipelineStage;
+            return (
+              <div
+                key={stage.id}
+                onClick={() => setActivePipelineStage(stage.id)}
+                className={`p-5 rounded-lg border transition-all cursor-pointer ${
+                  isActive
+                    ? 'bg-[var(--color-bg-card)] border-[var(--color-primary)] shadow-md ring-1 ring-[var(--color-primary)]'
+                    : 'bg-[var(--color-bg-surface)] border-[var(--color-border)] hover:border-[var(--color-text-muted)]'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-3 font-mono">
+                  <span className="text-xs font-bold text-[var(--color-primary)]">{stage.num}</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded border border-[var(--color-border)] bg-[var(--color-bg-dim)] text-[var(--color-text-muted)]">
+                    {stage.techBadge}
                   </span>
                 </div>
-              </div>
-
-              <p className="text-xs sm:text-sm text-text-muted leading-relaxed font-sans">{activePipelineObj.desc}</p>
-
-              <div className="p-3.5 sm:p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-xs space-y-2 overflow-hidden">
-                <div className="text-text-dim text-[10px] uppercase tracking-wider">[ SAMPLE LOG TRANSFORMATION ]</div>
-                <div className="text-text-primary font-bold break-all leading-snug">{activePipelineObj.payload}</div>
-                <div className="text-emerald-400 text-[11px] pt-1 break-all">
-                  <span className="text-text-muted">SHA-256 Digest:</span> {activePipelineObj.digest}
+                <h3 className="font-bold text-base text-[var(--color-text-main)] mb-1">{stage.name}</h3>
+                <p className="text-xs text-[var(--color-text-muted)] leading-relaxed mb-3">{stage.desc}</p>
+                <div className="font-mono text-[10px] text-[var(--color-text-dim)] truncate border-t border-[var(--color-border)] pt-2">
+                  MODULE: <span className="text-[var(--color-text-main)]">{stage.filepath}</span>
                 </div>
               </div>
+            );
+          })}
+        </div>
+
+        {/* Selected Stage Detail Inspector */}
+        <div className="mt-8 p-6 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg font-mono text-xs space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-border)] pb-3">
+            <div className="flex items-center space-x-2">
+              <span className="text-[var(--color-primary)] font-bold">{currentStageData.num}</span>
+              <span className="font-bold text-[var(--color-text-main)]">{currentStageData.title}</span>
+            </div>
+            <div className="text-[11px] text-[var(--color-text-muted)]">
+              FILE: <span className="text-[var(--color-primary)]">{currentStageData.filepath}</span>
             </div>
           </div>
-        </section>
 
-        {/* CHAPTER 03: EVERYTHING YOU NEED TO MONITOR YOUR SYSTEMS */}
-        <section id="capabilities" className="max-w-7xl mx-auto px-6 py-16 border-b border-border-muted space-y-8 scroll-mt-24">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-border-muted pb-4">
-            <div>
-              <div className="text-xs font-mono text-text-muted uppercase tracking-widest">[ CHAPTER 03 // WHAT YOU CAN DO ]</div>
-              <h2 className="text-2xl sm:text-4xl font-extrabold text-text-primary tracking-tight mt-1">
-                Everything You Need to Monitor Your Systems
-              </h2>
-            </div>
-            <p className="text-xs text-text-muted font-sans max-w-md">
-              Explore what you can do with Stitch using hover, tap, or focus. Select any feature to see how it works.
-            </p>
+          <div>
+            <div className="text-[10px] text-[var(--color-text-dim)] uppercase mb-1">SAMPLE PAYLOAD INGEST:</div>
+            <pre className="p-3 bg-[var(--terminal-bg)] text-[var(--terminal-text-main)] border border-[var(--color-border)] rounded overflow-x-auto text-[11px]">
+              {currentStageData.payload}
+            </pre>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* Interactive Capability Selector Bar (Span 4) */}
-            <div className="lg:col-span-4 flex flex-col gap-2">
-              {CAPABILITIES_DATA.map((cap) => {
-                const isSelected = activeFeature === cap.id;
-                return (
-                  <button
-                    key={cap.id}
-                    tabIndex={0}
-                    onMouseEnter={() => setActiveFeature(cap.id)}
-                    onClick={() => setActiveFeature(cap.id)}
-                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setActiveFeature(cap.id)}
-                    className={`p-3.5 rounded-xl border text-left transition-all duration-150 flex items-center justify-between group focus:outline-none focus:ring-2 focus:ring-primary ${
-                      isSelected
-                        ? 'bg-surface-container border-primary shadow-lg ring-1 ring-primary/40'
-                        : 'bg-surface-dim border-border-muted hover:border-primary/40 hover:bg-surface-hover'
-                    }`}
-                    aria-label={`Select capability: ${cap.name}`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${
-                          isSelected ? 'bg-primary text-surface-lowest' : 'bg-surface border border-border-muted text-text-muted group-hover:text-primary'
-                        }`}
-                      >
-                        <span className="material-symbols-outlined text-lg">{cap.icon}</span>
-                      </div>
-                      <div>
-                        <div className={`font-mono text-xs font-bold ${isSelected ? 'text-primary' : 'text-text-primary'}`}>
-                          {cap.name}
-                        </div>
-                        <div className="text-[9px] text-text-dim font-mono">{cap.badge}</div>
-                      </div>
-                    </div>
-                    <span className={`material-symbols-outlined text-sm transition-transform ${isSelected ? 'text-primary translate-x-1' : 'text-text-dim'}`}>
-                      chevron_right
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Capability Detail Panel (Span 8) */}
-            <div className="lg:col-span-8 glass-panel rounded-2xl p-6 sm:p-8 border border-border-muted shadow-2xl space-y-6">
-              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 border-b border-border-muted pb-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="material-symbols-outlined text-primary text-xl">{activeCapabilityObj.icon}</span>
-                    <h3 className="text-lg font-bold text-text-primary">{activeCapabilityObj.title}</h3>
-                  </div>
-                  <p className="text-xs text-text-muted font-sans">{activeCapabilityObj.desc}</p>
-                </div>
-                <Link
-                  to={activeCapabilityObj.route}
-                  className="btn-secondary px-4 py-2 rounded-xl text-xs font-mono font-bold self-start sm:self-auto flex items-center gap-1.5"
-                >
-                  <span>Open Feature</span>
-                  <span className="material-symbols-outlined text-sm">open_in_new</span>
-                </Link>
-              </div>
-
-              {/* Technical Event Flow Steps */}
-              <div className="space-y-2 font-mono">
-                <div className="text-[10px] text-text-dim uppercase tracking-wider">[ FEATURE WORKFLOW ]</div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-center">
-                  {activeCapabilityObj.flow.map((step, i) => (
-                    <div key={i} className="p-2.5 rounded-lg bg-surface border border-border-muted space-y-1">
-                      <div className="text-[9px] text-text-dim">STEP 0{i + 1}</div>
-                      <div className="font-bold text-text-primary text-[11px]">{step}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Performance Metrics */}
-              <div className="grid grid-cols-3 gap-3 font-mono text-center pt-1">
-                {activeCapabilityObj.metrics.map((m, i) => (
-                  <div key={i} className="p-3 rounded-xl bg-surface-dim border border-border-muted">
-                    <div className="text-[10px] text-text-dim uppercase">{m.label}</div>
-                    <div className="text-base font-extrabold text-primary mt-0.5">{m.val}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Problem Solved & SOC Connection Breakdown */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono pt-2 border-t border-border-muted">
-                <div className="p-3.5 rounded-xl bg-surface-dim border border-border-muted space-y-1">
-                  <div className="text-amber-400 font-bold flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-sm">shield</span>
-                    <span>Problem Solved</span>
-                  </div>
-                  <p className="text-text-muted font-sans text-xs">{activeCapabilityObj.problem}</p>
-                </div>
-                <div className="p-3.5 rounded-xl bg-surface-dim border border-border-muted space-y-1">
-                  <div className="text-primary font-bold flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-sm">hub</span>
-                    <span>Platform Connection</span>
-                  </div>
-                  <p className="text-text-muted font-sans text-xs">{activeCapabilityObj.connection}</p>
-                </div>
-              </div>
-            </div>
+          <div className="flex flex-wrap items-center justify-between text-[11px] text-[var(--color-text-muted)] pt-1">
+            <span className="truncate max-w-md">SHA-256 DIGEST: <strong className="text-[var(--color-text-main)]">{currentStageData.digest}</strong></span>
+            <span className="text-emerald-400 font-bold">● VERIFIED ZERO-TAMPERING</span>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* CHAPTER 04: SEE HOW EVERYTHING CONNECTS */}
-        <section id="topology" className="max-w-7xl mx-auto px-6 py-16 border-b border-border-muted space-y-8 scroll-mt-24">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-border-muted pb-4">
-            <div>
-              <div className="text-xs font-mono text-text-muted uppercase tracking-widest">[ CHAPTER 04 // HOW STITCH WORKS ]</div>
-              <h2 className="text-2xl sm:text-4xl font-extrabold text-text-primary tracking-tight mt-1">
-                See How Everything Connects
-              </h2>
-            </div>
-            <p className="text-xs text-text-muted font-sans max-w-md">
-              See how logs move through Stitch, from collection and processing to detection and investigation.
-            </p>
+      {/* ========================================================================= */}
+      {/* 5. CHAPTER 2: SUPPORTED PERIMETER APPLIANCES (#capabilities)              */}
+      {/* ========================================================================= */}
+      <section id="capabilities" className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full">
+        <div className="space-y-2 mb-10">
+          <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase">
+            CHAPTER 02 // HETEROGENEOUS INGESTION
           </div>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text-main)]">
+            Native Support for Heterogeneous Security Architecture
+          </h2>
+          <p className="text-sm text-[var(--color-text-muted)] max-w-2xl">
+            Plug-and-play parsers for top enterprise firewall, IDS/IPS, and network perimeter appliances.
+          </p>
+        </div>
 
-          <div className="max-w-5xl mx-auto space-y-8">
-            {/* Topology Node Buttons */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 font-mono text-xs">
-              {ARCHITECTURE_NODES.map((node) => {
-                const isSelected = activeArchNode === node.id;
-                return (
-                  <button
-                    key={node.id}
-                    tabIndex={0}
-                    onMouseEnter={() => setActiveArchNode(node.id)}
-                    onClick={() => setActiveArchNode(node.id)}
-                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setActiveArchNode(node.id)}
-                    className={`p-3 rounded-xl border font-bold text-center flex flex-col justify-between h-20 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary ${
-                      isSelected
-                        ? 'bg-primary text-surface-lowest border-primary shadow-xl scale-105 ring-2 ring-primary/40'
-                        : 'bg-surface border-border-muted text-text-muted hover:text-text-primary hover:border-primary/50'
-                    }`}
-                    aria-label={`Select Topology Node: ${node.name}`}
-                  >
-                    <span className="text-[9px] opacity-70 uppercase">{node.type}</span>
-                    <span className="text-xs font-extrabold leading-tight">{node.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Architecture Detail Box */}
-            <div className="glass-panel p-6 sm:p-8 rounded-2xl border border-border-muted space-y-4 shadow-2xl">
-              <div className="flex justify-between items-center border-b border-border-muted pb-3 font-mono">
-                <div>
-                  <span className="text-[10px] text-primary uppercase font-bold tracking-wider">{activeArchObj.type}</span>
-                  <h3 className="text-lg font-bold text-text-primary mt-0.5">{activeArchObj.name}</h3>
-                </div>
-                <span className="px-3 py-1 rounded bg-surface-dim border border-border-muted text-xs text-emerald-400 font-bold">
-                  ACTIVE COMPONENT
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {APPLIANCES.map((app, idx) => (
+            <div key={idx} className="p-5 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg space-y-3 font-mono">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-sm text-[var(--color-text-main)]">{app.name}</span>
+                <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  {app.status}
                 </span>
               </div>
-
-              <p className="text-xs sm:text-sm text-text-muted leading-relaxed font-sans">{activeArchObj.desc}</p>
-
-              <div className="space-y-2 font-mono text-xs">
-                <div className="text-[10px] text-text-dim uppercase tracking-wider">[ INTERNAL COMPONENT MODULES ]</div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {activeArchObj.components.map((c, i) => (
-                    <div key={i} className="p-2.5 rounded-lg bg-surface-dim border border-border-muted text-center font-bold text-text-primary text-[11px]">
-                      {c}
-                    </div>
-                  ))}
+              <div className="grid grid-cols-2 gap-2 text-xs text-[var(--color-text-muted)] pt-2 border-t border-[var(--color-border)]">
+                <div>
+                  <span className="block text-[10px] text-[var(--color-text-dim)] uppercase">FORMAT</span>
+                  <span>{app.format}</span>
                 </div>
+                <div>
+                  <span className="block text-[10px] text-[var(--color-text-dim)] uppercase">THROUGHPUT</span>
+                  <span className="text-[var(--color-primary)] font-bold">{app.speed}</span>
+                </div>
+              </div>
+              <div className="text-[10px] text-[var(--color-text-dim)] pt-1">
+                PARSER TAG: <span className="text-[var(--color-text-main)]">{app.parser}</span>
               </div>
             </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 6. CHAPTER 3: SOC FINANCIAL ROI ESTIMATOR (#estimator)                    */}
+      {/* ========================================================================= */}
+      <section id="estimator" className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full">
+        <div className="space-y-2 mb-10">
+          <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase">
+            CHAPTER 03 // FINANCIAL IMPACT &amp; MTTR REDUCTION
           </div>
-        </section>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text-main)]">
+            Quantifiable Security Efficiency &amp; ROI Estimator
+          </h2>
+          <p className="text-sm text-[var(--color-text-muted)] max-w-2xl">
+            Adjust your enterprise log volume and perimeter device count to estimate monthly analyst savings and MTTR reduction.
+          </p>
+        </div>
 
-        {/* CHAPTER 05: ESTIMATE THE IMPACT ON YOUR SECURITY TEAM */}
-        <section id="estimator" className="max-w-7xl mx-auto px-6 py-16 space-y-8 scroll-mt-24">
-          <div className="text-center max-w-2xl mx-auto space-y-2">
-            <div className="text-xs font-mono text-text-muted uppercase tracking-widest">[ CHAPTER 05 // SEE THE IMPACT ]</div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
-              Estimate the Impact on Your Security Team
-            </h2>
-            <p className="text-xs text-text-muted leading-relaxed font-sans">
-              Adjust daily log volume and device counts to estimate how much analyst time your team could save by automating log collection and alert correlation.
-            </p>
-          </div>
-
-          <div className="glass-panel rounded-2xl p-8 max-w-4xl mx-auto border border-border-muted shadow-2xl">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              {/* Sliders */}
-              <div className="space-y-6">
-                <div>
-                  <div className="flex justify-between text-xs font-mono mb-2">
-                    <span className="font-bold text-text-primary">Daily Log Volume (Events / Day)</span>
-                    <span className="text-primary font-bold">{logVolume.toLocaleString()}</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="10000"
-                    max="10000000"
-                    step="10000"
-                    value={logVolume}
-                    onChange={(e) => setLogVolume(Number(e.target.value))}
-                    className="w-full cursor-pointer accent-primary"
-                  />
-                  <div className="flex justify-between text-[10px] font-mono text-text-muted mt-1">
-                    <span>10K</span>
-                    <span>5M</span>
-                    <span>10M</span>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-xs font-mono mb-2">
-                    <span className="font-bold text-text-primary">Perimeter Devices Monitored</span>
-                    <span className="text-primary font-bold">{devicesMonitored}</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="1"
-                    max="500"
-                    value={devicesMonitored}
-                    onChange={(e) => setDevicesMonitored(Number(e.target.value))}
-                    className="w-full cursor-pointer accent-primary"
-                  />
-                  <div className="flex justify-between text-[10px] font-mono text-text-muted mt-1">
-                    <span>1</span>
-                    <span>250</span>
-                    <span>500</span>
-                  </div>
-                </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-[var(--color-bg-card)] border border-[var(--color-border)] p-6 sm:p-8 rounded-lg shadow-xl">
+          
+          {/* Sliders Column */}
+          <div className="lg:col-span-6 space-y-6">
+            
+            {/* Slider 1: Daily Log Volume */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center font-mono text-xs">
+                <span className="text-[var(--color-text-muted)] uppercase">DAILY LOG VOLUME (EVENTS/DAY)</span>
+                <span className="text-[var(--color-primary)] font-bold">{logVolume.toLocaleString()} EPS</span>
               </div>
-
-              {/* Output Results */}
-              <div className="bg-surface-dim rounded-xl p-6 border border-border-muted space-y-6 text-center">
-                <div>
-                  <div className="text-[10px] font-mono text-text-muted uppercase tracking-widest mb-1">Analyst Hours Saved / Month</div>
-                  <div className="text-3xl font-extrabold font-mono text-text-primary">{hoursSaved} hrs</div>
-                </div>
-
-                <div>
-                  <div className="text-[10px] font-mono text-text-muted uppercase tracking-widest mb-1">Estimated MTTR Reduction</div>
-                  <div className="text-3xl font-extrabold font-mono text-emerald-400">{mttrReduction}%</div>
-                </div>
-
-                <div>
-                  <div className="text-[10px] font-mono text-text-muted uppercase tracking-widest mb-1">Estimated Monthly Cost Savings</div>
-                  <div className="text-3xl font-extrabold font-mono text-primary">${monthlySavings} / mo</div>
-                </div>
+              <input
+                type="range"
+                min="100000"
+                max="5000000"
+                step="50000"
+                value={logVolume}
+                onChange={(e) => setLogVolume(Number(e.target.value))}
+                className="w-full h-2 bg-[var(--color-surface-variant)] rounded-lg appearance-none cursor-pointer"
+              />
+              <div className="flex justify-between font-mono text-[10px] text-[var(--color-text-dim)]">
+                <span>100K EPS</span>
+                <span>2.5M EPS</span>
+                <span>5.0M EPS</span>
               </div>
             </div>
-          </div>
-        </section>
 
-      </main>
+            {/* Slider 2: Monitored Devices */}
+            <div className="space-y-2 pt-4 border-t border-[var(--color-border)]">
+              <div className="flex justify-between items-center font-mono text-xs">
+                <span className="text-[var(--color-text-muted)] uppercase">MONITORED PERIMETER DEVICES</span>
+                <span className="text-[var(--color-primary)] font-bold">{devicesMonitored} APPLIANCES</span>
+              </div>
+              <input
+                type="range"
+                min="5"
+                max="100"
+                step="1"
+                value={devicesMonitored}
+                onChange={(e) => setDevicesMonitored(Number(e.target.value))}
+                className="w-full h-2 bg-[var(--color-surface-variant)] rounded-lg appearance-none cursor-pointer"
+              />
+              <div className="flex justify-between font-mono text-[10px] text-[var(--color-text-dim)]">
+                <span>5 Devices</span>
+                <span>50 Devices</span>
+                <span>100 Devices</span>
+              </div>
+            </div>
 
-      {/* Editorial Footer */}
-      <footer className="w-full py-8 border-t border-border-muted bg-surface-dim text-center text-text-dim text-xs font-mono">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="font-extrabold text-base text-text-primary font-mono">STITCH INTELLIGENCE ENGINE</div>
-          <div className="flex gap-4">
-            <Link to="/login" className="hover:text-primary transition-colors">Sign In</Link>
-            <Link to="/register" className="hover:text-primary transition-colors">Register</Link>
-            <Link to="/threat-intel" className="hover:text-primary transition-colors">Threat Intel</Link>
-            <Link to="/dashboard" className="hover:text-primary transition-colors">SOC Console</Link>
+            <div className="p-3 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded text-xs text-[var(--color-text-muted)] font-mono">
+              💡 Formula based on standard $65/hr analyst rate, 85% alert reduction via OCSF clustering, and automated Isolation Forest feature attribution.
+            </div>
+
           </div>
-          <div>© 2026 STITCH Security Engine. All rights reserved.</div>
+
+          {/* Output Cards Column & Circular Gauge */}
+          <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono">
+            
+            {/* Calculated Monthly Savings */}
+            <div className="p-5 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-lg space-y-1">
+              <span className="text-[10px] text-[var(--color-text-dim)] uppercase">ESTIMATED MONTHLY SAVINGS</span>
+              <div className="text-2xl sm:text-3xl font-bold text-emerald-400">${monthlySavings}</div>
+              <span className="text-[11px] text-[var(--color-text-muted)]">Direct SOC labor reduction</span>
+            </div>
+
+            {/* Calculated Hours Saved */}
+            <div className="p-5 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-lg space-y-1">
+              <span className="text-[10px] text-[var(--color-text-dim)] uppercase">ANALYST HOURS RECLAIMED</span>
+              <div className="text-2xl sm:text-3xl font-bold text-[var(--color-primary)]">{hoursSaved} hrs/mo</div>
+              <span className="text-[11px] text-[var(--color-text-muted)]">Automated triage &amp; playbooks</span>
+            </div>
+
+            {/* MTTR Reduction Circular SVG Gauge */}
+            <div className="sm:col-span-2 p-5 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-lg flex items-center justify-between">
+              <div>
+                <span className="text-[10px] text-[var(--color-text-dim)] uppercase">MTTR REDUCTION GAIN</span>
+                <div className="text-xl font-bold text-[var(--color-text-main)]">{mttrReduction}% FASTER RESPONSE</div>
+                <span className="text-[11px] text-[var(--color-text-muted)]">From hours to sub-minute triage</span>
+              </div>
+              <div className="relative w-16 h-16 flex items-center justify-center">
+                <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+                  <path
+                    className="gauge-circle-bg"
+                    strokeWidth="3.5"
+                    fill="none"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  />
+                  <path
+                    className="gauge-circle-fill"
+                    strokeDasharray={`${mttrReduction}, 100`}
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                    fill="none"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  />
+                </svg>
+                <span className="absolute text-xs font-bold text-[var(--color-primary)]">{mttrReduction}%</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 7. CHAPTER 4: TELEMETRY OUTPUT & LIVE CONSOLE INTELLIGENCE (#topology)    */}
+      {/* ========================================================================= */}
+      <section id="topology" className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full">
+        <div className="space-y-2 mb-10">
+          <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase">
+            CHAPTER 04 // REAL-TIME CONSOLE INTELLIGENCE
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text-main)]">
+            Live System Telemetry &amp; Event Feed
+          </h2>
+          <p className="text-sm text-[var(--color-text-muted)] max-w-2xl">
+            Live pipeline diagnostics consuming backend metrics in real time.
+          </p>
+        </div>
+
+        {/* Live KPI Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 font-mono">
+          <div className="p-4 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg">
+            <span className="text-[10px] text-[var(--color-text-dim)] uppercase">EVENTS ANALYZED</span>
+            <div className="text-xl sm:text-2xl font-bold text-[var(--color-text-main)]">
+              {(stats.total_events || 4200000).toLocaleString()}
+            </div>
+            <span className="text-[10px] text-emerald-400">● Live Ingest</span>
+          </div>
+          <div className="p-4 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg">
+            <span className="text-[10px] text-[var(--color-text-dim)] uppercase">ACTIVE THREATS</span>
+            <div className="text-xl sm:text-2xl font-bold text-rose-400">
+              {stats.active_threats || 14}
+            </div>
+            <span className="text-[10px] text-rose-400">Sliding Window</span>
+          </div>
+          <div className="p-4 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg">
+            <span className="text-[10px] text-[var(--color-text-dim)] uppercase">AVG THREAT SCORE</span>
+            <div className="text-xl sm:text-2xl font-bold text-amber-400">
+              {stats.avg_threat_score || 68.4}
+            </div>
+            <span className="text-[10px] text-[var(--color-text-muted)]">Isolation Forest</span>
+          </div>
+          <div className="p-4 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg">
+            <span className="text-[10px] text-[var(--color-text-dim)] uppercase">PIPELINE LATENCY</span>
+            <div className="text-xl sm:text-2xl font-bold text-[var(--color-primary)]">
+              {stats.pipeline_latency || '1.1ms'}
+            </div>
+            <span className="text-[10px] text-[var(--color-text-muted)]">Sub-millisecond</span>
+          </div>
+        </div>
+
+        {/* Telemetry Stream Table */}
+        <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg overflow-hidden font-mono text-xs">
+          <div className="p-4 border-b border-[var(--color-border)] flex items-center justify-between">
+            <span className="font-bold text-[var(--color-text-main)]">LIVE OCSF TELEMETRY STREAM</span>
+            <span className="text-[10px] text-[var(--color-text-muted)]">Showing latest events</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-[var(--color-border)] bg-[var(--color-bg-surface)] text-[var(--color-text-dim)] text-[10px] uppercase">
+                  <th className="py-2.5 px-4">Timestamp</th>
+                  <th className="py-2.5 px-4">Vendor</th>
+                  <th className="py-2.5 px-4">Action</th>
+                  <th className="py-2.5 px-4">Source IP</th>
+                  <th className="py-2.5 px-4">Dst Port</th>
+                  <th className="py-2.5 px-4">Severity</th>
+                  <th className="py-2.5 px-4">Threat Score</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--color-border)] text-[11px]">
+                {recentEvents.map((evt, idx) => (
+                  <tr key={evt.id || idx} className="hover:bg-[var(--color-surface-hover)] transition-colors">
+                    <td className="py-2.5 px-4 text-[var(--color-text-muted)]">{evt.timestamp}</td>
+                    <td className="py-2.5 px-4 text-[var(--color-text-main)] font-semibold">{evt.vendor}</td>
+                    <td className="py-2.5 px-4 text-[var(--color-text-muted)]">{evt.action}</td>
+                    <td className="py-2.5 px-4 text-[var(--color-text-main)]">{evt.src_ip}</td>
+                    <td className="py-2.5 px-4 text-[var(--color-text-muted)]">{evt.dst_port}</td>
+                    <td className="py-2.5 px-4">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        evt.severity === 'HIGH' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                      }`}>
+                        {evt.severity}
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-4 text-[var(--color-primary)] font-bold">{evt.threat_score}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 8. CHAPTER 5: 6-STAGE LOG TRANSFORMATION INSPECTOR                       */}
+      {/* ========================================================================= */}
+      <section className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full">
+        <div className="space-y-2 mb-8">
+          <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase">
+            CHAPTER 05 // TRANSFORM INSPECTOR
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text-main)]">
+            Interactive Stage-by-Stage Log Payload Transformation
+          </h2>
+        </div>
+
+        {/* 6 Stage Buttons */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-6 font-mono text-xs">
+          {PIPELINE_STAGES.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => setActivePipelineStage(s.id)}
+              className={`p-3 rounded border text-left transition-all ${
+                activePipelineStage === s.id
+                  ? 'bg-[var(--color-primary)] text-[#0f131c] border-[var(--color-primary)] font-bold'
+                  : 'bg-[var(--color-bg-card)] border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'
+              }`}
+            >
+              <div className="text-[10px] opacity-75">{s.num}</div>
+              <div className="truncate">{s.name}</div>
+            </button>
+          ))}
+        </div>
+
+        {/* Code Terminal View */}
+        <div className="bg-[var(--terminal-bg)] border border-[var(--color-border)] rounded-lg p-5 font-mono text-xs space-y-3">
+          <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-3 text-[var(--terminal-text-muted)]">
+            <span>EXECUTING: {currentStageData.filepath}</span>
+            <span className="text-[var(--color-primary)]">{currentStageData.techBadge}</span>
+          </div>
+          <pre className="text-[var(--terminal-text-main)] overflow-x-auto text-[11px] leading-relaxed p-2">
+            {currentStageData.payload}
+          </pre>
+          <div className="text-[10px] text-[var(--terminal-text-dim)] border-t border-[var(--color-border)] pt-2 flex justify-between">
+            <span>SHA-256: {currentStageData.digest}</span>
+            <span className="text-emerald-400">STATUS: STAGE OK</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 9. EDITORIAL FOOTER                                                       */}
+      {/* ========================================================================= */}
+      <footer className="px-4 lg:px-8 py-12 bg-[var(--color-bg-surface)] font-mono text-xs text-[var(--color-text-muted)]">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center space-x-3">
+            <StitchBrandMark size={24} />
+            <span className="font-bold text-[var(--color-text-main)]">LOG // AI</span>
+            <span>- Autonomous SOC Pipeline</span>
+          </div>
+          <div className="flex items-center space-x-6">
+            <Link to="/login" className="hover:text-[var(--color-text-main)]">SIGN IN</Link>
+            <Link to="/register" className="hover:text-[var(--color-text-main)]">SIGN UP</Link>
+            <Link to="/dashboard" className="hover:text-[var(--color-primary)]">SOC CONSOLE</Link>
+          </div>
+          <div className="text-[10px] text-[var(--color-text-dim)]">
+            LOG AI v2.4.0-STITCH-RELEASE | ZERO TELEMETRY TRACKING
+          </div>
         </div>
       </footer>
+
     </div>
   );
 }
