@@ -16,6 +16,11 @@ export function LandingPage() {
   const topologyRef = useRef(null);
   const estimatorRef = useRef(null);
 
+  // Card Element Refs for Reading-Zone Scroll Target Calculations
+  const pipelineCardRefs = useRef([]);
+  const capabilitiesCardRefs = useRef([]);
+  const topologyCardRefs = useRef([]);
+
   const [isPipelineActive, setIsPipelineActive] = useState(false);
   const [isCapabilitiesActive, setIsCapabilitiesActive] = useState(false);
   const [isTopologyActive, setIsTopologyActive] = useState(false);
@@ -149,8 +154,8 @@ export function LandingPage() {
             setActiveState(entry.isIntersecting);
           });
         },
-        // Trigger activation as soon as section approaches the upper-middle active reading zone
-        { threshold: 0.05, rootMargin: '100px 0px -5% 0px' }
+        // Trigger section activation as soon as section approaches viewport
+        { threshold: 0.05, rootMargin: '120px 0px -5% 0px' }
       );
       observer.observe(el);
       return observer;
@@ -170,33 +175,43 @@ export function LandingPage() {
   }, []);
 
   // =========================================================================
-  // 7. LOCAL SECTION-SCOPED SCROLL PROGRESS (ACTIVE SECTIONS ONLY)
+  // 7. CARD-INTERSECTION READING-ZONE SCROLL STAGE DETECTOR
+  // Detects which subtopic card is currently centered in the reading zone (42% viewport height)
   // =========================================================================
   useEffect(() => {
     const handleScroll = () => {
-      const calculateStage = (ref, numStages) => {
-        if (!ref.current) return 1;
-        const rect = ref.current.getBoundingClientRect();
+      const getActiveStageFromCards = (cardRefs, numStages) => {
+        if (!cardRefs.current || cardRefs.current.length === 0) return 1;
         const windowHeight = window.innerHeight;
-        
-        // Active reading entry trigger: section top reaches ~88% of window height
-        const startOffset = windowHeight * 0.88;
-        const totalHeight = rect.height;
-        const scrolled = startOffset - rect.top;
-        
-        // Progress ratio from 0.0 (entering reading area) to 1.0 (scrolled through section)
-        const progress = Math.max(0, Math.min(1, scrolled / (totalHeight + windowHeight * 0.1)));
-        return Math.min(numStages, Math.max(1, Math.floor(progress * numStages) + 1));
+        // Prime reading focus line: 42% down from the top of the browser viewport
+        const targetLine = windowHeight * 0.42;
+
+        let closestStage = 1;
+        let minDistance = Infinity;
+
+        cardRefs.current.forEach((cardEl, index) => {
+          if (!cardEl) return;
+          const rect = cardEl.getBoundingClientRect();
+          const cardCenter = rect.top + rect.height / 2;
+          const distance = Math.abs(cardCenter - targetLine);
+
+          if (distance < minDistance) {
+            minDistance = distance;
+            closestStage = index + 1;
+          }
+        });
+
+        return Math.min(numStages, Math.max(1, closestStage));
       };
 
       if (isPipelineActive) {
-        setScrollPipelineStage(calculateStage(pipelineRef, 6));
+        setScrollPipelineStage(getActiveStageFromCards(pipelineCardRefs, 6));
       }
       if (isCapabilitiesActive) {
-        setScrollCapabilitiesStage(calculateStage(capabilitiesRef, 6));
+        setScrollCapabilitiesStage(getActiveStageFromCards(capabilitiesCardRefs, 6));
       }
       if (isTopologyActive) {
-        setScrollTopologyStage(calculateStage(topologyRef, 5));
+        setScrollTopologyStage(getActiveStageFromCards(topologyCardRefs, 5));
       }
     };
 
@@ -715,9 +730,9 @@ export function LandingPage() {
       <section
         id="pipeline"
         ref={pipelineRef}
-        className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full transition-opacity duration-300 relative"
+        className="px-4 lg:px-8 py-20 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full transition-opacity duration-300 relative"
       >
-        <div className="space-y-2 mb-10">
+        <div className="space-y-2 mb-12">
           <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase flex items-center space-x-2">
             <span>CHAPTER 01 // HOW LOGS MOVE THROUGH THE SYSTEM</span>
             {isPipelineActive && (
@@ -737,9 +752,9 @@ export function LandingPage() {
         {/* Desktop Side-by-Side (Equal-Height Grid) & Mobile Vertical Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch relative">
           
-          {/* Left Column: 6 Subtopics (Controls for Main Visualization) */}
-          <div className="lg:col-span-6 space-y-3.5" role="tablist" aria-label="Pipeline Stages">
-            {PIPELINE_STAGES.map((stage) => {
+          {/* Left Column: 6 Subtopics with Generous Vertical Spacing for Comfortable Scrolling */}
+          <div className="lg:col-span-6 space-y-8 py-4" role="tablist" aria-label="Pipeline Stages">
+            {PIPELINE_STAGES.map((stage, idx) => {
               const isActive = activePipelineStage === stage.id;
               const props = getSubtopicProps(
                 stage.id,
@@ -750,28 +765,29 @@ export function LandingPage() {
               return (
                 <div
                   key={stage.id}
+                  ref={(el) => (pipelineCardRefs.current[idx] = el)}
                   {...props}
-                  className={`p-4 sm:p-5 rounded-lg border transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] ${
+                  className={`p-6 rounded-lg border transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] ${
                     isActive
-                      ? 'bg-[var(--color-bg-card)] border-[var(--color-primary)] shadow-md ring-1 ring-[var(--color-primary)]'
+                      ? 'bg-[var(--color-bg-card)] border-[var(--color-primary)] shadow-lg ring-1 ring-[var(--color-primary)] scale-[1.01]'
                       : 'bg-[var(--color-bg-surface)] border-[var(--color-border)] hover:border-[var(--color-text-muted)] opacity-85 hover:opacity-100'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-2 font-mono">
+                  <div className="flex items-center justify-between mb-3 font-mono">
                     <span className={`text-xs font-bold ${isActive ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-dim)]'}`}>
                       {stage.num}
                     </span>
                     <span className={`text-[10px] px-2 py-0.5 rounded border ${
                       isActive
-                        ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
+                        ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-bold'
                         : 'border-[var(--color-border)] bg-[var(--color-bg-dim)] text-[var(--color-text-muted)]'
                     }`}>
                       {stage.techBadge}
                     </span>
                   </div>
-                  <h3 className="font-bold text-base text-[var(--color-text-main)] mb-1">{stage.name}</h3>
-                  <p className="text-xs text-[var(--color-text-muted)] leading-relaxed mb-2">{stage.desc}</p>
-                  <div className="font-mono text-[10px] text-[var(--color-text-dim)] truncate border-t border-[var(--color-border)]/50 pt-2">
+                  <h3 className="font-bold text-base text-[var(--color-text-main)] mb-1.5">{stage.name}</h3>
+                  <p className="text-xs text-[var(--color-text-muted)] leading-relaxed mb-3">{stage.desc}</p>
+                  <div className="font-mono text-[10px] text-[var(--color-text-dim)] truncate border-t border-[var(--color-border)]/50 pt-2.5">
                     MODULE: <span className="text-[var(--color-text-main)]">{stage.filepath}</span>
                   </div>
                 </div>
@@ -781,8 +797,8 @@ export function LandingPage() {
 
           {/* Right Column: Anchored Container Stretching Full Height of Left Column */}
           <div className="lg:col-span-6 relative min-h-full">
-            {/* Sticky MAIN VISUALIZATION Box Pins at top-24 Across Entire Scroll of Section */}
-            <div className="lg:sticky lg:top-24 w-full">
+            {/* Sticky MAIN VISUALIZATION Box Pins at top-28 Across Entire Scroll of Section */}
+            <div className="lg:sticky lg:top-28 w-full">
               <div className="p-6 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg font-mono text-xs space-y-4 shadow-xl">
                 
                 {/* Header Badge & Stage Title */}
@@ -863,9 +879,9 @@ export function LandingPage() {
       <section
         id="capabilities"
         ref={capabilitiesRef}
-        className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full transition-opacity duration-300 relative"
+        className="px-4 lg:px-8 py-20 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full transition-opacity duration-300 relative"
       >
-        <div className="space-y-2 mb-10">
+        <div className="space-y-2 mb-12">
           <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase flex items-center space-x-2">
             <span>CHAPTER 02 // LOG FORMAT CAPABILITIES</span>
             {isCapabilitiesActive && (
@@ -885,9 +901,9 @@ export function LandingPage() {
         {/* Desktop Side-by-Side (Equal-Height Grid) & Mobile Vertical Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch relative">
           
-          {/* Subtopics List (Left 6 Columns) */}
-          <div className="lg:col-span-6 space-y-3.5" role="tablist" aria-label="Log Format Capabilities">
-            {CAPABILITIES_STAGES.map((app) => {
+          {/* Subtopics List (Left 6 Columns with Spacing) */}
+          <div className="lg:col-span-6 space-y-8 py-4" role="tablist" aria-label="Log Format Capabilities">
+            {CAPABILITIES_STAGES.map((app, idx) => {
               const isActive = activeCapabilitiesStage === app.id;
               const props = getSubtopicProps(
                 app.id,
@@ -898,23 +914,24 @@ export function LandingPage() {
               return (
                 <div
                   key={app.id}
+                  ref={(el) => (capabilitiesCardRefs.current[idx] = el)}
                   {...props}
-                  className={`p-4 rounded-lg border transition-all cursor-pointer font-mono text-xs focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] ${
+                  className={`p-5 rounded-lg border transition-all duration-200 cursor-pointer font-mono text-xs focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] ${
                     isActive
-                      ? 'bg-[var(--color-bg-card)] border-[var(--color-primary)] shadow-md ring-1 ring-[var(--color-primary)]'
+                      ? 'bg-[var(--color-bg-card)] border-[var(--color-primary)] shadow-lg ring-1 ring-[var(--color-primary)] scale-[1.01]'
                       : 'bg-[var(--color-bg-surface)] border-[var(--color-border)] hover:border-[var(--color-text-muted)]'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center justify-between mb-2">
                     <span className="font-bold text-sm text-[var(--color-text-main)]">{app.name}</span>
-                    <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
                       {app.speed}
                     </span>
                   </div>
-                  <div className="text-[11px] text-[var(--color-text-muted)] mb-2">
+                  <div className="text-[11px] text-[var(--color-text-muted)] mb-2.5">
                     {app.vendor} — <span className="text-[var(--color-primary)]">{app.format}</span>
                   </div>
-                  <div className="text-[10px] text-[var(--color-text-dim)] truncate border-t border-[var(--color-border)] pt-2">
+                  <div className="text-[10px] text-[var(--color-text-dim)] truncate border-t border-[var(--color-border)] pt-2.5">
                     PARSER TAG: <span className="text-[var(--color-text-main)]">{app.parser}</span>
                   </div>
                 </div>
@@ -924,8 +941,8 @@ export function LandingPage() {
 
           {/* Right Column: Anchored Container Stretching Full Height of Left Column */}
           <div className="lg:col-span-6 relative min-h-full">
-            {/* Sticky Format Inspector Box Pins at top-24 Across Entire Scroll of Section */}
-            <div className="lg:sticky lg:top-24 w-full">
+            {/* Sticky Format Inspector Box Pins at top-28 Across Entire Scroll of Section */}
+            <div className="lg:sticky lg:top-28 w-full">
               <div className="p-6 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg font-mono text-xs space-y-4 shadow-xl">
                 <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
                   <div>
@@ -978,9 +995,9 @@ export function LandingPage() {
       <section
         id="topology"
         ref={topologyRef}
-        className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full transition-opacity duration-300"
+        className="px-4 lg:px-8 py-20 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full transition-opacity duration-300"
       >
-        <div className="space-y-2 mb-10">
+        <div className="space-y-2 mb-12">
           <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase flex items-center space-x-2">
             <span>CHAPTER 03 // SYSTEM TOPOLOGY &amp; ARCHITECTURE</span>
             {isTopologyActive && (
@@ -1004,7 +1021,7 @@ export function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 font-mono text-xs">
-            {TOPOLOGY_STAGES.map((stg) => {
+            {TOPOLOGY_STAGES.map((stg, idx) => {
               const isActive = activeTopologyStage === stg.id;
               const props = getSubtopicProps(
                 stg.id,
@@ -1015,6 +1032,7 @@ export function LandingPage() {
               return (
                 <div
                   key={stg.id}
+                  ref={(el) => (topologyCardRefs.current[idx] = el)}
                   {...props}
                   className={`p-4 rounded border text-center transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] ${
                     isActive
@@ -1070,9 +1088,9 @@ export function LandingPage() {
       <section
         id="estimator"
         ref={estimatorRef}
-        className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full"
+        className="px-4 lg:px-8 py-20 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full"
       >
-        <div className="space-y-2 mb-10">
+        <div className="space-y-2 mb-12">
           <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase flex items-center space-x-2">
             <span>CHAPTER 04 // SOC EFFICIENCY &amp; SAVINGS</span>
             {isEstimatorActive && (
@@ -1197,8 +1215,8 @@ export function LandingPage() {
       {/* ========================================================================= */}
       {/* 8. CHAPTER 05: LIVE TELEMETRY LOG ANALYSIS                                */}
       {/* ========================================================================= */}
-      <section className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full">
-        <div className="space-y-2 mb-10">
+      <section className="px-4 lg:px-8 py-20 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full">
+        <div className="space-y-2 mb-12">
           <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase">
             CHAPTER 05 // LIVE LOGS &amp; ANALYSIS
           </div>
