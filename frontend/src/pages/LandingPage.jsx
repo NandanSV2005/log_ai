@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { StitchBrandMark } from '../components/common/StitchBrandMark';
@@ -497,59 +497,74 @@ export function LandingPage() {
           </p>
         </div>
 
-        {/* 6 Stage Cards Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {PIPELINE_STAGES.map((stage) => {
-            const isActive = stage.id === activePipelineStage;
-            return (
-              <div
-                key={stage.id}
-                onClick={() => setActivePipelineStage(stage.id)}
-                className={`p-5 rounded-lg border transition-all cursor-pointer ${
-                  isActive
-                    ? 'bg-[var(--color-bg-card)] border-[var(--color-primary)] shadow-md ring-1 ring-[var(--color-primary)]'
-                    : 'bg-[var(--color-bg-surface)] border-[var(--color-border)] hover:border-[var(--color-text-muted)]'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-3 font-mono">
-                  <span className="text-xs font-bold text-[var(--color-primary)]">{stage.num}</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded border border-[var(--color-border)] bg-[var(--color-bg-dim)] text-[var(--color-text-muted)]">
-                    {stage.techBadge}
-                  </span>
+        {/* Desktop Sticky Side-by-Side & Mobile Vertical Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Left Column: 6 Stage Cards */}
+          <div className="lg:col-span-6 space-y-4">
+            {PIPELINE_STAGES.map((stage) => {
+              const isActive = stage.id === activePipelineStage;
+              return (
+                <div
+                  key={stage.id}
+                  onClick={() => setActivePipelineStage(stage.id)}
+                  className={`p-5 rounded-lg border transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-[var(--color-bg-card)] border-[var(--color-primary)] shadow-md ring-1 ring-[var(--color-primary)]'
+                      : 'bg-[var(--color-bg-surface)] border-[var(--color-border)] hover:border-[var(--color-text-muted)]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-3 font-mono">
+                    <span className="text-xs font-bold text-[var(--color-primary)]">{stage.num}</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded border border-[var(--color-border)] bg-[var(--color-bg-dim)] text-[var(--color-text-muted)]">
+                      {stage.techBadge}
+                    </span>
+                  </div>
+                  <h3 className="font-bold text-base text-[var(--color-text-main)] mb-1">{stage.name}</h3>
+                  <p className="text-xs text-[var(--color-text-muted)] leading-relaxed mb-3">{stage.desc}</p>
+                  <div className="font-mono text-[10px] text-[var(--color-text-dim)] truncate border-t border-[var(--color-border)] pt-2">
+                    MODULE: <span className="text-[var(--color-text-main)]">{stage.filepath}</span>
+                  </div>
                 </div>
-                <h3 className="font-bold text-base text-[var(--color-text-main)] mb-1">{stage.name}</h3>
-                <p className="text-xs text-[var(--color-text-muted)] leading-relaxed mb-3">{stage.desc}</p>
-                <div className="font-mono text-[10px] text-[var(--color-text-dim)] truncate border-t border-[var(--color-border)] pt-2">
-                  MODULE: <span className="text-[var(--color-text-main)]">{stage.filepath}</span>
+              );
+            })}
+          </div>
+
+          {/* Right Column: Sticky Visualizer Panel (Desktop Sticky lg:sticky lg:top-24) */}
+          <div className="lg:col-span-6 lg:sticky lg:top-24 w-full">
+            <div className="p-6 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg font-mono text-xs space-y-4 shadow-xl">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-border)] pb-3">
+                <div className="flex items-center space-x-2">
+                  <span className="text-[var(--color-primary)] font-bold">{currentStageData.num}</span>
+                  <span className="font-bold text-[var(--color-text-main)]">{currentStageData.title}</span>
+                </div>
+                <div className="text-[11px] text-[var(--color-text-muted)]">
+                  FILE: <span className="text-[var(--color-primary)]">{currentStageData.filepath}</span>
                 </div>
               </div>
-            );
-          })}
-        </div>
 
-        {/* Selected Stage Detail Inspector */}
-        <div className="mt-8 p-6 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg font-mono text-xs space-y-4 shadow-lg">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-border)] pb-3">
-            <div className="flex items-center space-x-2">
-              <span className="text-[var(--color-primary)] font-bold">{currentStageData.num}</span>
-              <span className="font-bold text-[var(--color-text-main)]">{currentStageData.title}</span>
+              {/* Progress Indicator Bar */}
+              <div className="w-full bg-[var(--color-surface-variant)] h-1.5 rounded-full overflow-hidden">
+                <div
+                  className="bg-[var(--color-primary)] h-full transition-all duration-500 ease-out"
+                  style={{ width: `${(activePipelineStage / 6) * 100}%` }}
+                ></div>
+              </div>
+
+              <div>
+                <div className="text-[10px] text-[var(--color-text-dim)] uppercase mb-1">STAGE DATA TRANSFORMATION:</div>
+                <pre className="p-4 bg-[var(--terminal-bg)] text-[var(--terminal-text-main)] border border-[var(--color-border)] rounded overflow-x-auto text-[11px] leading-relaxed transition-all">
+                  {currentStageData.payload}
+                </pre>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between text-[11px] text-[var(--color-text-muted)] pt-1">
+                <span className="truncate max-w-md">SHA-256 DIGEST: <strong className="text-[var(--color-text-main)]">{currentStageData.digest}</strong></span>
+                <span className="text-emerald-400 font-bold">● VERIFIED ZERO-TAMPERING</span>
+              </div>
             </div>
-            <div className="text-[11px] text-[var(--color-text-muted)]">
-              FILE: <span className="text-[var(--color-primary)]">{currentStageData.filepath}</span>
-            </div>
           </div>
 
-          <div>
-            <div className="text-[10px] text-[var(--color-text-dim)] uppercase mb-1">STAGE DATA TRANSFORMATION:</div>
-            <pre className="p-3 bg-[var(--terminal-bg)] text-[var(--terminal-text-main)] border border-[var(--color-border)] rounded overflow-x-auto text-[11px] leading-relaxed">
-              {currentStageData.payload}
-            </pre>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-between text-[11px] text-[var(--color-text-muted)] pt-1">
-            <span className="truncate max-w-md">SHA-256 DIGEST: <strong className="text-[var(--color-text-main)]">{currentStageData.digest}</strong></span>
-            <span className="text-emerald-400 font-bold">● VERIFIED ZERO-TAMPERING</span>
-          </div>
         </div>
       </section>
 

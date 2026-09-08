@@ -1,16 +1,14 @@
-# LOG AI — Sovereign Threat Ingestion, Normalization & Explainable Intelligence Platform
-## Complete Project Implementation & Presentation Report
+# LOG AI — Security Log Processing & Threat Detection Platform
+## Comprehensive Project Implementation & Presentation Report
 
-> **Document Purpose**: Technical architecture walkthrough, implementation record, and hackathon presentation (PPT) preparation guide based on the active codebase of LOG AI.
+> **Document Purpose**: Technical architecture walkthrough, active implementation record, and hackathon presentation (PPT) preparation guide based on the current codebase of LOG AI.
 
 ---
 
-## 1. Executive Summary
+## 1. Project Overview (Executive Summary)
 
-### Project Overview
-**LOG AI** is a high-performance, air-gapped security telemetry ingestion, normalization, and explainable threat detection platform. It solves the critical enterprise challenge of security log fragmentation across heterogeneous perimeter appliances—such as Cisco ASA firewalls, Fortinet FortiGate gateways, Suricata IDS/IPS sensors, and pfSense appliances.
-
-By capturing raw log payloads into compressed, immutable storage (`data/raw/`), hashing them with SHA-256 Merkle audit chains, normalizing vendor formats into the **Open Cybersecurity Schema Framework (OCSF 1.1)**, and scoring anomalies using an in-memory **Isolation Forest ML algorithm** combined with **15-minute sliding window alert correlation**, LOG AI enables Security Operations Center (SOC) teams to reduce Mean Time to Respond (MTTR) by up to **85%** without relying on third-party cloud analytics or external API dependencies.
+### What Does LOG AI Do?
+**LOG AI** is a high-performance, air-gapped security telemetry ingestion, normalization, and explainable threat detection platform. It collects raw system logs from heterogeneous network perimeter appliances—such as Cisco ASA firewalls, Fortinet FortiGate gateways, Suricata IDS/IPS sensors, and pfSense appliances—converts them into a standardized common schema (**OCSF 1.1**), detects suspicious activity using an in-memory **Isolation Forest ML model**, correlates related events into incident clusters, and presents plain-English explanations and step-by-step mitigation commands to security operators.
 
 ### Core Problem Solved
 1. **Log Format Tower of Babel**: Security teams deal with dozens of incompatible log formats (CEF, Syslog, CSV, KV-pairs, JSON), making automated threat correlation across vendor siloes nearly impossible.
@@ -50,12 +48,12 @@ By capturing raw log payloads into compressed, immutable storage (`data/raw/`), 
 ### Enterprise Security Challenges Addressed
 - **Heterogeneous Perimeter Appliance Ingestion**: Modern enterprise SOCs operate multi-vendor environments. Parsing firewall logs, IDS alerts, and network telemetry usually requires writing brittle, custom regex rules per device type.
 - **High Throughput & Zero Data Loss**: High-velocity network bursts can overflow standard log consumers. LOG AI guarantees raw log persistence to disk (`raw_writer.py`) before attempting parsing, preventing telemetry loss during spikes.
-- **Forensic Auditability**: Compliance frameworks (SOC 2, ISO 27001, HIPAA) require proof that security telemetry has not been tampered with after storage.
+- **Forensic Auditability**: Compliance frameworks require proof that security telemetry has not been tampered with after storage.
 - **Explainable Anomaly Detection**: Traditional ML anomaly detection models flag outliers without providing feature attributions, forcing analysts to manually verify raw log lines to discover why an alert triggered.
 
 ---
 
-## 3. Solution Overview & Conceptual Data Flow
+## 3. Solution Overview & Data Flow
 
 LOG AI implements an end-to-end 6-stage telemetry processing architecture:
 
@@ -89,7 +87,7 @@ LOG AI implements an end-to-end 6-stage telemetry processing architecture:
                                           ▼
 +-----------------------------------------------------------------------------------+
 | 5. 15-MINUTE SLIDING WINDOW CORRELATION                                           |
-|    Events sharing the same source IP are clustered into single Incidents with      |
+|    Events sharing the same source IP are correlated into single Incidents with    |
 |    incremental MITRE ATT&CK kill-chain tracking.                                  |
 +-----------------------------------------------------------------------------------+
                                           │
@@ -103,9 +101,7 @@ LOG AI implements an end-to-end 6-stage telemetry processing architecture:
 
 ---
 
-## 4. End-to-End Detailed Data Walkthrough
-
-Here is the exact step-by-step trace of a log payload moving through the codebase:
+## 4. How the System Works (End-to-End Walkthrough)
 
 1. **Ingestion Request (`app/routers/ingest.py`)**:
    An HTTP POST request containing a raw log string is submitted to `/api/v1/ingest`.
@@ -150,15 +146,15 @@ Here is the exact step-by-step trace of a log payload moving through the codebas
 
 ## 6. Core Features
 
-### 1. Unified SOC Dashboard (`DashboardPage.jsx`)
+### 1. Landing Page & Scroll-Driven Storytelling (`LandingPage.jsx`)
+- **Purpose**: Introduces visitors to LOG AI through simple, clear language and Apple-style scroll-driven progressive storytelling.
+- **Implementation**: Sticky desktop visualizer panel (`lg:sticky lg:top-24`) transforming continuously across 6 pipeline stages as the user scrolls.
+- **Evidence**: `frontend/src/pages/LandingPage.jsx`.
+
+### 2. Unified SOC Dashboard (`DashboardPage.jsx`)
 - **Purpose**: Gives security operators real-time visibility into overall threat posture, active incident count, pipeline latency, and live telemetry feeds.
 - **Implementation**: Fetches `/api/v1/dashboard/stats`, `/api/v1/dashboard/incidents`, and `/api/v1/dashboard/events/recent`.
 - **Evidence**: `app/routers/dashboard.py` (`get_dashboard_stats()`, `get_recent_events()`).
-
-### 2. Interactive Vector Radar Scanner (`LandingPage.jsx` & `DashboardPage.jsx`)
-- **Purpose**: Provides visual threat monitoring with degree markings (`0°` to `360°`), sweeping radar reticles, and clickable target lock nodes.
-- **Implementation**: CSS Keyframes `@keyframes radar-sweep` in `index.css` paired with SVG concentric rings and absolute node coordinate positioning.
-- **Evidence**: `frontend/src/pages/LandingPage.jsx` & `frontend/src/styles/index.css`.
 
 ### 3. Log Explorer (`LogExplorerPage.jsx`)
 - **Purpose**: Search, filter, inspect, and paginate raw and normalized telemetry logs across multiple vendor parsers.
@@ -244,7 +240,6 @@ LOG AI features a custom, pure Python/NumPy implementation of the Isolation Fore
 2. **Isolation Tree Ensemble**:
    The ensemble consists of `n_estimators=10` trees with `max_samples=64`. Average path length $h(x)$ across all trees determines anomaly score $s(x, n)$:
    $$s(x, n) = 2^{-\frac{E(h(x))}{c(n)}}$$
-   Where $c(n)$ is the average path length of unsuccessful searches in a Binary Search Tree.
 
 3. **Feature Attribution Z-Scores**:
    The anomaly engine calculates standard deviation Z-scores for each feature relative to baseline means. Features exceeding $Z \ge 1.5$ are flagged as primary drivers of the threat score.
@@ -303,9 +298,9 @@ LOG AI provides zero-network-latency offline IP geolocation:
 This section provides a 12-slide presentation structure for hackathon demos:
 
 ### Slide 1 — Title Slide
-- **Title**: LOG AI — Autonomous Threat Ingestion, Normalization & Explainable Intelligence
-- **Subtitle**: Air-Gapped SOC Telemetry Pipeline with OCSF 1.1 & Isolation Forest ML
-- **Visual**: LOG AI Brand Mark logo with vector radar graphic background.
+- **Title**: LOG AI — Security Log Processing & Threat Detection Platform
+- **Subtitle**: Air-Gapped Telemetry Pipeline with OCSF 1.1 & Isolation Forest ML
+- **Visual**: LOG AI logo with vector radar graphic background.
 
 ### Slide 2 — The Problem: Enterprise Log Chaos
 - **Key Points**:
@@ -351,11 +346,11 @@ This section provides a 12-slide presentation structure for hackathon demos:
   - Provides 3-step firewall mitigation commands for instant analyst action.
 - **Visual**: XAI Explanation box showing feature importance breakdown.
 
-### Slide 9 — Offline GeoIP & Interactive Threat Map
+### Slide 9 — Offline GeoIP & Threat Map
 - **Key Points**:
   - 100% offline CIDR database mapping global IPs and internal RFC-1918 subnets.
   - Zero external API call dependency.
-- **Visual**: Screenshot of Threat Map with interactive geographic markers.
+- **Visual**: Screenshot of Threat Map with geographic markers.
 
 ### Slide 10 — Financial Impact & SOC ROI Estimator
 - **Key Points**:
@@ -381,7 +376,7 @@ This section provides a 12-slide presentation structure for hackathon demos:
 
 1. **0:00 - 0:45 | Landing Page & Interactive Vector Radar**:
    - *Action*: Open `/` (Landing Page).
-   - *Script*: *"Welcome to LOG AI. Here on the landing page, we see our interactive vector radar scanner monitoring edge perimeter telemetry in real time. We can toggle between our Sage Green editorial light theme and Cyber Void dark theme."*
+   - *Script*: *"Welcome to LOG AI. Here on the landing page, we see our interactive vector radar scanner monitoring edge perimeter telemetry in real time. As we scroll down through our 6-stage pipeline, our sticky visualizer demonstrates live raw log transformation into normalized OCSF events."*
 2. **0:45 - 1:30 | Log Ingestion & OCSF Normalization**:
    - *Action*: Navigate to `/login`, sign in as `admin`, and open `/log-explorer`.
    - *Script*: *"Upon signing into the SOC console, we navigate to the Log Explorer. Here we see multi-vendor logs—from Cisco ASA to Suricata—parsed and normalized into the OCSF 1.1 unified schema."*
@@ -414,7 +409,7 @@ This section provides a 12-slide presentation structure for hackathon demos:
 - **Storage Engine**: Telemetry is persisted using compressed JSONL files on local disk rather than a distributed database cluster like PostgreSQL/ClickHouse.
 
 ### Future Scope
-- **Automated Active Defense**: Adding direct API connectors to push firewall block rules directly to Cisco ASA and FortiGate routers upon incident creation.
+- **Automated Active Defense**: Adding direct API connectors to push firewall block rules directly to Cisco ASA and Fortinet routers upon incident creation.
 - **Distributed Ingestion Nodes**: Scale background queue workers across multiple containerized worker nodes using Redis/RabbitMQ.
 
 ---
@@ -452,7 +447,7 @@ log_ai/
 ├── frontend/
 │   ├── src/
 │   │   ├── pages/
-│   │   │   ├── LandingPage.jsx      # Technical editorial landing page with vector radar
+│   │   │   ├── LandingPage.jsx      # Technical editorial landing page with sticky visualizer
 │   │   │   ├── LoginPage.jsx        # Operator login page with view password toggle
 │   │   │   ├── RegisterPage.jsx     # Operator registration page
 │   │   │   ├── DashboardPage.jsx    # Unified SOC dashboard & live telemetry feed
