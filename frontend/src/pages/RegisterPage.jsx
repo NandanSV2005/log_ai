@@ -56,7 +56,8 @@ export function RegisterPage() {
         setErrorMsg(res.message || 'Registration failed.');
       }
     } catch (err) {
-      setErrorMsg(err.message || 'Registration error occurred.');
+      const msg = err && err.message ? err.message : err;
+      setErrorMsg(typeof msg === 'string' ? msg : JSON.stringify(msg));
     } finally {
       setIsLoading(false);
     }

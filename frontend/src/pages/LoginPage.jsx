@@ -23,7 +23,8 @@ export function LoginPage() {
       await loginUser(usernameInput.trim(), passwordInput);
       navigate('/dashboard');
     } catch (err) {
-      setErrorMsg(err.message || 'Authentication failed. Please check your credentials and try again.');
+      const msg = err && err.message ? err.message : err;
+      setErrorMsg(typeof msg === 'string' ? msg : JSON.stringify(msg));
     } finally {
       setIsLoading(false);
     }

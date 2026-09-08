@@ -22,6 +22,20 @@ export function AuthProvider({ children }) {
     return res;
   };
 
+  const registerUser = async (data) => {
+    let u = '';
+    let p = '';
+    if (typeof data === 'object' && data !== null) {
+      u = data.username || '';
+      p = data.password || '';
+    } else if (typeof data === 'string') {
+      u = data;
+      p = arguments[1] || '';
+    }
+    const res = await api.register(u, p);
+    return { success: true, message: 'Operator account created successfully!', ...res };
+  };
+
   const logoutUser = () => {
     setToken(null);
     setUsername('');
@@ -44,6 +58,7 @@ export function AuthProvider({ children }) {
         isAdmin,
         isAuthenticated,
         loginUser,
+        registerUser,
         logoutUser,
       }}
     >
