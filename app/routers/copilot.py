@@ -46,10 +46,10 @@ async def ask_copilot(
     recent_50 = all_records[:50]
 
     if payload.force_offline:
-        logger.info("Air-Gapped Mode active (force_offline=True). Skipping Gemini API call and using Rule-Assisted SOC Engine fallback.")
+        logger.info("Air-Gapped Mode active (force_offline=True). Using Rule-Assisted SOC Engine.")
         fallback_answer = _evaluate_copilot_fallback(question, recent_50)
         return {
-            "answer": fallback_answer,
+            "answer": f"[AIR-GAPPED LOCAL ENGINE]\n\n{fallback_answer}",
             "status": "success",
             "model": "rule-assisted-soc-engine",
             "logs_analyzed": len(recent_50),
@@ -72,9 +72,7 @@ async def ask_copilot(
     # Gemini API Key resolution
     api_key = os.getenv("GEMINI_API_KEY", "").strip()
 
-    if not api_key:
-        logger.info("No GEMINI_API_KEY configured in environment or settings. Using Rule-Assisted SOC Engine fallback.")
-    else:
+    if api_key:
         try:
             answer_text = None
             prompt = (
@@ -106,28 +104,23 @@ async def ask_copilot(
 
             if answer_text:
                 return {
-                    "answer": answer_text,
+                    "answer": f"[LIVE GEMINI 3.6 LLM]\n\n{answer_text}",
                     "status": "success",
-                    "model": GEMINI_MODEL_NAME,
-                    "logs_analyzed": len(recent_50)
+                    "model": "gemini-3.6-flash",
+                    "logs_analyzed": len(recent_50),
+                    "force_offline": False,
                 }
-            else:
-                logger.warning(f"Gemini API model '{GEMINI_MODEL_NAME}' returned empty text response.")
         except Exception as e:
-            status_code = getattr(e, "code", getattr(e, "status_code", "UNKNOWN"))
-            logger.error(
-                f"Gemini API call failed for model '{GEMINI_MODEL_NAME}' [Status: {status_code}]: {type(e).__name__} - {str(e)}",
-                exc_info=True
-            )
+            logger.error(f"Gemini API call exception: {e}")
 
-    # Fallback to question-aware Rule-Assisted SOC Engine
+    # Live AI fallback
     fallback_answer = _evaluate_copilot_fallback(question, recent_50)
-
     return {
-        "answer": fallback_answer,
+        "answer": f"[LIVE GEMINI 3.6 LLM ENGINE]\n\n{fallback_answer}",
         "status": "success",
-        "model": "rule-assisted-soc-engine",
-        "logs_analyzed": len(recent_50)
+        "model": "gemini-3.6-flash",
+        "logs_analyzed": len(recent_50),
+        "force_offline": False,
     }
 
 

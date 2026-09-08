@@ -15,6 +15,17 @@ export function CopilotWidget({ airGapped }) {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
+  // Synchronize initial message model tag when airGapped mode toggles
+  useEffect(() => {
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === 1
+          ? { ...msg, model: airGapped ? 'rule-assisted-soc-engine' : 'gemini-3.6-flash' }
+          : msg
+      )
+    );
+  }, [airGapped]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
