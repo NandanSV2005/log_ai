@@ -1,17 +1,17 @@
 # LOG AI — Security Log Processing & Threat Detection Platform
 ## Comprehensive Project Implementation & Presentation Report
 
-> **Document Purpose**: Technical architecture walkthrough, active implementation record, and hackathon presentation (PPT) preparation guide based on the current codebase of LOG AI.
+> **Document Purpose**: Technical architecture walkthrough, active implementation record, landing page interaction specification, and hackathon presentation (PPT) preparation guide based on the current codebase of LOG AI.
 
 ---
 
 ## 1. Project Overview (Executive Summary)
 
 ### What Does LOG AI Do?
-**LOG AI** is a high-performance, air-gapped security telemetry ingestion, normalization, and explainable threat detection platform. It collects raw system logs from heterogeneous network perimeter appliances—such as Cisco ASA firewalls, Fortinet FortiGate gateways, Suricata IDS/IPS sensors, and pfSense appliances—converts them into a standardized common schema (**OCSF 1.1**), detects suspicious activity using an in-memory **Isolation Forest ML model**, correlates related events into incident clusters, and presents plain-English explanations and step-by-step mitigation commands to security operators.
+**LOG AI** is a high-performance security log ingestion, normalization, and explainable threat detection platform. It collects raw system logs from heterogeneous network perimeter appliances—such as Cisco ASA firewalls, Fortinet FortiGate gateways, Suricata IDS/IPS sensors, and pfSense appliances—converts them into a standardized common schema (**OCSF 1.1**), detects suspicious activity using an in-memory **Isolation Forest ML model**, correlates related events into incident clusters, and presents plain-English explanations and step-by-step mitigation commands to security operators.
 
 ### Core Problem Solved
-1. **Log Format Tower of Babel**: Security teams deal with dozens of incompatible log formats (CEF, Syslog, CSV, KV-pairs, JSON), making automated threat correlation across vendor siloes nearly impossible.
+1. **Log Format Babel**: Security teams deal with dozens of incompatible log formats (CEF, Syslog, CSV, KV-pairs, JSON), making automated threat correlation across vendor siloes nearly impossible.
 2. **Alert Fatigue & Opacity**: Conventional SIEMs flood analysts with thousands of uncontextualized alerts while black-box machine learning engines fail to explain *why* an anomaly was flagged.
 3. **Data Tampering & Compliance Risks**: Unhashed log streams can be altered or erased by malicious actors post-compromise, destroying forensic auditability.
 
@@ -134,56 +134,94 @@ LOG AI implements an end-to-end 6-stage telemetry processing architecture:
 | :--- | :--- | :--- |
 | **Backend Framework** | FastAPI (Python 3.10+) | High-performance asynchronous REST API framework with native OpenAPI doc generation and strict Pydantic data validation. |
 | **Frontend Framework** | React 18 + Vite | Modular component architecture rendering responsive security UI dashboards with instant HMR and lightweight bundle sizes. |
-| **Styling & Design** | TailwindCSS v4 | Utility-first styling enabling precise theme custom CSS variables for **Cyber Void** (dark slate) and **Sage Green** (off-white editorial) themes. |
+| **Styling & Design** | Vanilla CSS Tokens + TailwindCSS | Clean technical editorial styling supporting **Cyber Void** (dark slate) and **Sage Green** (off-white editorial) themes. |
 | **Data Validation** | Pydantic v2 | Standardized schema enforcement for OCSF 1.1 `UnifiedEvent` and `Incident` models. |
-| **ML Engine** | Pure NumPy IsolationForest | Custom pure-Python/NumPy implementation of Isolation Forest. Eliminates external C-DLL compilation dependencies (AppLocker safe) for reliable air-gapped SOC deployments. |
+| **ML Engine** | Pure NumPy IsolationForest | Custom pure-Python/NumPy implementation of Isolation Forest. Eliminates external C-DLL compilation dependencies for reliable deployment. |
 | **Rate Limiting** | SlowAPI | Protects log ingestion endpoints against denial-of-service floods (5 requests/sec per client IP). |
 | **Cryptographic Audit** | WebCrypto / Python `hashlib` | SHA-256 Merkle tree calculation for tamper-proof raw log verification. |
-| **Offline GeoIP** | Custom Offline CIDR DB | Resolves public IPs and RFC-1918 private subnets (`192.168.1.0/24`, `10.0.0.0/8`, `172.16.0.0/12`) to geographic coordinates without internet API calls. |
-| **Authentication** | OAuth2 + JWT (python-jose) | Secure token-based authentication with bcrypt password hashing. |
+| **Offline GeoIP** | Custom Offline CIDR DB | Resolves public IPs and RFC-1918 private subnets (`192.168.1.0/24`, `10.0.0.0/8`, `172.16.0.0/12`) without external web calls. |
+| **Authentication** | OAuth2 + JWT (python-jose) | Secure token-based authentication with bcrypt password hashing and view password visibility toggles. |
 
 ---
 
-## 6. Core Features
+## 6. Landing Page Interaction Architecture (`LandingPage.jsx`)
 
-### 1. Landing Page & Scroll-Driven Storytelling (`LandingPage.jsx`)
-- **Purpose**: Introduces visitors to LOG AI through simple, clear language and Apple-style scroll-driven progressive storytelling.
-- **Implementation**: Sticky desktop visualizer panel (`lg:sticky lg:top-24`) transforming continuously across 6 pipeline stages as the user scrolls.
-- **Evidence**: `frontend/src/pages/LandingPage.jsx`.
+The landing page features a **section-level scroll-driven interaction model** built on strict architectural hierarchy:
 
-### 2. Unified SOC Dashboard (`DashboardPage.jsx`)
-- **Purpose**: Gives security operators real-time visibility into overall threat posture, active incident count, pipeline latency, and live telemetry feeds.
-- **Implementation**: Fetches `/api/v1/dashboard/stats`, `/api/v1/dashboard/incidents`, and `/api/v1/dashboard/events/recent`.
-- **Evidence**: `app/routers/dashboard.py` (`get_dashboard_stats()`, `get_recent_events()`).
+```
+                  MAJOR SECTION
+                        │
+             scroll activates section
+                        │
+             ┌──────────┴──────────┐
+             │                     │
+      LOCAL SCROLL             MULTI-INPUT
+        PROGRESS              INTERACTIONS
+             │           (Hover / Click / Touch / Key)
+             │                     │
+             └──────────┬──────────┘
+                        │
+                        ▼
+                 ACTIVE SUBTOPIC
+                        │
+                        ▼
+               MAIN VISUALIZATION
+```
 
-### 3. Log Explorer (`LogExplorerPage.jsx`)
-- **Purpose**: Search, filter, inspect, and paginate raw and normalized telemetry logs across multiple vendor parsers.
-- **Implementation**: Multi-parameter search filter supporting severity, event type, source IP, and date ranges.
-- **Evidence**: `frontend/src/pages/LogExplorerPage.jsx` & `app/routers/dashboard.py`.
+### 1. Viewport-Aware Section Activation (`IntersectionObserver`)
+- Each major storytelling section (`6-Stage Log Processing Pipeline`, `Log Format Capabilities`, `End-to-End System Topology`, `SOC Efficiency Estimator`) owns an independent `IntersectionObserver`.
+- A section is given an `ACTIVE` state only when it enters the user's viewport.
+- **Critical Control**: Sections positioned below the viewport remain strictly `INACTIVE`. Scrolling near the top of the page (Hero section) does NOT trigger transitions, animations, or state updates in lower sections.
 
-### 4. Forensic Investigation & Merkle Audit (`ForensicsPage.jsx`)
-- **Purpose**: Verify SHA-256 cryptographic hashes of raw log payloads against the Merkle tree root hash to confirm zero data tampering.
-- **Implementation**: Reads compressed Gzip records from `data/raw/` via `raw_storage_manager.read_raw_payload()`.
-- **Evidence**: `app/storage/raw_writer.py` & `app/audit/hash_chain.py`.
+### 2. Section-Scoped Scroll Progress Calculation
+- Scroll progress is computed relative strictly to the active section's bounding rectangle (`getBoundingClientRect()`).
+- As the user scrolls down through an active section, the progress ratio ($0.0 \rightarrow 1.0$) mapped to section subtopic thresholds advances the active stage (`01` through `06`).
 
-### 5. Rule Studio (`RuleStudioPage.jsx`)
-- **Purpose**: Allows analysts to configure custom detection rules, score multipliers, and pattern triggers.
-- **Implementation**: `app/defense/rules_engine.py` evaluates rule sets dynamically during anomaly scoring.
-- **Evidence**: `app/defense/rules_engine.py` & `frontend/src/pages/RuleStudioPage.jsx`.
+### 3. Multi-Input Precedence Model (Hover + Click + Touch + Keyboard)
+Subtopic selection follows a priority precedence chain:
+$$\text{activeStage} = \text{selectedStage} \;\parallel\; \text{hoveredStage} \;\parallel\; \text{scrollStage} \;\parallel\; 1$$
 
-### 6. AI Copilot & Explainable AI (XAI) (`CopilotWidget.jsx` & `app/xai/explainer.py`)
-- **Purpose**: Provides plain-English explanations of flagged anomalies and step-by-step mitigation commands for active security incidents.
-- **Implementation**: `XAIExplainer` calculates Z-score feature importance and combines them with rule descriptions.
-- **Evidence**: `app/xai/explainer.py` & `app/routers/copilot.py`.
+- **Hover (`onMouseEnter`/`onMouseLeave`)**: Temporarily previews the hovered subtopic and updates the main visualization and technical explanation panel. Moving the pointer away returns to the selected or scroll-active state.
+- **Click (`onClick`)**: Explicitly selects the subtopic.
+- **Touch (`onTouchEnd`)**: Touchscreen users on mobile devices can tap any subtopic card to update the main visualization.
+- **Keyboard (`onFocus`/`onBlur`/`onKeyDown`)**: Full keyboard accessibility (`tabIndex={0}`, `role="tab"`, `aria-selected`, Enter/Space key selection).
 
-### 7. Financial Impact & ROI Estimator (`LandingPage.jsx`)
-- **Purpose**: Allows security leaders to calculate monthly financial savings ($) and reclaimed analyst hours based on daily log volume and device count.
-- **Implementation**: Dual range sliders bound to dynamic ROI formulas (`hoursSaved = ((logVolume * 0.001 * 0.85 * 3.5 * 30) / 60)`).
-- **Evidence**: `frontend/src/pages/LandingPage.jsx`.
+### 4. Central Morphing Visualizations Across Major Sections
+- **6-Stage Log Processing Pipeline (`#pipeline`)**: Features a horizontal 6-stage node flow bar, active stage progress meter, raw syslog stream, regex format identification, extracted key-value fields, OCSF 1.1 JSON schemas, Isolation Forest threat score gauge, and 3-step firewall mitigation playbooks (`iptables -A INPUT...`).
+- **Log Format Capabilities (`#capabilities`)**: Displays a format specification inspector panel with sample raw streams, normalized OCSF outputs, extraction accuracy (99.4%), throughput EPS gauges, and parser tags for Cisco ASA, Fortinet, Suricata, pfSense, CEF, and OCSF.
+- **System Architecture Topology (`#topology`)**: Displays a 5-node interactive graph (`Edge Ingestion` $\rightarrow$ `Parser Pool` $\rightarrow$ `ML Anomaly Engine` $\rightarrow$ `Alert Aggregator` $\rightarrow$ `SOC Console`) highlighting active component nodes, throughput EPS, latency (<1.2ms), and zero-loss rates.
+- **Financial ROI Estimator (`#estimator`)**: Interactive sliders for daily log volume and monitored appliances with monthly financial savings ($), analyst hours reclaimed, and circular SVG MTTR reduction gauge.
+
+### 5. Dual Themes & Reduced Motion Support
+- Both **Sage Green** (off-white editorial light theme) and **Cyber Void** (dark slate theme) share 100% identical interaction behavior.
+- Added `@media (prefers-reduced-motion: reduce)` in `index.css` to disable heavy pulse/sweep animations for users with motion sensitivity while keeping state accessibility intact.
 
 ---
 
-## 7. Supported Log Formats
+## 7. Unified SOC Dashboard & Core Pages
+
+### 1. Unified SOC Dashboard (`DashboardPage.jsx`)
+- Real-time visibility into overall threat posture, active incident count, pipeline latency, and live telemetry feeds.
+- Consumes `/api/v1/dashboard/stats`, `/api/v1/dashboard/incidents`, and `/api/v1/dashboard/events/recent`.
+
+### 2. Log Explorer (`LogExplorerPage.jsx`)
+- Multi-parameter log search and filtering interface across vendor parsers with severity badges, IP filtering, and JSON syntax rendering.
+
+### 3. Forensic Investigation & Merkle Audit (`ForensicsPage.jsx`)
+- Re-calculates SHA-256 cryptographic hashes of raw log payloads against the Merkle tree root hash to confirm zero data tampering. Reads compressed Gzip records from `data/raw/`.
+
+### 4. Rule Studio (`RuleStudioPage.jsx`)
+- Rule configuration page for custom threat thresholds, pattern triggers, and score multipliers evaluated by `rules_engine.py`.
+
+### 5. AI Copilot (`CopilotWidget.jsx` & `explainer.py`)
+- Provides plain-English explanations of flagged anomalies and step-by-step mitigation commands for active security incidents.
+
+### 6. Authentication Pages (`LoginPage.jsx` & `RegisterPage.jsx`)
+- Operator sign-in and account creation forms featuring brand logo integration (`LOG // AI`) and an interactive **view password visibility toggle** (eye button).
+
+---
+
+## 8. Supported Log Formats
 
 LOG AI includes native parser support for top enterprise security perimeter appliances:
 
@@ -198,7 +236,7 @@ LOG AI includes native parser support for top enterprise security perimeter appl
 
 ---
 
-## 8. OCSF 1.1 Normalization Schema
+## 9. OCSF 1.1 Normalization Schema
 
 All parsed logs are mapped to the standard `UnifiedEvent` Pydantic model (`app/normalization/schema.py`):
 
@@ -224,7 +262,7 @@ class UnifiedEvent(BaseModel):
 
 ---
 
-## 9. Detection & Anomaly Analysis (Isolation Forest ML)
+## 10. Detection & Anomaly Analysis (Isolation Forest ML)
 
 ### Pure NumPy Isolation Forest Engine (`app/detection/engine.py`)
 LOG AI features a custom, pure Python/NumPy implementation of the Isolation Forest anomaly detection algorithm.
@@ -246,7 +284,7 @@ LOG AI features a custom, pure Python/NumPy implementation of the Isolation Fore
 
 ---
 
-## 10. Severity & Incident Correlation
+## 11. Severity & Incident Correlation
 
 ### Severity Threshold Mapping
 - **CRITICAL** ($\ge 90.0$ Threat Score): Immediate threat requiring active mitigation.
@@ -262,7 +300,7 @@ LOG AI features a custom, pure Python/NumPy implementation of the Isolation Fore
 
 ---
 
-## 11. Offline GeoIP Resolution (`app/services/geoip.py`)
+## 12. Offline GeoIP Resolution (`app/services/geoip.py`)
 
 LOG AI provides zero-network-latency offline IP geolocation:
 - **Public IPs**: Checked against a pre-compiled offline database of global CIDR ranges covering North America, Europe, Asia Pacific, South America, and Africa.
@@ -271,7 +309,7 @@ LOG AI provides zero-network-latency offline IP geolocation:
 
 ---
 
-## 12. Security, Authentication & Multi-Tenancy
+## 13. Security, Authentication & Multi-Tenancy
 
 - **Authentication Endpoint (`app/routers/auth.py`)**: OAuth2 password bearer tokens using JWT (JSON Web Tokens) with 24-hour expiration.
 - **Password Hashing**: Passwords stored using `passlib` with bcrypt hashing algorithms.
@@ -280,7 +318,7 @@ LOG AI provides zero-network-latency offline IP geolocation:
 
 ---
 
-## 13. Traditional SIEM vs. LOG AI Comparison
+## 14. Traditional SIEM vs. LOG AI Comparison
 
 | Feature / Capability | Traditional Legacy SIEM | LOG AI Platform |
 | :--- | :--- | :--- |
@@ -289,11 +327,11 @@ LOG AI provides zero-network-latency offline IP geolocation:
 | **Forensic Integrity** | Unencrypted raw log storage | **SHA-256 Merkle Tree** audit chain with compressed raw Gzip storage |
 | **Anomaly Scoring** | Static threshold alerts | Pure NumPy **Isolation Forest ML** anomaly scoring |
 | **Explainability (XAI)** | Black-box opacity ("Alert triggered") | Plain-English **Z-score feature attributions** & 3-step mitigation commands |
-| **Network Requirement** | Requires cloud API calls for GeoIP & threat intelligence | **100% Offline & Air-Gapped** local execution capability |
+| **Network Requirement** | Requires cloud API calls for GeoIP & threat intelligence | **100% Offline** local execution capability |
 
 ---
 
-## 14. Presentation Slide Material (PPT Content)
+## 15. Presentation Slide Material (PPT Content)
 
 This section provides a 12-slide presentation structure for hackathon demos:
 
@@ -309,7 +347,7 @@ This section provides a 12-slide presentation structure for hackathon demos:
   - Lack of explainability in black-box ML models.
 - **Visual**: Diagram showing fragmented log streams leading to overloaded SOC analysts.
 
-### Slide 3 — The Solution: LOG AI Unified Architecture
+### Slide 3 — The Solution: LOG AI Architecture
 - **Key Points**:
   - Zero-Loss raw Gzip log capture + SHA-256 Merkle chain integrity.
   - OCSF 1.1 schema normalization across all vendor formats.
@@ -331,7 +369,7 @@ This section provides a 12-slide presentation structure for hackathon demos:
 ### Slide 6 — Pure NumPy Isolation Forest Anomaly Detection
 - **Key Points**:
   - 5-feature vector evaluation (`ip_freq`, `ip_deny`, `action_code`, `sev_code`, `hour`).
-  - Pure Python/NumPy engine runs safely in air-gapped environments without external C-DLL risks.
+  - Pure Python/NumPy engine runs safely without external binary risks.
 - **Visual**: Isolation Forest decision tree diagram with anomaly path length formula.
 
 ### Slide 7 — 15-Minute Sliding Window Correlation
@@ -372,7 +410,7 @@ This section provides a 12-slide presentation structure for hackathon demos:
 
 ---
 
-## 15. Live Demo Script (3-Minute Sequence)
+## 16. Live Demo Script (3-Minute Sequence)
 
 1. **0:00 - 0:45 | Landing Page & Interactive Vector Radar**:
    - *Action*: Open `/` (Landing Page).
@@ -389,7 +427,7 @@ This section provides a 12-slide presentation structure for hackathon demos:
 
 ---
 
-## 16. Likely Judge Technical Questions & Answers
+## 17. Likely Judge Technical Questions & Answers
 
 1. **Q: Why implement a custom Isolation Forest instead of using Scikit-Learn?**
    - **A**: Standard C-extensions in scikit-learn can fail or be blocked by enterprise AppLocker policies in strict air-gapped SOC environments. Implementing a pure NumPy Isolation Forest guarantees zero external binary dependencies and instant startup.
@@ -402,7 +440,7 @@ This section provides a 12-slide presentation structure for hackathon demos:
 
 ---
 
-## 17. Current Technical Limitations & Future Scope
+## 18. Current Technical Limitations & Future Scope
 
 ### Current Limitations
 - **Correlation Scope**: Incident correlation is currently scoped per `source_ip`. It does not yet group attacks across distributed botnet subnets sharing different source IPs.
@@ -414,7 +452,7 @@ This section provides a 12-slide presentation structure for hackathon demos:
 
 ---
 
-## 18. Implementation File Map
+## 19. Implementation File Map
 
 ```
 log_ai/
@@ -454,7 +492,7 @@ log_ai/
 │   │   │   ├── LogExplorerPage.jsx  # Multi-vendor log search & filtering page
 │   │   │   ├── ForensicsPage.jsx    # Merkle audit & raw log forensic verification page
 │   │   │   ├── RuleStudioPage.jsx   # Custom rule configuration page
-│   │   │   ├── ThreatIntelPage.jsx  # Interactive offline GeoIP threat map page
+   │   │   ├── ThreatIntelPage.jsx  # Interactive offline GeoIP threat map page
 │   │   │   └── SettingsPage.jsx     # System configuration & theme settings
 │   │   ├── components/
 │   │   │   ├── common/HeaderNav.jsx # Sticky header navigation with LOG // AI branding
@@ -464,7 +502,7 @@ log_ai/
 
 ---
 
-## 19. Final One-Page Presentation Summary
+## 20. Final One-Page Presentation Summary
 
 - **Problem**: Enterprise security teams face log format fragmentation across Cisco, Fortinet, Suricata, and pfSense devices, leading to alert fatigue and unexplainable anomaly alerts.
 - **Solution**: **LOG AI**—an air-gapped, zero-loss log ingestion and normalization platform built on OCSF 1.1 standards with pure NumPy Isolation Forest ML scoring and SHA-256 Merkle forensic auditability.

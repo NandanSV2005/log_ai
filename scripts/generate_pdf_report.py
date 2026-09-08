@@ -17,7 +17,7 @@ class PDFReport(FPDF):
         self.set_y(-15)
         self.set_font('Helvetica', 'I', 8)
         self.set_text_color(120, 130, 140)
-        self.cell(0, 10, f'Page {self.page_no()}/{{nb}} | LOG AI v2.4.0 Sovereign Security Platform', align='C')
+        self.cell(0, 10, f'Page {self.page_no()}/{{nb}} | LOG AI v2.4.0 Security Operations Platform', align='C')
 
 def sanitize_ascii(text: str) -> str:
     """Replaces non-latin-1 unicode characters with ASCII equivalents for FPDF."""
