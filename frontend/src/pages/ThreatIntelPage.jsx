@@ -299,24 +299,24 @@ export function ThreatIntelPage() {
 
       {/* SECTION 1: REAL GEOGRAPHIC LEAFLET THREAT MAP */}
       <div className="glass-panel rounded-2xl border border-border-muted overflow-hidden shadow-2xl space-y-0">
-        <div className="p-4 border-b border-border-muted bg-surface-dim flex flex-wrap justify-between items-center font-mono text-xs gap-2">
+        <div className="p-3 sm:p-4 border-b border-border-muted bg-surface-dim flex flex-wrap justify-between items-center font-mono text-xs gap-2">
           <div className="flex items-center gap-2 font-bold text-text-primary">
             <span className="material-symbols-outlined text-primary text-sm">public</span>
-            <span>REAL GEOGRAPHIC THREAT MAP (ESRI WORLD CANVAS)</span>
+            <span className="text-xs sm:text-xs">REAL GEOGRAPHIC THREAT MAP (ESRI WORLD CANVAS)</span>
           </div>
 
-          <div className="flex items-center gap-3 text-[11px]">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[10px] sm:text-[11px]">
             <span className="text-text-muted">
               Mapped Nodes: <strong className="text-primary">{clusters.length}</strong>
             </span>
             {unmappedCount > 0 && (
-              <span className="text-text-dim border-l border-border-muted pl-3">
-                Location Unavailable (Internal/Private IPs): <strong className="text-amber-400">{unmappedCount}</strong>
+              <span className="text-text-dim border-l border-border-muted pl-2 sm:pl-3">
+                Unmapped: <strong className="text-amber-400">{unmappedCount}</strong>
               </span>
             )}
             <button
               onClick={handleZoomReset}
-              className="px-2.5 py-1 rounded bg-surface border border-border-muted text-text-muted hover:text-text-primary transition-all font-mono text-[10px] flex items-center gap-1"
+              className="px-2.5 py-1.5 rounded bg-surface border border-border-muted text-text-muted hover:text-text-primary transition-all font-mono text-[10px] flex items-center gap-1 touch-target"
             >
               <span className="material-symbols-outlined text-xs">center_focus_strong</span>
               <span>RESET ZOOM</span>
@@ -325,31 +325,27 @@ export function ThreatIntelPage() {
         </div>
 
         {/* Real Leaflet World Map Container */}
-        <div className="relative w-full h-[400px] sm:h-[480px] bg-surface-dim z-0">
+        <div className="relative w-full h-[320px] sm:h-[480px] bg-surface-dim z-0">
           <div ref={mapContainerRef} className="w-full h-full z-10" />
 
           {/* Severity Map Legend Overlay */}
-          <div className="absolute bottom-4 left-4 z-20 glass-panel p-3 rounded-xl border border-border-muted font-mono text-[10px] space-y-1.5 shadow-xl">
-            <div className="font-bold text-text-primary uppercase tracking-wider text-[9px] mb-1">SEVERITY LEGEND</div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+          <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 z-20 glass-panel p-2 sm:p-3 rounded-xl border border-border-muted font-mono text-[9px] sm:text-[10px] space-y-1 shadow-xl max-w-[140px] sm:max-w-none">
+            <div className="font-bold text-text-primary uppercase tracking-wider text-[8px] sm:text-[9px] mb-1">SEVERITY LEGEND</div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-rose-500"></span>
               <span className="text-text-primary">CRITICAL</span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-orange-500"></span>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-orange-500"></span>
               <span className="text-text-primary">HIGH</span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-amber-400"></span>
               <span className="text-text-primary">MEDIUM</span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
               <span className="text-text-primary">LOW</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
-              <span className="text-text-primary">INFO</span>
             </div>
           </div>
         </div>

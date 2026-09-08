@@ -135,34 +135,34 @@ action:
               rows="9"
               value={yamlRuleText}
               onChange={(e) => setYamlRuleText(e.target.value)}
-              className="w-full p-3 rounded-xl bg-surface-dim border border-border-muted font-mono text-xs text-text-primary focus:outline-none focus:border-primary leading-relaxed"
+              className="w-full p-3 rounded-xl bg-surface-dim border border-border-muted font-mono text-xs text-text-primary focus:outline-none focus:border-primary leading-relaxed custom-scrollbar-touch"
             />
 
             <button
               onClick={handleTestRule}
-              className="btn-primary px-6 py-2.5 rounded-xl text-xs font-bold w-full"
+              className="btn-primary px-6 py-3 rounded-xl text-xs font-bold w-full touch-target"
             >
               Test & Compile Detection Rule
             </button>
 
             {ruleTestResult && (
               <div className="p-4 rounded-xl bg-surface-dim border border-emerald-500/40 font-mono text-xs space-y-2">
-                <div className="flex justify-between items-center text-[11px]">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center text-[11px] gap-1">
                   <span className="text-emerald-400 font-bold">Compilation Result: {ruleTestResult.status}</span>
                   <span className="text-text-muted">Time: {ruleTestResult.compilation_time_ms} ms</span>
                 </div>
-                <div className="text-text-primary">Matched Records: {ruleTestResult.matched_records_count} events</div>
-                <div className="text-[11px] text-text-muted">Sample Match: {ruleTestResult.sample_match_event}</div>
+                <div className="text-text-primary font-bold">Matched Records: {ruleTestResult.matched_records_count} events</div>
+                <div className="text-[11px] text-text-muted break-all">Sample Match: {ruleTestResult.sample_match_event}</div>
               </div>
             )}
           </div>
         </div>
 
         {/* Right Column: WebCrypto SHA-256 & Audit Tamper Simulation (Span 5) */}
-        <div className="lg:col-span-5 glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-xl">
+        <div className="lg:col-span-5 glass-panel p-4 sm:p-6 rounded-2xl border border-border-muted space-y-4 shadow-xl">
           <div className="flex justify-between items-center border-b border-border-muted pb-3 font-mono text-xs">
             <span className="font-bold text-text-primary uppercase tracking-wider">WebCrypto Merkle Audit Studio</span>
-            <span className="text-primary font-bold">SHA-256 IMMUTABILITY</span>
+            <span className="text-primary font-bold text-[11px]">SHA-256 IMMUTABILITY</span>
           </div>
 
           <div className="space-y-4 font-mono text-xs">
@@ -173,7 +173,7 @@ action:
                 placeholder="Type custom text to compute instant SHA-256..."
                 value={customText}
                 onChange={(e) => computeClientSha256(e.target.value)}
-                className="w-full p-2.5 rounded-xl bg-surface-dim border border-border-muted text-text-primary text-xs focus:outline-none focus:border-primary"
+                className="w-full p-3 rounded-xl bg-surface-dim border border-border-muted text-text-primary text-xs focus:outline-none focus:border-primary"
               />
               {calculatedHash && (
                 <div className="mt-2 p-2.5 rounded bg-surface border border-border-muted text-emerald-400 text-[10px] break-all font-bold">
@@ -188,12 +188,12 @@ action:
                 type="text"
                 value={merkleInputHash}
                 onChange={(e) => setMerkleInputHash(e.target.value)}
-                className="w-full p-2.5 rounded-xl bg-surface-dim border border-border-muted text-text-primary text-xs focus:outline-none focus:border-primary"
+                className="w-full p-3 rounded-xl bg-surface-dim border border-border-muted text-text-primary text-xs focus:outline-none focus:border-primary break-all"
               />
               <button
                 onClick={handleSimulateTamper}
                 disabled={isTampering}
-                className="btn-secondary px-4 py-2 rounded-xl text-xs font-bold w-full"
+                className="btn-secondary px-4 py-3 rounded-xl text-xs font-bold w-full touch-target"
               >
                 {isTampering ? 'Simulating Audit Check...' : 'Simulate Payload Tamper'}
               </button>
@@ -201,7 +201,7 @@ action:
               {tamperResult && (
                 <div className="p-3 rounded-xl bg-surface-dim border border-rose-500/40 text-[11px] space-y-1">
                   <div className="text-rose-400 font-bold">Verdict: {tamperResult.verdict}</div>
-                  <div className="text-text-muted text-[10px]">Tampered Hash: {tamperResult.tampered_hash}</div>
+                  <div className="text-text-muted text-[10px] break-all">Tampered Hash: {tamperResult.tampered_hash}</div>
                 </div>
               )}
             </div>

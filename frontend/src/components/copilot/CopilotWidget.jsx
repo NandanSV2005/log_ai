@@ -56,12 +56,12 @@ export function CopilotWidget({ airGapped }) {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
       {/* Floating Toggle Button */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="btn-copilot flex items-center gap-2.5 px-4 py-3 rounded-xl font-mono text-xs tracking-wide cursor-pointer select-none"
+          className="btn-copilot flex items-center gap-2.5 px-4 py-3 rounded-xl font-mono text-xs tracking-wide cursor-pointer select-none touch-target"
           aria-label="Open AI SOC Copilot assistant"
         >
           <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>
@@ -74,9 +74,9 @@ export function CopilotWidget({ airGapped }) {
 
       {/* Drawer Panel */}
       {isOpen && (
-        <div className="w-96 max-w-[90vw] h-[520px] rounded-2xl glass-panel border border-border-muted flex flex-col shadow-2xl overflow-hidden backdrop-blur-xl animate-in slide-in-from-bottom-5">
+        <div className="w-[calc(100vw-2rem)] max-w-sm sm:w-96 h-[80vh] max-h-[520px] rounded-2xl glass-panel border border-border-muted flex flex-col shadow-2xl overflow-hidden backdrop-blur-xl animate-in slide-in-from-bottom-5">
           {/* Drawer Header */}
-          <div className="p-4 border-b border-border-muted bg-surface-dim/80 flex items-center justify-between">
+          <div className="p-3.5 border-b border-border-muted bg-surface-dim/80 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-primary/20 text-primary border border-primary/30 flex items-center justify-center">
                 <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>
@@ -95,14 +95,15 @@ export function CopilotWidget({ airGapped }) {
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1 text-text-muted hover:text-text-primary transition-colors"
+              className="p-1.5 text-text-muted hover:text-text-primary transition-colors touch-target"
+              aria-label="Close SOC Copilot"
             >
-              <span className="material-symbols-outlined text-lg">close</span>
+              <span className="material-symbols-outlined text-xl">close</span>
             </button>
           </div>
 
           {/* Messages History */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-3 font-sans text-xs">
+          <div className="flex-1 p-3.5 overflow-y-auto space-y-3 font-sans text-xs custom-scrollbar-touch">
             {messages.map((msg) => (
               <div
                 key={msg.id}
@@ -120,7 +121,7 @@ export function CopilotWidget({ airGapped }) {
                   </div>
                 )}
                 <div
-                  className={`max-w-[85%] p-3 rounded-xl leading-relaxed ${
+                  className={`max-w-[88%] p-3 rounded-xl leading-relaxed ${
                     msg.sender === 'user'
                       ? 'bg-primary text-surface-lowest rounded-tr-none font-medium'
                       : 'bg-surface-container border border-border-muted text-text-primary rounded-tl-none whitespace-pre-wrap'
@@ -140,22 +141,22 @@ export function CopilotWidget({ airGapped }) {
           </div>
 
           {/* Quick Prompt Pills */}
-          <div className="px-3 py-2 border-t border-border-muted bg-surface-dim/40 flex gap-1.5 overflow-x-auto text-[10px]">
+          <div className="px-3 py-2 border-t border-border-muted bg-surface-dim/40 flex gap-1.5 overflow-x-auto text-[10px] custom-scrollbar-touch">
             <button
               onClick={() => handleSend('Summarize high severity anomalies')}
-              className="px-2 py-1 rounded bg-surface border border-border-muted text-text-muted hover:text-text-primary whitespace-nowrap"
+              className="px-2.5 py-1.5 rounded bg-surface border border-border-muted text-text-muted hover:text-text-primary whitespace-nowrap touch-target"
             >
               ⚡ Summarize High Severity
             </button>
             <button
               onClick={() => handleSend('What MITRE ATT&CK tactics are active?')}
-              className="px-2 py-1 rounded bg-surface border border-border-muted text-text-muted hover:text-text-primary whitespace-nowrap"
+              className="px-2.5 py-1.5 rounded bg-surface border border-border-muted text-text-muted hover:text-text-primary whitespace-nowrap touch-target"
             >
               🛡️ Active MITRE Tactics
             </button>
             <button
               onClick={() => handleSend('How many total events ingested?')}
-              className="px-2 py-1 rounded bg-surface border border-border-muted text-text-muted hover:text-text-primary whitespace-nowrap"
+              className="px-2.5 py-1.5 rounded bg-surface border border-border-muted text-text-muted hover:text-text-primary whitespace-nowrap touch-target"
             >
               📊 Telemetry Counts
             </button>
@@ -179,7 +180,7 @@ export function CopilotWidget({ airGapped }) {
             <button
               type="submit"
               disabled={isLoading || !inputQuery.trim()}
-              className="p-2 rounded-lg bg-primary text-surface-lowest disabled:opacity-40 font-bold flex items-center justify-center"
+              className="p-2.5 rounded-lg bg-primary text-surface-lowest disabled:opacity-40 font-bold flex items-center justify-center touch-target"
             >
               <span className="material-symbols-outlined text-sm">send</span>
             </button>

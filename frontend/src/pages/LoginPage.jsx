@@ -46,14 +46,14 @@ export function LoginPage() {
       </header>
 
       {/* Main Login Form Container */}
-      <main className="flex-1 flex items-center justify-center p-4 z-10">
-        <div className="glass-panel w-full max-w-md rounded-2xl p-8 border border-border-muted shadow-2xl relative space-y-6">
+      <main className="flex-1 flex items-center justify-center p-3 sm:p-4 z-10">
+        <div className="glass-panel w-full max-w-md rounded-2xl p-4 sm:p-8 border border-border-muted shadow-2xl relative space-y-6">
           
           <div className="text-center space-y-2">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-dim border border-border-muted font-mono text-[10px] text-text-muted uppercase tracking-widest">
               [ SECURE ACCESS // INTELLIGENCE PLATFORM ]
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+            <h1 className="text-xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
               Access Intelligence
             </h1>
             <p className="text-xs text-text-muted font-sans">
@@ -74,7 +74,7 @@ export function LoginPage() {
                 Operator Username / ID
               </label>
               <div className="relative">
-                <span className="material-symbols-outlined absolute left-3 top-2.5 text-text-muted text-lg">
+                <span className="material-symbols-outlined absolute left-3 top-3 text-text-muted text-lg">
                   person
                 </span>
                 <input
@@ -85,7 +85,7 @@ export function LoginPage() {
                   onChange={(e) => setUsernameInput(e.target.value)}
                   placeholder="admin"
                   autoComplete="username"
-                  className="input-cyber w-full rounded-xl py-2.5 pl-10 pr-4 text-xs font-mono bg-surface-dim border-border-muted focus:outline-none focus:border-primary"
+                  className="input-cyber w-full rounded-xl py-3 pl-10 pr-4 text-xs font-mono bg-surface-dim border-border-muted focus:outline-none focus:border-primary"
                 />
               </div>
             </div>
@@ -95,7 +95,7 @@ export function LoginPage() {
                 Password / Access Token
               </label>
               <div className="relative">
-                <span className="material-symbols-outlined absolute left-3 top-2.5 text-text-muted text-lg">
+                <span className="material-symbols-outlined absolute left-3 top-3 text-text-muted text-lg">
                   key
                 </span>
                 <input
@@ -106,7 +106,7 @@ export function LoginPage() {
                   onChange={(e) => setPasswordInput(e.target.value)}
                   placeholder="••••••••••••"
                   autoComplete="current-password"
-                  className="input-cyber w-full rounded-xl py-2.5 pl-10 pr-4 text-xs font-mono bg-surface-dim border-border-muted focus:outline-none focus:border-primary"
+                  className="input-cyber w-full rounded-xl py-3 pl-10 pr-4 text-xs font-mono bg-surface-dim border-border-muted focus:outline-none focus:border-primary"
                 />
               </div>
             </div>
@@ -114,7 +114,7 @@ export function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="btn-primary w-full rounded-xl py-3 text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-md hover:scale-[1.01] transition-all disabled:opacity-50 mt-6"
+              className="btn-primary w-full rounded-xl py-3.5 text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-md hover:scale-[1.01] transition-all disabled:opacity-50 mt-6 touch-target"
             >
               {isLoading ? (
                 <>

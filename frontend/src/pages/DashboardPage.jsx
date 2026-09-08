@@ -404,32 +404,38 @@ export function DashboardPage({ pollingInterval }) {
 
           {/* EXPANDABLE INCIDENT RELATIONSHIP DRAWER / MODAL */}
           {selectedIncident && (
-            <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-              <div className="glass-panel w-full max-w-3xl rounded-2xl border border-border-muted p-6 space-y-6 shadow-2xl animate-in zoom-in-95 duration-200">
-                <div className="flex justify-between items-center border-b border-border-muted pb-4">
+            <div
+              className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+              onClick={(e) => {
+                if (e.target === e.currentTarget) setSelectedIncident(null);
+              }}
+            >
+              <div className="glass-panel w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border-muted p-4 sm:p-6 space-y-4 sm:space-y-6 shadow-2xl animate-in zoom-in-95 duration-200">
+                <div className="flex justify-between items-start border-b border-border-muted pb-3 gap-2">
                   <div>
-                    <span className="font-mono text-xs text-rose-400 font-bold">
+                    <span className="font-mono text-xs text-rose-400 font-bold break-all">
                       INCIDENT GRAPH #{(selectedIncident.incident_id || '').substring(0, 8)}
                     </span>
-                    <h3 className="text-lg font-bold text-text-primary mt-0.5">
+                    <h3 className="text-base sm:text-lg font-bold text-text-primary mt-0.5 break-all">
                       Offending Source: {selectedIncident.source_ip || 'N/A'}
                     </h3>
                   </div>
                   <button
                     onClick={() => setSelectedIncident(null)}
-                    className="p-1.5 rounded-lg border border-border-muted hover:border-primary text-text-muted"
+                    className="p-2 rounded-lg border border-border-muted hover:border-primary text-text-muted touch-target"
+                    aria-label="Close Incident Details"
                   >
-                    <span className="material-symbols-outlined text-sm">close</span>
+                    <span className="material-symbols-outlined text-lg">close</span>
                   </button>
                 </div>
 
                 <div className="space-y-4 font-mono text-xs">
-                  <div className="p-4 rounded-xl bg-surface-dim border border-border-muted space-y-2">
+                  <div className="p-3 sm:p-4 rounded-xl bg-surface-dim border border-border-muted space-y-2">
                     <div className="text-[10px] text-text-dim uppercase">Relationship Node Breakdown:</div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center pt-1">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-center pt-1">
                       <div className="p-2 rounded bg-surface border border-border-muted">
                         <div className="text-[9px] text-text-dim">Source IP</div>
-                        <div className="font-bold text-text-primary text-xs mt-0.5">{selectedIncident.source_ip || '192.168.1.1'}</div>
+                        <div className="font-bold text-text-primary text-xs mt-0.5 break-all">{selectedIncident.source_ip || '192.168.1.1'}</div>
                       </div>
                       <div className="p-2 rounded bg-surface border border-border-muted">
                         <div className="text-[9px] text-text-dim">Events Count</div>
@@ -448,13 +454,13 @@ export function DashboardPage({ pollingInterval }) {
 
                   <div className="space-y-2">
                     <div className="text-text-muted text-xs font-bold">Correlated Events Stream:</div>
-                    <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
+                    <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar-touch">
                       {incidentDetailEvents.length > 0 ? (
                         incidentDetailEvents.map((evt, idx) => (
-                          <div key={idx} className="p-2.5 rounded bg-surface-dim border border-border-muted flex justify-between items-center text-[11px]">
+                          <div key={idx} className="p-2.5 rounded bg-surface-dim border border-border-muted flex flex-col sm:flex-row justify-between sm:items-center gap-1 text-[11px]">
                             <span className="text-text-primary font-bold">{evt.event_type || 'cisco_asa'}</span>
-                            <span className="text-text-muted">{evt.source_ip} &rarr; {evt.destination_ip || '10.0.0.1'}</span>
-                            <span className="text-rose-400 font-bold">{evt.threat_level || 'HIGH'}</span>
+                            <span className="text-text-muted break-all">{evt.source_ip} &rarr; {evt.destination_ip || '10.0.0.1'}</span>
+                            <span className="text-rose-400 font-bold self-start sm:self-auto">{evt.threat_level || 'HIGH'}</span>
                           </div>
                         ))
                       ) : (
@@ -464,24 +470,24 @@ export function DashboardPage({ pollingInterval }) {
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center pt-2 border-t border-border-muted">
+                <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 pt-3 border-t border-border-muted">
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleIncidentStatusChange(selectedIncident.incident_id, 'Resolved')}
-                      className="btn-primary px-4 py-2 rounded-xl text-xs font-bold"
+                      className="btn-primary px-4 py-2.5 rounded-xl text-xs font-bold flex-1 sm:flex-none touch-target"
                     >
                       Mark Resolved
                     </button>
                     <button
                       onClick={() => handleIncidentStatusChange(selectedIncident.incident_id, 'Active')}
-                      className="btn-secondary px-4 py-2 rounded-xl text-xs font-bold"
+                      className="btn-secondary px-4 py-2.5 rounded-xl text-xs font-bold flex-1 sm:flex-none touch-target"
                     >
                       Mark Active
                     </button>
                   </div>
                   <button
                     onClick={() => setSelectedIncident(null)}
-                    className="btn-secondary px-4 py-2 rounded-xl text-xs font-bold"
+                    className="btn-secondary px-4 py-2.5 rounded-xl text-xs font-bold touch-target"
                   >
                     Close Drawer
                   </button>
@@ -492,23 +498,23 @@ export function DashboardPage({ pollingInterval }) {
 
           {/* SECTION D: RECENT TELEMETRY TABLE */}
           <div className="glass-panel rounded-2xl border border-border-muted shadow-xl overflow-hidden space-y-4">
-            <div className="p-5 border-b border-border-muted bg-surface-dim flex justify-between items-center">
+            <div className="p-4 sm:p-5 border-b border-border-muted bg-surface-dim flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
               <div>
                 <h3 className="text-sm font-extrabold text-text-primary uppercase tracking-wider">Recent Telemetry Stream</h3>
                 <p className="text-xs text-text-muted mt-0.5">Live incoming OCSF 1.1 event stream across registered network perimeter nodes.</p>
               </div>
               <button
                 onClick={() => navigate('/log-explorer')}
-                className="btn-secondary px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1"
+                className="btn-secondary px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1 self-start sm:self-auto touch-target"
               >
                 <span>Log Explorer</span>
                 <span className="material-symbols-outlined text-sm">arrow_forward</span>
               </button>
             </div>
 
-            <div className="p-5 overflow-x-auto">
+            <div className="p-3 sm:p-5 overflow-x-auto custom-scrollbar-touch">
               {recentEvents.length > 0 ? (
-                <table className="w-full text-left font-mono text-xs border-collapse">
+                <table className="w-full text-left font-mono text-xs border-collapse min-w-[550px]">
                   <thead>
                     <tr className="border-b border-border-muted text-text-muted text-[10px] uppercase">
                       <th className="py-2.5 px-3">Timestamp</th>
@@ -522,16 +528,16 @@ export function DashboardPage({ pollingInterval }) {
                   <tbody className="divide-y divide-border-muted">
                     {recentEvents.slice(0, 10).map((evt, idx) => (
                       <tr key={evt.raw_event_hash || idx} className="hover:bg-surface-hover transition-colors">
-                        <td className="py-2.5 px-3 text-text-muted text-[11px]">
+                        <td className="py-2.5 px-3 text-text-muted text-[11px] whitespace-nowrap">
                           {evt.timestamp || '2026-08-31 19:40'}
                         </td>
-                        <td className="py-2.5 px-3 font-bold text-text-primary">
+                        <td className="py-2.5 px-3 font-bold text-text-primary whitespace-nowrap">
                           {evt.source_ip || '192.168.1.100'}
                         </td>
-                        <td className="py-2.5 px-3 text-primary">
+                        <td className="py-2.5 px-3 text-primary whitespace-nowrap">
                           {evt.event_type || 'syslog'}
                         </td>
-                        <td className="py-2.5 px-3">
+                        <td className="py-2.5 px-3 whitespace-nowrap">
                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                             evt.threat_level === 'HIGH' ? 'bg-rose-500/20 text-rose-400' :
                             evt.threat_level === 'MEDIUM' ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'
@@ -539,13 +545,13 @@ export function DashboardPage({ pollingInterval }) {
                             {evt.threat_level || 'LOW'}
                           </span>
                         </td>
-                        <td className="py-2.5 px-3 font-bold text-text-primary">
+                        <td className="py-2.5 px-3 font-bold text-text-primary whitespace-nowrap">
                           {(evt.threat_score || 12.0).toFixed(1)}
                         </td>
-                        <td className="py-2.5 px-3 text-right">
+                        <td className="py-2.5 px-3 text-right whitespace-nowrap">
                           <button
                             onClick={() => setSelectedEventDrawer(evt)}
-                            className="btn-secondary px-2.5 py-1 rounded text-[10px] font-bold"
+                            className="btn-secondary px-3 py-1.5 rounded text-[10px] font-bold touch-target"
                           >
                             Inspect
                           </button>
@@ -564,21 +570,33 @@ export function DashboardPage({ pollingInterval }) {
 
           {/* EVENT DETAIL DRAWER */}
           {selectedEventDrawer && (
-            <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-              <div className="glass-panel w-full max-w-2xl rounded-2xl border border-border-muted p-6 space-y-4 shadow-2xl">
+            <div
+              className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+              onClick={(e) => {
+                if (e.target === e.currentTarget) setSelectedEventDrawer(null);
+              }}
+            >
+              <div className="glass-panel w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border-muted p-4 sm:p-6 space-y-4 shadow-2xl">
                 <div className="flex justify-between items-center border-b border-border-muted pb-3">
                   <h3 className="text-base font-bold text-text-primary">OCSF Event Inspector</h3>
-                  <button onClick={() => setSelectedEventDrawer(null)} className="p-1 rounded text-text-muted hover:text-text-primary">
-                    <span className="material-symbols-outlined text-sm">close</span>
+                  <button
+                    onClick={() => setSelectedEventDrawer(null)}
+                    className="p-1.5 rounded text-text-muted hover:text-text-primary touch-target"
+                    aria-label="Close Event Inspector"
+                  >
+                    <span className="material-symbols-outlined text-lg">close</span>
                   </button>
                 </div>
-                <div className="p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-xs space-y-2 overflow-x-auto">
-                  <pre className="text-emerald-400 text-[11px] leading-relaxed">
+                <div className="p-3 sm:p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-xs space-y-2 overflow-x-auto custom-scrollbar-touch">
+                  <pre className="text-emerald-400 text-[11px] leading-relaxed break-all whitespace-pre-wrap">
                     {JSON.stringify(selectedEventDrawer, null, 2)}
                   </pre>
                 </div>
                 <div className="text-right">
-                  <button onClick={() => setSelectedEventDrawer(null)} className="btn-secondary px-4 py-1.5 rounded-xl text-xs font-bold">
+                  <button
+                    onClick={() => setSelectedEventDrawer(null)}
+                    className="btn-secondary px-4 py-2 rounded-xl text-xs font-bold touch-target"
+                  >
                     Close Inspector
                   </button>
                 </div>

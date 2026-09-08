@@ -189,16 +189,62 @@ export function LogExplorerPage() {
 
       {/* SECTION 2: LOG TABLE WITH EXPANDABLE ROWS */}
       <div className="glass-panel rounded-2xl border border-border-muted shadow-2xl overflow-hidden space-y-4">
-        <div className="p-5 border-b border-border-muted bg-surface-dim flex justify-between items-center font-mono text-xs">
+        <div className="p-4 sm:p-5 border-b border-border-muted bg-surface-dim flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 font-mono text-xs">
           <span className="font-bold text-text-primary uppercase tracking-wider">OCSF 1.1 Normalized Event Records</span>
           <span className="text-text-muted">Page {currentPage} of {totalPages}</span>
         </div>
 
-        <div className="p-5 overflow-x-auto">
+        {/* Mobile Log Card List (< 640px) */}
+        <div className="block sm:hidden p-3 space-y-3 font-mono text-xs">
+          {isLoading ? (
+            <div className="p-8 text-center text-text-muted">Loading telemetry records...</div>
+          ) : paginatedEvents.length > 0 ? (
+            paginatedEvents.map((evt, idx) => (
+              <div
+                key={evt.raw_event_hash || idx}
+                className="p-3.5 rounded-xl bg-surface-dim border border-border-muted space-y-2"
+              >
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className="text-text-muted">{evt.timestamp || '2026-08-31 19:40'}</span>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                    evt.threat_level === 'HIGH' ? 'bg-rose-500/20 text-rose-400' :
+                    evt.threat_level === 'MEDIUM' ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'
+                  }`}>
+                    {evt.threat_level || 'LOW'}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-baseline">
+                  <div className="font-bold text-text-primary text-sm">{evt.source_ip || '192.168.1.100'}</div>
+                  <div className="text-primary font-bold text-xs">{evt.event_type || 'cisco_asa'}</div>
+                </div>
+
+                <div className="flex justify-between items-center pt-1 border-t border-border-muted/50 text-[11px]">
+                  <div className="text-text-muted">
+                    Score: <span className="font-bold text-text-primary">{(evt.threat_score || 12.0).toFixed(1)}</span>
+                  </div>
+                  <button
+                    onClick={() => setSelectedEventDrawer(evt)}
+                    className="btn-secondary px-3 py-1.5 rounded-lg text-[10px] font-bold touch-target"
+                  >
+                    Inspect Payload
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="p-8 text-center text-text-muted">
+              No matching log records found.
+            </div>
+          )}
+        </div>
+
+        {/* Desktop/Tablet Log Table (>= 640px) */}
+        <div className="hidden sm:block p-5 overflow-x-auto custom-scrollbar-touch">
           {isLoading ? (
             <div className="p-12 text-center text-text-muted font-mono text-xs">Loading telemetry records...</div>
           ) : paginatedEvents.length > 0 ? (
-            <table className="w-full text-left font-mono text-xs border-collapse">
+            <table className="w-full text-left font-mono text-xs border-collapse min-w-[650px]">
               <thead>
                 <tr className="border-b border-border-muted text-text-muted text-[10px] uppercase">
                   <th className="py-3 px-3">Timestamp</th>
@@ -213,16 +259,16 @@ export function LogExplorerPage() {
               <tbody className="divide-y divide-border-muted">
                 {paginatedEvents.map((evt, idx) => (
                   <tr key={evt.raw_event_hash || idx} className="hover:bg-surface-hover transition-colors">
-                    <td className="py-3.5 px-3 text-text-muted text-[11px]">
+                    <td className="py-3.5 px-3 text-text-muted text-[11px] whitespace-nowrap">
                       {evt.timestamp || '2026-08-31 19:40'}
                     </td>
-                    <td className="py-3.5 px-3 font-bold text-text-primary">
+                    <td className="py-3.5 px-3 font-bold text-text-primary whitespace-nowrap">
                       {evt.source_ip || '192.168.1.100'}
                     </td>
-                    <td className="py-3.5 px-3 text-primary">
+                    <td className="py-3.5 px-3 text-primary whitespace-nowrap">
                       {evt.event_type || 'cisco_asa'}
                     </td>
-                    <td className="py-3.5 px-3">
+                    <td className="py-3.5 px-3 whitespace-nowrap">
                       <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold ${
                         evt.threat_level === 'HIGH' ? 'bg-rose-500/20 text-rose-400' :
                         evt.threat_level === 'MEDIUM' ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'
@@ -230,18 +276,18 @@ export function LogExplorerPage() {
                         {evt.threat_level || 'LOW'}
                       </span>
                     </td>
-                    <td className="py-3.5 px-3 font-bold text-text-primary">
+                    <td className="py-3.5 px-3 font-bold text-text-primary whitespace-nowrap">
                       {(evt.threat_score || 12.0).toFixed(1)}
                     </td>
-                    <td className="py-3.5 px-3">
+                    <td className="py-3.5 px-3 whitespace-nowrap">
                       <span className="px-2 py-0.5 rounded bg-surface border border-border-muted text-[10px] text-text-muted">
                         {evt.mitre_tactic || 'T1110'}
                       </span>
                     </td>
-                    <td className="py-3.5 px-3 text-right">
+                    <td className="py-3.5 px-3 text-right whitespace-nowrap">
                       <button
                         onClick={() => setSelectedEventDrawer(evt)}
-                        className="btn-secondary px-3 py-1 rounded text-[10px] font-bold"
+                        className="btn-secondary px-3 py-1.5 rounded text-[10px] font-bold touch-target"
                       >
                         Inspect Payload
                       </button>
@@ -262,15 +308,15 @@ export function LogExplorerPage() {
           <button
             disabled={currentPage <= 1}
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            className="btn-secondary px-4 py-1.5 rounded-xl text-xs font-bold disabled:opacity-40"
+            className="btn-secondary px-4 py-2 rounded-xl text-xs font-bold disabled:opacity-40 touch-target"
           >
             Previous
           </button>
-          <span className="text-text-muted">Showing {paginatedEvents.length} of {filteredEvents.length} events</span>
+          <span className="text-text-muted text-[11px] sm:text-xs">Showing {paginatedEvents.length} of {filteredEvents.length}</span>
           <button
             disabled={currentPage >= totalPages}
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            className="btn-secondary px-4 py-1.5 rounded-xl text-xs font-bold disabled:opacity-40"
+            className="btn-secondary px-4 py-2 rounded-xl text-xs font-bold disabled:opacity-40 touch-target"
           >
             Next
           </button>
@@ -280,48 +326,48 @@ export function LogExplorerPage() {
       {/* EVENT INSPECTOR DRAWER MODAL */}
       {selectedEventDrawer && (
         <div
-          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 cursor-pointer overflow-y-auto"
           onClick={(e) => {
             if (e.target === e.currentTarget) setSelectedEventDrawer(null);
           }}
         >
           <div
-            className="glass-panel w-full max-w-3xl rounded-2xl border border-border-muted p-6 space-y-4 shadow-2xl animate-in zoom-in-95 duration-200 cursor-default"
+            className="glass-panel w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border-muted p-4 sm:p-6 space-y-4 shadow-2xl animate-in zoom-in-95 duration-200 cursor-default"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center border-b border-border-muted pb-3 font-mono">
+            <div className="flex justify-between items-start border-b border-border-muted pb-3 font-mono gap-2">
               <div>
                 <span className="text-xs text-primary font-bold">OCSF 1.1 UNIFIED EVENT RECORD</span>
-                <h3 className="text-base font-bold text-text-primary mt-0.5">Source: {selectedEventDrawer.source_ip || '192.168.1.100'}</h3>
+                <h3 className="text-base font-bold text-text-primary mt-0.5 break-all">Source: {selectedEventDrawer.source_ip || '192.168.1.100'}</h3>
               </div>
               <button
                 onClick={() => setSelectedEventDrawer(null)}
                 aria-label="Close event details"
-                className="p-1.5 rounded-lg bg-surface-dim hover:bg-surface-hover border border-border-muted text-text-muted hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-primary transition-all flex items-center justify-center cursor-pointer"
+                className="p-2 rounded-lg bg-surface-dim hover:bg-surface-hover border border-border-muted text-text-muted hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-primary transition-all flex items-center justify-center cursor-pointer touch-target"
               >
                 <span className="material-symbols-outlined text-xl">close</span>
               </button>
             </div>
 
-            <div className="p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-xs space-y-3 max-h-96 overflow-y-auto">
+            <div className="p-3 sm:p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-xs space-y-3 max-h-96 overflow-y-auto custom-scrollbar-touch">
               <div className="text-[10px] text-text-dim uppercase">Original Syslog Payload:</div>
               <div className="p-2.5 rounded bg-surface border border-border-muted text-text-primary break-all font-bold">
                 {selectedEventDrawer.original_event || selectedEventDrawer.payload || 'No raw payload available'}
               </div>
 
               <div className="text-[10px] text-text-dim uppercase pt-2">Structured OCSF JSON Object:</div>
-              <pre className="p-3 rounded bg-surface border border-border-muted text-emerald-400 text-[11px] leading-relaxed">
+              <pre className="p-3 rounded bg-surface border border-border-muted text-emerald-400 text-[11px] leading-relaxed break-all whitespace-pre-wrap">
                 {JSON.stringify(selectedEventDrawer, null, 2)}
               </pre>
             </div>
 
-            <div className="flex justify-between items-center pt-2 border-t border-border-muted">
-              <span className="font-mono text-[10px] text-text-muted">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pt-3 border-t border-border-muted">
+              <span className="font-mono text-[10px] text-text-muted break-all">
                 SHA-256 Digest: {(selectedEventDrawer.raw_event_hash || '').substring(0, 16)}...
               </span>
               <button
                 onClick={() => setSelectedEventDrawer(null)}
-                className="btn-secondary px-4 py-1.5 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-primary"
+                className="btn-secondary px-4 py-2 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-primary touch-target"
               >
                 Close Inspector
               </button>

@@ -5,6 +5,7 @@ import { StitchBrandMark } from '../components/common/StitchBrandMark';
 
 export function LandingPage() {
   const { theme, setTheme } = useTheme();
+  const [isLandingMenuOpen, setIsLandingMenuOpen] = useState(false);
 
   // 1. 6-Stage Processing Pipeline Hover/Click State
   const [activePipelineStage, setActivePipelineStage] = useState(1);
@@ -300,21 +301,23 @@ export function LandingPage() {
     },
   ];
 
+  const activeArchObj = ARCHITECTURE_NODES.find((a) => a.id === activeArchNode) || ARCHITECTURE_NODES[0];
+
   return (
     <div className="bg-background text-text-primary antialiased min-h-screen flex flex-col relative overflow-x-hidden font-sans">
       <div className="scan-overlay"></div>
 
       {/* Editorial Navigation Header */}
-      <header className="w-full bg-background border-b border-border-muted relative z-20 py-4 px-6 max-w-7xl mx-auto flex justify-between items-center">
+      <header className="w-full bg-background border-b border-border-muted relative z-20 py-4 px-4 sm:px-6 max-w-7xl mx-auto flex justify-between items-center">
         <Link to="/" className="font-extrabold text-xl text-primary tracking-tighter flex items-center gap-2.5">
           <StitchBrandMark className="w-6 h-6 text-primary" />
           <span className="font-mono tracking-tight text-text-primary">STITCH</span>
-          <span className="text-[10px] font-mono border border-border-muted px-2 py-0.5 rounded text-text-muted">
+          <span className="hidden sm:inline-block text-[10px] font-mono border border-border-muted px-2 py-0.5 rounded text-text-muted">
             EDITORIAL BRIEFING
           </span>
         </Link>
 
-        {/* Navbar Anchor Links for Landing Page Sections */}
+        {/* Desktop Navbar Anchor Links */}
         <nav className="hidden md:flex items-center gap-8 text-xs font-mono font-bold tracking-wider text-text-muted">
           <a href="#pipeline" className="hover:text-primary transition-colors">PIPELINE</a>
           <a href="#capabilities" className="hover:text-primary transition-colors">CAPABILITIES</a>
@@ -322,43 +325,120 @@ export function LandingPage() {
           <a href="#estimator" className="hover:text-primary transition-colors">ESTIMATOR</a>
         </nav>
 
-        <div className="flex items-center gap-3">
+        {/* Header Action Controls */}
+        <div className="hidden sm:flex items-center gap-3">
           <button
             onClick={() => setTheme(theme === 'dark' ? 'sage' : 'dark')}
-            className="px-3.5 py-1.5 rounded-lg border border-border-muted bg-surface-dim text-xs font-mono font-bold flex items-center gap-2 hover:border-primary transition-all text-text-primary"
+            className="px-3.5 py-1.5 rounded-lg border border-border-muted bg-surface-dim text-xs font-mono font-bold flex items-center gap-2 hover:border-primary transition-all text-text-primary touch-target"
             aria-label="Toggle visual theme mode"
           >
             <span className="material-symbols-outlined text-sm">palette</span>
             <span>{theme === 'dark' ? 'CYBER VOID' : 'SAGE GREEN'}</span>
           </button>
 
-          <Link to="/login" className="btn-secondary px-4 py-1.5 rounded-lg text-xs font-bold font-mono">
+          <Link to="/login" className="btn-secondary px-4 py-1.5 rounded-lg text-xs font-bold font-mono touch-target">
             Sign In
           </Link>
-          <Link to="/dashboard" className="btn-primary px-4 py-1.5 rounded-lg text-xs font-bold font-mono flex items-center gap-1">
+          <Link to="/dashboard" className="btn-primary px-4 py-1.5 rounded-lg text-xs font-bold font-mono flex items-center gap-1 touch-target">
             <span>SOC Console</span>
             <span className="material-symbols-outlined text-sm">arrow_forward</span>
           </Link>
         </div>
+
+        {/* Mobile Header Menu Trigger */}
+        <div className="flex sm:hidden items-center gap-2">
+          <button
+            onClick={() => setIsLandingMenuOpen(!isLandingMenuOpen)}
+            className="p-2 rounded-lg bg-surface border border-border-muted text-text-primary hover:text-primary touch-target"
+            aria-label={isLandingMenuOpen ? 'Close menu' : 'Open menu'}
+          >
+            <span className="material-symbols-outlined text-2xl">
+              {isLandingMenuOpen ? 'close' : 'menu'}
+            </span>
+          </button>
+        </div>
+
+        {/* Mobile Landing Dropdown Menu */}
+        {isLandingMenuOpen && (
+          <div className="sm:hidden fixed inset-x-0 top-16 bg-surface/95 border-b border-border-muted backdrop-blur-lg p-4 z-50 space-y-3 font-mono text-xs">
+            <div className="grid grid-cols-2 gap-2 text-center">
+              <a
+                href="#pipeline"
+                onClick={() => setIsLandingMenuOpen(false)}
+                className="p-2.5 rounded-lg bg-surface-dim border border-border-muted text-text-primary font-bold touch-target"
+              >
+                PIPELINE
+              </a>
+              <a
+                href="#capabilities"
+                onClick={() => setIsLandingMenuOpen(false)}
+                className="p-2.5 rounded-lg bg-surface-dim border border-border-muted text-text-primary font-bold touch-target"
+              >
+                CAPABILITIES
+              </a>
+              <a
+                href="#topology"
+                onClick={() => setIsLandingMenuOpen(false)}
+                className="p-2.5 rounded-lg bg-surface-dim border border-border-muted text-text-primary font-bold touch-target"
+              >
+                TOPOLOGY
+              </a>
+              <a
+                href="#estimator"
+                onClick={() => setIsLandingMenuOpen(false)}
+                className="p-2.5 rounded-lg bg-surface-dim border border-border-muted text-text-primary font-bold touch-target"
+              >
+                ESTIMATOR
+              </a>
+            </div>
+
+            <div className="pt-2 border-t border-border-muted flex flex-col gap-2">
+              <button
+                onClick={() => setTheme(theme === 'dark' ? 'sage' : 'dark')}
+                className="w-full p-2.5 rounded-lg border border-border-muted bg-surface-dim text-text-primary font-bold flex items-center justify-center gap-2 touch-target"
+              >
+                <span className="material-symbols-outlined text-base">palette</span>
+                <span>{theme === 'dark' ? 'CYBER VOID' : 'SAGE GREEN'}</span>
+              </button>
+
+              <div className="flex gap-2">
+                <Link
+                  to="/login"
+                  onClick={() => setIsLandingMenuOpen(false)}
+                  className="flex-1 btn-secondary p-2.5 rounded-lg text-center font-bold touch-target"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/dashboard"
+                  onClick={() => setIsLandingMenuOpen(false)}
+                  className="flex-1 btn-primary p-2.5 rounded-lg text-center font-bold touch-target"
+                >
+                  SOC Console
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Mobile Navigation Bar */}
       <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-border-muted z-40 md:hidden flex justify-around py-2 px-1 shadow-md">
-        <Link to="/threat-intel" className="flex flex-col items-center text-text-muted hover:text-primary">
+        <Link to="/threat-intel" className="flex flex-col items-center text-text-muted hover:text-primary touch-target">
           <span className="material-symbols-outlined text-xl">security</span>
-          <span className="text-[10px] font-mono mt-1">Intel</span>
+          <span className="text-[10px] font-mono mt-0.5">Intel</span>
         </Link>
-        <Link to="/log-explorer" className="flex flex-col items-center text-text-muted hover:text-primary">
+        <Link to="/log-explorer" className="flex flex-col items-center text-text-muted hover:text-primary touch-target">
           <span className="material-symbols-outlined text-xl">database</span>
-          <span className="text-[10px] font-mono mt-1">Logs</span>
+          <span className="text-[10px] font-mono mt-0.5">Logs</span>
         </Link>
-        <Link to="/forensics" className="flex flex-col items-center text-text-muted hover:text-primary">
+        <Link to="/forensics" className="flex flex-col items-center text-text-muted hover:text-primary touch-target">
           <span className="material-symbols-outlined text-xl">verified</span>
-          <span className="text-[10px] font-mono mt-1">Forensics</span>
+          <span className="text-[10px] font-mono mt-0.5">Forensics</span>
         </Link>
-        <Link to="/dashboard" className="flex flex-col items-center text-text-muted hover:text-primary">
+        <Link to="/dashboard" className="flex flex-col items-center text-text-muted hover:text-primary touch-target">
           <span className="material-symbols-outlined text-xl">dashboard</span>
-          <span className="text-[10px] font-mono mt-1">Command</span>
+          <span className="text-[10px] font-mono mt-0.5">Command</span>
         </Link>
       </nav>
 
@@ -480,7 +560,7 @@ export function LandingPage() {
 
           <div className="space-y-6">
             {/* Interactive Stage Selector Bar */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 font-mono text-xs">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 font-mono text-xs overflow-x-auto pb-2 custom-scrollbar-touch">
               {PIPELINE_STAGES.map((stage) => {
                 const isActive = activePipelineStage === stage.id;
                 return (
@@ -490,7 +570,7 @@ export function LandingPage() {
                     onMouseEnter={() => setActivePipelineStage(stage.id)}
                     onClick={() => setActivePipelineStage(stage.id)}
                     onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setActivePipelineStage(stage.id)}
-                    className={`p-4 rounded-xl border text-left flex flex-col justify-between h-24 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary ${
+                    className={`p-3.5 sm:p-4 rounded-xl border text-left flex flex-col justify-between h-24 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary touch-target ${
                       isActive
                         ? 'bg-primary text-surface-lowest border-primary shadow-xl scale-105 font-bold'
                         : 'bg-surface border-border-muted text-text-muted hover:text-text-primary hover:border-primary/50'
@@ -505,14 +585,14 @@ export function LandingPage() {
             </div>
 
             {/* Active Stage Detail Panel */}
-            <div className="glass-panel p-6 sm:p-8 rounded-2xl border border-border-muted space-y-4 shadow-2xl transition-all duration-200">
+            <div className="glass-panel p-4 sm:p-8 rounded-2xl border border-border-muted space-y-4 shadow-2xl transition-all duration-200">
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-border-muted pb-4 font-mono">
-                <h3 className="text-lg font-bold text-text-primary">{activePipelineObj.title}</h3>
-                <div className="flex items-center gap-2">
+                <h3 className="text-base sm:text-lg font-bold text-text-primary">{activePipelineObj.title}</h3>
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="px-2.5 py-1 rounded bg-surface-dim border border-border-muted text-[10px] text-emerald-400 font-bold">
                     {activePipelineObj.techBadge}
                   </span>
-                  <span className="px-3 py-1 rounded bg-surface-dim border border-border-muted text-xs text-primary">
+                  <span className="px-2.5 py-1 rounded bg-surface-dim border border-border-muted text-[11px] sm:text-xs text-primary break-all">
                     {activePipelineObj.filepath}
                   </span>
                 </div>
@@ -520,10 +600,10 @@ export function LandingPage() {
 
               <p className="text-xs sm:text-sm text-text-muted leading-relaxed font-sans">{activePipelineObj.desc}</p>
 
-              <div className="p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-xs space-y-2">
+              <div className="p-3.5 sm:p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-xs space-y-2 overflow-hidden">
                 <div className="text-text-dim text-[10px] uppercase tracking-wider">[ SAMPLE LOG TRANSFORMATION ]</div>
-                <div className="text-text-primary font-bold">{activePipelineObj.payload}</div>
-                <div className="text-emerald-400 text-[11px] pt-1">
+                <div className="text-text-primary font-bold break-all leading-snug">{activePipelineObj.payload}</div>
+                <div className="text-emerald-400 text-[11px] pt-1 break-all">
                   <span className="text-text-muted">SHA-256 Digest:</span> {activePipelineObj.digest}
                 </div>
               </div>

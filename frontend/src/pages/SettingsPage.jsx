@@ -101,12 +101,12 @@ export function SettingsPage({ pollingInterval, setPollingInterval, airGapped, s
             <div className="font-bold text-text-primary">Real-Time Polling Interval</div>
             <div className="text-[11px] text-text-muted mt-0.5">Controls frequency of background API calls to `/api/v1/dashboard/stats`</div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {[1000, 2000, 5000, 10000].map((ms) => (
               <button
                 key={ms}
                 onClick={() => setPollingInterval && setPollingInterval(ms)}
-                className={`px-3 py-1.5 rounded-lg border font-bold ${
+                className={`px-3.5 py-2 rounded-lg border font-bold touch-target ${
                   pollingInterval === ms
                     ? 'bg-primary text-surface-lowest border-primary shadow'
                     : 'bg-surface-dim border-border-muted text-text-muted hover:border-primary/50'
@@ -120,7 +120,7 @@ export function SettingsPage({ pollingInterval, setPollingInterval, airGapped, s
       </div>
 
       {/* CATEGORY 3: SECURITY & PRIVACY */}
-      <div className="glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-lg">
+      <div className="glass-panel p-4 sm:p-6 rounded-2xl border border-border-muted space-y-4 shadow-lg">
         <div className="flex items-center gap-2 border-b border-border-muted pb-3 font-mono text-xs">
           <span className="material-symbols-outlined text-primary text-xl">shield_lock</span>
           <h2 className="text-sm font-bold text-text-primary uppercase tracking-wider">Security Controls & Air-Gapped Mode</h2>
@@ -133,7 +133,7 @@ export function SettingsPage({ pollingInterval, setPollingInterval, airGapped, s
           </div>
           <button
             onClick={() => setAirGapped && setAirGapped(!airGapped)}
-            className={`px-4 py-2 rounded-xl border font-bold transition-all ${
+            className={`px-4 py-2.5 rounded-xl border font-bold transition-all touch-target ${
               airGapped
                 ? 'bg-emerald-500 text-surface-lowest border-emerald-500'
                 : 'bg-surface-dim border-border-muted text-text-muted hover:text-text-primary'
@@ -145,7 +145,7 @@ export function SettingsPage({ pollingInterval, setPollingInterval, airGapped, s
       </div>
 
       {/* CATEGORY 4: DATA MAINTENANCE & RESET */}
-      <div className="glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-lg">
+      <div className="glass-panel p-4 sm:p-6 rounded-2xl border border-border-muted space-y-4 shadow-lg">
         <div className="flex items-center gap-2 border-b border-border-muted pb-3 font-mono text-xs">
           <span className="material-symbols-outlined text-rose-400 text-xl">delete_forever</span>
           <h2 className="text-sm font-bold text-text-primary uppercase tracking-wider">Telemetry Maintenance & Data Cleanup</h2>
@@ -158,7 +158,7 @@ export function SettingsPage({ pollingInterval, setPollingInterval, airGapped, s
         {!showConfirmReset ? (
           <button
             onClick={() => setShowConfirmReset(true)}
-            className="px-4 py-2 rounded-xl bg-rose-500/20 border border-rose-500/50 text-rose-400 font-mono text-xs font-bold hover:bg-rose-500/30 transition-all"
+            className="px-4 py-2.5 rounded-xl bg-rose-500/20 border border-rose-500/50 text-rose-400 font-mono text-xs font-bold hover:bg-rose-500/30 transition-all touch-target"
           >
             Clear Telemetry & Incident Logs
           </button>
@@ -169,13 +169,13 @@ export function SettingsPage({ pollingInterval, setPollingInterval, airGapped, s
               <button
                 onClick={handleResetData}
                 disabled={isResetting}
-                className="px-4 py-2 rounded-xl bg-rose-500 text-white font-bold hover:bg-rose-600 transition-all"
+                className="px-4 py-2.5 rounded-xl bg-rose-500 text-white font-bold hover:bg-rose-600 transition-all touch-target"
               >
                 {isResetting ? 'Clearing...' : 'Confirm Reset Data'}
               </button>
               <button
                 onClick={() => setShowConfirmReset(false)}
-                className="btn-secondary px-4 py-2 rounded-xl font-bold"
+                className="btn-secondary px-4 py-2.5 rounded-xl font-bold touch-target"
               >
                 Cancel
               </button>

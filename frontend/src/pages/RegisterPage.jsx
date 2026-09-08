@@ -78,15 +78,15 @@ export function RegisterPage() {
       </header>
 
       {/* Main Registration Form Container */}
-      <main className="flex-1 flex items-center justify-center p-4 z-10">
-        <div className="glass-panel w-full max-w-md rounded-2xl p-8 border border-border-muted shadow-2xl relative space-y-6">
+      <main className="flex-1 flex items-center justify-center p-3 sm:p-4 z-10">
+        <div className="glass-panel w-full max-w-md rounded-2xl p-4 sm:p-8 border border-border-muted shadow-2xl relative space-y-6">
           
           {/* Header Title */}
           <div className="text-center space-y-2">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-dim border border-border-muted font-mono text-[10px] text-text-muted uppercase tracking-widest">
               [ ACCOUNT PROVISIONING ]
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+            <h1 className="text-xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
               Create Account
             </h1>
             <p className="text-xs text-text-muted font-sans">
@@ -95,7 +95,7 @@ export function RegisterPage() {
           </div>
 
           {/* Controlled State 1: Account Created Success Confirmation */}
-          {isAccountCreated ? (
+          {successMsg ? (
             <div className="space-y-6 text-center animate-in fade-in zoom-in-95 duration-200">
               <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-3">
                 <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center mx-auto">
@@ -105,16 +105,13 @@ export function RegisterPage() {
                   ACCOUNT CREATED
                 </h2>
                 <p className="text-xs text-text-muted leading-relaxed font-sans">
-                  Workspace account for <strong className="text-text-primary font-mono">{createdUsername}</strong> has been created successfully.
-                </p>
-                <p className="text-[11px] text-text-dim font-mono">
-                  Sign in with your credentials to enter the intelligence platform.
+                  {successMsg}
                 </p>
               </div>
 
               <button
                 onClick={() => navigate('/login')}
-                className="btn-primary w-full rounded-xl py-3 text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg"
+                className="btn-primary w-full rounded-xl py-3.5 text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg touch-target"
               >
                 <span>Continue to Sign In</span>
                 <span className="material-symbols-outlined text-sm">arrow_forward</span>
@@ -142,7 +139,7 @@ export function RegisterPage() {
                   onChange={(e) => setUsernameInput(e.target.value)}
                   placeholder="analyst_smith"
                   autoComplete="username"
-                  className="input-cyber w-full rounded-xl py-2.5 px-3 text-xs font-mono bg-surface-dim border-border-muted focus:outline-none focus:border-primary"
+                  className="input-cyber w-full rounded-xl py-3 px-3.5 text-xs font-mono bg-surface-dim border-border-muted focus:outline-none focus:border-primary"
                 />
               </div>
 
@@ -158,7 +155,7 @@ export function RegisterPage() {
                   onChange={(e) => setPasswordInput(e.target.value)}
                   placeholder="••••••••••••"
                   autoComplete="new-password"
-                  className="input-cyber w-full rounded-xl py-2.5 px-3 text-xs font-mono bg-surface-dim border-border-muted focus:outline-none focus:border-primary"
+                  className="input-cyber w-full rounded-xl py-3 px-3.5 text-xs font-mono bg-surface-dim border-border-muted focus:outline-none focus:border-primary"
                 />
               </div>
 
@@ -174,14 +171,14 @@ export function RegisterPage() {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••••••"
                   autoComplete="new-password"
-                  className="input-cyber w-full rounded-xl py-2.5 px-3 text-xs font-mono bg-surface-dim border-border-muted focus:outline-none focus:border-primary"
+                  className="input-cyber w-full rounded-xl py-3 px-3.5 text-xs font-mono bg-surface-dim border-border-muted focus:outline-none focus:border-primary"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="btn-primary w-full rounded-xl py-3 text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-md hover:scale-[1.01] transition-all disabled:opacity-50 mt-6"
+                className="btn-primary w-full rounded-xl py-3.5 text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-md hover:scale-[1.01] transition-all disabled:opacity-50 mt-6 touch-target"
               >
                 {isLoading ? (
                   <>

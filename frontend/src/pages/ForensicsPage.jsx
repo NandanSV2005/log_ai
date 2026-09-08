@@ -64,40 +64,40 @@ export function ForensicsPage() {
       </header>
 
       {/* SECTION 1: CHRONOLOGICAL INVESTIGATION TIMELINE & MERKLE BADGE */}
-      <div className="glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-xl">
-        <div className="flex justify-between items-center border-b border-border-muted pb-3 font-mono text-xs">
+      <div className="glass-panel p-4 sm:p-6 rounded-2xl border border-border-muted space-y-4 shadow-xl">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-border-muted pb-3 font-mono text-xs">
           <span className="font-bold text-text-primary uppercase tracking-wider">Forensic Incident Investigation Timeline</span>
-          <span className="px-3 py-1 rounded bg-surface border border-emerald-500/40 text-emerald-400 font-bold flex items-center gap-1.5">
+          <span className="px-2.5 py-1 rounded bg-surface border border-emerald-500/40 text-emerald-400 font-bold flex items-center gap-1.5 text-[10px] sm:text-xs">
             <span className="material-symbols-outlined text-xs">verified</span>
             <span>SHA-256 Merkle Chain Integrity: VERIFIED</span>
           </span>
         </div>
 
         {/* 6-Stage Investigation Progression Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 font-mono text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 font-mono text-xs overflow-x-auto custom-scrollbar-touch">
           <div className="p-3 rounded-xl bg-surface-dim border border-border-muted text-center space-y-1">
             <div className="text-[10px] text-text-dim">01. CAPTURE</div>
-            <div className="font-bold text-text-primary">Raw Wire Log</div>
+            <div className="font-bold text-text-primary text-[11px]">Raw Wire Log</div>
           </div>
           <div className="p-3 rounded-xl bg-surface-dim border border-border-muted text-center space-y-1">
             <div className="text-[10px] text-text-dim">02. PARSE</div>
-            <div className="font-bold text-text-primary">Key-Values</div>
+            <div className="font-bold text-text-primary text-[11px]">Key-Values</div>
           </div>
           <div className="p-3 rounded-xl bg-surface-dim border border-border-muted text-center space-y-1">
             <div className="text-[10px] text-text-dim">03. OCSF</div>
-            <div className="font-bold text-text-primary">Schema Standard</div>
+            <div className="font-bold text-text-primary text-[11px]">Schema Standard</div>
           </div>
           <div className="p-3 rounded-xl bg-surface-dim border border-border-muted text-center space-y-1">
             <div className="text-[10px] text-text-dim">04. SCORE</div>
-            <div className="font-bold text-secondary">Isolation Forest</div>
+            <div className="font-bold text-secondary text-[11px]">Isolation Forest</div>
           </div>
           <div className="p-3 rounded-xl bg-surface-dim border border-border-muted text-center space-y-1">
             <div className="text-[10px] text-text-dim">05. CLUSTER</div>
-            <div className="font-bold text-rose-400">15-Min Graph</div>
+            <div className="font-bold text-rose-400 text-[11px]">15-Min Graph</div>
           </div>
           <div className="p-3 rounded-xl bg-surface-dim border border-border-muted text-center space-y-1">
             <div className="text-[10px] text-text-dim">06. MITIGATE</div>
-            <div className="font-bold text-emerald-400">XAI Playbook</div>
+            <div className="font-bold text-emerald-400 text-[11px]">XAI Playbook</div>
           </div>
         </div>
       </div>
@@ -109,12 +109,12 @@ export function ForensicsPage() {
         <div className="lg:col-span-4 glass-panel rounded-2xl border border-border-muted overflow-hidden flex flex-col shadow-xl">
           <div className="p-4 border-b border-border-muted flex justify-between items-center bg-surface-dim font-mono text-xs">
             <span className="font-bold text-text-primary uppercase tracking-wider">Open Investigations</span>
-            <span className="px-2 py-0.5 rounded bg-surface border border-border-muted text-text-muted font-bold">
+            <span className="px-2 py-0.5 rounded bg-surface border border-border-muted text-text-muted font-bold text-[10px]">
               {activeCases.length} CASES
             </span>
           </div>
 
-          <div className="p-4 flex-1 overflow-y-auto space-y-3 bg-surface-dim max-h-[500px] font-mono text-xs">
+          <div className="p-3.5 flex-1 overflow-y-auto space-y-3 bg-surface-dim max-h-[350px] lg:max-h-[500px] font-mono text-xs custom-scrollbar-touch">
             {activeCases.length > 0 ? (
               activeCases.map((incident, idx) => {
                 const isSelected = topCase?.incident_id === incident.incident_id;
@@ -122,19 +122,19 @@ export function ForensicsPage() {
                   <div
                     key={incident.incident_id || idx}
                     onClick={() => setSelectedCase(incident)}
-                    className={`p-3.5 rounded-xl border transition-all cursor-pointer space-y-1.5 ${
+                    className={`p-3.5 rounded-xl border transition-all cursor-pointer space-y-1.5 touch-target ${
                       isSelected
                         ? 'bg-rose-500/15 border-rose-500/60 ring-1 ring-rose-500/30'
                         : 'bg-surface border-border-muted hover:border-primary/40'
                     }`}
                   >
                     <div className="flex justify-between items-center">
-                      <span className="font-bold text-rose-400 text-xs">
+                      <span className="font-bold text-rose-400 text-xs break-all">
                         CASE-#{(incident.incident_id || 'INC').substring(0, 8)}
                       </span>
                       <span className="text-[10px] text-text-dim">{incident.status || 'Active'}</span>
                     </div>
-                    <div className="font-bold text-text-primary text-xs">
+                    <div className="font-bold text-text-primary text-xs break-all">
                       Offending IP: {incident.source_ip || '192.168.1.100'}
                     </div>
                     <div className="text-[11px] text-text-muted">
@@ -150,44 +150,44 @@ export function ForensicsPage() {
         </div>
 
         {/* Right Column: Case Deep Relationship Graph & Evidence (Span 8) */}
-        <div className="lg:col-span-8 glass-panel p-6 rounded-2xl border border-border-muted space-y-5 shadow-xl">
+        <div className="lg:col-span-8 glass-panel p-4 sm:p-6 rounded-2xl border border-border-muted space-y-5 shadow-xl">
           <div className="flex justify-between items-center border-b border-border-muted pb-3 font-mono text-xs">
             <span className="font-bold text-text-primary uppercase tracking-wider">Entity Relationship & Evidence Breakdown</span>
-            {topCase && <span className="text-rose-400 font-bold">CASE-#{(topCase.incident_id || '').substring(0, 8)}</span>}
+            {topCase && <span className="text-rose-400 font-bold text-xs break-all">CASE-#{(topCase.incident_id || '').substring(0, 8)}</span>}
           </div>
 
           {topCase ? (
             <div className="space-y-4 font-mono text-xs">
               {/* Entity Node Cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-                <div className="p-3 rounded-xl bg-surface-dim border border-border-muted">
-                  <div className="text-[10px] text-text-dim">Source Entity</div>
-                  <div className="font-bold text-text-primary mt-0.5">{topCase.source_ip || '192.168.1.100'}</div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-center">
+                <div className="p-2.5 rounded-xl bg-surface-dim border border-border-muted">
+                  <div className="text-[9px] text-text-dim">Source Entity</div>
+                  <div className="font-bold text-text-primary text-xs mt-0.5 break-all">{topCase.source_ip || '192.168.1.100'}</div>
                 </div>
-                <div className="p-3 rounded-xl bg-surface-dim border border-border-muted">
-                  <div className="text-[10px] text-text-dim">Events Correlated</div>
-                  <div className="font-bold text-text-primary mt-0.5">{topCase.event_count || 1}</div>
+                <div className="p-2.5 rounded-xl bg-surface-dim border border-border-muted">
+                  <div className="text-[9px] text-text-dim">Events Correlated</div>
+                  <div className="font-bold text-text-primary text-xs mt-0.5">{topCase.event_count || 1}</div>
                 </div>
-                <div className="p-3 rounded-xl bg-surface-dim border border-border-muted">
-                  <div className="text-[10px] text-text-dim">Anomaly Threat Score</div>
-                  <div className="font-bold text-rose-400 mt-0.5">{(topCase.threat_score || 85.0).toFixed(1)}</div>
+                <div className="p-2.5 rounded-xl bg-surface-dim border border-border-muted">
+                  <div className="text-[9px] text-text-dim">Anomaly Threat Score</div>
+                  <div className="font-bold text-rose-400 text-xs mt-0.5">{(topCase.threat_score || 85.0).toFixed(1)}</div>
                 </div>
-                <div className="p-3 rounded-xl bg-surface-dim border border-border-muted">
-                  <div className="text-[10px] text-text-dim">MITRE ATT&CK Tactic</div>
-                  <div className="font-bold text-text-primary mt-0.5">{topCase.mitre_tactics || 'T1110'}</div>
+                <div className="p-2.5 rounded-xl bg-surface-dim border border-border-muted">
+                  <div className="text-[9px] text-text-dim">MITRE ATT&CK Tactic</div>
+                  <div className="font-bold text-text-primary text-xs mt-0.5 break-all">{topCase.mitre_tactics || 'T1110'}</div>
                 </div>
               </div>
 
               {/* Forensic Evidence Events Stream */}
               <div className="space-y-2">
                 <div className="text-text-muted font-bold text-xs uppercase">Correlated Case Telemetry Events:</div>
-                <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1">
+                <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar-touch">
                   {caseEvents.length > 0 ? (
                     caseEvents.map((evt, idx) => (
-                      <div key={idx} className="p-3 rounded-xl bg-surface-dim border border-border-muted flex justify-between items-center text-[11px]">
+                      <div key={idx} className="p-2.5 rounded-xl bg-surface-dim border border-border-muted flex flex-col sm:flex-row justify-between sm:items-center gap-1 text-[11px]">
                         <span className="font-bold text-text-primary">{evt.event_type || 'cisco_asa'}</span>
-                        <span className="text-text-muted">{evt.source_ip} &rarr; {evt.destination_ip || '10.0.0.50'}</span>
-                        <span className="text-rose-400 font-bold">{evt.threat_level || 'HIGH'}</span>
+                        <span className="text-text-muted break-all">{evt.source_ip} &rarr; {evt.destination_ip || '10.0.0.50'}</span>
+                        <span className="text-rose-400 font-bold self-start sm:self-auto">{evt.threat_level || 'HIGH'}</span>
                       </div>
                     ))
                   ) : (
