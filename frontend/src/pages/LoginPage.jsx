@@ -7,6 +7,7 @@ import { StitchBrandMark } from '../components/common/StitchBrandMark';
 export function LoginPage() {
   const [usernameInput, setUsernameInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { loginUser } = useAuth();
@@ -102,14 +103,25 @@ export function LoginPage() {
                 </span>
                 <input
                   id="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   value={passwordInput}
                   onChange={(e) => setPasswordInput(e.target.value)}
                   placeholder="••••••••••••"
                   autoComplete="current-password"
-                  className="input-cyber w-full rounded-xl py-3 pl-10 pr-4 text-xs font-mono bg-surface-dim border-border-muted focus:outline-none focus:border-primary"
+                  className="input-cyber w-full rounded-xl py-3 pl-10 pr-10 text-xs font-mono bg-surface-dim border-border-muted focus:outline-none focus:border-primary"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-text-muted hover:text-text-primary transition-colors focus:outline-none"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  <span className="material-symbols-outlined text-lg">
+                    {showPassword ? 'visibility_off' : 'visibility'}
+                  </span>
+                </button>
               </div>
             </div>
 

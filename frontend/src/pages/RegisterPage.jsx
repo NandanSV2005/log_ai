@@ -8,6 +8,8 @@ export function RegisterPage() {
   const [usernameInput, setUsernameInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [roleInput, setRoleInput] = useState('ANALYST');
   const [secretKeyInput, setSecretKeyInput] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
@@ -149,32 +151,58 @@ export function RegisterPage() {
                 <label className="block text-xs font-mono font-bold text-text-primary mb-1.5" htmlFor="password">
                   Account Password
                 </label>
-                <input
-                  id="password"
-                  type="password"
-                  required
-                  value={passwordInput}
-                  onChange={(e) => setPasswordInput(e.target.value)}
-                  placeholder="••••••••••••"
-                  autoComplete="new-password"
-                  className="input-cyber w-full rounded-xl py-3 px-3.5 text-xs font-mono bg-surface-dim border-border-muted focus:outline-none focus:border-primary"
-                />
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={passwordInput}
+                    onChange={(e) => setPasswordInput(e.target.value)}
+                    placeholder="••••••••••••"
+                    autoComplete="new-password"
+                    className="input-cyber w-full rounded-xl py-3 pl-3.5 pr-10 text-xs font-mono bg-surface-dim border-border-muted focus:outline-none focus:border-primary"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3 text-text-muted hover:text-text-primary transition-colors focus:outline-none"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    title={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    <span className="material-symbols-outlined text-lg">
+                      {showPassword ? 'visibility_off' : 'visibility'}
+                    </span>
+                  </button>
+                </div>
               </div>
 
               <div>
                 <label className="block text-xs font-mono font-bold text-text-primary mb-1.5" htmlFor="confirmPassword">
                   Confirm Password
                 </label>
-                <input
-                  id="confirmPassword"
-                  type="password"
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••••••"
-                  autoComplete="new-password"
-                  className="input-cyber w-full rounded-xl py-3 px-3.5 text-xs font-mono bg-surface-dim border-border-muted focus:outline-none focus:border-primary"
-                />
+                <div className="relative">
+                  <input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••••••"
+                    autoComplete="new-password"
+                    className="input-cyber w-full rounded-xl py-3 pl-3.5 pr-10 text-xs font-mono bg-surface-dim border-border-muted focus:outline-none focus:border-primary"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-3 text-text-muted hover:text-text-primary transition-colors focus:outline-none"
+                    aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                    title={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  >
+                    <span className="material-symbols-outlined text-lg">
+                      {showConfirmPassword ? 'visibility_off' : 'visibility'}
+                    </span>
+                  </button>
+                </div>
               </div>
 
               <button
