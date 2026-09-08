@@ -2,7 +2,7 @@ import React from 'react';
 
 /**
  * StitchBrandMark
- * Minimal, geometric brand mark for Stitch (Security Operations & Intelligence Platform).
+ * Minimal, geometric brand mark for LOG AI (Security Operations Platform).
  * Formed by interlocking telemetry data threads forming a clean 'S' shape.
  * Inherits text color dynamically (currentColor) for seamless Cyber Void and Sage Green theme adaptation.
  */

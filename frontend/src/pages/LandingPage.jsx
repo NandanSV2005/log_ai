@@ -8,7 +8,7 @@ export function LandingPage() {
   const { theme, setTheme } = useTheme();
   const [isLandingMenuOpen, setIsLandingMenuOpen] = useState(false);
 
-  // 1. Pipeline Stage Selection
+  // 1. Pipeline Stage Selection (Scroll & Click Driven)
   const [activePipelineStage, setActivePipelineStage] = useState(1);
 
   // 2. Financial Impact Estimator State
@@ -81,6 +81,28 @@ export function LandingPage() {
     return () => { mounted = false; };
   }, []);
 
+  // Scroll Progress Driven Storytelling Handler
+  useEffect(() => {
+    const handleScroll = () => {
+      const pipelineEl = document.getElementById('pipeline');
+      if (!pipelineEl) return;
+      const rect = pipelineEl.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      
+      // Calculate scroll progress through pipeline section
+      if (rect.top <= windowHeight && rect.bottom >= 0) {
+        const totalScrollable = rect.height;
+        const currentScroll = windowHeight - rect.top;
+        const progress = Math.max(0, Math.min(1, currentScroll / totalScrollable));
+        const calculatedStage = Math.min(6, Math.max(1, Math.ceil(progress * 6)));
+        setActivePipelineStage(calculatedStage);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   // Radar Interactive Nodes Array
   const RADAR_NODES = [
     { id: 1, ip: '185.220.100.22', device: 'Cisco ASA Edge', x: 70, y: 32, severity: 'HIGH', score: 88.5, proto: 'TCP/51422', rule: 'MITRE T1110 (Brute Force)', action: 'AUTO_BLOCKED' },
@@ -89,7 +111,7 @@ export function LandingPage() {
     { id: 4, ip: '45.33.32.156', device: 'pfSense Cluster', x: 36, y: 24, severity: 'HIGH', score: 94.2, proto: 'SSH/22', rule: 'Credential Stuffing', action: 'CONTAINED' },
   ];
 
-  // Pipeline Stages Data
+  // Pipeline Stages Data with Clear, Uncluttered Wording
   const PIPELINE_STAGES = [
     {
       id: 1,
@@ -159,7 +181,7 @@ export function LandingPage() {
     },
   ];
 
-  // Perimeter Appliance Cards Data
+  // Perimeter Appliance Support Cards
   const APPLIANCES = [
     { name: 'Cisco ASA Firewall', format: 'CEF / Syslog', speed: '1.2M EPS', parser: 'cisco_asa:deny', status: 'ACTIVE' },
     { name: 'Fortinet FortiGate', format: 'KV Pair Log', speed: '980K EPS', parser: 'fortigate:traffic', status: 'ACTIVE' },
@@ -269,23 +291,23 @@ export function LandingPage() {
       <section className="relative px-4 lg:px-8 pt-8 pb-16 border-b border-[var(--color-border)] bg-tech-grid">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           
-          {/* Left Column: Editorial Hero Copy & CTAs */}
+          {/* Left Column: Clear Hero Copy & CTAs */}
           <div className="lg:col-span-6 space-y-6">
             
             {/* Eyebrow Badge */}
             <div className="inline-flex items-center space-x-2 px-3 py-1 rounded border border-[var(--color-border)] bg-[var(--color-bg-card)] font-mono text-xs text-[var(--color-primary)]">
               <span className="w-2 h-2 rounded-full bg-[var(--color-primary)] animate-ping"></span>
-              <span>AUTONOMOUS TELEMETRY PIPELINE // 4.2M EPS</span>
+              <span>LOG PROCESSING PIPELINE // 4.2M EPS</span>
             </div>
 
             {/* Headline */}
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[var(--color-text-main)] leading-tight">
-              Autonomous Threat Ingestion &amp; Detection
+              Log Ingestion &amp; Threat Detection
             </h1>
 
             {/* Subheadline */}
             <p className="text-sm sm:text-base text-[var(--color-text-muted)] leading-relaxed max-w-xl">
-              Real-time SOC telemetry processing, OCSF 1.1 schema normalization, and explainable Isolation Forest anomaly scoring in a unified zero-trust pipeline.
+              Collect logs from your security devices, convert them into one common structure, detect suspicious activity, and investigate what happened.
             </p>
 
             {/* CTA Action Buttons */}
@@ -323,7 +345,7 @@ export function LandingPage() {
             </div>
           </div>
 
-          {/* Right Column: Interactive Editorial Radar Scanner (Matches Reference Screenshot) */}
+          {/* Right Column: Interactive Vector Radar Scanner */}
           <div className="lg:col-span-6 relative">
             <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg p-4 sm:p-6 shadow-xl relative overflow-hidden">
               
@@ -460,18 +482,18 @@ export function LandingPage() {
       </div>
 
       {/* ========================================================================= */}
-      {/* 4. CHAPTER 1: END-TO-END ZERO-LOSS PIPELINE (#pipeline)                   */}
+      {/* 4. CHAPTER 1: 6-STAGE LOG PROCESSING PIPELINE (#pipeline)                 */}
       {/* ========================================================================= */}
       <section id="pipeline" className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full">
         <div className="space-y-2 mb-10">
           <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase">
-            CHAPTER 01 // END-TO-END TELEMETRY
+            CHAPTER 01 // HOW LOGS MOVE THROUGH THE SYSTEM
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text-main)]">
-            Zero-Loss Processing &amp; Cryptographic Pipeline
+            6-Stage Log Processing Pipeline
           </h2>
           <p className="text-sm text-[var(--color-text-muted)] max-w-2xl">
-            From edge device arrival to explainable SOC playbooks in 6 deterministic stages.
+            From raw log arrival at the edge to actionable security analysis in 6 clear steps. Scroll or click to see how data transforms at each stage.
           </p>
         </div>
 
@@ -506,7 +528,7 @@ export function LandingPage() {
         </div>
 
         {/* Selected Stage Detail Inspector */}
-        <div className="mt-8 p-6 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg font-mono text-xs space-y-4">
+        <div className="mt-8 p-6 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg font-mono text-xs space-y-4 shadow-lg">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-border)] pb-3">
             <div className="flex items-center space-x-2">
               <span className="text-[var(--color-primary)] font-bold">{currentStageData.num}</span>
@@ -518,8 +540,8 @@ export function LandingPage() {
           </div>
 
           <div>
-            <div className="text-[10px] text-[var(--color-text-dim)] uppercase mb-1">SAMPLE PAYLOAD INGEST:</div>
-            <pre className="p-3 bg-[var(--terminal-bg)] text-[var(--terminal-text-main)] border border-[var(--color-border)] rounded overflow-x-auto text-[11px]">
+            <div className="text-[10px] text-[var(--color-text-dim)] uppercase mb-1">STAGE DATA TRANSFORMATION:</div>
+            <pre className="p-3 bg-[var(--terminal-bg)] text-[var(--terminal-text-main)] border border-[var(--color-border)] rounded overflow-x-auto text-[11px] leading-relaxed">
               {currentStageData.payload}
             </pre>
           </div>
@@ -532,18 +554,18 @@ export function LandingPage() {
       </section>
 
       {/* ========================================================================= */}
-      {/* 5. CHAPTER 2: SUPPORTED PERIMETER APPLIANCES (#capabilities)              */}
+      {/* 5. CHAPTER 2: LOG FORMAT SUPPORT (#capabilities)                         */}
       {/* ========================================================================= */}
       <section id="capabilities" className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full">
         <div className="space-y-2 mb-10">
           <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase">
-            CHAPTER 02 // HETEROGENEOUS INGESTION
+            CHAPTER 02 // LOG FORMAT SUPPORT
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text-main)]">
-            Native Support for Heterogeneous Security Architecture
+            What the Platform Can Do
           </h2>
           <p className="text-sm text-[var(--color-text-muted)] max-w-2xl">
-            Plug-and-play parsers for top enterprise firewall, IDS/IPS, and network perimeter appliances.
+            Built-in parsers for firewall, IDS/IPS, and network perimeter appliances.
           </p>
         </div>
 
@@ -575,18 +597,18 @@ export function LandingPage() {
       </section>
 
       {/* ========================================================================= */}
-      {/* 6. CHAPTER 3: SOC FINANCIAL ROI ESTIMATOR (#estimator)                    */}
+      {/* 6. CHAPTER 3: SOC EFFICIENCY & COST SAVINGS (#estimator)                  */}
       {/* ========================================================================= */}
       <section id="estimator" className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full">
         <div className="space-y-2 mb-10">
           <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase">
-            CHAPTER 03 // FINANCIAL IMPACT &amp; MTTR REDUCTION
+            CHAPTER 03 // SOC EFFICIENCY &amp; SAVINGS
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text-main)]">
-            Quantifiable Security Efficiency &amp; ROI Estimator
+            SOC Efficiency &amp; Cost Savings Estimator
           </h2>
           <p className="text-sm text-[var(--color-text-muted)] max-w-2xl">
-            Adjust your enterprise log volume and perimeter device count to estimate monthly analyst savings and MTTR reduction.
+            Adjust daily log volume and device count to estimate analyst time saved and operational efficiency.
           </p>
         </div>
 
@@ -696,18 +718,18 @@ export function LandingPage() {
       </section>
 
       {/* ========================================================================= */}
-      {/* 7. CHAPTER 4: TELEMETRY OUTPUT & LIVE CONSOLE INTELLIGENCE (#topology)    */}
+      {/* 7. CHAPTER 4: LIVE LOGS & SECURITY ANALYSIS (#topology)                   */}
       {/* ========================================================================= */}
       <section id="topology" className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full">
         <div className="space-y-2 mb-10">
           <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase">
-            CHAPTER 04 // REAL-TIME CONSOLE INTELLIGENCE
+            CHAPTER 04 // LIVE LOGS &amp; ANALYSIS
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text-main)]">
-            Live System Telemetry &amp; Event Feed
+            Live Logs &amp; Security Analysis
           </h2>
           <p className="text-sm text-[var(--color-text-muted)] max-w-2xl">
-            Live pipeline diagnostics consuming backend metrics in real time.
+            Real-time view of system activity, threat scores, and recent event logs.
           </p>
         </div>
 
@@ -787,16 +809,19 @@ export function LandingPage() {
       </section>
 
       {/* ========================================================================= */}
-      {/* 8. CHAPTER 5: 6-STAGE LOG TRANSFORMATION INSPECTOR                       */}
+      {/* 8. CHAPTER 5: LOG PROCESSING INSPECTOR                                  */}
       {/* ========================================================================= */}
       <section className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full">
         <div className="space-y-2 mb-8">
           <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase">
-            CHAPTER 05 // TRANSFORM INSPECTOR
+            CHAPTER 05 // LOG TRANSFORM INSPECTOR
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text-main)]">
-            Interactive Stage-by-Stage Log Payload Transformation
+            Log Processing Inspector
           </h2>
+          <p className="text-sm text-[var(--color-text-muted)] max-w-2xl">
+            Inspect how a raw log line transforms step-by-step into a normalized event.
+          </p>
         </div>
 
         {/* 6 Stage Buttons */}
@@ -841,7 +866,7 @@ export function LandingPage() {
           <div className="flex items-center space-x-3">
             <StitchBrandMark size={24} />
             <span className="font-bold text-[var(--color-text-main)]">LOG // AI</span>
-            <span>- Autonomous SOC Pipeline</span>
+            <span>- Security Operations Platform</span>
           </div>
           <div className="flex items-center space-x-6">
             <Link to="/login" className="hover:text-[var(--color-text-main)]">SIGN IN</Link>
@@ -849,7 +874,7 @@ export function LandingPage() {
             <Link to="/dashboard" className="hover:text-[var(--color-primary)]">SOC CONSOLE</Link>
           </div>
           <div className="text-[10px] text-[var(--color-text-dim)]">
-            LOG AI v2.4.0-STITCH-RELEASE | ZERO TELEMETRY TRACKING
+            LOG AI v2.4.0 | ZERO TELEMETRY TRACKING
           </div>
         </div>
       </footer>
