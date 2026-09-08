@@ -149,7 +149,8 @@ export function LandingPage() {
             setActiveState(entry.isIntersecting);
           });
         },
-        { threshold: 0.1, rootMargin: '0px 0px -10% 0px' }
+        // Trigger activation as soon as section approaches the upper-middle active reading zone
+        { threshold: 0.05, rootMargin: '100px 0px -5% 0px' }
       );
       observer.observe(el);
       return observer;
@@ -177,10 +178,14 @@ export function LandingPage() {
         if (!ref.current) return 1;
         const rect = ref.current.getBoundingClientRect();
         const windowHeight = window.innerHeight;
-        const startOffset = windowHeight * 0.75;
+        
+        // Active reading entry trigger: section top reaches ~88% of window height
+        const startOffset = windowHeight * 0.88;
         const totalHeight = rect.height;
         const scrolled = startOffset - rect.top;
-        const progress = Math.max(0, Math.min(1, scrolled / (totalHeight + windowHeight * 0.2)));
+        
+        // Progress ratio from 0.0 (entering reading area) to 1.0 (scrolled through section)
+        const progress = Math.max(0, Math.min(1, scrolled / (totalHeight + windowHeight * 0.1)));
         return Math.min(numStages, Math.max(1, Math.floor(progress * numStages) + 1));
       };
 
@@ -710,7 +715,7 @@ export function LandingPage() {
       <section
         id="pipeline"
         ref={pipelineRef}
-        className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full transition-opacity duration-300"
+        className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full transition-opacity duration-300 relative"
       >
         <div className="space-y-2 mb-10">
           <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase flex items-center space-x-2">
@@ -729,11 +734,11 @@ export function LandingPage() {
           </p>
         </div>
 
-        {/* Desktop Side-by-Side & Mobile Vertical Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Desktop Side-by-Side (Equal-Height Grid) & Mobile Vertical Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch relative">
           
           {/* Left Column: 6 Subtopics (Controls for Main Visualization) */}
-          <div className="lg:col-span-6 space-y-3" role="tablist" aria-label="Pipeline Stages">
+          <div className="lg:col-span-6 space-y-3.5" role="tablist" aria-label="Pipeline Stages">
             {PIPELINE_STAGES.map((stage) => {
               const isActive = activePipelineStage === stage.id;
               const props = getSubtopicProps(
@@ -774,75 +779,78 @@ export function LandingPage() {
             })}
           </div>
 
-          {/* Right Column: Sticky MAIN VISUALIZATION + EXPLANATION */}
-          <div className="lg:col-span-6 lg:sticky lg:top-24 w-full">
-            <div className="p-6 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg font-mono text-xs space-y-4 shadow-xl">
-              
-              {/* Header Badge & Stage Title */}
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-border)] pb-3">
-                <div className="flex items-center space-x-2">
-                  <span className="px-2 py-0.5 rounded bg-[var(--color-primary)] text-[#0f131c] font-bold text-xs">
-                    STAGE {currentPipelineData.num}
-                  </span>
-                  <span className="font-bold text-[var(--color-text-main)] text-sm">{currentPipelineData.name}</span>
-                </div>
-                <span className="text-[10px] text-[var(--color-text-dim)]">
-                  {currentPipelineData.filepath}
-                </span>
-              </div>
-
-              {/* Horizontal 6-Stage Progress Flow Visualizer */}
-              <div className="space-y-1.5">
-                <div className="text-[10px] text-[var(--color-text-dim)] uppercase">PIPELINE STAGE PROGRESS:</div>
-                <div className="grid grid-cols-6 gap-1 p-1 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded">
-                  {PIPELINE_STAGES.map((s) => (
-                    <div
-                      key={s.id}
-                      className={`h-2 rounded transition-all ${
-                        s.id === activePipelineStage
-                          ? 'bg-[var(--color-primary)] shadow-sm'
-                          : s.id < activePipelineStage
-                          ? 'bg-emerald-500/60'
-                          : 'bg-[var(--color-surface-variant)]'
-                      }`}
-                    ></div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Central Morphing Visualization Canvas */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-[10px] text-[var(--color-text-dim)] uppercase">
-                  <span>STAGE DATA TRANSFORMATION ENGINE</span>
-                  <span className="text-emerald-400 font-bold">● ACTIVE</span>
-                </div>
+          {/* Right Column: Anchored Container Stretching Full Height of Left Column */}
+          <div className="lg:col-span-6 relative min-h-full">
+            {/* Sticky MAIN VISUALIZATION Box Pins at top-24 Across Entire Scroll of Section */}
+            <div className="lg:sticky lg:top-24 w-full">
+              <div className="p-6 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg font-mono text-xs space-y-4 shadow-xl">
                 
-                {/* Dynamic Content Container */}
-                <div className="p-4 bg-[var(--terminal-bg)] text-[var(--terminal-text-main)] border border-[var(--color-border)] rounded space-y-3 transition-all duration-300">
-                  <div className="flex items-center justify-between text-[11px] text-[var(--terminal-text-muted)] border-b border-[var(--color-border)] pb-2">
-                    <span>{currentPipelineData.title}</span>
-                    <span className="px-1.5 py-0.5 rounded text-[9px] bg-[var(--color-primary)]/20 text-[var(--color-primary)] border border-[var(--color-primary)]/30">
-                      {currentPipelineData.techBadge}
+                {/* Header Badge & Stage Title */}
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-border)] pb-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="px-2 py-0.5 rounded bg-[var(--color-primary)] text-[#0f131c] font-bold text-xs">
+                      STAGE {currentPipelineData.num}
                     </span>
+                    <span className="font-bold text-[var(--color-text-main)] text-sm">{currentPipelineData.name}</span>
                   </div>
-
-                  <pre className="overflow-x-auto text-[11px] leading-relaxed font-mono whitespace-pre-wrap">
-                    {currentPipelineData.payload}
-                  </pre>
+                  <span className="text-[10px] text-[var(--color-text-dim)]">
+                    {currentPipelineData.filepath}
+                  </span>
                 </div>
-              </div>
 
-              {/* Explanation & Data Integrity Footer */}
-              <div className="p-3 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded text-xs text-[var(--color-text-muted)] leading-relaxed">
-                <span className="font-bold text-[var(--color-text-main)] block mb-1">Technical Explanation:</span>
-                {currentPipelineData.desc}
-              </div>
+                {/* Horizontal 6-Stage Progress Flow Visualizer */}
+                <div className="space-y-1.5">
+                  <div className="text-[10px] text-[var(--color-text-dim)] uppercase">PIPELINE STAGE PROGRESS:</div>
+                  <div className="grid grid-cols-6 gap-1 p-1 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded">
+                    {PIPELINE_STAGES.map((s) => (
+                      <div
+                        key={s.id}
+                        className={`h-2 rounded transition-all ${
+                          s.id === activePipelineStage
+                            ? 'bg-[var(--color-primary)] shadow-sm'
+                            : s.id < activePipelineStage
+                            ? 'bg-emerald-500/60'
+                            : 'bg-[var(--color-surface-variant)]'
+                        }`}
+                      ></div>
+                    ))}
+                  </div>
+                </div>
 
-              <div className="flex flex-wrap items-center justify-between text-[10px] text-[var(--color-text-dim)] pt-1 border-t border-[var(--color-border)]">
-                <span className="truncate max-w-xs">SHA-256: <strong className="text-[var(--color-text-main)]">{currentPipelineData.digest}</strong></span>
-                <span className="text-emerald-400 font-bold">● VERIFIED ZERO-TAMPERING</span>
-              </div>
+                {/* Central Morphing Visualization Canvas */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-[10px] text-[var(--color-text-dim)] uppercase">
+                    <span>STAGE DATA TRANSFORMATION ENGINE</span>
+                    <span className="text-emerald-400 font-bold">● ACTIVE</span>
+                  </div>
+                  
+                  {/* Dynamic Content Container */}
+                  <div className="p-4 bg-[var(--terminal-bg)] text-[var(--terminal-text-main)] border border-[var(--color-border)] rounded space-y-3 transition-all duration-300">
+                    <div className="flex items-center justify-between text-[11px] text-[var(--terminal-text-muted)] border-b border-[var(--color-border)] pb-2">
+                      <span>{currentPipelineData.title}</span>
+                      <span className="px-1.5 py-0.5 rounded text-[9px] bg-[var(--color-primary)]/20 text-[var(--color-primary)] border border-[var(--color-primary)]/30">
+                        {currentPipelineData.techBadge}
+                      </span>
+                    </div>
 
+                    <pre className="overflow-x-auto text-[11px] leading-relaxed font-mono whitespace-pre-wrap">
+                      {currentPipelineData.payload}
+                    </pre>
+                  </div>
+                </div>
+
+                {/* Explanation & Data Integrity Footer */}
+                <div className="p-3 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded text-xs text-[var(--color-text-muted)] leading-relaxed">
+                  <span className="font-bold text-[var(--color-text-main)] block mb-1">Technical Explanation:</span>
+                  {currentPipelineData.desc}
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between text-[10px] text-[var(--color-text-dim)] pt-1 border-t border-[var(--color-border)]">
+                  <span className="truncate max-w-xs">SHA-256: <strong className="text-[var(--color-text-main)]">{currentPipelineData.digest}</strong></span>
+                  <span className="text-emerald-400 font-bold">● VERIFIED ZERO-TAMPERING</span>
+                </div>
+
+              </div>
             </div>
           </div>
 
@@ -855,7 +863,7 @@ export function LandingPage() {
       <section
         id="capabilities"
         ref={capabilitiesRef}
-        className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full transition-opacity duration-300"
+        className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full transition-opacity duration-300 relative"
       >
         <div className="space-y-2 mb-10">
           <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase flex items-center space-x-2">
@@ -874,10 +882,11 @@ export function LandingPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Desktop Side-by-Side (Equal-Height Grid) & Mobile Vertical Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch relative">
           
           {/* Subtopics List (Left 6 Columns) */}
-          <div className="lg:col-span-6 space-y-3" role="tablist" aria-label="Log Format Capabilities">
+          <div className="lg:col-span-6 space-y-3.5" role="tablist" aria-label="Log Format Capabilities">
             {CAPABILITIES_STAGES.map((app) => {
               const isActive = activeCapabilitiesStage === app.id;
               const props = getSubtopicProps(
@@ -913,45 +922,48 @@ export function LandingPage() {
             })}
           </div>
 
-          {/* Main Visualization Inspector Panel (Right 6 Columns) */}
-          <div className="lg:col-span-6 lg:sticky lg:top-24 w-full">
-            <div className="p-6 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg font-mono text-xs space-y-4 shadow-xl">
-              <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
+          {/* Right Column: Anchored Container Stretching Full Height of Left Column */}
+          <div className="lg:col-span-6 relative min-h-full">
+            {/* Sticky Format Inspector Box Pins at top-24 Across Entire Scroll of Section */}
+            <div className="lg:sticky lg:top-24 w-full">
+              <div className="p-6 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg font-mono text-xs space-y-4 shadow-xl">
+                <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
+                  <div>
+                    <span className="text-[10px] text-[var(--color-text-dim)] uppercase block">INSPECTING FORMAT</span>
+                    <span className="font-bold text-base text-[var(--color-text-main)]">{currentCapabilitiesData.name}</span>
+                  </div>
+                  <span className="px-2.5 py-1 rounded text-xs bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/30 font-bold">
+                    {currentCapabilitiesData.speed}
+                  </span>
+                </div>
+
+                <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
+                  {currentCapabilitiesData.desc}
+                </p>
+
                 <div>
-                  <span className="text-[10px] text-[var(--color-text-dim)] uppercase block">INSPECTING FORMAT</span>
-                  <span className="font-bold text-base text-[var(--color-text-main)]">{currentCapabilitiesData.name}</span>
+                  <div className="text-[10px] text-[var(--color-text-dim)] uppercase mb-1">SAMPLE RAW INGEST STREAM:</div>
+                  <pre className="p-3 bg-[var(--terminal-bg)] text-[var(--terminal-text-main)] border border-[var(--color-border)] rounded text-[11px] overflow-x-auto whitespace-pre-wrap">
+                    {currentCapabilitiesData.sampleInput}
+                  </pre>
                 </div>
-                <span className="px-2.5 py-1 rounded text-xs bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/30 font-bold">
-                  {currentCapabilitiesData.speed}
-                </span>
-              </div>
 
-              <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
-                {currentCapabilitiesData.desc}
-              </p>
-
-              <div>
-                <div className="text-[10px] text-[var(--color-text-dim)] uppercase mb-1">SAMPLE RAW INGEST STREAM:</div>
-                <pre className="p-3 bg-[var(--terminal-bg)] text-[var(--terminal-text-main)] border border-[var(--color-border)] rounded text-[11px] overflow-x-auto whitespace-pre-wrap">
-                  {currentCapabilitiesData.sampleInput}
-                </pre>
-              </div>
-
-              <div>
-                <div className="text-[10px] text-[var(--color-text-dim)] uppercase mb-1">NORMALIZED OCSF OUTPUT:</div>
-                <div className="p-3 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded text-[11px] text-emerald-400 font-bold">
-                  {currentCapabilitiesData.schemaOutput}
+                <div>
+                  <div className="text-[10px] text-[var(--color-text-dim)] uppercase mb-1">NORMALIZED OCSF OUTPUT:</div>
+                  <div className="p-3 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded text-[11px] text-emerald-400 font-bold">
+                    {currentCapabilitiesData.schemaOutput}
+                  </div>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[var(--color-border)] text-center text-[10px] text-[var(--color-text-dim)]">
-                <div className="p-2 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded">
-                  <span>EXTRACTION ACCURACY</span>
-                  <div className="text-xs font-bold text-[var(--color-text-main)] mt-0.5">99.4%</div>
-                </div>
-                <div className="p-2 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded">
-                  <span>PARSER COMPATIBILITY</span>
-                  <div className="text-xs font-bold text-[var(--color-primary)] mt-0.5">OCSF 1.1 READY</div>
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[var(--color-border)] text-center text-[10px] text-[var(--color-text-dim)]">
+                  <div className="p-2 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded">
+                    <span>EXTRACTION ACCURACY</span>
+                    <div className="text-xs font-bold text-[var(--color-text-main)] mt-0.5">99.4%</div>
+                  </div>
+                  <div className="p-2 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded">
+                    <span>PARSER COMPATIBILITY</span>
+                    <div className="text-xs font-bold text-[var(--color-primary)] mt-0.5">OCSF 1.1 READY</div>
+                  </div>
                 </div>
               </div>
             </div>
