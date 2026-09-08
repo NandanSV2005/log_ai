@@ -122,23 +122,27 @@ export function ForensicsPage() {
                   <div
                     key={incident.incident_id || idx}
                     onClick={() => setSelectedCase(incident)}
-                    className={`p-3.5 rounded-xl border transition-all cursor-pointer space-y-1.5 touch-target ${
+                    className={`p-3.5 rounded-xl border transition-all cursor-pointer space-y-2.5 touch-target ${
                       isSelected
                         ? 'bg-rose-500/15 border-rose-500/60 ring-1 ring-rose-500/30'
                         : 'bg-surface border-border-muted hover:border-primary/40'
                     }`}
                   >
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-rose-400 text-xs break-all">
+                    <div className="flex justify-between items-center gap-2">
+                      <span className="font-bold text-rose-400 text-xs font-mono tracking-tight shrink-0">
                         CASE-#{(incident.incident_id || 'INC').substring(0, 8)}
                       </span>
-                      <span className="text-[10px] text-text-dim">{incident.status || 'Active'}</span>
+                      <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold text-[10px] uppercase tracking-wider shrink-0">
+                        {incident.status || 'Active'}
+                      </span>
                     </div>
-                    <div className="font-bold text-text-primary text-xs break-all">
-                      Offending IP: {incident.source_ip || '192.168.1.100'}
+                    <div className="text-xs text-text-primary font-mono font-medium flex items-center justify-between gap-1 flex-wrap">
+                      <span className="text-text-muted text-[11px]">Offending IP:</span>
+                      <span className="font-bold text-text-primary bg-surface-dim px-2 py-0.5 rounded border border-border-muted font-mono">{incident.source_ip || '192.168.1.100'}</span>
                     </div>
-                    <div className="text-[11px] text-text-muted">
-                      Correlated burst of {incident.event_count || 1} events
+                    <div className="text-[11px] text-text-muted flex items-center justify-between pt-1 border-t border-border-muted/40 font-mono">
+                      <span>Correlated burst</span>
+                      <span className="font-bold text-text-primary">{incident.event_count || 1} events</span>
                     </div>
                   </div>
                 );
