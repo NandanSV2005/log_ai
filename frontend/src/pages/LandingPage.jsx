@@ -27,32 +27,35 @@ export function LandingPage() {
   const [isEstimatorActive, setIsEstimatorActive] = useState(false);
 
   // =========================================================================
-  // 2. SECTION STAGE STATES (Scroll, Hover, Select)
-  // Precedence: selectedStage || hoveredStage || scrollStage || 1
+  // 2. SECTION STAGE STATES (Scroll + Hover Preview)
+  // Precedence: hoveredStage || scrollStage || 1
   // =========================================================================
   // Pipeline Section State
   const [scrollPipelineStage, setScrollPipelineStage] = useState(1);
   const [hoveredPipelineStage, setHoveredPipelineStage] = useState(null);
-  const [selectedPipelineStage, setSelectedPipelineStage] = useState(null);
-  const activePipelineStage = selectedPipelineStage || hoveredPipelineStage || scrollPipelineStage || 1;
+  const activePipelineStage = hoveredPipelineStage || scrollPipelineStage || 1;
 
   // Capabilities Section State
   const [scrollCapabilitiesStage, setScrollCapabilitiesStage] = useState(1);
   const [hoveredCapabilitiesStage, setHoveredCapabilitiesStage] = useState(null);
-  const [selectedCapabilitiesStage, setSelectedCapabilitiesStage] = useState(null);
-  const activeCapabilitiesStage = selectedCapabilitiesStage || hoveredCapabilitiesStage || scrollCapabilitiesStage || 1;
+  const activeCapabilitiesStage = hoveredCapabilitiesStage || scrollCapabilitiesStage || 1;
 
   // Topology Section State
   const [scrollTopologyStage, setScrollTopologyStage] = useState(1);
   const [hoveredTopologyStage, setHoveredTopologyStage] = useState(null);
-  const [selectedTopologyStage, setSelectedTopologyStage] = useState(null);
-  const activeTopologyStage = selectedTopologyStage || hoveredTopologyStage || scrollTopologyStage || 1;
+  const activeTopologyStage = hoveredTopologyStage || scrollTopologyStage || 1;
 
   // =========================================================================
-  // 3. INTERACTION HELPER (Hover + Click + Touch + Keyboard)
+  // 3. INTERACTION HELPER (Hover + Click/Tap Smooth Scroll to Reading Focus)
   // =========================================================================
-  const getSubtopicProps = (id, activeStage, setHovered, setSelected) => {
+  const getSubtopicProps = (id, activeStage, setHovered, getCardEl) => {
     const isActive = activeStage === id;
+    const scrollToCard = () => {
+      const el = typeof getCardEl === 'function' ? getCardEl() : null;
+      if (el && el.scrollIntoView) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    };
     return {
       role: 'tab',
       tabIndex: 0,
@@ -61,12 +64,12 @@ export function LandingPage() {
       onMouseLeave: () => setHovered(null),
       onFocus: () => setHovered(id),
       onBlur: () => setHovered(null),
-      onClick: () => setSelected(id),
-      onTouchEnd: () => setSelected(id),
+      onClick: scrollToCard,
+      onTouchEnd: scrollToCard,
       onKeyDown: (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          setSelected(id);
+          scrollToCard();
         }
       }
     };
@@ -204,21 +207,15 @@ export function LandingPage() {
         return Math.min(numStages, Math.max(1, closestStage));
       };
 
-      if (isPipelineActive) {
-        setScrollPipelineStage(getActiveStageFromCards(pipelineCardRefs, 6));
-      }
-      if (isCapabilitiesActive) {
-        setScrollCapabilitiesStage(getActiveStageFromCards(capabilitiesCardRefs, 6));
-      }
-      if (isTopologyActive) {
-        setScrollTopologyStage(getActiveStageFromCards(topologyCardRefs, 5));
-      }
+      setScrollPipelineStage(getActiveStageFromCards(pipelineCardRefs, 6));
+      setScrollCapabilitiesStage(getActiveStageFromCards(capabilitiesCardRefs, 6));
+      setScrollTopologyStage(getActiveStageFromCards(topologyCardRefs, 5));
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isPipelineActive, isCapabilitiesActive, isTopologyActive]);
+  }, []);
 
   // =========================================================================
   // 8. DATA STRUCTURES FOR MAJOR SECTIONS
@@ -760,7 +757,7 @@ export function LandingPage() {
                 stage.id,
                 activePipelineStage,
                 setHoveredPipelineStage,
-                setSelectedPipelineStage
+                () => pipelineCardRefs.current[idx]
               );
               return (
                 <div
@@ -909,7 +906,7 @@ export function LandingPage() {
                 app.id,
                 activeCapabilitiesStage,
                 setHoveredCapabilitiesStage,
-                setSelectedCapabilitiesStage
+                () => capabilitiesCardRefs.current[idx]
               );
               return (
                 <div
@@ -1027,7 +1024,7 @@ export function LandingPage() {
                 stg.id,
                 activeTopologyStage,
                 setHoveredTopologyStage,
-                setSelectedTopologyStage
+                () => topologyCardRefs.current[idx]
               );
               return (
                 <div

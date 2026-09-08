@@ -85,7 +85,6 @@
 html {
   scroll-behavior: smooth;
   overflow-y: auto;
-  overflow-x: hidden;
 }
 
 body {
@@ -93,7 +92,6 @@ body {
   color: var(--color-text-main);
   font-family: 'Inter', sans-serif;
   transition: background-color 0.2s ease, color 0.2s ease;
-  overflow-x: hidden;
   width: 100%;
   margin: 0;
 }
