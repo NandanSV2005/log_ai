@@ -8,13 +8,13 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
   const { username, role, isAdmin, logoutUser } = useAuth();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
-  const [utcTime, setUtcTime] = useState('');
+  const [istTime, setIstTime] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      setUtcTime(now.toISOString().substring(11, 19) + ' UTC');
+      setIstTime(now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false }) + ' IST');
     };
     updateTime();
     const interval = setInterval(updateTime, 1000);
@@ -75,10 +75,10 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
             <span>LIVE {pollingInterval}MS</span>
           </div>
 
-          {/* UTC Clock */}
+          {/* IST Clock */}
           <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-container border border-border-muted text-text-primary">
             <span className="material-symbols-outlined text-sm text-text-muted">schedule</span>
-            <span>{utcTime}</span>
+            <span>{istTime}</span>
           </div>
 
           {/* Air-Gapped Toggle */}
@@ -366,8 +366,12 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
               </div>
             </div>
 
-            <div className="text-[10px] text-text-muted text-center pt-1">
-              ROLE: {role} | POLLING: {pollingInterval}MS
+            <div className="text-[10px] text-text-muted text-center pt-1 font-mono flex items-center justify-center gap-1.5 flex-wrap">
+              <span>{istTime}</span>
+              <span>|</span>
+              <span>ROLE: {role}</span>
+              <span>|</span>
+              <span>LIVE: {pollingInterval}MS</span>
             </div>
           </div>
         </div>
