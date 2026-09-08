@@ -27,30 +27,37 @@ export function LandingPage() {
   const [isEstimatorActive, setIsEstimatorActive] = useState(false);
 
   // =========================================================================
-  // 2. SECTION STAGE STATES (Scroll + Hover Preview)
-  // Precedence: hoveredStage || scrollStage || 1
+  // 2. SECTION STAGE STATES (Scroll + Hover + Selection)
   // =========================================================================
+  const selectedPipelineY = useRef(null);
+  const selectedCapabilitiesY = useRef(null);
+
   // Pipeline Section State
   const [scrollPipelineStage, setScrollPipelineStage] = useState(1);
   const [hoveredPipelineStage, setHoveredPipelineStage] = useState(null);
-  const activePipelineStage = hoveredPipelineStage || scrollPipelineStage || 1;
+  const [selectedPipelineStage, setSelectedPipelineStage] = useState(null);
+  const activePipelineStage = selectedPipelineStage || hoveredPipelineStage || scrollPipelineStage || 1;
 
   // Capabilities Section State
   const [scrollCapabilitiesStage, setScrollCapabilitiesStage] = useState(1);
   const [hoveredCapabilitiesStage, setHoveredCapabilitiesStage] = useState(null);
-  const activeCapabilitiesStage = hoveredCapabilitiesStage || scrollCapabilitiesStage || 1;
+  const [selectedCapabilitiesStage, setSelectedCapabilitiesStage] = useState(null);
+  const activeCapabilitiesStage = selectedCapabilitiesStage || hoveredCapabilitiesStage || scrollCapabilitiesStage || 1;
 
-  // Topology Section State
-  const [scrollTopologyStage, setScrollTopologyStage] = useState(1);
+  // Topology Section State (Horizontal Grid Tabs - Driven by Selection & Hover)
   const [hoveredTopologyStage, setHoveredTopologyStage] = useState(null);
-  const activeTopologyStage = hoveredTopologyStage || scrollTopologyStage || 1;
+  const [selectedTopologyStage, setSelectedTopologyStage] = useState(1);
+  const activeTopologyStage = hoveredTopologyStage || selectedTopologyStage || 1;
 
   // =========================================================================
-  // 3. INTERACTION HELPER (Hover + Click/Tap Smooth Scroll to Reading Focus)
+  // 3. INTERACTION HELPER (Hover + Click/Tap Selection & Smooth Scroll)
   // =========================================================================
-  const getSubtopicProps = (id, activeStage, setHovered, getCardEl) => {
+  const getSubtopicProps = (id, activeStage, setHovered, setSelected, getCardEl) => {
     const isActive = activeStage === id;
-    const scrollToCard = () => {
+    const handleSelect = () => {
+      if (typeof setSelected === 'function') {
+        setSelected(id);
+      }
       const el = typeof getCardEl === 'function' ? getCardEl() : null;
       if (el && el.scrollIntoView) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -64,12 +71,12 @@ export function LandingPage() {
       onMouseLeave: () => setHovered(null),
       onFocus: () => setHovered(id),
       onBlur: () => setHovered(null),
-      onClick: scrollToCard,
-      onTouchEnd: scrollToCard,
+      onClick: handleSelect,
+      onTouchEnd: handleSelect,
       onKeyDown: (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          scrollToCard();
+          handleSelect();
         }
       }
     };
@@ -183,11 +190,25 @@ export function LandingPage() {
   // =========================================================================
   useEffect(() => {
     const handleScroll = () => {
+      const currentY = window.scrollY;
+
+      // Clear manual pipeline card selection when user scrolls away (> 50px delta)
+      if (selectedPipelineY.current !== null && Math.abs(currentY - selectedPipelineY.current) > 50) {
+        setSelectedPipelineStage(null);
+        selectedPipelineY.current = null;
+      }
+
+      // Clear manual capabilities format selection when user scrolls away (> 50px delta)
+      if (selectedCapabilitiesY.current !== null && Math.abs(currentY - selectedCapabilitiesY.current) > 50) {
+        setSelectedCapabilitiesStage(null);
+        selectedCapabilitiesY.current = null;
+      }
+
       const getActiveStageFromCards = (cardRefs, numStages) => {
         if (!cardRefs.current || cardRefs.current.length === 0) return 1;
         const windowHeight = window.innerHeight;
-        // Prime reading focus line: 42% down from the top of the browser viewport
-        const targetLine = windowHeight * 0.42;
+        // Prime reading focus line: 40% down from top of viewport
+        const targetLine = windowHeight * 0.40;
 
         let closestStage = 1;
         let minDistance = Infinity;
@@ -209,7 +230,6 @@ export function LandingPage() {
 
       setScrollPipelineStage(getActiveStageFromCards(pipelineCardRefs, 6));
       setScrollCapabilitiesStage(getActiveStageFromCards(capabilitiesCardRefs, 6));
-      setScrollTopologyStage(getActiveStageFromCards(topologyCardRefs, 5));
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -757,6 +777,10 @@ export function LandingPage() {
                 stage.id,
                 activePipelineStage,
                 setHoveredPipelineStage,
+                (id) => {
+                  setSelectedPipelineStage(id);
+                  selectedPipelineY.current = window.scrollY;
+                },
                 () => pipelineCardRefs.current[idx]
               );
               return (
@@ -906,6 +930,10 @@ export function LandingPage() {
                 app.id,
                 activeCapabilitiesStage,
                 setHoveredCapabilitiesStage,
+                (id) => {
+                  setSelectedCapabilitiesStage(id);
+                  selectedCapabilitiesY.current = window.scrollY;
+                },
                 () => capabilitiesCardRefs.current[idx]
               );
               return (
@@ -1024,7 +1052,8 @@ export function LandingPage() {
                 stg.id,
                 activeTopologyStage,
                 setHoveredTopologyStage,
-                () => topologyCardRefs.current[idx]
+                setSelectedTopologyStage,
+                null
               );
               return (
                 <div
