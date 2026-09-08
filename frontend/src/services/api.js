@@ -20,16 +20,31 @@ async function handleResponse(response) {
       window.location.href = '/login';
     }
   }
-  
+
   if (!response.ok) {
-    let errorDetail = 'API Request Failed';
+    let errorDetail = `HTTP ${response.status}`;
     try {
-      const errorData = await response.json();
-      errorDetail = errorData.detail || errorData.message || JSON.stringify(errorData);
-    } catch (e) {
-      errorDetail = await response.text();
+      const text = await response.text();
+      try {
+        const errorData = JSON.parse(text);
+        if (typeof errorData.detail === 'string') {
+          errorDetail = errorData.detail;
+        } else if (Array.isArray(errorData.detail)) {
+          errorDetail = errorData.detail.map(d => (typeof d === 'string' ? d : d.msg || JSON.stringify(d))).join(', ');
+        } else if (errorData.detail && typeof errorData.detail === 'object') {
+          errorDetail = JSON.stringify(errorData.detail);
+        } else if (errorData.message) {
+          errorDetail = typeof errorData.message === 'string' ? errorData.message : JSON.stringify(errorData.message);
+        } else if (text) {
+          errorDetail = text;
+        }
+      } catch (parseErr) {
+        if (text) errorDetail = text;
+      }
+    } catch (readErr) {
+      errorDetail = `HTTP ${response.status} (${response.statusText})`;
     }
-    throw new Error(errorDetail || `HTTP ${response.status}`);
+    throw new Error(typeof errorDetail === 'string' ? errorDetail : `HTTP ${response.status}`);
   }
 
   const contentType = response.headers.get('content-type');

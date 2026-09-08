@@ -42,11 +42,11 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
         {/* Brand Logo */}
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => { closeMobileMenu(); navigate('/dashboard'); }}>
           <div className="w-9 h-9 rounded-lg bg-surface-container border border-border-muted flex items-center justify-center text-primary shadow-sm">
-            <StitchBrandMark className="w-5 h-5 text-primary" />
+            <StitchBrandMark size={24} />
           </div>
           <div>
-            <div className="font-extrabold text-lg text-text-primary tracking-tight flex items-center gap-2">
-              STITCH
+            <div className="font-mono text-base font-extrabold tracking-wider uppercase text-text-primary flex items-center gap-2">
+              LOG <span className="text-primary">//</span> AI
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary-fixed-dim/20 text-primary border border-primary/30 uppercase font-mono font-bold">
                 {theme === 'sage' ? 'SAGE GREEN' : 'CYBER VOID'}
               </span>

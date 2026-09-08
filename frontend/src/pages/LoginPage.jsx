@@ -32,9 +32,11 @@ export function LoginPage() {
     <div className="min-h-screen bg-background text-text-primary flex flex-col justify-between font-sans relative overflow-hidden">
       {/* Brand Header Nav */}
       <header className="w-full h-16 flex items-center justify-between px-6 max-w-7xl mx-auto z-10">
-        <Link to="/" className="flex items-center gap-2.5 font-extrabold text-xl text-primary tracking-tight">
-          <StitchBrandMark className="w-6 h-6 text-primary" />
-          <span className="font-mono text-text-primary tracking-tight">STITCH</span>
+        <Link to="/" className="flex items-center space-x-2 focus:outline-none rounded px-1 py-0.5">
+          <StitchBrandMark size={28} />
+          <span className="font-mono text-sm tracking-wider font-bold uppercase text-text-primary">
+            LOG <span className="text-primary">//</span> AI
+          </span>
         </Link>
         <button
           onClick={() => setTheme(theme === 'dark' ? 'sage' : 'dark')}
@@ -140,7 +142,7 @@ export function LoginPage() {
       </main>
 
       <footer className="w-full py-4 text-center text-text-dim text-[10px] font-mono border-t border-border-muted/40">
-        © 2026 STITCH Security Engine. Authorized Personnel Only.
+        © 2026 LOG // AI Security Engine. Authorized Personnel Only.
       </footer>
     </div>
   );
