@@ -63,11 +63,6 @@ export function LoginPage() {
             <p className="text-xs text-text-muted font-sans">
               Sign in to your security intelligence workspace with authenticated operator credentials.
             </p>
-            <div className="pt-1">
-              <span className="inline-block px-2.5 py-1 rounded bg-primary/10 border border-primary/30 text-primary font-mono text-[11px]">
-                Default Admin: <strong className="text-text-primary">admin</strong> / <strong className="text-text-primary">admin123</strong>
-              </span>
-            </div>
           </div>
 
           {errorMsg && (

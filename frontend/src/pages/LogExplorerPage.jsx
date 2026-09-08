@@ -242,58 +242,66 @@ export function LogExplorerPage() {
         {/* Desktop/Tablet Log Table (>= 640px) */}
         <div className="hidden sm:block p-5 overflow-x-auto custom-scrollbar-touch">
           {isLoading ? (
-            <div className="p-12 text-center text-text-muted font-mono text-xs">Loading telemetry records...</div>
+            <div className="p-12 text-center text-text-muted font-mono text-xs">Loading normalized OCSF schema records...</div>
           ) : paginatedEvents.length > 0 ? (
-            <table className="w-full text-left font-mono text-xs border-collapse min-w-[650px]">
+            <table className="w-full text-left font-mono text-xs border-collapse min-w-[750px]">
               <thead>
                 <tr className="border-b border-border-muted text-text-muted text-[10px] uppercase">
                   <th className="py-3 px-3">Timestamp</th>
-                  <th className="py-3 px-3">Source IP</th>
-                  <th className="py-3 px-3">Event Type</th>
+                  <th className="py-3 px-3">OCSF Schema Class</th>
+                  <th className="py-3 px-3">Network Connection Tuple</th>
                   <th className="py-3 px-3">Threat Level</th>
-                  <th className="py-3 px-3">Threat Score</th>
-                  <th className="py-3 px-3">MITRE Tactic</th>
-                  <th className="py-3 px-3 text-right">Inspect</th>
+                  <th className="py-3 px-3">Score</th>
+                  <th className="py-3 px-3">MITRE ATT&CK Tactic</th>
+                  <th className="py-3 px-3 text-right">Payload</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-muted">
-                {paginatedEvents.map((evt, idx) => (
-                  <tr key={evt.raw_event_hash || idx} className="hover:bg-surface-hover transition-colors">
-                    <td className="py-3.5 px-3 text-text-muted text-[11px] whitespace-nowrap">
-                      {evt.timestamp || '2026-08-31 19:40'}
-                    </td>
-                    <td className="py-3.5 px-3 font-bold text-text-primary whitespace-nowrap">
-                      {evt.source_ip || '192.168.1.100'}
-                    </td>
-                    <td className="py-3.5 px-3 text-primary whitespace-nowrap">
-                      {evt.event_type || 'cisco_asa'}
-                    </td>
-                    <td className="py-3.5 px-3 whitespace-nowrap">
-                      <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold ${
-                        evt.threat_level === 'HIGH' ? 'bg-rose-500/20 text-rose-400' :
-                        evt.threat_level === 'MEDIUM' ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'
-                      }`}>
-                        {evt.threat_level || 'LOW'}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-3 font-bold text-text-primary whitespace-nowrap">
-                      {(evt.threat_score || 12.0).toFixed(1)}
-                    </td>
-                    <td className="py-3.5 px-3 whitespace-nowrap">
-                      <span className="px-2 py-0.5 rounded bg-surface border border-border-muted text-[10px] text-text-muted">
-                        {evt.mitre_tactic || 'T1110'}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-3 text-right whitespace-nowrap">
-                      <button
-                        onClick={() => setSelectedEventDrawer(evt)}
-                        className="btn-secondary px-3 py-1.5 rounded text-[10px] font-bold touch-target"
-                      >
-                        Inspect Payload
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {paginatedEvents.map((evt, idx) => {
+                  const ocsfClass = evt.event_type && evt.event_type.includes('alert') ? 'Class 2001: Security Finding' : 'Class 4001: Network Activity';
+                  const dstIp = evt.destination_ip || '10.0.0.10';
+                  return (
+                    <tr key={evt.raw_event_hash || idx} className="hover:bg-surface-hover transition-colors">
+                      <td className="py-3.5 px-3 text-text-muted text-[11px] whitespace-nowrap">
+                        {evt.timestamp || '2026-09-08 16:10:43'}
+                      </td>
+                      <td className="py-3.5 px-3 font-bold text-text-primary whitespace-nowrap">
+                        <span className="px-2 py-0.5 rounded bg-surface-dim border border-border-muted text-[10px] text-primary">
+                          {ocsfClass}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-3 text-text-primary font-bold whitespace-nowrap">
+                        <span className="text-rose-400">{evt.source_ip || '203.0.113.45'}</span>
+                        <span className="text-text-muted px-1.5">&rarr;</span>
+                        <span className="text-text-muted">{dstIp}:80</span>
+                      </td>
+                      <td className="py-3.5 px-3 whitespace-nowrap">
+                        <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold ${
+                          evt.threat_level === 'HIGH' || evt.threat_level === 'CRITICAL' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
+                          evt.threat_level === 'MEDIUM' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                        }`}>
+                          {evt.threat_level || 'LOW'}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-3 font-bold text-text-primary whitespace-nowrap">
+                        {(evt.threat_score || 12.0).toFixed(1)}
+                      </td>
+                      <td className="py-3.5 px-3 text-text-muted whitespace-nowrap">
+                        <span className="px-2 py-0.5 rounded bg-surface border border-border-muted text-[10px] font-bold text-text-primary">
+                          {evt.mitre_tactic || 'T1110 - Brute Force'}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-3 text-right whitespace-nowrap">
+                        <button
+                          onClick={() => setSelectedEventDrawer(evt)}
+                          className="btn-secondary px-3 py-1.5 rounded-lg text-[10px] font-bold touch-target"
+                        >
+                          Inspect Payload
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           ) : (

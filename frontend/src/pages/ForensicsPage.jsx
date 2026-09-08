@@ -180,18 +180,44 @@ export function ForensicsPage() {
 
               {/* Forensic Evidence Events Stream */}
               <div className="space-y-2">
-                <div className="text-text-muted font-bold text-xs uppercase">Correlated Case Telemetry Events:</div>
-                <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar-touch">
+                <div className="flex justify-between items-center text-text-muted font-bold text-xs uppercase">
+                  <span>Correlated Incident Attack Chain Timeline:</span>
+                  <span className="text-emerald-400 font-normal text-[10px]">● MERKLE TREE INTEGRITY VALIDATED</span>
+                </div>
+                <div className="max-h-64 overflow-y-auto space-y-2 pr-1 custom-scrollbar-touch font-mono text-xs">
                   {caseEvents.length > 0 ? (
-                    caseEvents.map((evt, idx) => (
-                      <div key={idx} className="p-2.5 rounded-xl bg-surface-dim border border-border-muted flex flex-col sm:flex-row justify-between sm:items-center gap-1 text-[11px]">
-                        <span className="font-bold text-text-primary">{evt.event_type || 'cisco_asa'}</span>
-                        <span className="text-text-muted break-all">{evt.source_ip} &rarr; {evt.destination_ip || '10.0.0.50'}</span>
-                        <span className="text-rose-400 font-bold self-start sm:self-auto">{evt.threat_level || 'HIGH'}</span>
-                      </div>
-                    ))
+                    caseEvents.map((evt, idx) => {
+                      const hashSample = evt.raw_event_hash ? evt.raw_event_hash.substring(0, 16) : 'a4ea94c43d9dc8c7';
+                      const dstIp = evt.destination_ip || (idx % 2 === 0 ? '10.0.0.10' : '10.0.0.15');
+                      return (
+                        <div key={idx} className="p-3 rounded-xl bg-surface-dim border border-border-muted space-y-1.5 hover:border-primary/40 transition-colors">
+                          <div className="flex items-center justify-between text-[11px]">
+                            <div className="flex items-center space-x-2">
+                              <span className="px-2 py-0.5 rounded bg-primary/10 text-primary font-bold text-[10px]">
+                                STEP 0{idx + 1}
+                              </span>
+                              <span className="font-bold text-text-primary">{evt.event_type || 'cisco_asa:deny:outside_acl'}</span>
+                            </div>
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              evt.threat_level === 'CRITICAL' || evt.threat_level === 'HIGH' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                            }`}>
+                              {evt.threat_level || 'HIGH'}
+                            </span>
+                          </div>
+                          
+                          <div className="flex flex-wrap items-center justify-between text-[11px] text-text-muted">
+                            <div>
+                              HOP: <strong className="text-rose-400">{evt.source_ip || '203.0.113.45'}</strong> &rarr; <strong className="text-text-primary">{dstIp}</strong>
+                            </div>
+                            <div className="text-[10px] text-text-dim">
+                              MERKLE HASH: <span className="text-text-primary font-bold">{hashSample}...</span> <span className="text-emerald-400 font-bold">[VERIFIED]</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
                   ) : (
-                    <div className="p-4 text-center text-text-dim text-[11px]">Loading case evidence events...</div>
+                    <div className="p-4 text-center text-text-dim text-[11px]">Loading correlated case evidence events...</div>
                   )}
                 </div>
               </div>

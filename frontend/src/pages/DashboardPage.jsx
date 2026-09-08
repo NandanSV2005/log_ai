@@ -500,64 +500,78 @@ export function DashboardPage({ pollingInterval }) {
           <div className="glass-panel rounded-2xl border border-border-muted shadow-xl overflow-hidden space-y-4">
             <div className="p-4 sm:p-5 border-b border-border-muted bg-surface-dim flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
               <div>
-                <h3 className="text-sm font-extrabold text-text-primary uppercase tracking-wider">Recent Telemetry Stream</h3>
-                <p className="text-xs text-text-muted mt-0.5">Live incoming OCSF 1.1 event stream across registered network perimeter nodes.</p>
+                <h3 className="text-sm font-extrabold text-text-primary uppercase tracking-wider">Perimeter Telemetry Stream</h3>
+                <p className="text-xs text-text-muted mt-0.5">Live real-time edge network log ingestion stream across firewall, IDS/IPS, and router interfaces.</p>
               </div>
               <button
                 onClick={() => navigate('/log-explorer')}
                 className="btn-secondary px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1 self-start sm:self-auto touch-target"
               >
-                <span>Log Explorer</span>
+                <span>Open Log Explorer</span>
                 <span className="material-symbols-outlined text-sm">arrow_forward</span>
               </button>
             </div>
 
             <div className="p-3 sm:p-5 overflow-x-auto custom-scrollbar-touch">
               {recentEvents.length > 0 ? (
-                <table className="w-full text-left font-mono text-xs border-collapse min-w-[550px]">
+                <table className="w-full text-left font-mono text-xs border-collapse min-w-[650px]">
                   <thead>
                     <tr className="border-b border-border-muted text-text-muted text-[10px] uppercase">
                       <th className="py-2.5 px-3">Timestamp</th>
+                      <th className="py-2.5 px-3">Perimeter Device</th>
                       <th className="py-2.5 px-3">Source IP</th>
-                      <th className="py-2.5 px-3">Event Type</th>
-                      <th className="py-2.5 px-3">Threat Level</th>
+                      <th className="py-2.5 px-3">Ingest Action</th>
+                      <th className="py-2.5 px-3">Severity</th>
                       <th className="py-2.5 px-3">Threat Score</th>
-                      <th className="py-2.5 px-3 text-right">Details</th>
+                      <th className="py-2.5 px-3 text-right">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border-muted">
-                    {recentEvents.slice(0, 10).map((evt, idx) => (
-                      <tr key={evt.raw_event_hash || idx} className="hover:bg-surface-hover transition-colors">
-                        <td className="py-2.5 px-3 text-text-muted text-[11px] whitespace-nowrap">
-                          {evt.timestamp || '2026-08-31 19:40'}
-                        </td>
-                        <td className="py-2.5 px-3 font-bold text-text-primary whitespace-nowrap">
-                          {evt.source_ip || '192.168.1.100'}
-                        </td>
-                        <td className="py-2.5 px-3 text-primary whitespace-nowrap">
-                          {evt.event_type || 'syslog'}
-                        </td>
-                        <td className="py-2.5 px-3 whitespace-nowrap">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                            evt.threat_level === 'HIGH' ? 'bg-rose-500/20 text-rose-400' :
-                            evt.threat_level === 'MEDIUM' ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'
-                          }`}>
-                            {evt.threat_level || 'LOW'}
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-3 font-bold text-text-primary whitespace-nowrap">
-                          {(evt.threat_score || 12.0).toFixed(1)}
-                        </td>
-                        <td className="py-2.5 px-3 text-right whitespace-nowrap">
-                          <button
-                            onClick={() => setSelectedEventDrawer(evt)}
-                            className="btn-secondary px-3 py-1.5 rounded text-[10px] font-bold touch-target"
-                          >
-                            Inspect
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {recentEvents.slice(0, 10).map((evt, idx) => {
+                      const deviceVendor = evt.event_type ? evt.event_type.split(':')[0].toUpperCase() : 'CISCO_ASA';
+                      const actionTag = (evt.event_type || '').includes('permit') || (evt.event_type || '').includes('pass') ? 'PERMIT' : 'DENY';
+                      return (
+                        <tr key={evt.raw_event_hash || idx} className="hover:bg-surface-hover transition-colors">
+                          <td className="py-2.5 px-3 text-text-muted text-[11px] whitespace-nowrap">
+                            {evt.timestamp || '2026-09-08 16:10:43'}
+                          </td>
+                          <td className="py-2.5 px-3 font-bold text-text-primary whitespace-nowrap">
+                            <span className="px-2 py-0.5 rounded bg-surface border border-border-muted text-[10px] text-primary">
+                              {deviceVendor}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 font-bold text-text-primary whitespace-nowrap">
+                            {evt.source_ip || '203.0.113.45'}
+                          </td>
+                          <td className="py-2.5 px-3 whitespace-nowrap">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              actionTag === 'DENY' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                            }`}>
+                              {actionTag}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 whitespace-nowrap">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              evt.threat_level === 'HIGH' || evt.threat_level === 'CRITICAL' ? 'bg-rose-500/20 text-rose-400' :
+                              evt.threat_level === 'MEDIUM' ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'
+                            }`}>
+                              {evt.threat_level || 'LOW'}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 font-bold text-text-primary whitespace-nowrap">
+                            {(evt.threat_score || 12.0).toFixed(1)}
+                          </td>
+                          <td className="py-2.5 px-3 text-right whitespace-nowrap">
+                            <button
+                              onClick={() => setSelectedEventDrawer(evt)}
+                              className="btn-secondary px-3 py-1.5 rounded text-[10px] font-bold touch-target"
+                            >
+                              Inspect Stream
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               ) : (
