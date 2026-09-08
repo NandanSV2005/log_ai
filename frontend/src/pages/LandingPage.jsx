@@ -8,33 +8,87 @@ export function LandingPage() {
   const { theme, setTheme } = useTheme();
   const [isLandingMenuOpen, setIsLandingMenuOpen] = useState(false);
 
-  // 1. Pipeline Stage Selection (Scroll & Click Driven)
-  const [activePipelineStage, setActivePipelineStage] = useState(1);
+  // =========================================================================
+  // 1. SECTION REFS & VIEWPORT-AWARE ACTIVATION (IntersectionObserver)
+  // =========================================================================
+  const pipelineRef = useRef(null);
+  const capabilitiesRef = useRef(null);
+  const topologyRef = useRef(null);
+  const estimatorRef = useRef(null);
 
-  // 2. Financial Impact Estimator State
+  const [isPipelineActive, setIsPipelineActive] = useState(false);
+  const [isCapabilitiesActive, setIsCapabilitiesActive] = useState(false);
+  const [isTopologyActive, setIsTopologyActive] = useState(false);
+  const [isEstimatorActive, setIsEstimatorActive] = useState(false);
+
+  // =========================================================================
+  // 2. SECTION STAGE STATES (Scroll, Hover, Select)
+  // Precedence: selectedStage || hoveredStage || scrollStage || 1
+  // =========================================================================
+  // Pipeline Section State
+  const [scrollPipelineStage, setScrollPipelineStage] = useState(1);
+  const [hoveredPipelineStage, setHoveredPipelineStage] = useState(null);
+  const [selectedPipelineStage, setSelectedPipelineStage] = useState(null);
+  const activePipelineStage = selectedPipelineStage || hoveredPipelineStage || scrollPipelineStage || 1;
+
+  // Capabilities Section State
+  const [scrollCapabilitiesStage, setScrollCapabilitiesStage] = useState(1);
+  const [hoveredCapabilitiesStage, setHoveredCapabilitiesStage] = useState(null);
+  const [selectedCapabilitiesStage, setSelectedCapabilitiesStage] = useState(null);
+  const activeCapabilitiesStage = selectedCapabilitiesStage || hoveredCapabilitiesStage || scrollCapabilitiesStage || 1;
+
+  // Topology Section State
+  const [scrollTopologyStage, setScrollTopologyStage] = useState(1);
+  const [hoveredTopologyStage, setHoveredTopologyStage] = useState(null);
+  const [selectedTopologyStage, setSelectedTopologyStage] = useState(null);
+  const activeTopologyStage = selectedTopologyStage || hoveredTopologyStage || scrollTopologyStage || 1;
+
+  // =========================================================================
+  // 3. INTERACTION HELPER (Hover + Click + Touch + Keyboard)
+  // =========================================================================
+  const getSubtopicProps = (id, activeStage, setHovered, setSelected) => {
+    const isActive = activeStage === id;
+    return {
+      role: 'tab',
+      tabIndex: 0,
+      'aria-selected': isActive,
+      onMouseEnter: () => setHovered(id),
+      onMouseLeave: () => setHovered(null),
+      onFocus: () => setHovered(id),
+      onBlur: () => setHovered(null),
+      onClick: () => setSelected(id),
+      onTouchEnd: () => setSelected(id),
+      onKeyDown: (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          setSelected(id);
+        }
+      }
+    };
+  };
+
+  // =========================================================================
+  // 4. FINANCIAL ROI ESTIMATOR STATE & FORMULAS (Unchanged)
+  // =========================================================================
   const [logVolume, setLogVolume] = useState(500000);
   const [devicesMonitored, setDevicesMonitored] = useState(25);
 
-  // Calculations for Financial Impact Estimator (Formulas 100% UNCHANGED)
   const hoursSaved = ((logVolume * 0.001 * 0.85 * 3.5 * 30) / 60).toFixed(1);
   const mttrReduction = Math.min(85, (50 + devicesMonitored * 0.2)).toFixed(1);
   const monthlySavings = (hoursSaved * 65).toLocaleString('en-US', { maximumFractionDigits: 0 });
 
-  // Radar Interactive Selection
-  const [activeRadarNode, setActiveRadarNode] = useState({
-    id: 1,
-    ip: '185.220.100.22',
-    device: 'Cisco ASA Edge',
-    x: 70,
-    y: 32,
-    severity: 'HIGH',
-    score: 88.5,
-    proto: 'TCP/51422',
-    rule: 'MITRE T1110 (Brute Force)',
-    action: 'AUTO_BLOCKED'
-  });
+  // =========================================================================
+  // 5. RADAR INTERACTIVE NODES & DATA
+  // =========================================================================
+  const RADAR_NODES = [
+    { id: 1, ip: '185.220.100.22', device: 'Cisco ASA Edge', x: 70, y: 32, severity: 'HIGH', score: 88.5, proto: 'TCP/51422', rule: 'MITRE T1110 (Brute Force)', action: 'AUTO_BLOCKED' },
+    { id: 2, ip: '192.168.1.105', device: 'FortiGate FW', x: 28, y: 65, severity: 'MEDIUM', score: 62.0, proto: 'UDP/53', rule: 'DNS Tunneling Anomaly', action: 'MONITORED' },
+    { id: 3, ip: '10.0.0.50', device: 'Suricata IDS', x: 62, y: 76, severity: 'LOW', score: 24.1, proto: 'HTTP/80', rule: 'Standard GET /health', action: 'CLEARED' },
+    { id: 4, ip: '45.33.32.156', device: 'pfSense Cluster', x: 36, y: 24, severity: 'HIGH', score: 94.2, proto: 'SSH/22', rule: 'Credential Stuffing', action: 'CONTAINED' },
+  ];
+  const [activeRadarNode, setActiveRadarNode] = useState(RADAR_NODES[0]);
 
-  // Live Telemetry Stats & Events (Graceful fallback if unauthenticated public access)
+  // Live Telemetry Stats & Events
   const [stats, setStats] = useState({
     total_events: 4200000,
     active_threats: 14,
@@ -50,7 +104,7 @@ export function LandingPage() {
     { id: 'evt-05', timestamp: '2026-09-08 11:41:39', vendor: 'cef_syslog', action: 'DENY', src_ip: '198.51.100.14', dst_port: 8080, severity: 'HIGH', threat_score: 82.1 },
   ]);
 
-  // Attempt live API fetch on component mount
+  // Attempt live API fetch on mount
   useEffect(() => {
     let mounted = true;
     async function loadData() {
@@ -65,7 +119,7 @@ export function LandingPage() {
           });
         }
       } catch (err) {
-        // Silent fallback for public unauthenticated visitors
+        // Public fallback
       }
 
       try {
@@ -74,124 +128,291 @@ export function LandingPage() {
           setRecentEvents(fetchedEvents);
         }
       } catch (err) {
-        // Silent fallback
+        // Public fallback
       }
     }
     loadData();
     return () => { mounted = false; };
   }, []);
 
-  // Scroll Progress Driven Storytelling Handler
+  // =========================================================================
+  // 6. VIEWPORT-AWARE INTERSECTION OBSERVER FOR ALL MAJOR SECTIONS
+  // =========================================================================
+  useEffect(() => {
+    const createSectionObserver = (ref, setActiveState) => {
+      const el = ref.current;
+      if (!el) return null;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            setActiveState(entry.isIntersecting);
+          });
+        },
+        { threshold: 0.1, rootMargin: '0px 0px -10% 0px' }
+      );
+      observer.observe(el);
+      return observer;
+    };
+
+    const obs1 = createSectionObserver(pipelineRef, setIsPipelineActive);
+    const obs2 = createSectionObserver(capabilitiesRef, setIsCapabilitiesActive);
+    const obs3 = createSectionObserver(topologyRef, setIsTopologyActive);
+    const obs4 = createSectionObserver(estimatorRef, setIsEstimatorActive);
+
+    return () => {
+      if (obs1) obs1.disconnect();
+      if (obs2) obs2.disconnect();
+      if (obs3) obs3.disconnect();
+      if (obs4) obs4.disconnect();
+    };
+  }, []);
+
+  // =========================================================================
+  // 7. LOCAL SECTION-SCOPED SCROLL PROGRESS (ACTIVE SECTIONS ONLY)
+  // =========================================================================
   useEffect(() => {
     const handleScroll = () => {
-      const pipelineEl = document.getElementById('pipeline');
-      if (!pipelineEl) return;
-      const rect = pipelineEl.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-      
-      // Calculate scroll progress through pipeline section
-      if (rect.top <= windowHeight && rect.bottom >= 0) {
-        const totalScrollable = rect.height;
-        const currentScroll = windowHeight - rect.top;
-        const progress = Math.max(0, Math.min(1, currentScroll / totalScrollable));
-        const calculatedStage = Math.min(6, Math.max(1, Math.ceil(progress * 6)));
-        setActivePipelineStage(calculatedStage);
+      const calculateStage = (ref, numStages) => {
+        if (!ref.current) return 1;
+        const rect = ref.current.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        const startOffset = windowHeight * 0.75;
+        const totalHeight = rect.height;
+        const scrolled = startOffset - rect.top;
+        const progress = Math.max(0, Math.min(1, scrolled / (totalHeight + windowHeight * 0.2)));
+        return Math.min(numStages, Math.max(1, Math.floor(progress * numStages) + 1));
+      };
+
+      if (isPipelineActive) {
+        setScrollPipelineStage(calculateStage(pipelineRef, 6));
+      }
+      if (isCapabilitiesActive) {
+        setScrollCapabilitiesStage(calculateStage(capabilitiesRef, 6));
+      }
+      if (isTopologyActive) {
+        setScrollTopologyStage(calculateStage(topologyRef, 5));
       }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isPipelineActive, isCapabilitiesActive, isTopologyActive]);
 
-  // Radar Interactive Nodes Array
-  const RADAR_NODES = [
-    { id: 1, ip: '185.220.100.22', device: 'Cisco ASA Edge', x: 70, y: 32, severity: 'HIGH', score: 88.5, proto: 'TCP/51422', rule: 'MITRE T1110 (Brute Force)', action: 'AUTO_BLOCKED' },
-    { id: 2, ip: '192.168.1.105', device: 'FortiGate FW', x: 28, y: 65, severity: 'MEDIUM', score: 62.0, proto: 'UDP/53', rule: 'DNS Tunneling Anomaly', action: 'MONITORED' },
-    { id: 3, ip: '10.0.0.50', device: 'Suricata IDS', x: 62, y: 76, severity: 'LOW', score: 24.1, proto: 'HTTP/80', rule: 'Standard GET /health', action: 'CLEARED' },
-    { id: 4, ip: '45.33.32.156', device: 'pfSense Cluster', x: 36, y: 24, severity: 'HIGH', score: 94.2, proto: 'SSH/22', rule: 'Credential Stuffing', action: 'CONTAINED' },
-  ];
-
-  // Pipeline Stages Data with Clear, Uncluttered Wording
+  // =========================================================================
+  // 8. DATA STRUCTURES FOR MAJOR SECTIONS
+  // =========================================================================
+  
+  // Pipeline Stages Data
   const PIPELINE_STAGES = [
     {
       id: 1,
       num: '01',
-      name: 'Receive Logs',
-      title: 'Stage 1: Raw Log Capture & Cryptographic Hashing',
+      name: 'Ingestion',
+      title: 'Stage 1: Raw Log Capture & Cryptographic Digesting',
       filepath: 'app/storage/raw_writer.py',
-      desc: 'Raw log payloads are collected from edge devices and immediately assigned a SHA-256 cryptographic digest before parsing to ensure tamper-proof data integrity.',
+      desc: 'Raw syslog packets arriving at edge interfaces are captured with zero data loss and immediately assigned a SHA-256 hash to ensure tamper-proof integrity.',
+      techBadge: 'Zero-Loss Capture',
       payload: '%ASA-4-106023: Deny tcp src outside:185.220.100.22/51422 dst inside:10.0.0.10/80 by access-group "outside_acl"',
       digest: 'a4ea94c43d9dc8c7753255ca0d6e2bb2093560056c170d2f992edb7d36071e3f',
-      techBadge: 'Zero-Loss Capture',
+      transformType: 'raw'
     },
     {
       id: 2,
       num: '02',
-      name: 'Identify Format',
-      title: 'Stage 2: Vendor Format Auto-Detection & Key Parsing',
+      name: 'Format Detection',
+      title: 'Stage 2: Format Identification & Header Extraction',
       filepath: 'app/parsers/dynamic_parser.py',
-      desc: 'Extractors identify Cisco ASA, Fortinet, Suricata, and pfSense log formats automatically, extracting key attributes such as source IPs, destination ports, and firewall actions.',
-      payload: 'Detected Format: Cisco ASA | Action: DENY | Protocol: TCP | SrcIP: 185.220.100.22 | DstIP: 10.0.0.10 | DstPort: 80',
-      digest: '3c8e92ba8712df649f109281a8ef1284561029e8471b6501928471209e847120',
+      desc: 'Extractors match incoming strings against Cisco ASA, FortiGate, Suricata, and pfSense patterns automatically, identifying vendor format and action types.',
       techBadge: 'Format Detection',
+      payload: 'FORMAT MATCHED: Cisco ASA Syslog | ACTION: DENY | PROTO: TCP | SRC: 185.220.100.22 | DST: 10.0.0.10:80',
+      digest: '3c8e92ba8712df649f109281a8ef1284561029e8471b6501928471209e847120',
+      transformType: 'format'
     },
     {
       id: 3,
       num: '03',
-      name: 'Organize Fields',
-      title: 'Stage 3: OCSF 1.1 Field Normalization',
-      filepath: 'app/normalization/schema.py',
-      desc: 'Maps raw vendor attributes into standard OCSF 1.1 UnifiedEvent objects with consistent ISO timestamps, severity tiers, and IP network classifications.',
-      payload: 'UnifiedEvent(event_type="cisco_asa:deny", severity="Warning", threat_level="MEDIUM", threat_score=65.0, status="New")',
+      name: 'Parsing',
+      title: 'Stage 3: Regex Key Extraction & Value Tokenizing',
+      filepath: 'app/normalization/parser_engine.py',
+      desc: 'Dissects unstructured syslog strings into typed key-value pairs (source IP, destination port, protocol, severity, timestamp) for rapid indexing.',
+      techBadge: 'Key Extraction',
+      payload: 'FIELDS EXTRACTED: {\n  "src_ip": "185.220.100.22",\n  "src_port": 51422,\n  "dst_ip": "10.0.0.10",\n  "dst_port": 80,\n  "action": "DENY",\n  "acl_name": "outside_acl"\n}',
       digest: '7a910284712b6501928471209e847120f2b259a563db460ee9d7b9ddf5b18d89',
-      techBadge: 'Unified Schema',
+      transformType: 'parse'
     },
     {
       id: 4,
       num: '04',
-      name: 'Detect Threats',
-      title: 'Stage 4: Isolation Forest Anomaly Scoring',
-      filepath: 'app/detection/anomaly_engine.py',
-      desc: 'Evaluates connection velocity, payload entropy, and rule triggers against pre-trained ML baselines to compute normalized threat scores (0.0 to 100.0).',
-      payload: 'Threat Score: 65.0 (MEDIUM) | Triggers: ["repeated_deny", "external_source"] | Feature Attribution: action_code (+4.84 z-score)',
+      name: 'Normalization',
+      title: 'Stage 4: OCSF 1.1 Unified Schema Transformation',
+      filepath: 'app/normalization/schema.py',
+      desc: 'Maps extracted vendor attributes into standard OCSF 1.1 UnifiedEvent objects with consistent ISO timestamps, severity tiers, and IP network classifications.',
+      techBadge: 'OCSF Schema',
+      payload: 'UnifiedEvent(\n  class_uid=4001, // Network Activity\n  category_uid=4,\n  activity_id=2, // Blocked\n  severity_id=3, // Medium\n  src_endpoint=Endpoint(ip="185.220.100.22"),\n  dst_endpoint=Endpoint(ip="10.0.0.10", port=80)\n)',
       digest: '9f7fe12c98001dcace31357795d410458710a892bfecdac00aee45bce0a96915',
-      techBadge: 'Anomaly Engine',
+      transformType: 'normalize'
     },
     {
       id: 5,
       num: '05',
-      name: 'Group Incidents',
-      title: 'Stage 5: Multi-Vector Alert Correlation',
-      filepath: 'app/detection/correlation.py',
-      desc: 'Correlates related security events across 15-minute sliding windows sharing source IPs, clustering isolated alerts into single incident timelines.',
-      payload: 'Incident Cluster #inc_a81b5b: Source IP 185.220.100.22 | Events Count: 12 | MITRE Tactics: ["T1110 - Brute Force"]',
+      name: 'Validation',
+      title: 'Stage 5: Isolation Forest Anomaly Scoring',
+      filepath: 'app/detection/anomaly_engine.py',
+      desc: 'Evaluates connection velocity, payload entropy, and rule triggers against pre-trained ML baselines to compute normalized threat scores (0.0 to 100.0).',
+      techBadge: 'Anomaly Engine',
+      payload: 'ANOMALY DETECTED: Threat Score 88.5/100 (HIGH)\nFeature Attribution:\n  + velocity_spike (+3.42 z-score)\n  + repeated_deny (+2.88 z-score)\n  + high_risk_asn (+1.95 z-score)',
       digest: '488480b6ca3f120649476bb2499f7fc43fbe08c16bec56b1d74517b1c38e7477',
-      techBadge: 'Alert Aggregator',
+      transformType: 'score'
     },
     {
       id: 6,
       num: '06',
-      name: 'Recommend Actions',
-      title: 'Stage 6: Explainable AI & Mitigation Playbooks',
+      name: 'Analysis',
+      title: 'Stage 6: Multi-Vector Alert Correlation & Playbooks',
       filepath: 'app/xai/explainer.py',
-      desc: 'Delivers transparent feature attribution breakdowns and 3-step firewall mitigation commands for active security incidents without black-box opacity.',
-      payload: 'Mitigation Plan: 1. iptables -A INPUT -s 185.220.100.22 -j DROP | 2. Revoke active JWT tokens | 3. Push policy update to Cisco ASA',
-      digest: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      desc: 'Correlates related events across 15-minute windows and generates 3-step firewall mitigation playbooks with transparent feature attributions.',
       techBadge: 'Explainable AI',
+      payload: 'INCIDENT CREATED #inc_a81b5b (MITRE T1110 Brute Force)\nRecommended Playbook:\n  1. iptables -A INPUT -s 185.220.100.22 -j DROP\n  2. Revoke active JWT tokens for user "admin"\n  3. Push policy update to Cisco ASA Edge',
+      digest: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      transformType: 'playbook'
     },
   ];
 
-  // Perimeter Appliance Support Cards
-  const APPLIANCES = [
-    { name: 'Cisco ASA Firewall', format: 'CEF / Syslog', speed: '1.2M EPS', parser: 'cisco_asa:deny', status: 'ACTIVE' },
-    { name: 'Fortinet FortiGate', format: 'KV Pair Log', speed: '980K EPS', parser: 'fortigate:traffic', status: 'ACTIVE' },
-    { name: 'Suricata IDS/IPS', format: 'EVE JSON', speed: '850K EPS', parser: 'suricata:eve', status: 'ACTIVE' },
-    { name: 'pfSense Filterlog', format: 'CSV Stream', speed: '620K EPS', parser: 'pfsense:filterlog', status: 'ACTIVE' },
-    { name: 'CEF Standard', format: 'Common Event', speed: '450K EPS', parser: 'cef:generic', status: 'ACTIVE' },
-    { name: 'Enterprise Cross-Ingest', format: 'Multi-Vendor', speed: '4.2M EPS', parser: 'ocsf:unified', status: 'ACTIVE' },
+  // Capabilities Subtopics Data
+  const CAPABILITIES_STAGES = [
+    {
+      id: 1,
+      num: '01',
+      name: 'Cisco ASA Firewall',
+      vendor: 'Cisco Systems',
+      format: 'CEF / Syslog Stream',
+      speed: '1.2M EPS',
+      parser: 'cisco_asa:deny',
+      desc: 'Ingests Cisco ASA %ASA-4 access-group drop logs, extracting source/destination sockets and interface bindings.',
+      sampleInput: '%ASA-4-106023: Deny tcp src outside:185.220.100.22/51422 dst inside:10.0.0.10/80 by access-group "outside_acl"',
+      schemaOutput: 'OCSF Class: 4001 Network Activity | Action: DENY | Protocol: TCP (6)'
+    },
+    {
+      id: 2,
+      num: '02',
+      name: 'Fortinet FortiGate',
+      vendor: 'Fortinet Inc.',
+      format: 'KV Pair Log',
+      speed: '980K EPS',
+      parser: 'fortigate:traffic',
+      desc: 'Parses key-value pairs from FortiOS firewall traffic and threat log streams with automatic field type casting.',
+      sampleInput: 'date=2026-09-08 time=11:41:58 devname="FG100E" type="traffic" subtype="forward" action="deny" srcip="192.168.1.105" dstip="10.0.0.50" dstport=443',
+      schemaOutput: 'OCSF Class: 4001 Network Activity | Action: DENY | Protocol: HTTPS (443)'
+    },
+    {
+      id: 3,
+      num: '03',
+      name: 'Suricata IDS/IPS',
+      vendor: 'Open Information Security Foundation',
+      format: 'EVE JSON Stream',
+      speed: '850K EPS',
+      parser: 'suricata:eve',
+      desc: 'Consumes raw Suricata EVE JSON event logs, extracting signature IDs, alert categories, and payload hex dumps.',
+      sampleInput: '{"event_type":"alert","src_ip":"45.33.32.156","src_port":22,"alert":{"signature":"ET SCAN Potential SSH Brute Force","severity":1}}',
+      schemaOutput: 'OCSF Class: 2001 Security Finding | Category: Intrusion Detection | Severity: HIGH'
+    },
+    {
+      id: 4,
+      num: '04',
+      name: 'pfSense Filterlog',
+      vendor: 'Netgate / FreeBSD',
+      format: 'CSV Packet Stream',
+      speed: '620K EPS',
+      parser: 'pfsense:filterlog',
+      desc: 'Decodes comma-separated pfSense filterlog streams into normalized network connection tuples and rule numbers.',
+      sampleInput: '15,,,1000000103,em0,match,block,in,4,0x0,,64,0,0,DF,6,tcp,60,10.0.0.50,198.51.100.14,53,8080,0',
+      schemaOutput: 'OCSF Class: 4001 Network Activity | Action: BLOCK | Interface: em0'
+    },
+    {
+      id: 5,
+      num: '05',
+      name: 'CEF Standard',
+      vendor: 'Micro Focus ArcSight',
+      format: 'Common Event Format',
+      speed: '450K EPS',
+      parser: 'cef:generic',
+      desc: 'Extracts ArcSight Common Event Format (CEF) header pipe-delimited tokens and extension key-value attributes.',
+      sampleInput: 'CEF:0|Security|Firewall|1.0|100|Connection Denied|5|src=198.51.100.14 dst=10.0.0.10 spt=51422 dpt=8080',
+      schemaOutput: 'OCSF Class: 4001 Network Activity | Severity: MEDIUM | Device Vendor: Security'
+    },
+    {
+      id: 6,
+      num: '06',
+      name: 'Enterprise OCSF Unified',
+      vendor: 'Open Cybersecurity Schema Framework',
+      format: 'Cross-Vendor Unified Schema',
+      speed: '4.2M EPS',
+      parser: 'ocsf:unified',
+      desc: 'Universal schema mapping layer ensuring seamless interoperability across heterogeneous enterprise security stacks.',
+      sampleInput: 'UnifiedEvent(event_type="ocsf:network", vendor="Multi-Vendor", threat_score=68.4, status="Parsed")',
+      schemaOutput: 'OCSF Class: 4001 Unified Network Activity | Schema Version: 1.1.0'
+    },
   ];
 
-  const currentStageData = PIPELINE_STAGES.find(s => s.id === activePipelineStage) || PIPELINE_STAGES[0];
+  // Topology Architecture Stages Data
+  const TOPOLOGY_STAGES = [
+    {
+      id: 1,
+      num: '01',
+      name: 'Ingestion Edge',
+      title: 'High-Throughput Edge Ingestion & Buffer',
+      module: 'app/storage/raw_writer.py',
+      desc: 'Syslog packets enter high-speed buffer queues. Raw logs are assigned SHA-256 digests immediately upon arrival.',
+      metrics: { eps: '4,200,000 EPS', latency: '< 0.3ms', loss: '0.00%' },
+      status: 'OPTIMAL'
+    },
+    {
+      id: 2,
+      num: '02',
+      name: 'Dynamic Parser Pool',
+      title: 'Regex Format Identification & OCSF Normalizer',
+      module: 'app/parsers/dynamic_parser.py',
+      desc: 'Parallel worker threads analyze log syntax, extract key fields, and output standardized OCSF 1.1 JSON objects.',
+      metrics: { eps: '4,180,000 EPS', latency: '< 0.4ms', loss: '0.00%' },
+      status: 'PARSING'
+    },
+    {
+      id: 3,
+      num: '03',
+      name: 'ML Anomaly Engine',
+      title: 'Isolation Forest Anomaly Scoring',
+      module: 'app/detection/anomaly_engine.py',
+      desc: 'Pre-trained Isolation Forest models calculate z-score feature attributions and assign continuous threat scores (0-100).',
+      metrics: { eps: '4,150,000 EPS', latency: '< 0.2ms', loss: '0.00%' },
+      status: 'EVALUATING'
+    },
+    {
+      id: 4,
+      num: '04',
+      name: 'Alert Aggregator',
+      title: '15-Minute Sliding Window Correlation',
+      module: 'app/detection/correlation.py',
+      desc: 'Correlates related security events by source IP, destination target, and MITRE ATT&CK tactic into single incident clusters.',
+      metrics: { eps: '4,150,000 EPS', latency: '< 0.1ms', loss: '0.00%' },
+      status: 'CLUSTERING'
+    },
+    {
+      id: 5,
+      num: '05',
+      name: 'SOC Analyst Console',
+      title: 'Explainable AI & Automated Firewall Playbooks',
+      module: 'app/xai/explainer.py',
+      desc: 'Renders transparent feature attribution breakdowns and generates 1-click executable firewall mitigation commands.',
+      metrics: { eps: '100% Synced', latency: '< 0.1ms', loss: '0.00%' },
+      status: 'ACTION READY'
+    },
+  ];
+
+  const currentPipelineData = PIPELINE_STAGES.find(s => s.id === activePipelineStage) || PIPELINE_STAGES[0];
+  const currentCapabilitiesData = CAPABILITIES_STAGES.find(s => s.id === activeCapabilitiesStage) || CAPABILITIES_STAGES[0];
+  const currentTopologyData = TOPOLOGY_STAGES.find(s => s.id === activeTopologyStage) || TOPOLOGY_STAGES[0];
 
   return (
     <div className="min-h-screen bg-[var(--color-bg-dim)] text-[var(--color-text-main)] font-sans flex flex-col selection:bg-[var(--color-primary)] selection:text-[#0f131c]">
@@ -286,12 +507,12 @@ export function LandingPage() {
       </header>
 
       {/* ========================================================================= */}
-      {/* 2. HERO SECTION & INTERACTIVE VECTOR RADAR (Reference Composition)        */}
+      {/* 2. HERO SECTION & INTERACTIVE VECTOR RADAR                                */}
       {/* ========================================================================= */}
       <section className="relative px-4 lg:px-8 pt-8 pb-16 border-b border-[var(--color-border)] bg-tech-grid">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           
-          {/* Left Column: Clear Hero Copy & CTAs */}
+          {/* Left Column: Hero Copy & CTAs */}
           <div className="lg:col-span-6 space-y-6">
             
             {/* Eyebrow Badge */}
@@ -394,13 +615,15 @@ export function LandingPage() {
                     <button
                       key={node.id}
                       onClick={() => setActiveRadarNode(node)}
+                      onMouseEnter={() => setActiveRadarNode(node)}
+                      onFocus={() => setActiveRadarNode(node)}
                       style={{ left: `${node.x}%`, top: `${node.y}%` }}
-                      className={`absolute -translate-x-1/2 -translate-y-1/2 p-1.5 rounded-full transition-all focus:outline-none ${
-                        isSelected ? 'scale-125 z-20' : 'hover:scale-110 z-10'
+                      className={`absolute -translate-x-1/2 -translate-y-1/2 p-1.5 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] ${
+                        isSelected ? 'scale-125 z-20 ring-2 ring-[var(--color-primary)]' : 'hover:scale-110 z-10'
                       }`}
                       title={`Inspect ${node.ip}`}
                     >
-                      <span className={`relative flex h-4 w-4 items-center justify-center`}>
+                      <span className="relative flex h-4 w-4 items-center justify-center">
                         <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
                           isHigh ? 'bg-rose-500' : 'bg-amber-500'
                         }`}></span>
@@ -482,47 +705,68 @@ export function LandingPage() {
       </div>
 
       {/* ========================================================================= */}
-      {/* 4. CHAPTER 1: 6-STAGE LOG PROCESSING PIPELINE (#pipeline)                 */}
+      {/* 4. CHAPTER 01: 6-STAGE LOG PROCESSING PIPELINE (#pipeline)                */}
       {/* ========================================================================= */}
-      <section id="pipeline" className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full">
+      <section
+        id="pipeline"
+        ref={pipelineRef}
+        className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full transition-opacity duration-300"
+      >
         <div className="space-y-2 mb-10">
-          <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase">
-            CHAPTER 01 // HOW LOGS MOVE THROUGH THE SYSTEM
+          <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase flex items-center space-x-2">
+            <span>CHAPTER 01 // HOW LOGS MOVE THROUGH THE SYSTEM</span>
+            {isPipelineActive && (
+              <span className="px-2 py-0.5 rounded text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                ACTIVE VIEWPORT STORY
+              </span>
+            )}
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text-main)]">
             6-Stage Log Processing Pipeline
           </h2>
           <p className="text-sm text-[var(--color-text-muted)] max-w-2xl">
-            From raw log arrival at the edge to actionable security analysis in 6 clear steps. Scroll or click to see how data transforms at each stage.
+            From raw log arrival at the edge to actionable security analysis in 6 clear steps. Scroll through this section or hover/tap any stage below to inspect its live transformation.
           </p>
         </div>
 
-        {/* Desktop Sticky Side-by-Side & Mobile Vertical Layout */}
+        {/* Desktop Side-by-Side & Mobile Vertical Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Left Column: 6 Stage Cards */}
-          <div className="lg:col-span-6 space-y-4">
+          {/* Left Column: 6 Subtopics (Controls for Main Visualization) */}
+          <div className="lg:col-span-6 space-y-3" role="tablist" aria-label="Pipeline Stages">
             {PIPELINE_STAGES.map((stage) => {
-              const isActive = stage.id === activePipelineStage;
+              const isActive = activePipelineStage === stage.id;
+              const props = getSubtopicProps(
+                stage.id,
+                activePipelineStage,
+                setHoveredPipelineStage,
+                setSelectedPipelineStage
+              );
               return (
                 <div
                   key={stage.id}
-                  onClick={() => setActivePipelineStage(stage.id)}
-                  className={`p-5 rounded-lg border transition-all cursor-pointer ${
+                  {...props}
+                  className={`p-4 sm:p-5 rounded-lg border transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] ${
                     isActive
                       ? 'bg-[var(--color-bg-card)] border-[var(--color-primary)] shadow-md ring-1 ring-[var(--color-primary)]'
-                      : 'bg-[var(--color-bg-surface)] border-[var(--color-border)] hover:border-[var(--color-text-muted)]'
+                      : 'bg-[var(--color-bg-surface)] border-[var(--color-border)] hover:border-[var(--color-text-muted)] opacity-85 hover:opacity-100'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-3 font-mono">
-                    <span className="text-xs font-bold text-[var(--color-primary)]">{stage.num}</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded border border-[var(--color-border)] bg-[var(--color-bg-dim)] text-[var(--color-text-muted)]">
+                  <div className="flex items-center justify-between mb-2 font-mono">
+                    <span className={`text-xs font-bold ${isActive ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-dim)]'}`}>
+                      {stage.num}
+                    </span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded border ${
+                      isActive
+                        ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
+                        : 'border-[var(--color-border)] bg-[var(--color-bg-dim)] text-[var(--color-text-muted)]'
+                    }`}>
                       {stage.techBadge}
                     </span>
                   </div>
                   <h3 className="font-bold text-base text-[var(--color-text-main)] mb-1">{stage.name}</h3>
-                  <p className="text-xs text-[var(--color-text-muted)] leading-relaxed mb-3">{stage.desc}</p>
-                  <div className="font-mono text-[10px] text-[var(--color-text-dim)] truncate border-t border-[var(--color-border)] pt-2">
+                  <p className="text-xs text-[var(--color-text-muted)] leading-relaxed mb-2">{stage.desc}</p>
+                  <div className="font-mono text-[10px] text-[var(--color-text-dim)] truncate border-t border-[var(--color-border)]/50 pt-2">
                     MODULE: <span className="text-[var(--color-text-main)]">{stage.filepath}</span>
                   </div>
                 </div>
@@ -530,38 +774,75 @@ export function LandingPage() {
             })}
           </div>
 
-          {/* Right Column: Sticky Visualizer Panel (Desktop Sticky lg:sticky lg:top-24) */}
+          {/* Right Column: Sticky MAIN VISUALIZATION + EXPLANATION */}
           <div className="lg:col-span-6 lg:sticky lg:top-24 w-full">
             <div className="p-6 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg font-mono text-xs space-y-4 shadow-xl">
+              
+              {/* Header Badge & Stage Title */}
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-border)] pb-3">
                 <div className="flex items-center space-x-2">
-                  <span className="text-[var(--color-primary)] font-bold">{currentStageData.num}</span>
-                  <span className="font-bold text-[var(--color-text-main)]">{currentStageData.title}</span>
+                  <span className="px-2 py-0.5 rounded bg-[var(--color-primary)] text-[#0f131c] font-bold text-xs">
+                    STAGE {currentPipelineData.num}
+                  </span>
+                  <span className="font-bold text-[var(--color-text-main)] text-sm">{currentPipelineData.name}</span>
                 </div>
-                <div className="text-[11px] text-[var(--color-text-muted)]">
-                  FILE: <span className="text-[var(--color-primary)]">{currentStageData.filepath}</span>
+                <span className="text-[10px] text-[var(--color-text-dim)]">
+                  {currentPipelineData.filepath}
+                </span>
+              </div>
+
+              {/* Horizontal 6-Stage Progress Flow Visualizer */}
+              <div className="space-y-1.5">
+                <div className="text-[10px] text-[var(--color-text-dim)] uppercase">PIPELINE STAGE PROGRESS:</div>
+                <div className="grid grid-cols-6 gap-1 p-1 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded">
+                  {PIPELINE_STAGES.map((s) => (
+                    <div
+                      key={s.id}
+                      className={`h-2 rounded transition-all ${
+                        s.id === activePipelineStage
+                          ? 'bg-[var(--color-primary)] shadow-sm'
+                          : s.id < activePipelineStage
+                          ? 'bg-emerald-500/60'
+                          : 'bg-[var(--color-surface-variant)]'
+                      }`}
+                    ></div>
+                  ))}
                 </div>
               </div>
 
-              {/* Progress Indicator Bar */}
-              <div className="w-full bg-[var(--color-surface-variant)] h-1.5 rounded-full overflow-hidden">
-                <div
-                  className="bg-[var(--color-primary)] h-full transition-all duration-500 ease-out"
-                  style={{ width: `${(activePipelineStage / 6) * 100}%` }}
-                ></div>
+              {/* Central Morphing Visualization Canvas */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-[10px] text-[var(--color-text-dim)] uppercase">
+                  <span>STAGE DATA TRANSFORMATION ENGINE</span>
+                  <span className="text-emerald-400 font-bold">● ACTIVE</span>
+                </div>
+                
+                {/* Dynamic Content Container */}
+                <div className="p-4 bg-[var(--terminal-bg)] text-[var(--terminal-text-main)] border border-[var(--color-border)] rounded space-y-3 transition-all duration-300">
+                  <div className="flex items-center justify-between text-[11px] text-[var(--terminal-text-muted)] border-b border-[var(--color-border)] pb-2">
+                    <span>{currentPipelineData.title}</span>
+                    <span className="px-1.5 py-0.5 rounded text-[9px] bg-[var(--color-primary)]/20 text-[var(--color-primary)] border border-[var(--color-primary)]/30">
+                      {currentPipelineData.techBadge}
+                    </span>
+                  </div>
+
+                  <pre className="overflow-x-auto text-[11px] leading-relaxed font-mono whitespace-pre-wrap">
+                    {currentPipelineData.payload}
+                  </pre>
+                </div>
               </div>
 
-              <div>
-                <div className="text-[10px] text-[var(--color-text-dim)] uppercase mb-1">STAGE DATA TRANSFORMATION:</div>
-                <pre className="p-4 bg-[var(--terminal-bg)] text-[var(--terminal-text-main)] border border-[var(--color-border)] rounded overflow-x-auto text-[11px] leading-relaxed transition-all">
-                  {currentStageData.payload}
-                </pre>
+              {/* Explanation & Data Integrity Footer */}
+              <div className="p-3 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded text-xs text-[var(--color-text-muted)] leading-relaxed">
+                <span className="font-bold text-[var(--color-text-main)] block mb-1">Technical Explanation:</span>
+                {currentPipelineData.desc}
               </div>
 
-              <div className="flex flex-wrap items-center justify-between text-[11px] text-[var(--color-text-muted)] pt-1">
-                <span className="truncate max-w-md">SHA-256 DIGEST: <strong className="text-[var(--color-text-main)]">{currentStageData.digest}</strong></span>
+              <div className="flex flex-wrap items-center justify-between text-[10px] text-[var(--color-text-dim)] pt-1 border-t border-[var(--color-border)]">
+                <span className="truncate max-w-xs">SHA-256: <strong className="text-[var(--color-text-main)]">{currentPipelineData.digest}</strong></span>
                 <span className="text-emerald-400 font-bold">● VERIFIED ZERO-TAMPERING</span>
               </div>
+
             </div>
           </div>
 
@@ -569,61 +850,230 @@ export function LandingPage() {
       </section>
 
       {/* ========================================================================= */}
-      {/* 5. CHAPTER 2: LOG FORMAT SUPPORT (#capabilities)                         */}
+      {/* 5. CHAPTER 02: LOG FORMAT SUPPORT & CAPABILITIES (#capabilities)          */}
       {/* ========================================================================= */}
-      <section id="capabilities" className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full">
+      <section
+        id="capabilities"
+        ref={capabilitiesRef}
+        className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full transition-opacity duration-300"
+      >
         <div className="space-y-2 mb-10">
-          <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase">
-            CHAPTER 02 // LOG FORMAT SUPPORT
+          <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase flex items-center space-x-2">
+            <span>CHAPTER 02 // LOG FORMAT CAPABILITIES</span>
+            {isCapabilitiesActive && (
+              <span className="px-2 py-0.5 rounded text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                ACTIVE VIEWPORT STORY
+              </span>
+            )}
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text-main)]">
-            What the Platform Can Do
+            Perimeter Appliance Format Support
           </h2>
           <p className="text-sm text-[var(--color-text-muted)] max-w-2xl">
-            Built-in parsers for firewall, IDS/IPS, and network perimeter appliances.
+            Built-in high-speed extractors for enterprise firewalls, IDS/IPS sensors, and cross-vendor syslog feeds. Hover or select any appliance format to inspect details.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {APPLIANCES.map((app, idx) => (
-            <div key={idx} className="p-5 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg space-y-3 font-mono">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-sm text-[var(--color-text-main)]">{app.name}</span>
-                <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  {app.status}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Subtopics List (Left 6 Columns) */}
+          <div className="lg:col-span-6 space-y-3" role="tablist" aria-label="Log Format Capabilities">
+            {CAPABILITIES_STAGES.map((app) => {
+              const isActive = activeCapabilitiesStage === app.id;
+              const props = getSubtopicProps(
+                app.id,
+                activeCapabilitiesStage,
+                setHoveredCapabilitiesStage,
+                setSelectedCapabilitiesStage
+              );
+              return (
+                <div
+                  key={app.id}
+                  {...props}
+                  className={`p-4 rounded-lg border transition-all cursor-pointer font-mono text-xs focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] ${
+                    isActive
+                      ? 'bg-[var(--color-bg-card)] border-[var(--color-primary)] shadow-md ring-1 ring-[var(--color-primary)]'
+                      : 'bg-[var(--color-bg-surface)] border-[var(--color-border)] hover:border-[var(--color-text-muted)]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="font-bold text-sm text-[var(--color-text-main)]">{app.name}</span>
+                    <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      {app.speed}
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-[var(--color-text-muted)] mb-2">
+                    {app.vendor} — <span className="text-[var(--color-primary)]">{app.format}</span>
+                  </div>
+                  <div className="text-[10px] text-[var(--color-text-dim)] truncate border-t border-[var(--color-border)] pt-2">
+                    PARSER TAG: <span className="text-[var(--color-text-main)]">{app.parser}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Main Visualization Inspector Panel (Right 6 Columns) */}
+          <div className="lg:col-span-6 lg:sticky lg:top-24 w-full">
+            <div className="p-6 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg font-mono text-xs space-y-4 shadow-xl">
+              <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
+                <div>
+                  <span className="text-[10px] text-[var(--color-text-dim)] uppercase block">INSPECTING FORMAT</span>
+                  <span className="font-bold text-base text-[var(--color-text-main)]">{currentCapabilitiesData.name}</span>
+                </div>
+                <span className="px-2.5 py-1 rounded text-xs bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/30 font-bold">
+                  {currentCapabilitiesData.speed}
                 </span>
               </div>
-              <div className="grid grid-cols-2 gap-2 text-xs text-[var(--color-text-muted)] pt-2 border-t border-[var(--color-border)]">
-                <div>
-                  <span className="block text-[10px] text-[var(--color-text-dim)] uppercase">FORMAT</span>
-                  <span>{app.format}</span>
-                </div>
-                <div>
-                  <span className="block text-[10px] text-[var(--color-text-dim)] uppercase">THROUGHPUT</span>
-                  <span className="text-[var(--color-primary)] font-bold">{app.speed}</span>
+
+              <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
+                {currentCapabilitiesData.desc}
+              </p>
+
+              <div>
+                <div className="text-[10px] text-[var(--color-text-dim)] uppercase mb-1">SAMPLE RAW INGEST STREAM:</div>
+                <pre className="p-3 bg-[var(--terminal-bg)] text-[var(--terminal-text-main)] border border-[var(--color-border)] rounded text-[11px] overflow-x-auto whitespace-pre-wrap">
+                  {currentCapabilitiesData.sampleInput}
+                </pre>
+              </div>
+
+              <div>
+                <div className="text-[10px] text-[var(--color-text-dim)] uppercase mb-1">NORMALIZED OCSF OUTPUT:</div>
+                <div className="p-3 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded text-[11px] text-emerald-400 font-bold">
+                  {currentCapabilitiesData.schemaOutput}
                 </div>
               </div>
-              <div className="text-[10px] text-[var(--color-text-dim)] pt-1">
-                PARSER TAG: <span className="text-[var(--color-text-main)]">{app.parser}</span>
+
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[var(--color-border)] text-center text-[10px] text-[var(--color-text-dim)]">
+                <div className="p-2 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded">
+                  <span>EXTRACTION ACCURACY</span>
+                  <div className="text-xs font-bold text-[var(--color-text-main)] mt-0.5">99.4%</div>
+                </div>
+                <div className="p-2 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded">
+                  <span>PARSER COMPATIBILITY</span>
+                  <div className="text-xs font-bold text-[var(--color-primary)] mt-0.5">OCSF 1.1 READY</div>
+                </div>
               </div>
             </div>
-          ))}
+          </div>
+
         </div>
       </section>
 
       {/* ========================================================================= */}
-      {/* 6. CHAPTER 3: SOC EFFICIENCY & COST SAVINGS (#estimator)                  */}
+      {/* 6. CHAPTER 03: ARCHITECTURE TOPOLOGY (#topology)                          */}
       {/* ========================================================================= */}
-      <section id="estimator" className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full">
+      <section
+        id="topology"
+        ref={topologyRef}
+        className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full transition-opacity duration-300"
+      >
         <div className="space-y-2 mb-10">
-          <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase">
-            CHAPTER 03 // SOC EFFICIENCY &amp; SAVINGS
+          <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase flex items-center space-x-2">
+            <span>CHAPTER 03 // SYSTEM TOPOLOGY &amp; ARCHITECTURE</span>
+            {isTopologyActive && (
+              <span className="px-2 py-0.5 rounded text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                ACTIVE VIEWPORT STORY
+              </span>
+            )}
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text-main)]">
+            End-to-End System Topology
+          </h2>
+          <p className="text-sm text-[var(--color-text-muted)] max-w-2xl">
+            Inspect the 5 interconnected architectural components handling ingestion, parsing, anomaly scoring, and SOC alert correlation.
+          </p>
+        </div>
+
+        {/* Dynamic Topology Canvas Visualizer */}
+        <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg p-6 mb-8 shadow-xl">
+          <div className="text-[10px] font-mono text-[var(--color-text-dim)] uppercase mb-4 text-center">
+            SYSTEM ARCHITECTURE GRAPH — ACTIVE STAGE NODE HIGHLIGHTED
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 font-mono text-xs">
+            {TOPOLOGY_STAGES.map((stg) => {
+              const isActive = activeTopologyStage === stg.id;
+              const props = getSubtopicProps(
+                stg.id,
+                activeTopologyStage,
+                setHoveredTopologyStage,
+                setSelectedTopologyStage
+              );
+              return (
+                <div
+                  key={stg.id}
+                  {...props}
+                  className={`p-4 rounded border text-center transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] ${
+                    isActive
+                      ? 'bg-[var(--color-primary)] text-[#0f131c] border-[var(--color-primary)] font-bold shadow-lg scale-105 z-10'
+                      : 'bg-[var(--color-bg-surface)] border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'
+                  }`}
+                >
+                  <div className="text-[10px] opacity-75">{stg.num}</div>
+                  <div className="truncate text-xs mt-1">{stg.name}</div>
+                  <div className="text-[9px] mt-2 opacity-80 uppercase">{stg.status}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Selected Component Technical Detail Box */}
+        <div className="p-6 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg font-mono text-xs space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-border)] pb-3">
+            <div className="flex items-center space-x-2">
+              <span className="text-[var(--color-primary)] font-bold">NODE {currentTopologyData.num}</span>
+              <span className="font-bold text-[var(--color-text-main)] text-sm">{currentTopologyData.title}</span>
+            </div>
+            <span className="text-[11px] text-[var(--color-text-muted)]">
+              MODULE: <span className="text-[var(--color-primary)]">{currentTopologyData.module}</span>
+            </span>
+          </div>
+
+          <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
+            {currentTopologyData.desc}
+          </p>
+
+          <div className="grid grid-cols-3 gap-3 pt-2 text-center">
+            <div className="p-3 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded">
+              <span className="text-[9px] text-[var(--color-text-dim)] uppercase">THROUGHPUT</span>
+              <div className="text-sm font-bold text-[var(--color-primary)] mt-0.5">{currentTopologyData.metrics.eps}</div>
+            </div>
+            <div className="p-3 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded">
+              <span className="text-[9px] text-[var(--color-text-dim)] uppercase">PROCESSING LATENCY</span>
+              <div className="text-sm font-bold text-emerald-400 mt-0.5">{currentTopologyData.metrics.latency}</div>
+            </div>
+            <div className="p-3 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded">
+              <span className="text-[9px] text-[var(--color-text-dim)] uppercase">DATA LOSS RATE</span>
+              <div className="text-sm font-bold text-[var(--color-text-main)] mt-0.5">{currentTopologyData.metrics.loss}</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 7. CHAPTER 04: SOC EFFICIENCY & SAVINGS ESTIMATOR (#estimator)            */}
+      {/* ========================================================================= */}
+      <section
+        id="estimator"
+        ref={estimatorRef}
+        className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full"
+      >
+        <div className="space-y-2 mb-10">
+          <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase flex items-center space-x-2">
+            <span>CHAPTER 04 // SOC EFFICIENCY &amp; SAVINGS</span>
+            {isEstimatorActive && (
+              <span className="px-2 py-0.5 rounded text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                ACTIVE VIEWPORT STORY
+              </span>
+            )}
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text-main)]">
             SOC Efficiency &amp; Cost Savings Estimator
           </h2>
           <p className="text-sm text-[var(--color-text-muted)] max-w-2xl">
-            Adjust daily log volume and device count to estimate analyst time saved and operational efficiency.
+            Adjust daily log volume and device count to estimate analyst time saved and operational efficiency gains.
           </p>
         </div>
 
@@ -733,15 +1183,15 @@ export function LandingPage() {
       </section>
 
       {/* ========================================================================= */}
-      {/* 7. CHAPTER 4: LIVE LOGS & SECURITY ANALYSIS (#topology)                   */}
+      {/* 8. CHAPTER 05: LIVE TELEMETRY LOG ANALYSIS                                */}
       {/* ========================================================================= */}
-      <section id="topology" className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full">
+      <section className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full">
         <div className="space-y-2 mb-10">
           <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase">
-            CHAPTER 04 // LIVE LOGS &amp; ANALYSIS
+            CHAPTER 05 // LIVE LOGS &amp; ANALYSIS
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text-main)]">
-            Live Logs &amp; Security Analysis
+            Live Telemetry Log Stream
           </h2>
           <p className="text-sm text-[var(--color-text-muted)] max-w-2xl">
             Real-time view of system activity, threat scores, and recent event logs.
@@ -819,56 +1269,6 @@ export function LandingPage() {
                 ))}
               </tbody>
             </table>
-          </div>
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 8. CHAPTER 5: LOG PROCESSING INSPECTOR                                  */}
-      {/* ========================================================================= */}
-      <section className="px-4 lg:px-8 py-16 border-b border-[var(--color-border)] max-w-7xl mx-auto w-full">
-        <div className="space-y-2 mb-8">
-          <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase">
-            CHAPTER 05 // LOG TRANSFORM INSPECTOR
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text-main)]">
-            Log Processing Inspector
-          </h2>
-          <p className="text-sm text-[var(--color-text-muted)] max-w-2xl">
-            Inspect how a raw log line transforms step-by-step into a normalized event.
-          </p>
-        </div>
-
-        {/* 6 Stage Buttons */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-6 font-mono text-xs">
-          {PIPELINE_STAGES.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => setActivePipelineStage(s.id)}
-              className={`p-3 rounded border text-left transition-all ${
-                activePipelineStage === s.id
-                  ? 'bg-[var(--color-primary)] text-[#0f131c] border-[var(--color-primary)] font-bold'
-                  : 'bg-[var(--color-bg-card)] border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]'
-              }`}
-            >
-              <div className="text-[10px] opacity-75">{s.num}</div>
-              <div className="truncate">{s.name}</div>
-            </button>
-          ))}
-        </div>
-
-        {/* Code Terminal View */}
-        <div className="bg-[var(--terminal-bg)] border border-[var(--color-border)] rounded-lg p-5 font-mono text-xs space-y-3">
-          <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-3 text-[var(--terminal-text-muted)]">
-            <span>EXECUTING: {currentStageData.filepath}</span>
-            <span className="text-[var(--color-primary)]">{currentStageData.techBadge}</span>
-          </div>
-          <pre className="text-[var(--terminal-text-main)] overflow-x-auto text-[11px] leading-relaxed p-2">
-            {currentStageData.payload}
-          </pre>
-          <div className="text-[10px] text-[var(--terminal-text-dim)] border-t border-[var(--color-border)] pt-2 flex justify-between">
-            <span>SHA-256: {currentStageData.digest}</span>
-            <span className="text-emerald-400">STATUS: STAGE OK</span>
           </div>
         </div>
       </section>
