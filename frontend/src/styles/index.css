@@ -1,5 +1,26 @@
 @import "tailwindcss";
 
+@theme {
+  --color-bg-dim: var(--color-bg-dim);
+  --color-bg-surface: var(--color-bg-surface);
+  --color-bg-card: var(--color-bg-card);
+  --color-surface-dim: var(--color-surface-dim);
+  --color-surface-hover: var(--color-surface-hover);
+  --color-surface-bright: var(--color-surface-bright);
+  --color-surface-variant: var(--color-surface-variant);
+  --color-text-primary: var(--color-text-main);
+  --color-text-muted: var(--color-text-muted);
+  --color-text-dim: var(--color-text-dim);
+  --color-primary: var(--color-primary);
+  --color-primary-fixed: var(--color-primary-fixed);
+  --color-primary-fixed-dim: var(--color-primary-fixed-dim);
+  --color-secondary: var(--color-secondary);
+  --color-secondary-container: var(--color-secondary-container);
+  --color-tertiary: var(--color-tertiary);
+  --color-tertiary-container: var(--color-tertiary-container);
+  --color-border-muted: var(--color-border);
+}
+
 :root, :root[data-theme="dark"] {
   color-scheme: dark;
   --color-bg-dim: #0f131c;

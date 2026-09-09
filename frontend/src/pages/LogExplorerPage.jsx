@@ -195,7 +195,7 @@ export function LogExplorerPage() {
               {timeBuckets.map((heightPercent, i) => (
                 <div
                   key={i}
-                  className="flex-1 bg-primary hover:bg-primary-fixed transition-all rounded-t opacity-85 hover:opacity-100 relative group cursor-pointer"
+                  className="flex-1 bg-primary bg-[var(--color-primary)] hover:bg-[var(--color-primary-fixed)] transition-all rounded-t opacity-85 hover:opacity-100 relative group cursor-pointer"
                   style={{ height: `${heightPercent}%` }}
                 >
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex flex-col items-center z-20 pointer-events-none">
