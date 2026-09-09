@@ -9,6 +9,7 @@ export function InvestigationReportPage() {
 
   const [incidentData, setIncidentData] = useState(location.state?.incident || null);
   const [events, setEvents] = useState(location.state?.events || []);
+  const [selectedEventIndex, setSelectedEventIndex] = useState(0);
   const [selectedEvent, setSelectedEvent] = useState(location.state?.event || null);
   const [loading, setLoading] = useState(!incidentData);
   const [error, setError] = useState(null);
@@ -30,11 +31,10 @@ export function InvestigationReportPage() {
               setIncidentData(res.incident);
               setStatus(res.incident.status || 'Active');
             }
-            if (Array.isArray(res.events)) {
+            if (Array.isArray(res.events) && res.events.length > 0) {
               setEvents(res.events);
-              if (res.events.length > 0) {
-                setSelectedEvent(res.events[0]);
-              }
+              setSelectedEventIndex(0);
+              setSelectedEvent(res.events[0]);
             }
           }
         }
@@ -59,6 +59,7 @@ export function InvestigationReportPage() {
             
             if (matchingEvents.length > 0) {
               setEvents(matchingEvents);
+              setSelectedEventIndex(0);
               setSelectedEvent(matchingEvents[0]);
             }
           }
@@ -73,6 +74,35 @@ export function InvestigationReportPage() {
     loadReportData();
     return () => { isMounted = false; };
   }, [incidentId]);
+
+  const handlePrevEvent = () => {
+    if (selectedEventIndex > 0) {
+      const newIdx = selectedEventIndex - 1;
+      setSelectedEventIndex(newIdx);
+      setSelectedEvent(events[newIdx]);
+    }
+  };
+
+  const handleNextEvent = () => {
+    if (events.length > 0 && selectedEventIndex < events.length - 1) {
+      const newIdx = selectedEventIndex + 1;
+      setSelectedEventIndex(newIdx);
+      setSelectedEvent(events[newIdx]);
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'ArrowLeft') {
+        handlePrevEvent();
+      } else if (e.key === 'ArrowRight') {
+        handleNextEvent();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedEventIndex, events]);
 
   // Derived Values
   const caseIdDisplay = incidentId ? incidentId.substring(0, 12).toUpperCase() : 'INC_UNKNOWN';
@@ -305,11 +335,14 @@ export function InvestigationReportPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {events.map((evt, idx) => {
-                  const isSelected = (selectedEvent?.id || selectedEvent?.raw_event_hash) === (evt.id || evt.raw_event_hash);
+                  const isSelected = selectedEventIndex === idx;
                   return (
                     <button
                       key={evt.id || evt.raw_event_hash || idx}
-                      onClick={() => setSelectedEvent(evt)}
+                      onClick={() => {
+                        setSelectedEventIndex(idx);
+                        setSelectedEvent(evt);
+                      }}
                       className={`p-3.5 rounded-xl border text-left space-y-1.5 transition-all focus:outline-none focus:ring-2 focus:ring-primary ${
                         isSelected
                           ? 'bg-primary/10 border-primary ring-1 ring-primary shadow'
@@ -330,6 +363,40 @@ export function InvestigationReportPage() {
               </div>
             </div>
           )}
+
+          {/* 4B. CORRELATED EVIDENCE STEP NAVIGATOR */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-4 rounded-2xl glass-panel border border-border-muted font-mono text-xs shadow-xl">
+            <div>
+              <span className="text-[10px] text-text-dim uppercase tracking-wider block font-bold">ACTIVE CORRELATED EVIDENCE STEP</span>
+              <span className="text-sm font-bold text-text-primary mt-0.5 block">
+                Evidence Step {events.length > 0 ? selectedEventIndex + 1 : 1} of {events.length || 1} ({activeEvt.event_type || 'cisco_asa'})
+              </span>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <button
+                disabled={selectedEventIndex <= 0}
+                onClick={handlePrevEvent}
+                className="btn-secondary px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1 disabled:opacity-40 disabled:cursor-not-allowed touch-target"
+              >
+                <span>&larr;</span>
+                <span>Previous Event</span>
+              </button>
+
+              <span className="px-3 py-1 rounded-lg bg-surface-dim border border-border-muted text-primary font-bold text-xs">
+                {events.length > 0 ? selectedEventIndex + 1 : 1} / {events.length || 1}
+              </span>
+
+              <button
+                disabled={events.length === 0 || selectedEventIndex >= events.length - 1}
+                onClick={handleNextEvent}
+                className="btn-secondary px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1 disabled:opacity-40 disabled:cursor-not-allowed touch-target"
+              >
+                <span>Next Event</span>
+                <span>&rarr;</span>
+              </button>
+            </div>
+          </div>
 
           {/* 5. PERIMETER TELEMETRY (RAW LOG EVIDENCE VIEWER) */}
           <div className="glass-panel p-6 rounded-2xl border border-border-muted space-y-3 shadow-xl font-mono text-xs">

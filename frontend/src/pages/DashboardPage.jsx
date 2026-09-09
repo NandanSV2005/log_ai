@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import { StreamInspectionModal } from '../components/inspection/StreamInspectionModal';
 
 export function DashboardPage({ pollingInterval }) {
   const navigate = useNavigate();
@@ -16,8 +17,8 @@ export function DashboardPage({ pollingInterval }) {
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [incidentDetailEvents, setIncidentDetailEvents] = useState([]);
 
-  // Selected event drawer state
-  const [selectedEventDrawer, setSelectedEventDrawer] = useState(null);
+  // Inspection Modal State
+  const [inspectingStreamEvent, setInspectingStreamEvent] = useState(null);
   
   // Ingestion State
   const [selectedFile, setSelectedFile] = useState(null);
@@ -462,10 +463,7 @@ export function DashboardPage({ pollingInterval }) {
                           </td>
                           <td className="py-2.5 px-3 text-right whitespace-nowrap">
                             <button
-                              onClick={() => {
-                                const incId = evt.incident_id || evt.id || 'inc_a81b5b';
-                                navigate(`/forensics/investigation/${encodeURIComponent(incId)}`, { state: { event: evt } });
-                              }}
+                              onClick={() => setInspectingStreamEvent(evt)}
                               className="btn-secondary px-3 py-1.5 rounded text-[10px] font-bold touch-target"
                             >
                               Inspect Stream
@@ -599,6 +597,14 @@ export function DashboardPage({ pollingInterval }) {
             )}
           </div>
         </div>
+      )}
+
+      {/* Stream Inspection Modal Window */}
+      {inspectingStreamEvent && (
+        <StreamInspectionModal
+          event={inspectingStreamEvent}
+          onClose={() => setInspectingStreamEvent(null)}
+        />
       )}
 
     </div>

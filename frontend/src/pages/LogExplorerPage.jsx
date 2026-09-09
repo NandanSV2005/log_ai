@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import { EventInspectionModal } from '../components/inspection/EventInspectionModal';
 
 export function LogExplorerPage() {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ export function LogExplorerPage() {
     INFO: true,
   });
   const [expandedEventId, setExpandedEventId] = useState(null);
+  const [inspectingElementEvent, setInspectingElementEvent] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 15;
@@ -259,13 +261,10 @@ export function LogExplorerPage() {
                     Score: <span className="font-bold text-text-primary">{(evt.threat_score || 12.0).toFixed(1)}</span>
                   </div>
                   <button
-                    onClick={() => {
-                      const incId = evt.incident_id || evt.incidentId || evt.id || 'INC-2026-8941';
-                      navigate(`/forensics/investigation/${encodeURIComponent(incId)}`, { state: { event: evt } });
-                    }}
+                    onClick={() => setInspectingElementEvent(evt)}
                     className="btn-secondary px-3 py-1.5 rounded-lg text-[10px] font-bold touch-target"
                   >
-                    Inspect Payload
+                    Inspect Element
                   </button>
                 </div>
               </div>
@@ -331,13 +330,10 @@ export function LogExplorerPage() {
                       </td>
                       <td className="py-3.5 px-3 text-text-right whitespace-nowrap">
                         <button
-                          onClick={() => {
-                            const incId = evt.incident_id || evt.incidentId || evt.id || 'INC-2026-8941';
-                            navigate(`/forensics/investigation/${encodeURIComponent(incId)}`, { state: { event: evt } });
-                          }}
+                          onClick={() => setInspectingElementEvent(evt)}
                           className="btn-secondary px-3 py-1.5 rounded-lg text-[10px] font-bold touch-target"
                         >
-                          Inspect Payload
+                          Inspect Element
                         </button>
                       </td>
                     </tr>
@@ -371,6 +367,15 @@ export function LogExplorerPage() {
           </button>
         </div>
       </div>
+
+      {/* Event Inspection Modal Window */}
+      {inspectingElementEvent && (
+        <EventInspectionModal
+          event={inspectingElementEvent}
+          onClose={() => setInspectingElementEvent(null)}
+        />
+      )}
+
     </div>
   );
 }
