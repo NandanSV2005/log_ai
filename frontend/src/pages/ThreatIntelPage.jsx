@@ -200,8 +200,8 @@ export function ThreatIntelPage() {
       let markerBg = 'bg-emerald-500';
 
       if (level === 'CRITICAL') {
-        pulseBg = 'bg-rose-500';
-        markerBg = 'bg-rose-600';
+        pulseBg = 'bg-[var(--color-severity-critical)]';
+        markerBg = 'bg-[var(--color-severity-critical)]';
       } else if (level === 'HIGH') {
         pulseBg = 'bg-orange-500';
         markerBg = 'bg-orange-500';
@@ -332,7 +332,7 @@ export function ThreatIntelPage() {
           <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 z-20 glass-panel p-2 sm:p-3 rounded-xl border border-border-muted font-mono text-[9px] sm:text-[10px] space-y-1 shadow-xl max-w-[140px] sm:max-w-none">
             <div className="font-bold text-text-primary uppercase tracking-wider text-[8px] sm:text-[9px] mb-1">SEVERITY LEGEND</div>
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+              <span className="w-2 h-2 rounded-full bg-[var(--color-severity-critical)]"></span>
               <span className="text-text-primary">CRITICAL</span>
             </div>
             <div className="flex items-center gap-1.5">
@@ -364,12 +364,12 @@ export function ThreatIntelPage() {
           <div className="space-y-4 font-mono text-xs">
             <div>
               <div className="flex justify-between text-[11px] mb-1">
-                <span className="text-rose-400 font-bold">CRITICAL SEVERITY</span>
+                <span className="text-[var(--color-severity-critical)] font-bold">CRITICAL SEVERITY</span>
                 <span className="text-text-primary font-bold">{criticalCount} Nodes</span>
               </div>
               <div className="h-2.5 w-full bg-surface-dim rounded-full overflow-hidden border border-border-muted">
                 <div
-                  className="h-full bg-rose-500 rounded-full transition-all duration-300"
+                  className="h-full bg-[var(--color-severity-critical)] rounded-full transition-all duration-300"
                   style={{ width: `${clusters.length ? (criticalCount / clusters.length) * 100 : 0}%` }}
                 ></div>
               </div>
@@ -454,7 +454,7 @@ export function ThreatIntelPage() {
                 </div>
                 <div className="p-2.5 rounded-xl bg-surface-dim border border-border-muted">
                   <div className="text-text-dim text-[9px] uppercase">MAX SEVERITY</div>
-                  <div className="font-bold text-rose-400 mt-0.5">
+                  <div className={`font-bold mt-0.5 ${selectedCluster.maxThreatLevel === 'CRITICAL' ? 'text-[var(--color-severity-critical)]' : selectedCluster.maxThreatLevel === 'HIGH' ? 'text-rose-400' : 'text-amber-400'}`}>
                     {selectedCluster.maxThreatLevel} ({selectedCluster.maxThreatScore.toFixed(1)})
                   </div>
                 </div>

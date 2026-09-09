@@ -1,0 +1,920 @@
+<!DOCTYPE html><html class="dark scroll-smooth" lang="en" style=""><svg class="inline-defs-container" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"></svg><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@700;800;900&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-background": "#dfe2ef",
+            "primary": "#cebdff",
+            "tertiary": "#4edea3",
+            "error": "#ffb4ab",
+            "on-secondary-fixed": "#001e2c",
+            "secondary-fixed": "#c4e7ff",
+            "primary-container": "#a78bfa",
+            "secondary-container": "#0078a2",
+            "surface-bright": "#353943",
+            "background": "#0c1017",
+            "surface-variant": "#31353f",
+            "outline": "#948e9d",
+            "secondary": "#7cd0ff",
+            "tertiary-container": "#00b37c",
+            "surface": "#0f131c",
+            "surface-container": "#1c2029",
+            "surface-container-high": "#262a34",
+            "surface-container-low": "#181b25",
+            "surface-container-lowest": "#0a0e17",
+            "on-surface": "#f1f5f9",
+            "on-surface-variant": "#94a3b8",
+            "outline-variant": "#494552"
+          },
+          fontFamily: {
+            "display": ["Space Grotesk", "sans-serif"],
+            "headline": ["Space Grotesk", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"],
+            "sans": ["Inter", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+    }
+    ::-webkit-scrollbar { display: none; }
+    @keyframes pulse-flow {
+      0% { stroke-dashoffset: 24; }
+      100% { stroke-dashoffset: 0; }
+    }
+    .animate-dash-flow {
+      animation: pulse-flow 1.2s linear infinite;
+    }
+    @keyframes sweep-radar {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .animate-radar {
+      animation: sweep-radar 5s linear infinite;
+    }
+  </style>
+</head>
+<body class="bg-background font-sans text-on-surface antialiased selection:bg-primary selection:text-[#180a3a]">
+<!-- FIXED NAVIGATION HEADER -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-[#0a0e17]/85 backdrop-blur-xl border-b border-outline-variant/30 shadow-[0_4px_24px_rgba(0,0,0,0.5)]">
+<div class="h-16 w-full max-w-[1600px] mx-auto px-4 md:px-8 flex items-center justify-between">
+<!-- Brand Logotype & Status Indicator -->
+<div class="flex items-center gap-3 md:gap-5">
+<div class="w-9 h-9 relative flex items-center justify-center flex-shrink-0"><div class="w-9 h-9 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shadow-[0_0_12px_rgba(206,189,255,0.35)]"><span class="material-symbols-outlined text-[20px]">security</span></div></div>
+<div class="flex items-center gap-3">
+<span class="font-display font-black text-xl md:text-2xl text-on-surface tracking-tight uppercase">LOG AI</span>
+<div class="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full bg-surface-container-high/90 border border-outline-variant/40">
+<span class="w-2 h-2 rounded-full bg-tertiary animate-ping"></span>
+<span class="font-mono text-[11px] font-bold text-tertiary tracking-wider uppercase">ULPF v2.4 // ONLINE</span>
+<span class="font-mono text-[11px] text-outline">[48,210 eps]</span>
+</div>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden xl:flex items-center gap-1 font-mono text-[12px] tracking-wide" data-active-classes="bg-surface-container text-primary font-bold rounded-lg">
+<a class="px-3 py-1.5 rounded-lg bg-surface-container/70 text-primary font-bold border border-primary/20" href="#pipeline">01 // Pipeline</a>
+<a class="px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="#sources">02 // Sources</a>
+<a class="px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="#topology">03 // Topology</a>
+<a class="px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="#roi-engine">04 // ROI Engine</a>
+<a class="px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" href="#demo">05 // Live Demo</a>
+</nav>
+<!-- Terminal & Action Jumpers -->
+<div class="flex items-center gap-3 md:gap-4">
+<div class="hidden md:flex items-center bg-[#131722] rounded-lg p-1 border border-outline-variant/30">
+<button class="px-2.5 py-1 font-mono text-[11px] font-bold rounded bg-primary text-[#240c5e] shadow-sm" type="button">CYBERVOID</button>
+<button class="px-2.5 py-1 font-mono text-[11px] font-medium rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" type="button">SAGE</button>
+</div>
+
+<a class="px-3.5 py-1.5 rounded bg-primary-container text-[#1f0952] font-sans font-bold text-sm shadow-[0_0_18px_rgba(167,139,250,0.45)] hover:bg-primary transition-all" href="#demo">Open SOC Console</a>
+</div>
+</div>
+</header>
+<!-- CHAPTER QUICK DOCK (RIGHT DESKTOP RAIL) -->
+<aside class="fixed right-6 top-1/2 -translate-y-1/2 z-40 hidden 2xl:flex flex-col gap-3 bg-[#0a0e17]/80 backdrop-blur-md p-2 rounded-xl border border-outline-variant/40">
+<a class="flex flex-col items-center gap-1 group py-1" href="#pipeline">
+<span class="font-mono text-[10px] text-primary font-bold">01</span>
+<div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_#cebdff]"></div>
+<span class="font-mono text-[9px] text-on-surface-variant group-hover:text-primary transition-colors">PIPE</span>
+</a>
+<div class="w-px h-4 bg-outline-variant/40 mx-auto"></div>
+<a class="flex flex-col items-center gap-1 group py-1" href="#sources">
+<span class="font-mono text-[10px] text-secondary font-bold">02</span>
+<div class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_8px_#7cd0ff]"></div>
+<span class="font-mono text-[9px] text-on-surface-variant group-hover:text-secondary transition-colors">SRC</span>
+</a>
+<div class="w-px h-4 bg-outline-variant/40 mx-auto"></div>
+<a class="flex flex-col items-center gap-1 group py-1" href="#topology">
+<span class="font-mono text-[10px] text-tertiary font-bold">03</span>
+<div class="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_8px_#4edea3]"></div>
+<span class="font-mono text-[9px] text-on-surface-variant group-hover:text-tertiary transition-colors">TOPO</span>
+</a>
+<div class="w-px h-4 bg-outline-variant/40 mx-auto"></div>
+<a class="flex flex-col items-center gap-1 group py-1" href="#roi-engine">
+<span class="font-mono text-[10px] text-tertiary-container font-bold">04</span>
+<div class="w-2 h-2 rounded-full bg-[#00b37c]"></div>
+<span class="font-mono text-[9px] text-on-surface-variant group-hover:text-tertiary transition-colors">ROI</span>
+</a>
+<div class="w-px h-4 bg-outline-variant/40 mx-auto"></div>
+<a class="flex flex-col items-center gap-1 group py-1" href="#demo">
+<span class="font-mono text-[10px] text-primary font-bold">05</span>
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<span class="font-mono text-[9px] text-on-surface-variant group-hover:text-primary transition-colors">DEMO</span>
+</a>
+</aside>
+<main class="w-full pt-16 pb-12 flex flex-col">
+<!-- HERO SECTION // TONAL CANVAS: #0c1017 + VIOLET/INDIGO MESH GLOW -->
+<section class="relative w-full overflow-hidden px-4 md:px-8 xl:px-14 py-20 lg:py-24 bg-[#0c1017] border-b border-outline-variant/20">
+<!-- Radiant Atmospheric Glow -->
+<div class="absolute -top-40 left-1/4 w-[700px] h-[500px] bg-primary/10 rounded-full blur-[140px] pointer-events-none"></div>
+<div class="absolute top-1/3 -right-20 w-[550px] h-[450px] bg-secondary/10 rounded-full blur-[130px] pointer-events-none"></div>
+<div class="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#948e9d_1px,transparent_1px)] [background-size:24px_24px]"></div>
+<div class="max-w-[1600px] mx-auto w-full grid grid-cols-1 xl:grid-cols-12 gap-10 lg:gap-12 relative z-10 items-center">
+<!-- Hero Narrative -->
+<div class="xl:col-span-6 flex flex-col gap-6">
+<div class="flex flex-wrap items-center gap-3">
+<div class="inline-flex items-center gap-2 px-3 py-1 bg-surface-container-high/80 border border-primary/25 rounded-full">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-mono text-[11px] font-bold text-primary uppercase tracking-wider">00 // UNIVERSAL LOG PRE-PROCESSING FRAMEWORK (ULPF)</span>
+</div>
+<span class="font-mono text-xs text-outline font-semibold">v2.4-STABLE</span>
+</div>
+<h1 class="font-display font-black text-4xl sm:text-5xl lg:text-6xl text-on-surface uppercase tracking-tight leading-[1.08] text-balance">
+            Understand what your systems are doing.
+          </h1>
+<p class="font-sans text-base lg:text-lg text-on-surface-variant max-w-xl font-normal leading-relaxed text-pretty">
+            Ingest chaotic, heterogeneous logs across multi-vendor firewalls and distributed edge nodes. Normalize sub-millisecond, cryptographically hash-chain every raw event with Merkle ledger guarantees, and produce explainable threat verdicts before toxic alert volume exhausts your SIEM.
+          </p>
+<!-- Dynamic Action CTAs -->
+<div class="flex flex-wrap items-center gap-4 pt-2">
+<a class="px-6 py-3 rounded-lg bg-primary-container text-[#1f0952] font-sans font-bold text-sm shadow-[0_0_24px_rgba(167,139,250,0.45)] hover:bg-primary transition-all flex items-center gap-2" href="#pipeline">
+<span class="material-symbols-outlined text-[19px]">account_tree</span>
+<span class="">Explore ULPF Pipeline</span>
+</a>
+<a class="px-6 py-3 rounded-lg bg-surface-container-high hover:bg-surface-bright text-on-surface font-sans font-bold text-sm border border-outline-variant/50 transition-colors flex items-center gap-2" href="#demo">
+<span class="material-symbols-outlined text-[19px]">play_circle</span>
+<span class="">Live Interactive Demo</span>
+</a>
+<a class="px-4 py-3 rounded-lg bg-[#111622] hover:bg-surface-container text-on-surface-variant hover:text-on-surface font-mono text-xs border border-outline-variant/30 transition-colors flex items-center gap-2" href="https://github.com/NandanSV2005/log_ai" rel="noopener noreferrer" target="_blank">
+<span class="material-symbols-outlined text-[17px]">verified</span>
+<span class="">NandanSV2005/log_ai</span>
+<span class="px-1.5 py-0.5 rounded bg-tertiary/20 text-tertiary font-bold text-[10px]">v2.4</span>
+</a>
+</div>
+<!-- Diagnostic KPI Strip -->
+<div class="grid grid-cols-3 gap-3 pt-3 max-w-xl">
+<div class="p-3.5 bg-surface-container-lowest/80 border border-outline-variant/30 rounded-xl flex flex-col">
+<span class="font-mono text-[10px] font-bold text-outline uppercase tracking-wider">Ingest Speed</span>
+<span class="font-mono text-2xl lg:text-3xl text-primary font-extrabold tracking-tight mt-1" id="live-eps">48,281</span>
+<span class="font-mono text-[10px] text-tertiary mt-0.5">EPS Real-Time</span>
+</div>
+<div class="p-3.5 bg-surface-container-lowest/80 border border-outline-variant/30 rounded-xl flex flex-col">
+<span class="font-mono text-[10px] font-bold text-outline uppercase tracking-wider">Pipeline Latency</span>
+<span class="font-mono text-2xl lg:text-3xl text-secondary font-extrabold tracking-tight mt-1">0.0012s</span>
+<span class="font-mono text-[10px] text-outline mt-0.5">P99 SLA Guarantee</span>
+</div>
+<div class="p-3.5 bg-surface-container-lowest/80 border border-outline-variant/30 rounded-xl flex flex-col">
+<span class="font-mono text-[10px] font-bold text-outline uppercase tracking-wider">Tamper Proof</span>
+<span class="font-mono text-2xl lg:text-3xl text-tertiary font-extrabold tracking-tight mt-1">100%</span>
+<span class="font-mono text-[10px] text-tertiary mt-0.5">Merkle Root Enforced</span>
+</div>
+</div>
+</div>
+<!-- Right HUD Stream Instrument -->
+<div class="xl:col-span-6 relative mt-4 xl:mt-0">
+<div class="relative w-full rounded-2xl bg-[#111624] border border-outline-variant/40 p-4 md:p-6 overflow-hidden shadow-2xl">
+<!-- Window Header -->
+<div class="flex items-center justify-between pb-3 mb-3 border-b border-outline-variant/30">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-error"></span>
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary"></span>
+<span class="ml-2 font-mono text-xs text-on-surface font-bold tracking-wider">ULPF // INGESTION_STREAM_V2</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-mono text-[10px] font-bold text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/20">SHA-256 LEDGER</span>
+<span class="font-mono text-[10px] text-tertiary font-bold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-ping"></span> LIVE
+                </span>
+</div>
+</div>
+<!-- Inbound vs Outbound Code Streams -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-[11px]">
+<div class="bg-[#090d15] p-3.5 rounded-xl border border-outline-variant/30 flex flex-col gap-1.5">
+<div class="flex justify-between items-center text-outline text-[10px] font-bold">
+<span class="">[RAW_TELEMETRY_BUFFER]</span>
+<span class="text-secondary">AUTO-FLUSH</span>
+</div>
+<div class="flex flex-col gap-1 text-on-surface-variant font-mono text-[10px] opacity-85 pt-1">
+<p class="text-error truncate">0x7F4A %ASA-4-106023: Deny udp src outside:185.220.101.5</p>
+<p class="truncate">0x7F4B CEF:0|Fortinet|FortiGate|v7.2|traffic:denied|src=10.0.4.12</p>
+<p class="text-secondary truncate">0x7F4C pf: rule 42/(match) pass in on igb0: 192.168.1.104</p>
+<p class="truncate">0x7F4D Suricata[3819]: [1:2018959:4] ET Suspicious Inbound TLS</p>
+<p class="text-tertiary truncate">0x7F4E {"EventID":4624,"TargetUserName":"SYSTEM","LogonType":5}</p>
+</div>
+</div>
+<div class="bg-[#090d15] p-3.5 rounded-xl border border-outline-variant/30 flex flex-col gap-1.5">
+<div class="flex justify-between items-center text-outline text-[10px] font-bold">
+<span class="">[CANONICAL_OCSF_OUTPUT]</span>
+<span class="text-tertiary">HASH_VERIFIED</span>
+</div>
+<div class="flex flex-col gap-1 text-tertiary font-mono text-[10px] pt-1">
+<p class="truncate text-primary">hash: "c29d18b4fa8001a4e9b98a3e7"</p>
+<p class="truncate text-on-surface">ocsf.class: "NETWORK_ACTIVITY"</p>
+<p class="truncate text-error">action: "BLOCKED" | sev_score: 9.4</p>
+<p class="truncate text-secondary">xai_verdict: "PORT_SCAN_DETECTION"</p>
+<p class="truncate text-outline">sig_proof: "0x89eaf042b...verified"</p>
+</div>
+</div>
+</div>
+<!-- In-Flight Micro Steps -->
+<div class="mt-3 p-2.5 bg-[#090d15] border border-outline-variant/30 rounded-xl flex items-center justify-between text-[10px] font-mono text-outline">
+<span class="text-primary font-bold">01 INGEST</span>
+<span class="">⟶</span>
+<span class="text-secondary font-bold">02 PARSE</span>
+<span class="">⟶</span>
+<span class="text-tertiary font-bold">03 OCSF</span>
+<span class="">⟶</span>
+<span class="text-primary font-bold">04 HASH</span>
+<span class="">⟶</span>
+<span class="text-tertiary font-bold">05 VERDICT</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CHAPTER 01 // PIPELINE // TONAL CANVAS: #131226 -> #0e111d + VIOLET RADIANT ATMOSPHERE -->
+<section class="w-full px-4 md:px-8 xl:px-14 py-20 relative bg-gradient-to-b from-[#131226] via-[#101122] to-[#0e111d] border-b border-primary/20" id="pipeline">
+<!-- Atmospheric Violet Diffusion Glow -->
+<div class="absolute top-10 left-1/3 w-[800px] h-[550px] bg-[#a78bfa]/[0.11] rounded-full blur-[160px] pointer-events-none"></div>
+<div class="max-w-[1600px] mx-auto flex flex-col gap-12 relative z-10">
+<!-- Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="font-mono text-xs font-bold text-primary uppercase tracking-widest">CHAPTER 01</span>
+<span class="text-outline font-mono">//</span>
+<span class="font-mono text-xs text-outline font-semibold tracking-wider">EXECUTION_SEQUENCE</span>
+</div>
+<h2 class="font-display font-black text-3xl md:text-4xl text-on-surface uppercase tracking-tight">
+              Deterministic Pipeline Architecture
+            </h2>
+</div>
+<p class="font-sans text-sm md:text-base text-on-surface-variant max-w-md leading-relaxed font-normal">
+            Six non-blocking micro-stages converting unstructured socket transmissions into mathematically unalterable forensic evidence records.
+          </p>
+</div>
+<!-- DOMINANT VISUAL ANCHOR: LARGE EXPANSIVE CONNECTED PIPELINE CANVAS -->
+<div class="w-full bg-[#0a0d18]/90 border border-primary/30 rounded-2xl p-6 lg:p-8 shadow-2xl relative overflow-hidden backdrop-blur-md">
+<div class="flex items-center justify-between pb-4 mb-6 border-b border-outline-variant/30 font-mono text-xs">
+<div class="flex items-center gap-2 text-primary font-bold">
+<span class="material-symbols-outlined text-[18px]">account_tree</span>
+<span class="">LIVE PIPELINE TOPOLOGY &amp; HIGH-THROUGHPUT STAGE BUS</span>
+</div>
+<span class="text-tertiary font-bold hidden sm:inline">P99 FLOW: 0.0012s DETERMINISTIC DWELL</span>
+</div>
+<!-- Connected Visual Stage Diagram -->
+<div class="relative w-full">
+<!-- Connecting SVG Flow Line with pulsing packets -->
+<svg class="w-full h-24 hidden md:block" fill="none" preserveAspectRatio="none" viewBox="0 0 1200 80">
+<!-- Glow shadow path -->
+<path d="M 60 40 L 1140 40" stroke="#a78bfa" stroke-opacity="0.2" stroke-width="4"></path>
+<!-- Dashed active bus -->
+<path class="animate-dash-flow" d="M 60 40 L 1140 40" stroke="url(#pipeGrad)" stroke-dasharray="10 14" stroke-width="2.5"></path>
+<defs>
+<linearGradient gradientUnits="userSpaceOnUse" id="pipeGrad" x1="0" x2="1200" y1="0" y2="0">
+<stop offset="0%" stop-color="#cebdff"></stop>
+<stop offset="50%" stop-color="#7cd0ff"></stop>
+<stop offset="100%" stop-color="#4edea3"></stop>
+</linearGradient>
+</defs>
+</svg>
+<!-- 6 Pipeline Anchor Nodes directly visually bridging to cards -->
+<div class="grid grid-cols-2 md:grid-cols-6 gap-3 lg:gap-4 -mt-10 relative z-10">
+<!-- Stage 1 Pill -->
+<div class="flex flex-col items-center">
+<div class="w-12 h-12 rounded-xl bg-[#141828] border-2 border-primary flex items-center justify-center text-primary shadow-[0_0_16px_rgba(206,189,255,0.4)] mb-2">
+<span class="font-mono font-black text-xs">01</span>
+</div>
+<span class="font-mono text-[11px] font-bold text-primary uppercase">RAW INGEST</span>
+</div>
+<!-- Stage 2 Pill -->
+<div class="flex flex-col items-center">
+<div class="w-12 h-12 rounded-xl bg-[#141828] border-2 border-secondary flex items-center justify-center text-secondary shadow-[0_0_16px_rgba(124,208,255,0.3)] mb-2">
+<span class="font-mono font-black text-xs">02</span>
+</div>
+<span class="font-mono text-[11px] font-bold text-secondary uppercase">TOKENIZE</span>
+</div>
+<!-- Stage 3 Pill -->
+<div class="flex flex-col items-center">
+<div class="w-12 h-12 rounded-xl bg-[#141828] border-2 border-tertiary flex items-center justify-center text-tertiary shadow-[0_0_16px_rgba(78,222,163,0.3)] mb-2">
+<span class="font-mono font-black text-xs">03</span>
+</div>
+<span class="font-mono text-[11px] font-bold text-tertiary uppercase">OCSF NORM</span>
+</div>
+<!-- Stage 4 Pill -->
+<div class="flex flex-col items-center">
+<div class="w-12 h-12 rounded-xl bg-[#141828] border-2 border-primary-container flex items-center justify-center text-primary shadow-[0_0_16px_rgba(167,139,250,0.4)] mb-2">
+<span class="font-mono font-black text-xs">04</span>
+</div>
+<span class="font-mono text-[11px] font-bold text-primary uppercase">SHA-256 SEAL</span>
+</div>
+<!-- Stage 5 Pill -->
+<div class="flex flex-col items-center">
+<div class="w-12 h-12 rounded-xl bg-[#141828] border-2 border-secondary flex items-center justify-center text-secondary shadow-[0_0_16px_rgba(124,208,255,0.3)] mb-2">
+<span class="font-mono font-black text-xs">05</span>
+</div>
+<span class="font-mono text-[11px] font-bold text-secondary uppercase">ANOMALY ML</span>
+</div>
+<!-- Stage 6 Pill -->
+<div class="flex flex-col items-center">
+<div class="w-12 h-12 rounded-xl bg-[#141828] border-2 border-tertiary flex items-center justify-center text-tertiary shadow-[0_0_16px_rgba(78,222,163,0.4)] mb-2">
+<span class="font-mono font-black text-xs">06</span>
+</div>
+<span class="font-mono text-[11px] font-bold text-tertiary uppercase">XAI VERDICT</span>
+</div>
+</div>
+</div>
+</div>
+<!-- REQUIREMENT 1: CUT CARD DENSITY (ONE IDEA PER CARD: Icon + Short Title + One Clean Punchy Description) -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-4">
+<!-- Card 1 -->
+<div class="p-5 rounded-xl bg-[#121629]/90 border border-primary/25 hover:border-primary/60 transition-all flex flex-col gap-3 group">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[22px]">input</span>
+</div>
+<h3 class="font-display font-bold text-base text-on-surface">Raw Ingestion</h3>
+<p class="font-sans text-xs text-on-surface-variant leading-relaxed font-normal">
+              High-throughput listeners stream unparsed packets across UDP, TCP, and eBPF.
+            </p>
+</div>
+<!-- Card 2 -->
+<div class="p-5 rounded-xl bg-[#121629]/90 border border-secondary/25 hover:border-secondary/60 transition-all flex flex-col gap-3 group">
+<div class="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[22px]">code_blocks</span>
+</div>
+<h3 class="font-display font-bold text-base text-on-surface">Lexical Parse</h3>
+<p class="font-sans text-xs text-on-surface-variant leading-relaxed font-normal">
+              Zero-copy SIMD tokenizers rapidly parse heterogeneous key-values and RFC formats.
+            </p>
+</div>
+<!-- Card 3 -->
+<div class="p-5 rounded-xl bg-[#121629]/90 border border-tertiary/25 hover:border-tertiary/60 transition-all flex flex-col gap-3 group">
+<div class="w-10 h-10 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[22px]">schema</span>
+</div>
+<h3 class="font-display font-bold text-base text-on-surface">Schema Normalization</h3>
+<p class="font-sans text-xs text-on-surface-variant leading-relaxed font-normal">
+              Harmonizes disparate vendor fields into strict Open Cybersecurity Schema (OCSF v1.1).
+            </p>
+</div>
+<!-- Card 4 -->
+<div class="p-5 rounded-xl bg-[#121629]/90 border border-primary/25 hover:border-primary/60 transition-all flex flex-col gap-3 group">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[22px]">enhanced_encryption</span>
+</div>
+<h3 class="font-display font-bold text-base text-on-surface">SHA-256 Hashing</h3>
+<p class="font-sans text-xs text-on-surface-variant leading-relaxed font-normal">
+              Cryptographically seals every log batch into an immutable, hardware-attested Merkle ledger.
+            </p>
+</div>
+<!-- Card 5 -->
+<div class="p-5 rounded-xl bg-[#121629]/90 border border-secondary/25 hover:border-secondary/60 transition-all flex flex-col gap-3 group">
+<div class="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[22px]">troubleshoot</span>
+</div>
+<h3 class="font-display font-bold text-base text-on-surface">ML Anomaly Core</h3>
+<p class="font-sans text-xs text-on-surface-variant leading-relaxed font-normal">
+              Sub-millisecond clustering instantly isolates beacon intervals and entropy spikes.
+            </p>
+</div>
+<!-- Card 6 -->
+<div class="p-5 rounded-xl bg-[#121629]/90 border border-tertiary/25 hover:border-tertiary/60 transition-all flex flex-col gap-3 group">
+<div class="w-10 h-10 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[22px]">psychology</span>
+</div>
+<h3 class="font-display font-bold text-base text-on-surface">XAI Verdict Output</h3>
+<p class="font-sans text-xs text-on-surface-variant leading-relaxed font-normal">
+              Emits natural-language explanations with MITRE ATT&amp;CK mappings for instant triage.
+            </p>
+</div>
+</div>
+</div>
+</section>
+<!-- CHAPTER 02 // LOG SOURCES // TONAL CANVAS: #0c1824 + COOL CYAN ATMOSPHERIC DIFFUSION -->
+<section class="w-full px-4 md:px-8 xl:px-14 py-20 relative bg-gradient-to-b from-[#0c1824] via-[#0b1622] to-[#09131d] border-b border-secondary/20" id="sources">
+<!-- Cool Cyan Atmosphere Glow -->
+<div class="absolute top-16 right-1/4 w-[750px] h-[500px] bg-[#7cd0ff]/[0.10] rounded-full blur-[150px] pointer-events-none"></div>
+<div class="max-w-[1600px] mx-auto flex flex-col gap-12 relative z-10">
+<!-- Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="font-mono text-xs font-bold text-secondary uppercase tracking-widest">CHAPTER 02</span>
+<span class="text-outline font-mono">//</span>
+<span class="font-mono text-xs text-outline font-semibold tracking-wider">INGESTION_ECOSYSTEM</span>
+</div>
+<h2 class="font-display font-black text-3xl md:text-4xl text-on-surface uppercase tracking-tight">
+              Many Heterogeneous Sources — One Strict Conduit
+            </h2>
+</div>
+<p class="font-sans text-sm md:text-base text-on-surface-variant max-w-md leading-relaxed font-normal">
+            Zero custom grok scripts required. Built-in decoders ingest raw firewall and endpoint formats natively.
+          </p>
+</div>
+<!-- REQUIREMENT 1: CUT CARD DENSITY (ONE IDEA PER CARD: Icon + Short Title + One Line of Clean Description) -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+<!-- Source 1 -->
+<div class="p-6 rounded-xl bg-[#0e1f2f]/80 border border-secondary/25 hover:border-secondary/60 transition-all flex flex-col gap-3 group">
+<div class="w-11 h-11 rounded-lg bg-secondary/15 flex items-center justify-center text-secondary group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[24px]">router</span>
+</div>
+<h3 class="font-display font-bold text-lg text-on-surface">Cisco ASA / FTD</h3>
+<p class="font-sans text-sm text-on-surface-variant leading-relaxed font-normal">
+              Decodes 106-series teardowns, NAT translations, and VPN lifecycle events natively.
+            </p>
+</div>
+<!-- Source 2 -->
+<div class="p-6 rounded-xl bg-[#0e1f2f]/80 border border-secondary/25 hover:border-secondary/60 transition-all flex flex-col gap-3 group">
+<div class="w-11 h-11 rounded-lg bg-secondary/15 flex items-center justify-center text-secondary group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[24px]">security</span>
+</div>
+<h3 class="font-display font-bold text-lg text-on-surface">Fortinet FortiGate</h3>
+<p class="font-sans text-sm text-on-surface-variant leading-relaxed font-normal">
+              Extracts UTM policies, AV signatures, IPS events, and interface bindings.
+            </p>
+</div>
+<!-- Source 3 -->
+<div class="p-6 rounded-xl bg-[#0e1f2f]/80 border border-secondary/25 hover:border-secondary/60 transition-all flex flex-col gap-3 group">
+<div class="w-11 h-11 rounded-lg bg-secondary/15 flex items-center justify-center text-secondary group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[24px]">troubleshoot</span>
+</div>
+<h3 class="font-display font-bold text-lg text-on-surface">Suricata EVE-JSON</h3>
+<p class="font-sans text-sm text-on-surface-variant leading-relaxed font-normal">
+              Parses streaming IDS flow alerts, DNS queries, and TLS JA3/JA4 fingerprints.
+            </p>
+</div>
+<!-- Source 4 -->
+<div class="p-6 rounded-xl bg-[#0e1f2f]/80 border border-secondary/25 hover:border-secondary/60 transition-all flex flex-col gap-3 group">
+<div class="w-11 h-11 rounded-lg bg-secondary/15 flex items-center justify-center text-secondary group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[24px]">filter_alt</span>
+</div>
+<h3 class="font-display font-bold text-lg text-on-surface">pfSense / FreeBSD PF</h3>
+<p class="font-sans text-sm text-on-surface-variant leading-relaxed font-normal">
+              Processes packet filter CSV headers, rule traces, and state table logs.
+            </p>
+</div>
+<!-- Source 5 -->
+<div class="p-6 rounded-xl bg-[#0e1f2f]/80 border border-secondary/25 hover:border-secondary/60 transition-all flex flex-col gap-3 group">
+<div class="w-11 h-11 rounded-lg bg-secondary/15 flex items-center justify-center text-secondary group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[24px]">desktop_windows</span>
+</div>
+<h3 class="font-display font-bold text-lg text-on-surface">Windows EVTX</h3>
+<p class="font-sans text-sm text-on-surface-variant leading-relaxed font-normal">
+              Decodes Kerberos logons, privilege escalations, and Sysmon process telemetry.
+            </p>
+</div>
+<!-- Source 6 -->
+<div class="p-6 rounded-xl bg-[#0e1f2f]/80 border border-secondary/25 hover:border-secondary/60 transition-all flex flex-col gap-3 group">
+<div class="w-11 h-11 rounded-lg bg-secondary/15 flex items-center justify-center text-secondary group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[24px]">terminal</span>
+</div>
+<h3 class="font-display font-bold text-lg text-on-surface">Linux Auditd / eBPF</h3>
+<p class="font-sans text-sm text-on-surface-variant leading-relaxed font-normal">
+              Captures deep kernel syscall executions, privilege transitions, and container namespaces.
+            </p>
+</div>
+</div>
+</div>
+</section>
+<!-- CHAPTER 03 // RADAR TOPOLOGY & CRYPTO // TONAL CANVAS: #091a18 + DEEP TEAL CYBERNETIC GLOW -->
+<section class="w-full px-4 md:px-8 xl:px-14 py-20 relative bg-gradient-to-b from-[#091a18] via-[#091f1c] to-[#081715] border-b border-tertiary/20" id="topology">
+<!-- Deep Teal Cybernetic Glow -->
+<div class="absolute top-10 left-1/4 w-[850px] h-[550px] bg-[#4edea3]/[0.10] rounded-full blur-[170px] pointer-events-none"></div>
+<div class="max-w-[1600px] mx-auto flex flex-col gap-10 relative z-10">
+<!-- Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="font-mono text-xs font-bold text-tertiary uppercase tracking-widest">CHAPTER 03</span>
+<span class="text-outline font-mono">//</span>
+<span class="font-mono text-xs text-outline font-semibold tracking-wider">TOPOLOGICAL_SURFACE</span>
+</div>
+<h2 class="font-display font-black text-3xl md:text-4xl text-on-surface uppercase tracking-tight">
+              Network Threat Radar &amp; Cryptographic Proof
+            </h2>
+</div>
+<p class="font-sans text-sm md:text-base text-on-surface-variant max-w-md leading-relaxed font-normal">
+            Real-time coordinate tracking of anomalous network entities paired with tamper-evident Merkle ledger proofs.
+          </p>
+</div>
+<!-- REQUIREMENT 3: DOMINANT VISUAL ANCHOR: RADAR OCCUPIES ~70% OF LAYOUT WITH COMPACT CRYPTO COMPANION -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
+<!-- DOMINANT EXPANSIVE THREAT RADAR CENTERPIECE (~68% width on desktop) -->
+<div class="xl:col-span-8 bg-[#0b211e]/90 border border-tertiary/35 rounded-2xl p-5 md:p-7 flex flex-col gap-4 shadow-2xl backdrop-blur-md relative overflow-hidden">
+<!-- Radar Header Bar -->
+<div class="flex items-center justify-between font-mono text-xs pb-3 border-b border-outline-variant/30">
+<div class="flex items-center gap-2 text-tertiary font-bold">
+<span class="material-symbols-outlined text-[20px]">radar</span>
+<span class="tracking-wide">SECTOR TOPOLOGY RADAR // AZIMUTH: 360° CONTINUOUS SWEEP</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-mono text-[11px] text-outline hidden sm:inline">SWEEP: 5.0s</span>
+<span class="px-2 py-0.5 rounded bg-tertiary/15 text-tertiary font-mono text-[10px] font-bold border border-tertiary/30 animate-pulse">2 DETECTIONS ACTIVE</span>
+</div>
+</div>
+<!-- EXPANSIVE DETAILED RADAR SCREEN -->
+<div class="relative w-full aspect-[16/10] md:aspect-[16/9] bg-[#05110f] rounded-xl overflow-hidden border border-outline-variant/30 flex items-center justify-center">
+<!-- Subtle Radar Grid Background -->
+<div class="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#4edea3_1px,transparent_1px)] [background-size:20px_20px]"></div>
+<!-- Concentric Range Circles with distance rings -->
+<div class="absolute w-[85%] h-[85%] rounded-full border border-tertiary/20"></div>
+<div class="absolute w-[62%] h-[62%] rounded-full border border-tertiary/30"></div>
+<div class="absolute w-[40%] h-[40%] rounded-full border border-tertiary/40"></div>
+<div class="absolute w-[18%] h-[18%] rounded-full border border-tertiary/50"></div>
+<!-- Degree Crosshairs & Cardinal Angles -->
+<div class="absolute w-full h-[1px] bg-tertiary/25"></div>
+<div class="absolute h-full w-[1px] bg-tertiary/25"></div>
+<div class="absolute w-full h-[1px] bg-tertiary/15 rotate-45"></div>
+<div class="absolute w-full h-[1px] bg-tertiary/15 -rotate-45"></div>
+<!-- Rotating High-Impact Sweep Beam -->
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none animate-radar">
+<div class="w-1/2 h-1/2 origin-bottom-right bg-gradient-to-br from-tertiary/30 via-tertiary/5 to-transparent"></div>
+</div>
+<!-- Radar Host Target 1: Red (Critical Threat Blip) -->
+<div class="absolute top-[26%] left-[70%] group cursor-pointer z-20">
+<span class="relative flex h-5 w-5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-80"></span>
+<span class="relative inline-flex rounded-full h-5 w-5 bg-error/90 border-2 border-white/80 shadow-[0_0_12px_#ffb4ab]"></span>
+</span>
+<!-- High-Impact Context Card -->
+<div class="absolute -top-16 -left-28 bg-[#160c0e]/95 border border-error/50 p-2.5 rounded-lg shadow-2xl w-48 font-mono text-[10px] pointer-events-none">
+<div class="text-error font-bold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-error animate-ping"></span>
+<span class="">ANOMALY // SEV 9.4</span>
+</div>
+<div class="text-on-surface font-semibold">HOST: 10.0.4.12 [SMB]</div>
+<div class="text-outline">T1021.002 Lateral Probe</div>
+</div>
+</div>
+<!-- Radar Host Target 2: Amber (Medium Alert Host) -->
+<div class="absolute top-[68%] left-[28%] group cursor-pointer z-20">
+<span class="relative flex h-4 w-4">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-70"></span>
+<span class="relative inline-flex rounded-full h-4 w-4 bg-secondary border border-white/70 shadow-[0_0_10px_#7cd0ff]"></span>
+</span>
+<div class="absolute top-5 -left-16 bg-[#0a1824]/95 border border-secondary/50 p-2.5 rounded-lg shadow-2xl w-44 font-mono text-[10px] pointer-events-none">
+<div class="text-secondary font-bold">BEACON // SEV 6.2</div>
+<div class="text-on-surface">HOST: 192.168.1.104</div>
+<div class="text-outline">C2 Egress Jitter</div>
+</div>
+</div>
+<!-- Radar Host Target 3: Core Gateway (Verified Host) -->
+<div class="absolute top-[48%] left-[44%] group cursor-pointer z-20">
+<span class="relative flex h-3.5 w-3.5">
+<span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-tertiary shadow-[0_0_8px_#4edea3]"></span>
+</span>
+<div class="absolute bottom-5 -left-12 bg-[#091e17]/95 border border-tertiary/50 p-2 rounded-lg shadow-2xl w-36 font-mono text-[10px] pointer-events-none">
+<div class="text-tertiary font-bold">GATEWAY SECURE</div>
+<div class="text-on-surface">pfSense [10.0.0.1]</div>
+</div>
+</div>
+<!-- Telemetry Overlay Coordinates on Radar Screen -->
+<div class="absolute bottom-3 left-4 font-mono text-[11px] text-tertiary/80 font-bold bg-[#05110f]/80 px-2.5 py-1 rounded border border-tertiary/20">
+                FOV: 10.0.0.0/16 // SCAN LAT: 0.0004s // SECTORS: 12
+              </div>
+<div class="absolute top-3 right-4 font-mono text-[10px] text-outline">
+                GRID COORD: 34.0522° N, 118.2437° W
+              </div>
+</div>
+</div>
+<!-- STREAMLINED CRYPTOGRAPHIC PROOF COMPANION (~32% width on desktop) -->
+<div class="xl:col-span-4 bg-[#0b211e]/90 border border-tertiary/35 rounded-2xl p-5 md:p-6 flex flex-col justify-between gap-4 shadow-2xl backdrop-blur-md">
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between pb-2 border-b border-outline-variant/30">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-[22px]">shield</span>
+<h3 class="font-display font-bold text-lg text-on-surface">Cryptographic Proof</h3>
+</div>
+<span class="font-mono text-[10px] font-bold text-tertiary px-2 py-0.5 rounded bg-tertiary/15 border border-tertiary/30">IMMUTABLE</span>
+</div>
+<p class="font-sans text-xs text-on-surface-variant leading-relaxed font-normal">
+                Every millisecond batch is SHA-256 chained in hardware enclave memory. Records cannot be rewritten or dropped.
+              </p>
+<!-- Streamlined Ledger Card -->
+<div class="bg-[#051210] p-4 rounded-xl border border-tertiary/25 flex flex-col gap-2.5 font-mono text-[11px]">
+<div class="flex justify-between items-center text-outline pb-1 border-b border-outline-variant/20">
+<span class="text-tertiary font-bold">LEDGER BLOCK: #1,849,204</span>
+<span class="text-tertiary font-bold">SEALED</span>
+</div>
+<div>
+<span class="text-outline text-[10px] block">PREV HASH:</span>
+<span class="text-on-surface-variant truncate block">0x8f3c49e28ba709320e1d...9a</span>
+</div>
+<div>
+<span class="text-outline text-[10px] block">MERKLE ROOT:</span>
+<span class="text-tertiary truncate block font-bold">0x4ea94dfb19a3d9dc8c7e...c7</span>
+</div>
+<div>
+<span class="text-outline text-[10px] block">SIGNATURE:</span>
+<span class="text-secondary truncate block">ECDSA-P256 hardware token</span>
+</div>
+</div>
+</div>
+<!-- Crisp Evidentiary Export Banner -->
+<div class="p-3 bg-[#071714] border border-tertiary/20 rounded-xl flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary text-[24px]">verified_user</span>
+<div class="flex flex-col">
+<span class="font-sans font-bold text-xs text-on-surface">Forensic Subpoena Export</span>
+<span class="font-sans text-[11px] text-on-surface-variant">Tamper-evident signed archives for court discovery.</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CHAPTER 04 // ROI & SOC FATIGUE // TONAL CANVAS: #0a1f1b + VIBRANT LUMINOUS EMERALD HIGHLIGHTS -->
+<section class="w-full px-4 md:px-8 xl:px-14 py-20 relative bg-gradient-to-b from-[#0a1f1b] via-[#09221d] to-[#071b17] border-b border-[#00b37c]/30" id="roi-engine">
+<!-- Vibrant Luminous Emerald Atmosphere Glow -->
+<div class="absolute top-10 left-1/3 w-[850px] h-[500px] bg-[#00b37c]/[0.18] rounded-full blur-[160px] pointer-events-none"></div>
+<div class="max-w-[1600px] mx-auto flex flex-col gap-12 relative z-10">
+<!-- Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="font-mono text-xs font-bold text-tertiary uppercase tracking-widest">CHAPTER 04</span>
+<span class="text-outline font-mono">//</span>
+<span class="font-mono text-xs text-outline font-semibold tracking-wider">CAPITAL_EFFICIENCY</span>
+</div>
+<h2 class="font-display font-black text-3xl md:text-4xl text-on-surface uppercase tracking-tight">
+              ROI &amp; SOC Fatigue Estimator
+            </h2>
+</div>
+<p class="font-sans text-sm md:text-base text-on-surface-variant max-w-md leading-relaxed font-normal">
+            Calculate the dramatic cost and hours reduction achieved by filtering noise and normalizing schema prior to SIEM ingestion.
+          </p>
+</div>
+<!-- Interactive Calculator Card with Higher Contrast Canvas -->
+<div class="p-6 lg:p-10 bg-[#07241e]/90 border border-tertiary/40 rounded-2xl grid grid-cols-1 xl:grid-cols-12 gap-8 lg:gap-12 items-center shadow-2xl backdrop-blur-md">
+<!-- Sliders Controls (6 cols) -->
+<div class="xl:col-span-6 flex flex-col gap-6">
+<!-- Slider 1: Daily Volume -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<label class="font-sans font-bold text-sm text-on-surface" for="slider-volume">
+                  Daily Ingested Log Volume
+                </label>
+<span class="font-mono text-2xl text-tertiary font-extrabold" id="val-volume">750 GB</span>
+</div>
+<input class="w-full h-2.5 bg-[#051613] border border-tertiary/30 rounded-lg appearance-none cursor-pointer accent-tertiary" id="slider-volume" max="5000" min="100" step="50" type="range" value="750">
+<div class="flex justify-between font-mono text-[10px] text-outline">
+<span class="">100 GB</span>
+<span class="">2,500 GB</span>
+<span class="">5,000 GB/day</span>
+</div>
+</div>
+<!-- Slider 2: Active Devices -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<label class="font-sans font-bold text-sm text-on-surface" for="slider-devices">
+                  Active Firewalls &amp; Network Nodes
+                </label>
+<span class="font-mono text-2xl text-primary font-extrabold" id="val-devices">120 Units</span>
+</div>
+<input class="w-full h-2.5 bg-[#051613] border border-primary/30 rounded-lg appearance-none cursor-pointer accent-primary" id="slider-devices" max="1000" min="10" step="10" type="range" value="120">
+<div class="flex justify-between font-mono text-[10px] text-outline">
+<span class="">10 Nodes</span>
+<span class="">500 Nodes</span>
+<span class="">1,000 Nodes</span>
+</div>
+</div>
+<!-- Explanatory note -->
+<div class="p-3 bg-[#051915] border border-tertiary/20 rounded-xl flex items-center gap-2 font-mono text-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-tertiary text-[20px]">calculate</span>
+<span class="">Model based on SIEM index pricing ($3.00/GB) + Tier 1 SOC alert triage pace.</span>
+</div>
+</div>
+<!-- Calculated Metrics Outputs (6 cols) -->
+<div class="xl:col-span-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="p-5 bg-[#051915] border border-tertiary/30 rounded-xl flex flex-col justify-between">
+<span class="font-mono text-[10px] font-bold text-outline uppercase tracking-wider">Monthly SIEM Savings</span>
+<div class="py-1">
+<span class="font-mono text-3xl lg:text-4xl text-tertiary font-black" id="out-cost">$14,850</span>
+<span class="text-tertiary font-sans font-bold text-sm">/mo</span>
+</div>
+<span class="font-sans text-xs text-on-surface-variant font-normal">Payload size compressed ~66%</span>
+</div>
+<div class="p-5 bg-[#051915] border border-primary/30 rounded-xl flex flex-col justify-between">
+<span class="font-mono text-[10px] font-bold text-outline uppercase tracking-wider">Analyst Time Preserved</span>
+<div class="py-1">
+<span class="font-mono text-3xl lg:text-4xl text-primary font-black" id="out-hours">142</span>
+<span class="text-primary font-sans font-bold text-sm">hrs/wk</span>
+</div>
+<span class="font-sans text-xs text-on-surface-variant font-normal">Freed from triaging noise</span>
+</div>
+<div class="p-5 bg-[#051915] border border-secondary/30 rounded-xl flex flex-col justify-between">
+<span class="font-mono text-[10px] font-bold text-outline uppercase tracking-wider">False Positives Filtered</span>
+<div class="py-1">
+<span class="font-mono text-3xl lg:text-4xl text-secondary font-black">78.4%</span>
+</div>
+<span class="font-sans text-xs text-on-surface-variant font-normal">Rejected at kernel layer</span>
+</div>
+<div class="p-5 bg-[#051915] border border-outline-variant/40 rounded-xl flex flex-col justify-between">
+<span class="font-mono text-[10px] font-bold text-outline uppercase tracking-wider">Payback Timeline</span>
+<div class="py-1">
+<span class="font-mono text-3xl lg:text-4xl text-on-surface font-black">&lt; 14</span>
+<span class="text-on-surface font-sans font-bold text-sm">days</span>
+</div>
+<span class="font-sans text-xs text-on-surface-variant font-normal">Instant drop-in deployment</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CHAPTER 05 // FORENSIC TRANSFORMATION DEMO // TONAL CANVAS: #0a0e17 DEEP FORENSIC DARK -->
+<section class="w-full px-4 md:px-8 xl:px-14 py-20 relative bg-[#0a0e17] border-b border-outline-variant/30" id="demo">
+<div class="max-w-[1600px] mx-auto flex flex-col gap-12 relative z-10">
+<!-- Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="font-mono text-xs font-bold text-primary uppercase tracking-widest">CHAPTER 05</span>
+<span class="text-outline font-mono">//</span>
+<span class="font-mono text-xs text-outline font-semibold tracking-wider">INTERACTIVE_DISSECTION</span>
+</div>
+<h2 class="font-display font-black text-3xl md:text-4xl text-on-surface uppercase tracking-tight">
+              Forensic Dissection: Raw In → Explained Alert Out
+            </h2>
+</div>
+<p class="font-sans text-sm md:text-base text-on-surface-variant max-w-md leading-relaxed font-normal">
+            Observe how a noisy, malformed firewall string undergoes lexical parsing, Merkle proof creation, and AI explanation.
+          </p>
+</div>
+<!-- 3-Column Dissection Workspace -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+<!-- Col 1: Raw Inbound -->
+<div class="xl:col-span-4 bg-[#101420] rounded-2xl border border-error/30 p-5 flex flex-col justify-between gap-4">
+<div class="flex items-center justify-between pb-3 border-b border-outline-variant/20">
+<div class="flex items-center gap-2 font-mono text-xs font-bold text-on-surface">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="">01. RAW UNSTRUCTURED INGEST</span>
+</div>
+<span class="font-mono text-[10px] font-bold text-error px-2 py-0.5 rounded bg-error/10 border border-error/20">DIRTY LOG</span>
+</div>
+<div class="bg-[#080a12] p-4 rounded-xl font-mono text-xs text-on-surface-variant leading-relaxed h-52 flex flex-col justify-center border border-outline-variant/20">
+<p class=""><span class="text-error font-bold">%ASA-4-106023: Deny udp src</span> outside:185.220.101.5/54312 dst inside:10.0.4.12/445 by access-group "OUTSIDE_IN" [0x7f4c9a81, 0x0]</p>
+<p class="text-outline text-[11px] pt-3"># Non-standard timestamp, unnormalized port string, unverified origin signature.</p>
+</div>
+<div class="font-mono text-[11px] text-outline flex items-center justify-between pt-1">
+<span class="">SOCKET: UDP/514</span>
+<span class="">ORIGIN: ASA-5525-X</span>
+</div>
+</div>
+<!-- Col 2: ULPF Transform Engine -->
+<div class="xl:col-span-4 bg-[#101420] rounded-2xl border border-secondary/30 p-5 flex flex-col justify-between gap-4">
+<div class="flex items-center justify-between pb-3 border-b border-outline-variant/20">
+<div class="flex items-center gap-2 font-mono text-xs font-bold text-on-surface">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="">02. ULPF TRANSFORM PIPELINE</span>
+</div>
+<span class="font-mono text-[10px] font-bold text-secondary px-2 py-0.5 rounded bg-secondary/10 border border-secondary/20">CANONICAL</span>
+</div>
+<div class="bg-[#080a12] p-4 rounded-xl font-mono text-xs text-secondary leading-relaxed h-52 flex flex-col justify-center gap-1.5 border border-outline-variant/20">
+<span class="text-on-surface font-bold">[EXTRACTED_VECTORS]</span>
+<span class="">src_ip: 185.220.101.5 (Tor Exit)</span>
+<span class="">dst_ip: 10.0.4.12 (SMB Server)</span>
+<span class="">protocol: 17 (UDP) / port: 445</span>
+<span class="text-primary truncate">sha256: 4f8b22a07c801e9a...</span>
+<span class="text-tertiary truncate">merkle_leaf: 0x82f489ad...</span>
+</div>
+<div class="font-mono text-[11px] text-outline flex items-center justify-between pt-1">
+<span class="">TRANSFORM: 0.0009s</span>
+<span class="">SCHEMA: OCSF 1.1.0</span>
+</div>
+</div>
+<!-- Col 3: Enriched XAI Threat Verdict -->
+<div class="xl:col-span-4 bg-[#101420] rounded-2xl border border-tertiary/30 p-5 flex flex-col justify-between gap-4">
+<div class="flex items-center justify-between pb-3 border-b border-outline-variant/20">
+<div class="flex items-center gap-2 font-mono text-xs font-bold text-on-surface">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="">03. EXPLAINABLE THREAT VERDICT</span>
+</div>
+<span class="font-mono text-[10px] font-bold text-error px-2 py-0.5 rounded bg-error/10 border border-error/20">SEV 9.4 CRITICAL</span>
+</div>
+<div class="bg-[#080a12] p-4 rounded-xl flex flex-col gap-2 h-52 justify-center border border-outline-variant/20">
+<div class="flex items-center gap-2 text-error font-display font-bold text-sm">
+<span class="material-symbols-outlined text-[20px]">gpp_maybe</span>
+<span class="">T1021.002: Lateral SMB Probe</span>
+</div>
+<p class="font-sans text-xs text-on-surface-variant leading-relaxed font-normal">
+<strong class="text-on-surface font-semibold">XAI Reasoning:</strong> Anomaly score 0.94 triggered due to unauthorized SMB syn-probe originating from verified Tor exit node targeting an internal server.
+              </p>
+<div class="p-2 bg-[#121a24] rounded font-mono text-[10px] text-tertiary flex items-center justify-between">
+<span class="">ACTION: BLOCK RULE SENT</span>
+<span class="">✓ TAMPER PROVED</span>
+</div>
+</div>
+<div class="font-mono text-[11px] text-outline flex items-center justify-between pt-1">
+<span class="">DISPATCH: SIEM + SLACK</span>
+<span class="">SOAR ID: #84920</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- FOOTER SECTION -->
+<footer class="w-full px-4 md:px-8 xl:px-14 py-16 bg-[#070a10]"><div class="max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-outline-variant/20"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shadow-[0_0_12px_rgba(206,189,255,0.35)]"><span class="material-symbols-outlined text-[20px]">security</span></div><span class="font-display font-black text-xl text-on-surface tracking-tight uppercase">LOG AI</span></div><nav class="flex flex-wrap items-center gap-6 font-mono text-xs text-on-surface-variant"><a class="hover:text-primary transition-colors" href="#">Privacy</a><a class="hover:text-primary transition-colors" href="#">Security</a><a class="hover:text-primary transition-colors" href="#">Compliance</a><a class="hover:text-primary transition-colors" href="#">Terms</a><a class="hover:text-primary transition-colors" href="#">Contact</a></nav></div><div class="max-w-[1600px] mx-auto pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-outline font-sans"><p class="">© 2025 LOG AI Inc. All rights reserved. Enterprise-grade cryptographic log pre-processing.</p><p class="font-mono text-[11px] text-tertiary">ISO/IEC 27001 &amp; SOC2 TYPE II COMPLIANT</p></div></footer>
+</main>
+<!-- FIXED BOTTOM SOC STATUS TICKER STRIP -->
+<footer class="fixed bottom-0 left-0 right-0 z-50 h-10 bg-[#070a10]/95 backdrop-blur-md border-t border-outline-variant/30">
+<div class="h-full w-full max-w-[1600px] mx-auto px-4 md:px-8 flex items-center justify-between font-mono text-[11px] text-on-surface-variant overflow-x-auto gap-4">
+<div class="flex items-center gap-6 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+<span class="text-outline">INGEST:</span>
+<span class="text-on-surface font-bold">142.8 GB/hr</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="text-outline">TAMPER-PROOF LEDGER:</span>
+<span class="text-secondary font-bold">SHA-256 VERIFIED</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="text-outline">ML ANOMALY THRESHOLD:</span>
+<span class="text-primary font-bold">99.82%</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="text-outline">SOC LATENCY:</span>
+<span class="text-tertiary font-bold">4.2ms</span>
+</div>
+</div>
+<div class="flex items-center gap-2 whitespace-nowrap">
+<span class="font-mono text-[10px] text-outline font-bold">STATUS: STEADY</span>
+<span class="text-outline">//</span>
+<span class="font-mono text-[10px] text-primary font-bold">OCSF_v1.1.0_ALIGNED</span>
+</div>
+</div>
+</footer>
+<!-- CLIENT-SIDE INTERACTIVITY SCRIPT -->
+<script>
+    (function () {
+      // Dynamic EPS Stream Counter Generator
+      const epsElem = document.getElementById('live-eps');
+      if (epsElem) {
+        setInterval(() => {
+          const delta = Math.floor(Math.random() * 800) - 400;
+          const currentVal = 48210 + delta;
+          epsElem.textContent = currentVal.toLocaleString();
+        }, 1800);
+      }
+
+      // ROI Dynamic Estimator Logic
+      const volumeSlider = document.getElementById('slider-volume');
+      const devicesSlider = document.getElementById('slider-devices');
+      const valVolume = document.getElementById('val-volume');
+      const valDevices = document.getElementById('val-devices');
+      const outCost = document.getElementById('out-cost');
+      const outHours = document.getElementById('out-hours');
+
+      function recalculateROI() {
+        if (!volumeSlider || !devicesSlider) return;
+        const vol = parseInt(volumeSlider.value, 10);
+        const dev = parseInt(devicesSlider.value, 10);
+
+        valVolume.textContent = vol.toLocaleString() + ' GB';
+        valDevices.textContent = dev.toLocaleString() + ' Units';
+
+        // Est SIEM savings: 66% unindexed noise @ $3.00/GB monthly index rate
+        const rawMonthlyGB = vol * 30;
+        const filteredGB = rawMonthlyGB * 0.66;
+        const savingsDollar = Math.round((filteredGB * 0.10) + (dev * 45));
+        outCost.textContent = '$' + savingsDollar.toLocaleString();
+
+        // Est hours saved based on volume and devices
+        const hoursSaved = Math.round((vol * 0.14) + (dev * 0.35));
+        outHours.textContent = hoursSaved.toLocaleString();
+      }
+
+      if (volumeSlider && devicesSlider) {
+        volumeSlider.addEventListener('input', recalculateROI);
+        devicesSlider.addEventListener('input', recalculateROI);
+      }
+    })();
+  </script>
+
+
+</body></html>

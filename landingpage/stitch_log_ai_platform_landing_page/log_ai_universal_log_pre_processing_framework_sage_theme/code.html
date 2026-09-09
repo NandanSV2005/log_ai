@@ -1,0 +1,844 @@
+<!DOCTYPE html><html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@700;800;900&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-background": "#dfe2ef",
+            "primary": "#cebdff",
+            "tertiary": "#4edea3",
+            "error": "#ffb4ab",
+            "on-secondary-fixed": "#001e2c",
+            "secondary-fixed": "#c4e7ff",
+            "primary-container": "#a78bfa",
+            "secondary-container": "#0078a2",
+            "surface-bright": "#353943",
+            "background": "#0c1017",
+            "surface-variant": "#31353f",
+            "outline": "#948e9d",
+            "secondary": "#7cd0ff",
+            "tertiary-container": "#00b37c",
+            "surface": "#0f131c",
+            "surface-container": "#1c2029",
+            "surface-container-high": "#262a34",
+            "surface-container-low": "#181b25",
+            "surface-container-lowest": "#0a0e17",
+            "on-surface": "#f1f5f9",
+            "on-surface-variant": "#94a3b8",
+            "outline-variant": "#494552"
+          },
+          fontFamily: {
+            "display": ["Space Grotesk", "sans-serif"],
+            "headline": ["Space Grotesk", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"],
+            "sans": ["Inter", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+    }
+    ::-webkit-scrollbar { display: none; }
+    @keyframes pulse-flow {
+      0% { stroke-dashoffset: 24; }
+      100% { stroke-dashoffset: 0; }
+    }
+    .animate-dash-flow {
+      animation: pulse-flow 1.2s linear infinite;
+    }
+    @keyframes sweep-radar {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .animate-radar {
+      animation: sweep-radar 5s linear infinite;
+    }
+  </style>
+</head>
+<body class="bg-background font-sans text-on-surface antialiased selection:bg-primary selection:text-[#180a3a]">
+<!-- FIXED NAVIGATION HEADER -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-[#0a0e17]/85 backdrop-blur-xl border-b border-outline-variant/30 shadow-[0_4px_24px_rgba(0,0,0,0.5)]" style="background: rgba(250, 250, 245, 0.92); border-bottom: 1px solid rgba(113, 131, 85, 0.22); box-shadow: 0 4px 20px rgba(31, 46, 21, 0.05);">
+<div class="h-16 w-full max-w-[1600px] mx-auto px-4 md:px-8 flex items-center justify-between">
+<!-- Brand Logotype & Status Indicator -->
+<div class="flex items-center gap-3 md:gap-5">
+<div class="w-9 h-9 relative flex items-center justify-center flex-shrink-0"><div class="w-9 h-9 rounded-lg bg-[#718355]/15 border border-[#718355]/30 flex items-center justify-center text-[#718355]"><span class="material-symbols-outlined text-[22px]">shield_with_heart</span></div></div>
+<div class="flex items-center gap-3">
+<span class="font-display font-black text-xl md:text-2xl text-on-surface tracking-tight uppercase" style="color: #1f2e15;">LOG AI</span>
+<div class="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full bg-surface-container-high/90 border border-outline-variant/40" style="background: #eef2e6; border: 1px solid rgba(113, 131, 85, 0.3); color: #1f2e15;">
+<span class="w-2 h-2 rounded-full bg-tertiary animate-ping"></span>
+<span class="font-mono text-[11px] font-bold text-tertiary tracking-wider uppercase">ULPF v2.4 // ONLINE</span>
+<span class="font-mono text-[11px] text-outline">[48,210 eps]</span>
+</div>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden xl:flex items-center gap-1 font-mono text-[12px] tracking-wide" data-active-classes="bg-surface-container text-primary font-bold rounded-lg"><a class="px-3 py-1.5 rounded-lg font-bold border" href="#pipeline" style="background:#e4ebd9; color:#1f2e15; border-color: rgba(113,131,85,0.35);">01 // Pipeline</a>
+<a class="px-3 py-1.5 rounded-lg transition-colors hover:bg-[#edf2e6]" href="#sources" style="color:#55634b;">02 // Sources</a>
+<a class="px-3 py-1.5 rounded-lg transition-colors hover:bg-[#edf2e6]" href="#topology" style="color:#55634b;">03 // Topology</a>
+<a class="px-3 py-1.5 rounded-lg transition-colors hover:bg-[#edf2e6]" href="#roi-engine" style="color:#55634b;">04 // ROI Engine</a>
+<a class="px-3 py-1.5 rounded-lg transition-colors hover:bg-[#edf2e6]" href="#demo" style="color:#55634b;">05 // Live Demo</a></nav>
+<!-- Terminal & Action Jumpers -->
+<div class="flex items-center gap-3 md:gap-4">
+<div class="hidden md:flex items-center bg-[#131722] rounded-lg p-1 border border-outline-variant/30"><button class="px-2.5 py-1 font-mono text-[11px] font-medium rounded transition-colors" style="color:#637055; background:transparent;" type="button">CYBERVOID</button>
+<button class="px-2.5 py-1 font-mono text-[11px] font-bold rounded shadow-sm" style="background:#718355; color:#ffffff;" type="button">SAGE</button></div>
+<a class="px-3.5 py-1.5 rounded bg-primary-container text-[#1f0952] font-sans font-bold text-sm shadow-[0_0_18px_rgba(167,139,250,0.45)] hover:bg-primary transition-all" href="#demo" style="background: #718355; color: #ffffff; box-shadow: 0 2px 10px rgba(113, 131, 85, 0.35);">
+          Open Console
+        </a>
+</div>
+</div>
+</header>
+<!-- CHAPTER QUICK DOCK (RIGHT DESKTOP RAIL) -->
+<aside class="fixed right-6 top-1/2 -translate-y-1/2 z-40 hidden 2xl:flex flex-col gap-3 bg-[#0a0e17]/80 backdrop-blur-md p-2 rounded-xl border border-outline-variant/40" style="background: rgba(245, 247, 240, 0.92); border: 1px solid rgba(113, 131, 85, 0.28); box-shadow: 0 4px 20px rgba(31, 46, 21, 0.08);"><a class="flex flex-col items-center gap-1 group py-1" href="#pipeline">
+<span class="font-mono text-[10px] font-bold" style="color:#718355;">01</span>
+<div class="w-2 h-2 rounded-full" style="background:#718355; box-shadow: 0 0 6px #718355;"></div>
+<span class="font-mono text-[9px]" style="color:#55634b;">PIPE</span>
+</a>
+<div class="w-px h-4 mx-auto" style="background:rgba(113,131,85,0.3);"></div>
+<a class="flex flex-col items-center gap-1 group py-1" href="#sources">
+<span class="font-mono text-[10px] font-bold" style="color:#5c7a6e;">02</span>
+<div class="w-2 h-2 rounded-full" style="background:#5c7a6e; box-shadow: 0 0 6px #5c7a6e;"></div>
+<span class="font-mono text-[9px]" style="color:#55634b;">SRC</span>
+</a>
+<div class="w-px h-4 mx-auto" style="background:rgba(113,131,85,0.3);"></div>
+<a class="flex flex-col items-center gap-1 group py-1" href="#topology">
+<span class="font-mono text-[10px] font-bold" style="color:#3b6957;">03</span>
+<div class="w-2 h-2 rounded-full" style="background:#3b6957; box-shadow: 0 0 6px #3b6957;"></div>
+<span class="font-mono text-[9px]" style="color:#55634b;">TOPO</span>
+</a>
+<div class="w-px h-4 mx-auto" style="background:rgba(113,131,85,0.3);"></div>
+<a class="flex flex-col items-center gap-1 group py-1" href="#roi-engine">
+<span class="font-mono text-[10px] font-bold" style="color:#15803d;">04</span>
+<div class="w-2 h-2 rounded-full" style="background:#15803d;"></div>
+<span class="font-mono text-[9px]" style="color:#55634b;">ROI</span>
+</a>
+<div class="w-px h-4 mx-auto" style="background:rgba(113,131,85,0.3);"></div>
+<a class="flex flex-col items-center gap-1 group py-1" href="#demo">
+<span class="font-mono text-[10px] font-bold" style="color:#718355;">05</span>
+<div class="w-2 h-2 rounded-full" style="background:#718355;"></div>
+<span class="font-mono text-[9px]" style="color:#55634b;">DEMO</span>
+</a></aside>
+<main class="w-full pt-16 pb-12 flex flex-col">
+<!-- HERO SECTION // TONAL CANVAS: #0c1017 + VIOLET/INDIGO MESH GLOW -->
+<section class="relative w-full overflow-hidden px-4 md:px-8 xl:px-14 py-20 lg:py-24 bg-[#0c1017] border-b border-outline-variant/20" style="background: #fafaf5; border-bottom: 1px solid rgba(113, 131, 85, 0.2);">
+<!-- Radiant Atmospheric Glow -->
+<div class="absolute -top-40 left-1/4 w-[700px] h-[500px] bg-primary/10 rounded-full blur-[140px] pointer-events-none" style="background: rgba(113, 131, 85, 0.14);"></div>
+<div class="absolute top-1/3 -right-20 w-[550px] h-[450px] bg-secondary/10 rounded-full blur-[130px] pointer-events-none" style="background: rgba(92, 122, 110, 0.12);"></div>
+<div class="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#948e9d_1px,transparent_1px)] [background-size:24px_24px]"></div>
+<div class="max-w-[1600px] mx-auto w-full grid grid-cols-1 xl:grid-cols-12 gap-10 lg:gap-12 relative z-10 items-center">
+<!-- Hero Narrative -->
+<div class="xl:col-span-6 flex flex-col gap-6">
+<div class="flex flex-wrap items-center gap-3">
+<div class="inline-flex items-center gap-2 px-3 py-1 bg-surface-container-high/80 border border-primary/25 rounded-full" style="background: #edf2e6; border: 1px solid rgba(113, 131, 85, 0.32); color: #1f2e15;">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse" style="background: #718355;"></span>
+<span class="font-mono text-[11px] font-bold text-primary uppercase tracking-wider" style="color: #3b6957;">00 // UNIVERSAL LOG PRE-PROCESSING FRAMEWORK (ULPF)</span>
+</div>
+<span class="font-mono text-xs text-outline font-semibold">v2.4-STABLE</span>
+</div>
+<h1 class="font-display font-black text-4xl sm:text-5xl lg:text-6xl text-on-surface uppercase tracking-tight leading-[1.08] text-balance" style="color: #1f2e15;">
+            Understand what your systems are doing.
+          </h1>
+<p class="font-sans text-base lg:text-lg text-on-surface-variant max-w-xl font-normal leading-relaxed text-pretty" style="color: #55634b;">
+            Ingest chaotic, heterogeneous logs across multi-vendor firewalls and distributed edge nodes. Normalize sub-millisecond, cryptographically hash-chain every raw event with Merkle ledger guarantees, and produce explainable threat verdicts before toxic alert volume exhausts your SIEM.
+          </p>
+<!-- Dynamic Action CTAs -->
+<div class="flex flex-wrap items-center gap-4 pt-2"><a class="px-6 py-3 rounded-lg font-sans font-bold text-sm shadow-md transition-all flex items-center gap-2 hover:opacity-95" href="#pipeline" style="background:#718355; color:#ffffff; box-shadow: 0 4px 14px rgba(113,131,85,0.3);">
+<span class="material-symbols-outlined text-[19px]">account_tree</span>
+<span class="">Explore ULPF Pipeline</span>
+</a>
+<a class="px-6 py-3 rounded-lg font-sans font-bold text-sm transition-colors flex items-center gap-2 hover:bg-[#eef3e6]" href="#demo" style="background:#ffffff; color:#1f2e15; border: 1px solid rgba(113,131,85,0.28);">
+<span class="material-symbols-outlined text-[19px]" style="color:#5c7a6e;">play_circle</span>
+<span class="">Live Interactive Demo</span>
+</a>
+<a class="px-4 py-3 rounded-lg font-mono text-xs transition-colors flex items-center gap-2 hover:bg-[#eef3e6]" href="https://github.com/NandanSV2005/log_ai" rel="noopener noreferrer" style="background:#f3f6ee; color:#55634b; border: 1px solid rgba(113,131,85,0.25);" target="_blank">
+<span class="material-symbols-outlined text-[17px]" style="color:#718355;">verified</span>
+<span class="">NandanSV2005/log_ai</span>
+<span class="px-1.5 py-0.5 rounded font-bold text-[10px]" style="background:#dce8ce; color:#3b6957;">v2.4</span>
+</a></div>
+<!-- Diagnostic KPI Strip -->
+<div class="grid grid-cols-3 gap-3 pt-3 max-w-xl"><div class="p-3.5 rounded-xl flex flex-col" style="background:#ffffff; border: 1px solid rgba(113,131,85,0.24); box-shadow: 0 2px 10px rgba(31,46,21,0.04);">
+<span class="font-mono text-[10px] font-bold uppercase tracking-wider" style="color:#55634b;">Ingest Speed</span>
+<span class="font-mono text-2xl lg:text-3xl font-extrabold tracking-tight mt-1" id="live-eps" style="color:#718355;">47,956</span>
+<span class="font-mono text-[10px] mt-0.5 font-bold" style="color:#3b6957;">EPS Real-Time</span>
+</div>
+<div class="p-3.5 rounded-xl flex flex-col" style="background:#ffffff; border: 1px solid rgba(113,131,85,0.24); box-shadow: 0 2px 10px rgba(31,46,21,0.04);">
+<span class="font-mono text-[10px] font-bold uppercase tracking-wider" style="color:#55634b;">Pipeline Latency</span>
+<span class="font-mono text-2xl lg:text-3xl font-extrabold tracking-tight mt-1" style="color:#5c7a6e;">0.0012s</span>
+<span class="font-mono text-[10px] mt-0.5" style="color:#637055;">P99 SLA Guarantee</span>
+</div>
+<div class="p-3.5 rounded-xl flex flex-col" style="background:#ffffff; border: 1px solid rgba(113,131,85,0.24); box-shadow: 0 2px 10px rgba(31,46,21,0.04);">
+<span class="font-mono text-[10px] font-bold uppercase tracking-wider" style="color:#55634b;">Tamper Proof</span>
+<span class="font-mono text-2xl lg:text-3xl font-extrabold tracking-tight mt-1" style="color:#15803d;">100%</span>
+<span class="font-mono text-[10px] mt-0.5 font-bold" style="color:#15803d;">Merkle Root Enforced</span>
+</div></div>
+</div>
+<!-- Right HUD Stream Instrument -->
+<div class="xl:col-span-6 relative mt-4 xl:mt-0">
+<div class="relative w-full rounded-2xl p-4 md:p-6 overflow-hidden shadow-lg" style="background:#f5f7f0; border: 1px solid rgba(113,131,85,0.28); box-shadow: 0 10px 30px rgba(31,46,21,0.06);">
+<div class="flex items-center justify-between pb-3 mb-3 border-b" style="border-color: rgba(113,131,85,0.2);">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full" style="background:#dc2626;"></span>
+<span class="w-2.5 h-2.5 rounded-full" style="background:#d97706;"></span>
+<span class="w-2.5 h-2.5 rounded-full" style="background:#15803d;"></span>
+<span class="ml-2 font-mono text-xs font-bold tracking-wider" style="color:#1f2e15;">ULPF // INGESTION_STREAM_V2</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded border" style="background:#e7ede0; color:#718355; border-color: rgba(113,131,85,0.3);">SHA-256 LEDGER</span>
+<span class="font-mono text-[10px] font-bold flex items-center gap-1" style="color:#15803d;">
+<span class="w-1.5 h-1.5 rounded-full animate-ping" style="background:#15803d;"></span> LIVE
+      </span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-[11px]">
+<div class="p-3.5 rounded-xl flex flex-col gap-1.5 border" style="background:#ffffff; border-color: rgba(113,131,85,0.22);">
+<div class="flex justify-between items-center text-[10px] font-bold" style="color:#55634b;">
+<span class="">[RAW_TELEMETRY_BUFFER]</span>
+<span style="color:#5c7a6e;" class="">AUTO-FLUSH</span>
+</div>
+<div class="flex flex-col gap-1 font-mono text-[10px] pt-1" style="color:#55634b;">
+<p class="truncate" style="color:#dc2626;">0x7F4A %ASA-4-106023: Deny udp src outside:185.220.101.5</p>
+<p class="truncate" style="color:#1f2e15;">0x7F4B CEF:0|Fortinet|FortiGate|v7.2|traffic:denied|src=10.0.4.12</p>
+<p class="truncate" style="color:#5c7a6e;">0x7F4C pf: rule 42/(match) pass in on igb0: 192.168.1.104</p>
+<p class="truncate" style="color:#1f2e15;">0x7F4D Suricata[3819]: [1:2018959:4] ET Suspicious Inbound TLS</p>
+<p class="truncate" style="color:#3b6957;">0x7F4E {"EventID":4624,"TargetUserName":"SYSTEM","LogonType":5}</p>
+</div>
+</div>
+<div class="p-3.5 rounded-xl flex flex-col gap-1.5 border" style="background:#ffffff; border-color: rgba(113,131,85,0.22);">
+<div class="flex justify-between items-center text-[10px] font-bold" style="color:#55634b;">
+<span class="">[CANONICAL_OCSF_OUTPUT]</span>
+<span style="color:#15803d;" class="">HASH_VERIFIED</span>
+</div>
+<div class="flex flex-col gap-1 font-mono text-[10px] pt-1">
+<p class="truncate font-bold" style="color:#718355;">hash: "c29d18b4fa8001a4e9b98a3e7"</p>
+<p class="truncate font-medium" style="color:#1f2e15;">ocsf.class: "NETWORK_ACTIVITY"</p>
+<p class="truncate font-bold" style="color:#dc2626;">action: "BLOCKED" | sev_score: 9.4</p>
+<p class="truncate" style="color:#5c7a6e;">xai_verdict: "PORT_SCAN_DETECTION"</p>
+<p class="truncate" style="color:#55634b;">sig_proof: "0x89eaf042b...verified"</p>
+</div>
+</div>
+</div>
+<div class="mt-3 p-2.5 rounded-xl flex items-center justify-between text-[10px] font-mono border" style="background:#ffffff; border-color: rgba(113,131,85,0.22); color:#55634b;">
+<span class="font-bold" style="color:#718355;">01 INGEST</span>
+<span class="">⟶</span>
+<span class="font-bold" style="color:#5c7a6e;">02 PARSE</span>
+<span class="">⟶</span>
+<span class="font-bold" style="color:#3b6957;">03 OCSF</span>
+<span class="">⟶</span>
+<span class="font-bold" style="color:#718355;">04 HASH</span>
+<span class="">⟶</span>
+<span class="font-bold" style="color:#15803d;">05 VERDICT</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CHAPTER 01 // PIPELINE // TONAL CANVAS: #131226 -> #0e111d + VIOLET RADIANT ATMOSPHERE -->
+<section class="w-full px-4 md:px-8 xl:px-14 py-20 relative bg-gradient-to-b from-[#131226] via-[#101122] to-[#0e111d] border-b border-primary/20" id="pipeline" style="background: linear-gradient(180deg, #f4f7ee 0%, #edf2e6 100%); border-bottom: 1px solid rgba(113, 131, 85, 0.22);">
+<!-- Atmospheric Violet Diffusion Glow -->
+<div class="absolute top-10 left-1/3 w-[800px] h-[550px] bg-[#a78bfa]/[0.11] rounded-full blur-[160px] pointer-events-none"></div>
+<div class="max-w-[1600px] mx-auto flex flex-col gap-12 relative z-10">
+<!-- Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="font-mono text-xs font-bold text-primary uppercase tracking-widest" style="color: #718355;">CHAPTER 01</span>
+<span class="text-outline font-mono">//</span>
+<span class="font-mono text-xs text-outline font-semibold tracking-wider">EXECUTION_SEQUENCE</span>
+</div>
+<h2 class="font-display font-black text-3xl md:text-4xl text-on-surface uppercase tracking-tight" style="color: #1f2e15;">
+              Deterministic Pipeline Architecture
+            </h2>
+</div>
+<p class="font-sans text-sm md:text-base text-on-surface-variant max-w-md leading-relaxed font-normal" style="color: #55634b;">
+            Six non-blocking micro-stages converting unstructured socket transmissions into mathematically unalterable forensic evidence records.
+          </p>
+</div>
+<!-- DOMINANT VISUAL ANCHOR: LARGE EXPANSIVE CONNECTED PIPELINE CANVAS -->
+<div class="w-full rounded-2xl p-6 lg:p-8 shadow-md relative overflow-hidden" style="background:#ffffff; border: 1px solid rgba(113,131,85,0.28); box-shadow: 0 8px 24px rgba(31,46,21,0.05);">
+<div class="flex items-center justify-between pb-4 mb-6 border-b font-mono text-xs" style="border-color: rgba(113,131,85,0.2);">
+<div class="flex items-center gap-2 font-bold" style="color:#718355;">
+<span class="material-symbols-outlined text-[18px]">account_tree</span>
+<span class="">LIVE PIPELINE TOPOLOGY &amp; HIGH-THROUGHPUT STAGE BUS</span>
+</div>
+<span class="font-bold hidden sm:inline" style="color:#3b6957;">P99 FLOW: 0.0012s DETERMINISTIC DWELL</span>
+</div>
+<div class="relative w-full">
+<svg class="w-full h-24 hidden md:block" fill="none" preserveAspectRatio="none" viewBox="0 0 1200 80">
+<path d="M 60 40 L 1140 40" stroke="#718355" stroke-opacity="0.2" stroke-width="4"></path>
+<path class="animate-dash-flow" d="M 60 40 L 1140 40" stroke="url(#pipeGradSage)" stroke-dasharray="10 14" stroke-width="2.5"></path>
+<defs>
+<linearGradient gradientUnits="userSpaceOnUse" id="pipeGradSage" x1="0" x2="1200" y1="0" y2="0">
+<stop offset="0%" stop-color="#718355"></stop>
+<stop offset="50%" stop-color="#5c7a6e"></stop>
+<stop offset="100%" stop-color="#3b6957"></stop>
+</linearGradient>
+</defs>
+</svg>
+<div class="grid grid-cols-2 md:grid-cols-6 gap-3 lg:gap-4 -mt-10 relative z-10">
+<div class="flex flex-col items-center">
+<div class="w-12 h-12 rounded-xl flex items-center justify-center font-mono font-black text-xs mb-2 shadow-sm border-2" style="background:#ffffff; border-color:#718355; color:#718355;">01</div>
+<span class="font-mono text-[11px] font-bold uppercase" style="color:#718355;">RAW INGEST</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-12 h-12 rounded-xl flex items-center justify-center font-mono font-black text-xs mb-2 shadow-sm border-2" style="background:#ffffff; border-color:#5c7a6e; color:#5c7a6e;">02</div>
+<span class="font-mono text-[11px] font-bold uppercase" style="color:#5c7a6e;">TOKENIZE</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-12 h-12 rounded-xl flex items-center justify-center font-mono font-black text-xs mb-2 shadow-sm border-2" style="background:#ffffff; border-color:#3b6957; color:#3b6957;">03</div>
+<span class="font-mono text-[11px] font-bold uppercase" style="color:#3b6957;">OCSF NORM</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-12 h-12 rounded-xl flex items-center justify-center font-mono font-black text-xs mb-2 shadow-sm border-2" style="background:#ffffff; border-color:#718355; color:#718355;">04</div>
+<span class="font-mono text-[11px] font-bold uppercase" style="color:#718355;">SHA-256 SEAL</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-12 h-12 rounded-xl flex items-center justify-center font-mono font-black text-xs mb-2 shadow-sm border-2" style="background:#ffffff; border-color:#5c7a6e; color:#5c7a6e;">05</div>
+<span class="font-mono text-[11px] font-bold uppercase" style="color:#5c7a6e;">ANOMALY ML</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-12 h-12 rounded-xl flex items-center justify-center font-mono font-black text-xs mb-2 shadow-sm border-2" style="background:#ffffff; border-color:#3b6957; color:#3b6957;">06</div>
+<span class="font-mono text-[11px] font-bold uppercase" style="color:#3b6957;">XAI VERDICT</span>
+</div>
+</div>
+</div>
+</div>
+<!-- REQUIREMENT 1: CUT CARD DENSITY (ONE IDEA PER CARD: Icon + Short Title + One Clean Punchy Description) -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-4"><div class="p-5 rounded-xl flex flex-col gap-3 group transition-all hover:shadow-md" style="background:#ffffff; border: 1px solid rgba(113,131,85,0.24);">
+<div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:#eef2e6; color:#718355;">
+<span class="material-symbols-outlined text-[22px]">input</span>
+</div>
+<h3 class="font-display font-bold text-base" style="color:#1f2e15;">Raw Ingestion</h3>
+<p class="font-sans text-xs leading-relaxed font-normal" style="color:#55634b;">
+    High-throughput listeners stream unparsed packets across UDP, TCP, and eBPF.
+  </p>
+</div>
+<div class="p-5 rounded-xl flex flex-col gap-3 group transition-all hover:shadow-md" style="background:#ffffff; border: 1px solid rgba(92,122,110,0.24);">
+<div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:#eaf2ef; color:#5c7a6e;">
+<span class="material-symbols-outlined text-[22px]">code_blocks</span>
+</div>
+<h3 class="font-display font-bold text-base" style="color:#1f2e15;">Lexical Parse</h3>
+<p class="font-sans text-xs leading-relaxed font-normal" style="color:#55634b;">
+    Zero-copy SIMD tokenizers rapidly parse heterogeneous key-values and RFC formats.
+  </p>
+</div>
+<div class="p-5 rounded-xl flex flex-col gap-3 group transition-all hover:shadow-md" style="background:#ffffff; border: 1px solid rgba(59,105,87,0.24);">
+<div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:#e6f0ec; color:#3b6957;">
+<span class="material-symbols-outlined text-[22px]">schema</span>
+</div>
+<h3 class="font-display font-bold text-base" style="color:#1f2e15;">Schema Normalization</h3>
+<p class="font-sans text-xs leading-relaxed font-normal" style="color:#55634b;">
+    Harmonizes disparate vendor fields into strict Open Cybersecurity Schema (OCSF v1.1).
+  </p>
+</div>
+<div class="p-5 rounded-xl flex flex-col gap-3 group transition-all hover:shadow-md" style="background:#ffffff; border: 1px solid rgba(113,131,85,0.24);">
+<div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:#eef2e6; color:#718355;">
+<span class="material-symbols-outlined text-[22px]">enhanced_encryption</span>
+</div>
+<h3 class="font-display font-bold text-base" style="color:#1f2e15;">SHA-256 Hashing</h3>
+<p class="font-sans text-xs leading-relaxed font-normal" style="color:#55634b;">
+    Cryptographically seals every log batch into an immutable, hardware-attested Merkle ledger.
+  </p>
+</div>
+<div class="p-5 rounded-xl flex flex-col gap-3 group transition-all hover:shadow-md" style="background:#ffffff; border: 1px solid rgba(92,122,110,0.24);">
+<div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:#eaf2ef; color:#5c7a6e;">
+<span class="material-symbols-outlined text-[22px]">troubleshoot</span>
+</div>
+<h3 class="font-display font-bold text-base" style="color:#1f2e15;">ML Anomaly Core</h3>
+<p class="font-sans text-xs leading-relaxed font-normal" style="color:#55634b;">
+    Sub-millisecond clustering instantly isolates beacon intervals and entropy spikes.
+  </p>
+</div>
+<div class="p-5 rounded-xl flex flex-col gap-3 group transition-all hover:shadow-md" style="background:#ffffff; border: 1px solid rgba(59,105,87,0.24);">
+<div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:#e6f0ec; color:#3b6957;">
+<span class="material-symbols-outlined text-[22px]">psychology</span>
+</div>
+<h3 class="font-display font-bold text-base" style="color:#1f2e15;">XAI Verdict Output</h3>
+<p class="font-sans text-xs leading-relaxed font-normal" style="color:#55634b;">
+    Emits natural-language explanations with MITRE ATT&amp;CK mappings for instant triage.
+  </p>
+</div></div>
+</div>
+</section>
+<!-- CHAPTER 02 // LOG SOURCES // TONAL CANVAS: #0c1824 + COOL CYAN ATMOSPHERIC DIFFUSION -->
+<section class="w-full px-4 md:px-8 xl:px-14 py-20 relative bg-gradient-to-b from-[#0c1824] via-[#0b1622] to-[#09131d] border-b border-secondary/20" id="sources" style="background: linear-gradient(180deg, #eff5f2 0%, #e7f0ec 100%); border-bottom: 1px solid rgba(92, 122, 110, 0.22);">
+<!-- Cool Cyan Atmosphere Glow -->
+<div class="absolute top-16 right-1/4 w-[750px] h-[500px] bg-[#7cd0ff]/[0.10] rounded-full blur-[150px] pointer-events-none"></div>
+<div class="max-w-[1600px] mx-auto flex flex-col gap-12 relative z-10">
+<!-- Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="font-mono text-xs font-bold text-secondary uppercase tracking-widest" style="color: #5c7a6e;">CHAPTER 02</span>
+<span class="text-outline font-mono">//</span>
+<span class="font-mono text-xs text-outline font-semibold tracking-wider">INGESTION_ECOSYSTEM</span>
+</div>
+<h2 class="font-display font-black text-3xl md:text-4xl text-on-surface uppercase tracking-tight" style="color: #1f2e15;">
+              Many Heterogeneous Sources — One Strict Conduit
+            </h2>
+</div>
+<p class="font-sans text-sm md:text-base text-on-surface-variant max-w-md leading-relaxed font-normal" style="color: #55634b;">
+            Zero custom grok scripts required. Built-in decoders ingest raw firewall and endpoint formats natively.
+          </p>
+</div>
+<!-- REQUIREMENT 1: CUT CARD DENSITY (ONE IDEA PER CARD: Icon + Short Title + One Line of Clean Description) -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"><div class="p-6 rounded-xl flex flex-col gap-3 group transition-all hover:shadow-md" style="background:#ffffff; border: 1px solid rgba(92,122,110,0.22);">
+<div class="w-11 h-11 rounded-lg flex items-center justify-center" style="background:#eaf2ef; color:#5c7a6e;">
+<span class="material-symbols-outlined text-[24px]">router</span>
+</div>
+<h3 class="font-display font-bold text-lg" style="color:#1f2e15;">Cisco ASA / FTD</h3>
+<p class="font-sans text-sm leading-relaxed font-normal" style="color:#55634b;">
+    Decodes 106-series teardowns, NAT translations, and VPN lifecycle events natively.
+  </p>
+</div>
+<div class="p-6 rounded-xl flex flex-col gap-3 group transition-all hover:shadow-md" style="background:#ffffff; border: 1px solid rgba(92,122,110,0.22);">
+<div class="w-11 h-11 rounded-lg flex items-center justify-center" style="background:#eaf2ef; color:#5c7a6e;">
+<span class="material-symbols-outlined text-[24px]">security</span>
+</div>
+<h3 class="font-display font-bold text-lg" style="color:#1f2e15;">Fortinet FortiGate</h3>
+<p class="font-sans text-sm leading-relaxed font-normal" style="color:#55634b;">
+    Extracts UTM policies, AV signatures, IPS events, and interface bindings.
+  </p>
+</div>
+<div class="p-6 rounded-xl flex flex-col gap-3 group transition-all hover:shadow-md" style="background:#ffffff; border: 1px solid rgba(92,122,110,0.22);">
+<div class="w-11 h-11 rounded-lg flex items-center justify-center" style="background:#eaf2ef; color:#5c7a6e;">
+<span class="material-symbols-outlined text-[24px]">troubleshoot</span>
+</div>
+<h3 class="font-display font-bold text-lg" style="color:#1f2e15;">Suricata EVE-JSON</h3>
+<p class="font-sans text-sm leading-relaxed font-normal" style="color:#55634b;">
+    Parses streaming IDS flow alerts, DNS queries, and TLS JA3/JA4 fingerprints.
+  </p>
+</div>
+<div class="p-6 rounded-xl flex flex-col gap-3 group transition-all hover:shadow-md" style="background:#ffffff; border: 1px solid rgba(92,122,110,0.22);">
+<div class="w-11 h-11 rounded-lg flex items-center justify-center" style="background:#eaf2ef; color:#5c7a6e;">
+<span class="material-symbols-outlined text-[24px]">filter_alt</span>
+</div>
+<h3 class="font-display font-bold text-lg" style="color:#1f2e15;">pfSense / FreeBSD PF</h3>
+<p class="font-sans text-sm leading-relaxed font-normal" style="color:#55634b;">
+    Processes packet filter CSV headers, rule traces, and state table logs.
+  </p>
+</div>
+<div class="p-6 rounded-xl flex flex-col gap-3 group transition-all hover:shadow-md" style="background:#ffffff; border: 1px solid rgba(92,122,110,0.22);">
+<div class="w-11 h-11 rounded-lg flex items-center justify-center" style="background:#eaf2ef; color:#5c7a6e;">
+<span class="material-symbols-outlined text-[24px]">desktop_windows</span>
+</div>
+<h3 class="font-display font-bold text-lg" style="color:#1f2e15;">Windows EVTX</h3>
+<p class="font-sans text-sm leading-relaxed font-normal" style="color:#55634b;">
+    Decodes Kerberos logons, privilege escalations, and Sysmon process telemetry.
+  </p>
+</div>
+<div class="p-6 rounded-xl flex flex-col gap-3 group transition-all hover:shadow-md" style="background:#ffffff; border: 1px solid rgba(92,122,110,0.22);">
+<div class="w-11 h-11 rounded-lg flex items-center justify-center" style="background:#eaf2ef; color:#5c7a6e;">
+<span class="material-symbols-outlined text-[24px]">terminal</span>
+</div>
+<h3 class="font-display font-bold text-lg" style="color:#1f2e15;">Linux Auditd / eBPF</h3>
+<p class="font-sans text-sm leading-relaxed font-normal" style="color:#55634b;">
+    Captures deep kernel syscall executions, privilege transitions, and container namespaces.
+  </p>
+</div></div>
+</div>
+</section>
+<!-- CHAPTER 03 // RADAR TOPOLOGY & CRYPTO // TONAL CANVAS: #091a18 + DEEP TEAL CYBERNETIC GLOW -->
+<section class="w-full px-4 md:px-8 xl:px-14 py-20 relative bg-gradient-to-b from-[#091a18] via-[#091f1c] to-[#081715] border-b border-tertiary/20" id="topology" style="background: linear-gradient(180deg, #eaf2ee 0%, #e3ede8 100%); border-bottom: 1px solid rgba(59, 105, 87, 0.22);">
+<!-- Deep Teal Cybernetic Glow -->
+<div class="absolute top-10 left-1/4 w-[850px] h-[550px] bg-[#4edea3]/[0.10] rounded-full blur-[170px] pointer-events-none"></div>
+<div class="max-w-[1600px] mx-auto flex flex-col gap-10 relative z-10">
+<!-- Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="font-mono text-xs font-bold text-tertiary uppercase tracking-widest" style="color: #3b6957;">CHAPTER 03</span>
+<span class="text-outline font-mono">//</span>
+<span class="font-mono text-xs text-outline font-semibold tracking-wider">TOPOLOGICAL_SURFACE</span>
+</div>
+<h2 class="font-display font-black text-3xl md:text-4xl text-on-surface uppercase tracking-tight" style="color: #1f2e15;">
+              Network Threat Radar &amp; Cryptographic Proof
+            </h2>
+</div>
+<p class="font-sans text-sm md:text-base text-on-surface-variant max-w-md leading-relaxed font-normal" style="color: #55634b;">
+            Real-time coordinate tracking of anomalous network entities paired with tamper-evident Merkle ledger proofs.
+          </p>
+</div>
+<!-- REQUIREMENT 3: DOMINANT VISUAL ANCHOR: RADAR OCCUPIES ~70% OF LAYOUT WITH COMPACT CRYPTO COMPANION -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
+<!-- DOMINANT EXPANSIVE THREAT RADAR CENTERPIECE (~68% width on desktop) -->
+<div class="xl:col-span-8 rounded-2xl p-5 md:p-7 flex flex-col gap-4 shadow-md relative overflow-hidden" style="background:#ffffff; border: 1px solid rgba(59,105,87,0.3); box-shadow: 0 8px 24px rgba(31,46,21,0.06);">
+<div class="flex items-center justify-between font-mono text-xs pb-3 border-b" style="border-color: rgba(59,105,87,0.2);">
+<div class="flex items-center gap-2 font-bold" style="color:#3b6957;">
+<span class="material-symbols-outlined text-[20px]">radar</span>
+<span class="tracking-wide">SECTOR TOPOLOGY RADAR // AZIMUTH: 360° CONTINUOUS SWEEP</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-mono text-[11px] hidden sm:inline" style="color:#55634b;">SWEEP: 5.0s</span>
+<span class="px-2 py-0.5 rounded font-mono text-[10px] font-bold border animate-pulse" style="background:#e7f0ec; color:#3b6957; border-color: rgba(59,105,87,0.3);">2 DETECTIONS ACTIVE</span>
+</div>
+</div>
+<div class="relative w-full aspect-[16/10] md:aspect-[16/9] rounded-xl overflow-hidden border flex items-center justify-center" style="background:#1b2d24; border-color: rgba(59,105,87,0.4);">
+<div class="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#a6c97a_1px,transparent_1px)] [background-size:20px_20px]"></div>
+<div class="absolute w-[85%] h-[85%] rounded-full border" style="border-color: rgba(166,201,122,0.25);"></div>
+<div class="absolute w-[62%] h-[62%] rounded-full border" style="border-color: rgba(166,201,122,0.35);"></div>
+<div class="absolute w-[40%] h-[40%] rounded-full border" style="border-color: rgba(166,201,122,0.45);"></div>
+<div class="absolute w-[18%] h-[18%] rounded-full border" style="border-color: rgba(166,201,122,0.6);"></div>
+<div class="absolute w-full h-[1px]" style="background: rgba(166,201,122,0.3);"></div>
+<div class="absolute h-full w-[1px]" style="background: rgba(166,201,122,0.3);"></div>
+<div class="absolute w-full h-[1px] rotate-45" style="background: rgba(166,201,122,0.2);"></div>
+<div class="absolute w-full h-[1px] -rotate-45" style="background: rgba(166,201,122,0.2);"></div>
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none animate-radar">
+<div class="w-1/2 h-1/2 origin-bottom-right bg-gradient-to-br from-[#718355]/40 via-[#3b6957]/10 to-transparent"></div>
+</div>
+<div class="absolute top-[26%] left-[70%] group cursor-pointer z-20">
+<span class="relative flex h-5 w-5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-80" style="background:#dc2626;"></span>
+<span class="relative inline-flex rounded-full h-5 w-5 border-2 border-white shadow-md" style="background:#dc2626;"></span>
+</span>
+<div class="absolute -top-16 -left-28 p-2.5 rounded-lg shadow-xl w-48 font-mono text-[10px] pointer-events-none border" style="background:#ffffff; border-color:#dc2626;">
+<div class="font-bold flex items-center gap-1" style="color:#dc2626;">
+<span class="w-1.5 h-1.5 rounded-full animate-ping" style="background:#dc2626;"></span>
+<span class="">ANOMALY // SEV 9.4</span>
+</div>
+<div class="font-semibold" style="color:#1f2e15;">HOST: 10.0.4.12 [SMB]</div>
+<div style="color:#55634b;" class="">T1021.002 Lateral Probe</div>
+</div>
+</div>
+<div class="absolute top-[68%] left-[28%] group cursor-pointer z-20">
+<span class="relative flex h-4 w-4">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-70" style="background:#d97706;"></span>
+<span class="relative inline-flex rounded-full h-4 w-4 border border-white shadow-md" style="background:#d97706;"></span>
+</span>
+<div class="absolute top-5 -left-16 p-2.5 rounded-lg shadow-xl w-44 font-mono text-[10px] pointer-events-none border" style="background:#ffffff; border-color:#d97706;">
+<div class="font-bold" style="color:#d97706;">BEACON // SEV 6.2</div>
+<div style="color:#1f2e15;" class="">HOST: 192.168.1.104</div>
+<div style="color:#55634b;" class="">C2 Egress Jitter</div>
+</div>
+</div>
+<div class="absolute top-[48%] left-[44%] group cursor-pointer z-20">
+<span class="relative flex h-3.5 w-3.5">
+<span class="relative inline-flex rounded-full h-3.5 w-3.5 shadow-md" style="background:#3b6957;"></span>
+</span>
+<div class="absolute bottom-5 -left-12 p-2 rounded-lg shadow-xl w-36 font-mono text-[10px] pointer-events-none border" style="background:#ffffff; border-color:#3b6957;">
+<div class="font-bold" style="color:#3b6957;">GATEWAY SECURE</div>
+<div style="color:#1f2e15;" class="">pfSense [10.0.0.1]</div>
+</div>
+</div>
+<div class="absolute bottom-3 left-4 font-mono text-[11px] font-bold px-2.5 py-1 rounded border" style="background:rgba(27,45,36,0.85); color:#a6c97a; border-color:rgba(166,201,122,0.3);">
+      FOV: 10.0.0.0/16 // SCAN LAT: 0.0004s // SECTORS: 12
+    </div>
+<div class="absolute top-3 right-4 font-mono text-[10px]" style="color:#a6c97a;">
+      GRID COORD: 34.0522° N, 118.2437° W
+    </div>
+</div>
+</div>
+<!-- STREAMLINED CRYPTOGRAPHIC PROOF COMPANION (~32% width on desktop) -->
+<div class="xl:col-span-4 rounded-2xl p-5 md:p-6 flex flex-col justify-between gap-4 shadow-md" style="background:#ffffff; border: 1px solid rgba(59,105,87,0.3); box-shadow: 0 8px 24px rgba(31,46,21,0.06);">
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between pb-2 border-b" style="border-color: rgba(59,105,87,0.2);">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[22px]" style="color:#3b6957;">shield</span>
+<h3 class="font-display font-bold text-lg" style="color:#1f2e15;">Cryptographic Proof</h3>
+</div>
+<span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded border" style="background:#e7f0ec; color:#3b6957; border-color: rgba(59,105,87,0.3);">IMMUTABLE</span>
+</div>
+<p class="font-sans text-xs leading-relaxed font-normal" style="color:#55634b;">
+      Every millisecond batch is SHA-256 chained in hardware enclave memory. Records cannot be rewritten or dropped.
+    </p>
+<div class="p-4 rounded-xl border flex flex-col gap-2.5 font-mono text-[11px]" style="background:#f8faf6; border-color: rgba(59,105,87,0.25);">
+<div class="flex justify-between items-center pb-1 border-b" style="border-color: rgba(59,105,87,0.15); color:#55634b;">
+<span class="font-bold" style="color:#3b6957;">LEDGER BLOCK: #1,849,204</span>
+<span class="font-bold" style="color:#15803d;">SEALED</span>
+</div>
+<div>
+<span class="text-[10px] block" style="color:#55634b;">PREV HASH:</span>
+<span class="truncate block font-semibold" style="color:#1f2e15;">0x8f3c49e28ba709320e1d...9a</span>
+</div>
+<div>
+<span class="text-[10px] block" style="color:#55634b;">MERKLE ROOT:</span>
+<span class="truncate block font-bold" style="color:#3b6957;">0x4ea94dfb19a3d9dc8c7e...c7</span>
+</div>
+<div>
+<span class="text-[10px] block" style="color:#55634b;">SIGNATURE:</span>
+<span class="truncate block" style="color:#5c7a6e;">ECDSA-P256 hardware token</span>
+</div>
+</div>
+</div>
+<div class="p-3 border rounded-xl flex items-center gap-3" style="background:#edf3ef; border-color: rgba(59,105,87,0.25);">
+<span class="material-symbols-outlined text-[24px]" style="color:#3b6957;">verified_user</span>
+<div class="flex flex-col">
+<span class="font-sans font-bold text-xs" style="color:#1f2e15;">Forensic Subpoena Export</span>
+<span class="font-sans text-[11px]" style="color:#55634b;">Tamper-evident signed archives for court discovery.</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CHAPTER 04 // ROI & SOC FATIGUE // TONAL CANVAS: #0a1f1b + VIBRANT LUMINOUS EMERALD HIGHLIGHTS -->
+<section class="w-full px-4 md:px-8 xl:px-14 py-20 relative bg-gradient-to-b from-[#0a1f1b] via-[#09221d] to-[#071b17] border-b border-[#00b37c]/30" id="roi-engine" style="background: linear-gradient(180deg, #e6f0eb 0%, #dfeae4 100%); border-bottom: 1px solid rgba(59, 105, 87, 0.25);">
+<!-- Vibrant Luminous Emerald Atmosphere Glow -->
+<div class="absolute top-10 left-1/3 w-[850px] h-[500px] bg-[#00b37c]/[0.18] rounded-full blur-[160px] pointer-events-none"></div>
+<div class="max-w-[1600px] mx-auto flex flex-col gap-12 relative z-10">
+<!-- Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="font-mono text-xs font-bold text-tertiary uppercase tracking-widest" style="color: #3b6957;">CHAPTER 04</span>
+<span class="text-outline font-mono">//</span>
+<span class="font-mono text-xs text-outline font-semibold tracking-wider">CAPITAL_EFFICIENCY</span>
+</div>
+<h2 class="font-display font-black text-3xl md:text-4xl text-on-surface uppercase tracking-tight" style="color: #1f2e15;">
+              ROI &amp; SOC Fatigue Estimator
+            </h2>
+</div>
+<p class="font-sans text-sm md:text-base text-on-surface-variant max-w-md leading-relaxed font-normal" style="color: #55634b;">
+            Calculate the dramatic cost and hours reduction achieved by filtering noise and normalizing schema prior to SIEM ingestion.
+          </p>
+</div>
+<!-- Interactive Calculator Card with Higher Contrast Canvas -->
+<div class="p-6 lg:p-10 rounded-2xl grid grid-cols-1 xl:grid-cols-12 gap-8 lg:gap-12 items-center shadow-lg" style="background:#ffffff; border: 1px solid rgba(59,105,87,0.3); box-shadow: 0 10px 30px rgba(31,46,21,0.06);">
+<div class="xl:col-span-6 flex flex-col gap-6">
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<label class="font-sans font-bold text-sm" for="slider-volume" style="color:#1f2e15;">
+          Daily Ingested Log Volume
+        </label>
+<span class="font-mono text-2xl font-extrabold" id="val-volume" style="color:#3b6957;">750 GB</span>
+</div>
+<input class="w-full h-2.5 rounded-lg appearance-none cursor-pointer" id="slider-volume" max="5000" min="100" step="50" style="accent-color:#3b6957; background:#e2ece6;" type="range" value="750">
+<div class="flex justify-between font-mono text-[10px]" style="color:#55634b;">
+<span class="">100 GB</span>
+<span class="">2,500 GB</span>
+<span class="">5,000 GB/day</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<label class="font-sans font-bold text-sm" for="slider-devices" style="color:#1f2e15;">
+          Active Firewalls &amp; Network Nodes
+        </label>
+<span class="font-mono text-2xl font-extrabold" id="val-devices" style="color:#718355;">120 Units</span>
+</div>
+<input class="w-full h-2.5 rounded-lg appearance-none cursor-pointer" id="slider-devices" max="1000" min="10" step="10" style="accent-color:#718355; background:#e7ede0;" type="range" value="120">
+<div class="flex justify-between font-mono text-[10px]" style="color:#55634b;">
+<span class="">10 Nodes</span>
+<span class="">500 Nodes</span>
+<span class="">1,000 Nodes</span>
+</div>
+</div>
+<div class="p-3 rounded-xl flex items-center gap-2 font-mono text-xs border" style="background:#f5f8f3; border-color: rgba(59,105,87,0.22); color:#55634b;">
+<span class="material-symbols-outlined text-[20px]" style="color:#3b6957;">calculate</span>
+<span class="">Model based on SIEM index pricing ($3.00/GB) + Tier 1 SOC alert triage pace.</span>
+</div>
+</div>
+<div class="xl:col-span-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="p-5 rounded-xl flex flex-col justify-between border" style="background:#f8faf6; border-color: rgba(59,105,87,0.25);">
+<span class="font-mono text-[10px] font-bold uppercase tracking-wider" style="color:#55634b;">Monthly SIEM Savings</span>
+<div class="py-1">
+<span class="font-mono text-3xl lg:text-4xl font-black" id="out-cost" style="color:#3b6957;">$14,850</span>
+<span class="font-sans font-bold text-sm" style="color:#3b6957;">/mo</span>
+</div>
+<span class="font-sans text-xs font-normal" style="color:#55634b;">Payload size compressed ~66%</span>
+</div>
+<div class="p-5 rounded-xl flex flex-col justify-between border" style="background:#f8faf6; border-color: rgba(113,131,85,0.25);">
+<span class="font-mono text-[10px] font-bold uppercase tracking-wider" style="color:#55634b;">Analyst Time Preserved</span>
+<div class="py-1">
+<span class="font-mono text-3xl lg:text-4xl font-black" id="out-hours" style="color:#718355;">142</span>
+<span class="font-sans font-bold text-sm" style="color:#718355;">hrs/wk</span>
+</div>
+<span class="font-sans text-xs font-normal" style="color:#55634b;">Freed from triaging noise</span>
+</div>
+<div class="p-5 rounded-xl flex flex-col justify-between border" style="background:#f8faf6; border-color: rgba(92,122,110,0.25);">
+<span class="font-mono text-[10px] font-bold uppercase tracking-wider" style="color:#55634b;">False Positives Filtered</span>
+<div class="py-1">
+<span class="font-mono text-3xl lg:text-4xl font-black" style="color:#5c7a6e;">78.4%</span>
+</div>
+<span class="font-sans text-xs font-normal" style="color:#55634b;">Rejected at kernel layer</span>
+</div>
+<div class="p-5 rounded-xl flex flex-col justify-between border" style="background:#f8faf6; border-color: rgba(113,131,85,0.25);">
+<span class="font-mono text-[10px] font-bold uppercase tracking-wider" style="color:#55634b;">Payback Timeline</span>
+<div class="py-1">
+<span class="font-mono text-3xl lg:text-4xl font-black" style="color:#1f2e15;">&lt; 14</span>
+<span class="font-sans font-bold text-sm" style="color:#1f2e15;">days</span>
+</div>
+<span class="font-sans text-xs font-normal" style="color:#55634b;">Instant drop-in deployment</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CHAPTER 05 // FORENSIC TRANSFORMATION DEMO // TONAL CANVAS: #0a0e17 DEEP FORENSIC DARK -->
+<section class="w-full px-4 md:px-8 xl:px-14 py-20 relative bg-[#0a0e17] border-b border-outline-variant/30" id="demo" style="background: #f8faf4; border-bottom: 1px solid rgba(113, 131, 85, 0.22);">
+<div class="max-w-[1600px] mx-auto flex flex-col gap-12 relative z-10">
+<!-- Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="font-mono text-xs font-bold text-primary uppercase tracking-widest" style="color: #718355;">CHAPTER 05</span>
+<span class="text-outline font-mono">//</span>
+<span class="font-mono text-xs text-outline font-semibold tracking-wider">INTERACTIVE_DISSECTION</span>
+</div>
+<h2 class="font-display font-black text-3xl md:text-4xl text-on-surface uppercase tracking-tight" style="color: #1f2e15;">
+              Forensic Dissection: Raw In → Explained Alert Out
+            </h2>
+</div>
+<p class="font-sans text-sm md:text-base text-on-surface-variant max-w-md leading-relaxed font-normal" style="color: #55634b;">
+            Observe how a noisy, malformed firewall string undergoes lexical parsing, Merkle proof creation, and AI explanation.
+          </p>
+</div>
+<!-- 3-Column Dissection Workspace -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6"><div class="xl:col-span-4 rounded-2xl border p-5 flex flex-col justify-between gap-4 shadow-sm" style="background:#ffffff; border-color: rgba(220,38,38,0.35);">
+<div class="flex items-center justify-between pb-3 border-b" style="border-color: rgba(113,131,85,0.18);">
+<div class="flex items-center gap-2 font-mono text-xs font-bold" style="color:#1f2e15;">
+<span class="w-2 h-2 rounded-full" style="background:#dc2626;"></span>
+<span class="">01. RAW UNSTRUCTURED INGEST</span>
+</div>
+<span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded border" style="background:#fef2f2; color:#dc2626; border-color: rgba(220,38,38,0.3);">DIRTY LOG</span>
+</div>
+<div class="p-4 rounded-xl font-mono text-xs leading-relaxed h-52 flex flex-col justify-center border" style="background:#f9fbf8; border-color: rgba(113,131,85,0.2); color:#55634b;">
+<p class=""><span class="font-bold" style="color:#dc2626;">%ASA-4-106023: Deny udp src</span> outside:185.220.101.5/54312 dst inside:10.0.4.12/445 by access-group "OUTSIDE_IN" [0x7f4c9a81, 0x0]</p>
+<p class="text-[11px] pt-3" style="color:#55634b;"># Non-standard timestamp, unnormalized port string, unverified origin signature.</p>
+</div>
+<div class="font-mono text-[11px] flex items-center justify-between pt-1" style="color:#55634b;">
+<span class="">SOCKET: UDP/514</span>
+<span class="">ORIGIN: ASA-5525-X</span>
+</div>
+</div>
+<div class="xl:col-span-4 rounded-2xl border p-5 flex flex-col justify-between gap-4 shadow-sm" style="background:#ffffff; border-color: rgba(92,122,110,0.35);">
+<div class="flex items-center justify-between pb-3 border-b" style="border-color: rgba(113,131,85,0.18);">
+<div class="flex items-center gap-2 font-mono text-xs font-bold" style="color:#1f2e15;">
+<span class="w-2 h-2 rounded-full" style="background:#5c7a6e;"></span>
+<span class="">02. ULPF TRANSFORM PIPELINE</span>
+</div>
+<span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded border" style="background:#eef4f2; color:#5c7a6e; border-color: rgba(92,122,110,0.3);">CANONICAL</span>
+</div>
+<div class="p-4 rounded-xl font-mono text-xs leading-relaxed h-52 flex flex-col justify-center gap-1.5 border" style="background:#f9fbf8; border-color: rgba(113,131,85,0.2); color:#5c7a6e;">
+<span class="font-bold" style="color:#1f2e15;">[EXTRACTED_VECTORS]</span>
+<span class="">src_ip: 185.220.101.5 (Tor Exit)</span>
+<span class="">dst_ip: 10.0.4.12 (SMB Server)</span>
+<span class="">protocol: 17 (UDP) / port: 445</span>
+<span class="truncate font-semibold" style="color:#718355;">sha256: 4f8b22a07c801e9a...</span>
+<span class="truncate font-semibold" style="color:#3b6957;">merkle_leaf: 0x82f489ad...</span>
+</div>
+<div class="font-mono text-[11px] flex items-center justify-between pt-1" style="color:#55634b;">
+<span class="">TRANSFORM: 0.0009s</span>
+<span class="">SCHEMA: OCSF 1.1.0</span>
+</div>
+</div>
+<div class="xl:col-span-4 rounded-2xl border p-5 flex flex-col justify-between gap-4 shadow-sm" style="background:#ffffff; border-color: rgba(59,105,87,0.35);">
+<div class="flex items-center justify-between pb-3 border-b" style="border-color: rgba(113,131,85,0.18);">
+<div class="flex items-center gap-2 font-mono text-xs font-bold" style="color:#1f2e15;">
+<span class="w-2 h-2 rounded-full" style="background:#3b6957;"></span>
+<span class="">03. EXPLAINABLE THREAT VERDICT</span>
+</div>
+<span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded border" style="background:#fef2f2; color:#991b1b; border-color: rgba(153,27,27,0.3);">SEV 9.4 CRITICAL</span>
+</div>
+<div class="p-4 rounded-xl flex flex-col gap-2 h-52 justify-center border" style="background:#f9fbf8; border-color: rgba(113,131,85,0.2);">
+<div class="flex items-center gap-2 font-display font-bold text-sm" style="color:#dc2626;">
+<span class="material-symbols-outlined text-[20px]">gpp_maybe</span>
+<span class="">T1021.002: Lateral SMB Probe</span>
+</div>
+<p class="font-sans text-xs leading-relaxed font-normal" style="color:#55634b;">
+<strong class="font-semibold" style="color:#1f2e15;">XAI Reasoning:</strong> Anomaly score 0.94 triggered due to unauthorized SMB syn-probe originating from verified Tor exit node targeting an internal server.
+    </p>
+<div class="p-2 rounded font-mono text-[10px] flex items-center justify-between" style="background:#edf4ef; color:#15803d;">
+<span class="">ACTION: BLOCK RULE SENT</span>
+<span class="">✓ TAMPER PROVED</span>
+</div>
+</div>
+<div class="font-mono text-[11px] flex items-center justify-between pt-1" style="color:#55634b;">
+<span class="">DISPATCH: SIEM + SLACK</span>
+<span class="">SOAR ID: #84920</span>
+</div>
+</div></div>
+</div>
+</section>
+<!-- FOOTER SECTION -->
+<footer class="w-full px-4 md:px-8 xl:px-14 py-12" style="background: rgb(240, 243, 235); border-top: 1px solid rgba(113, 131, 85, 0.22);"><div class="max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6"><div class="flex flex-col md:flex-row items-center gap-4 text-center md:text-left"><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-lg bg-[#718355]/15 border border-[#718355]/30 flex items-center justify-center text-[#718355]"><span class="material-symbols-outlined text-[19px]">shield_with_heart</span></div><span class="font-display font-black text-lg text-on-surface tracking-tight uppercase" style="color: #1f2e15;">LOG AI</span></div><span class="hidden md:inline font-mono text-xs" style="color: rgba(113, 131, 85, 0.4);">|</span><p class="font-sans text-xs font-normal leading-relaxed" style="color: #637055;">© 2025 LOG AI Inc. All rights reserved. Enterprise-grade cryptographic log pre-processing.</p></div><nav class="flex flex-wrap items-center justify-center gap-6 font-mono text-xs"><a class="transition-colors hover:text-[#1f2e15]" href="#" style="color: #637055;">Privacy</a><a class="transition-colors hover:text-[#1f2e15]" href="#" style="color: #637055;">Security</a><a class="transition-colors hover:text-[#1f2e15]" href="#" style="color: #637055;">Compliance</a><a class="transition-colors hover:text-[#1f2e15]" href="#" style="color: #637055;">Terms</a><a class="transition-colors hover:text-[#1f2e15]" href="#" style="color: #637055;">Contact</a></nav></div></footer>
+</main>
+<!-- FIXED BOTTOM SOC STATUS TICKER STRIP -->
+<footer class="fixed bottom-0 left-0 right-0 z-50 h-10 bg-[#070a10]/95 backdrop-blur-md border-t border-outline-variant/30" style="background: rgba(250, 250, 245, 0.95); border-top: 1px solid rgba(113, 131, 85, 0.25); color: #1f2e15;">
+<div class="h-full w-full max-w-[1600px] mx-auto px-4 md:px-8 flex items-center justify-between font-mono text-[11px] text-on-surface-variant overflow-x-auto gap-4"><div class="flex items-center gap-6 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full animate-pulse" style="background:#15803d;"></span>
+<span style="color:#55634b;" class="">INGEST:</span>
+<span class="font-bold" style="color:#1f2e15;">142.8 GB/hr</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full" style="background:#5c7a6e;"></span>
+<span style="color:#55634b;" class="">TAMPER-PROOF LEDGER:</span>
+<span class="font-bold" style="color:#5c7a6e;">SHA-256 VERIFIED</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full" style="background:#718355;"></span>
+<span style="color:#55634b;" class="">ML ANOMALY THRESHOLD:</span>
+<span class="font-bold" style="color:#718355;">99.82%</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full" style="background:#3b6957;"></span>
+<span style="color:#55634b;" class="">SOC LATENCY:</span>
+<span class="font-bold" style="color:#3b6957;">4.2ms</span>
+</div>
+</div>
+<div class="flex items-center gap-2 whitespace-nowrap">
+<span class="font-mono text-[10px] font-bold" style="color:#55634b;">STATUS: STEADY</span>
+<span style="color:#55634b;" class="">//</span>
+<span class="font-mono text-[10px] font-bold" style="color:#718355;">OCSF_v1.1.0_ALIGNED</span>
+</div></div>
+</footer>
+<!-- CLIENT-SIDE INTERACTIVITY SCRIPT -->
+<script>
+    (function () {
+      // Dynamic EPS Stream Counter Generator
+      const epsElem = document.getElementById('live-eps');
+      if (epsElem) {
+        setInterval(() => {
+          const delta = Math.floor(Math.random() * 800) - 400;
+          const currentVal = 48210 + delta;
+          epsElem.textContent = currentVal.toLocaleString();
+        }, 1800);
+      }
+
+      // ROI Dynamic Estimator Logic
+      const volumeSlider = document.getElementById('slider-volume');
+      const devicesSlider = document.getElementById('slider-devices');
+      const valVolume = document.getElementById('val-volume');
+      const valDevices = document.getElementById('val-devices');
+      const outCost = document.getElementById('out-cost');
+      const outHours = document.getElementById('out-hours');
+
+      function recalculateROI() {
+        if (!volumeSlider || !devicesSlider) return;
+        const vol = parseInt(volumeSlider.value, 10);
+        const dev = parseInt(devicesSlider.value, 10);
+
+        valVolume.textContent = vol.toLocaleString() + ' GB';
+        valDevices.textContent = dev.toLocaleString() + ' Units';
+
+        // Est SIEM savings: 66% unindexed noise @ $3.00/GB monthly index rate
+        const rawMonthlyGB = vol * 30;
+        const filteredGB = rawMonthlyGB * 0.66;
+        const savingsDollar = Math.round((filteredGB * 0.10) + (dev * 45));
+        outCost.textContent = '$' + savingsDollar.toLocaleString();
+
+        // Est hours saved based on volume and devices
+        const hoursSaved = Math.round((vol * 0.14) + (dev * 0.35));
+        outHours.textContent = hoursSaved.toLocaleString();
+      }
+
+      if (volumeSlider && devicesSlider) {
+        volumeSlider.addEventListener('input', recalculateROI);
+        devicesSlider.addEventListener('input', recalculateROI);
+      }
+    })();
+  </script>
+
+
+</body></html>
