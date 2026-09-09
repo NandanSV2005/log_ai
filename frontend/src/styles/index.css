@@ -401,20 +401,8 @@ input[type="range"]:focus::-moz-range-thumb {
     opacity: 0.8;
   }
 }
-
-.animate-node-ping {
+.animate-node-ping {
   animation: node-ping 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Reduced Motion Support */
-@media (prefers-reduced-motion: reduce) {
-  .animate-radar-sweep,
-  .animate-node-ping,
-  .animate-marquee-smooth,
-  .animate-pulse {
-    animation: none !important;
-    transition: none !important;
-  }
 }
 
 /* Gauge Circle Animations */
@@ -426,3 +414,28 @@ input[type="range"]:focus::-moz-range-thumb {
   stroke: var(--color-primary);
   transition: stroke-dashoffset 0.5s ease-in-out;
 }
+
+/* Data Flow Animation Keyframes */
+@keyframes flow-dash {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+.animate-flow-dash {
+  stroke-dasharray: 6 6;
+  animation: flow-dash 1.2s linear infinite;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .animate-radar-sweep,
+  .animate-node-ping,
+  .animate-marquee-smooth,
+  .animate-pulse,
+  .animate-flow-dash {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
