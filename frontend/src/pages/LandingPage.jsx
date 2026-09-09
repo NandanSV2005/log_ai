@@ -386,36 +386,47 @@ export function LandingPage() {
   const [selectedPresetId, setSelectedPresetId] = useState('cisco-asa');
   const [demoLoading, setDemoLoading] = useState(false);
   const [demoError, setDemoError] = useState(null);
-  const [demoResult, setDemoResult] = useState({
-    raw_line: DEMO_PRESETS[0].log_line,
-    extracted_fields: {
-      source_ip: '185.220.101.5',
-      destination_ip: '10.0.4.12',
-      event_type: 'cisco_asa:deny:outside_acl',
-      severity: 'Error',
-      sha256: 'c29d18b4fa8001a4e9b9...',
-      full_sha256: 'c29d18b4fa8001a4e9b98a3e7',
-      merkle_leaf: '0x82f489ad7f'
-    },
-    classification_metadata: {
-      schema_version: 'OCSF 1.1.0',
-      transform_time: '<2ms',
-      parsed_class: 'NETWORK_ACTIVITY'
-    },
-    verdict: {
-      threat_level: 'CRITICAL',
-      threat_score: 9.4,
-      mitre_technique: 'T1021.002: Lateral SMB Probe',
-      xai_reasoning: 'Critical threat (Score: 9.4) detected from source IP 185.220.101.5 targeting 10.0.4.12 via [cisco_asa:deny:outside_acl]. Rule Triggers: rapid repeated deny.',
-      action: 'BLOCKED'
+  const [demoResult, setDemoResult] = useState(null); // Defaults to null (Awaiting state!)
+  const [revealStep, setRevealStep] = useState(0);
+
+  // Trigger staggered reveal sequence whenever demoResult changes to a non-null object
+  useEffect(() => {
+    if (!demoResult) {
+      setRevealStep(0);
+      return;
     }
-  });
+
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (mediaQuery.matches) {
+      setRevealStep(10); // Skip reveal animation if reduced motion is requested
+      return;
+    }
+
+    setRevealStep(0);
+    let step = 0;
+    const interval = setInterval(() => {
+      step += 1;
+      setRevealStep(step);
+      if (step >= 6) {
+        clearInterval(interval);
+      }
+    }, 90);
+
+    return () => clearInterval(interval);
+  }, [demoResult]);
 
   const handlePresetClick = (preset) => {
     setSelectedPresetId(preset.id);
     setDemoInput(preset.log_line);
+    setDemoResult(null); // Reset Columns 2 & 3 back to Awaiting Analysis state!
     setDemoError(null);
-    runDemoAnalysis(preset.log_line);
+  };
+
+  const handleTextareaChange = (e) => {
+    setDemoInput(e.target.value);
+    setSelectedPresetId(null);
+    setDemoResult(null); // Reset Columns 2 & 3 back to Awaiting Analysis state on edit!
+    setDemoError(null);
   };
 
   const handleDemoSubmit = (e) => {
@@ -428,10 +439,21 @@ export function LandingPage() {
   };
 
   const runDemoAnalysis = async (logLine) => {
+    setDemoResult(null); // Reset prior result immediately
     setDemoLoading(true);
     setDemoError(null);
+    const startTime = Date.now();
+
     try {
       const res = await api.analyzeDemo(logLine);
+
+      // Enforce minimum loading duration of 600ms so user registers processing happening
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, 600 - elapsed);
+      if (remaining > 0) {
+        await new Promise(r => setTimeout(r, remaining));
+      }
+
       if (res && res.status === 'success') {
         setDemoResult(res);
       } else {
@@ -1355,10 +1377,7 @@ export function LandingPage() {
                 <div className="flex flex-col gap-2">
                   <textarea
                     value={demoInput}
-                    onChange={(e) => {
-                      setDemoInput(e.target.value);
-                      setSelectedPresetId(null);
-                    }}
+                    onChange={handleTextareaChange}
                     rows={4}
                     placeholder="Paste a raw firewall string, syslog line, or JSON alert..."
                     className="w-full bg-surface-dim p-3 rounded-xl font-mono text-xs text-text-primary border border-border-muted focus:border-primary focus:outline-none resize-none leading-relaxed shadow-inner"
@@ -1400,36 +1419,57 @@ export function LandingPage() {
 
                 {demoLoading ? (
                   <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-secondary h-52 flex flex-col justify-center gap-3 border border-border-muted animate-pulse">
-                    <div className="h-4 bg-secondary/20 rounded w-2/3"></div>
+                    <div className="flex items-center gap-2 text-text-muted text-[11px]">
+                      <span className="w-2 h-2 rounded-full bg-secondary animate-ping"></span>
+                      <span>PARSING &amp; MAPPING FIELDS...</span>
+                    </div>
+                    <div className="h-3.5 bg-secondary/20 rounded w-2/3"></div>
                     <div className="h-3 bg-secondary/15 rounded w-5/6"></div>
                     <div className="h-3 bg-secondary/15 rounded w-4/5"></div>
-                    <div className="h-3 bg-secondary/15 rounded w-3/4"></div>
-                    <div className="h-3 bg-secondary/15 rounded w-1/2"></div>
+                    <div className="h-3 bg-secondary/10 rounded w-2/3"></div>
                   </div>
                 ) : demoError ? (
                   <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-[var(--color-severity-critical)] h-52 flex flex-col justify-center items-center text-center gap-2 border border-[var(--color-severity-critical-border)]">
                     <span className="material-symbols-outlined text-2xl">error_outline</span>
                     <p>{demoError}</p>
-                    <span className="text-text-dim text-[10px]">Try selecting one of the preset sample buttons.</span>
+                    <span className="text-text-dim text-[10px]">Select one of the sample presets or check your input syntax.</span>
+                  </div>
+                ) : !demoResult ? (
+                  <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-text-dim h-52 flex flex-col justify-center items-center text-center gap-2 border border-dashed border-border-muted">
+                    <span className="material-symbols-outlined text-3xl opacity-35">hourglass_empty</span>
+                    <p className="font-sans text-xs text-text-muted font-medium">Awaiting Analysis</p>
+                    <span className="text-[10px] text-text-dim">Click "ANALYZE LOG STREAM" to run extraction.</span>
                   </div>
                 ) : (
                   <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-secondary leading-relaxed h-52 flex flex-col justify-center gap-1.5 border border-border-muted overflow-y-auto">
-                    <span className="text-text-primary font-bold">[EXTRACTED_VECTORS]</span>
-                    <span>src_ip: {demoResult?.extracted_fields?.source_ip}</span>
-                    <span>dst_ip: {demoResult?.extracted_fields?.destination_ip}</span>
-                    <span>event_type: {demoResult?.extracted_fields?.event_type}</span>
-                    <span className="text-primary truncate" title={demoResult?.extracted_fields?.full_sha256}>
-                      sha256: {demoResult?.extracted_fields?.sha256}
-                    </span>
-                    <span className="text-tertiary truncate">
-                      merkle_leaf: {demoResult?.extracted_fields?.merkle_leaf}
-                    </span>
+                    {revealStep >= 1 && (
+                      <span className="text-text-primary font-bold animate-in fade-in duration-150">[EXTRACTED_VECTORS]</span>
+                    )}
+                    {revealStep >= 2 && (
+                      <>
+                        <span className="animate-in fade-in slide-in-from-bottom-1 duration-150">src_ip: {demoResult?.extracted_fields?.source_ip}</span>
+                        <span className="animate-in fade-in slide-in-from-bottom-1 duration-150">dst_ip: {demoResult?.extracted_fields?.destination_ip}</span>
+                      </>
+                    )}
+                    {revealStep >= 3 && (
+                      <span className="animate-in fade-in slide-in-from-bottom-1 duration-150">event_type: {demoResult?.extracted_fields?.event_type}</span>
+                    )}
+                    {revealStep >= 4 && (
+                      <>
+                        <span className="text-primary truncate animate-in fade-in slide-in-from-bottom-1 duration-150" title={demoResult?.extracted_fields?.full_sha256}>
+                          sha256: {demoResult?.extracted_fields?.sha256}
+                        </span>
+                        <span className="text-tertiary truncate animate-in fade-in slide-in-from-bottom-1 duration-150">
+                          merkle_leaf: {demoResult?.extracted_fields?.merkle_leaf}
+                        </span>
+                      </>
+                    )}
                   </div>
                 )}
 
                 <div className="font-mono text-[11px] text-text-dim flex items-center justify-between pt-1">
-                  <span>TRANSFORM: {demoResult?.classification_metadata?.transform_time || '<10ms'}</span>
-                  <span>CLASS: {demoResult?.classification_metadata?.parsed_class || 'NETWORK'}</span>
+                  <span>TRANSFORM: {revealStep >= 6 && demoResult ? demoResult?.classification_metadata?.transform_time : 'AWAITING...'}</span>
+                  <span>CLASS: {revealStep >= 6 && demoResult ? demoResult?.classification_metadata?.parsed_class : 'PENDING'}</span>
                 </div>
               </div>
 
@@ -1440,48 +1480,69 @@ export function LandingPage() {
                     <span className="w-2 h-2 rounded-full bg-tertiary"></span>
                     <span>03. EXPLAINABLE THREAT VERDICT</span>
                   </div>
-                  <span className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded border ${
-                    demoResult?.verdict?.threat_level === 'CRITICAL' ? 'text-[var(--color-severity-critical)] bg-[var(--color-severity-critical-bg)] border-[var(--color-severity-critical-border)]' :
-                    demoResult?.verdict?.threat_level === 'HIGH' ? 'text-rose-400 bg-rose-500/10 border-rose-500/30' :
-                    demoResult?.verdict?.threat_level === 'MEDIUM' ? 'text-amber-400 bg-amber-500/10 border-amber-500/30' :
-                    'text-tertiary bg-tertiary/10 border-tertiary/20'
-                  }`}>
-                    SEV {demoResult?.verdict?.threat_score} {demoResult?.verdict?.threat_level}
-                  </span>
+                  {demoResult && revealStep >= 1 ? (
+                    <span className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded border animate-in fade-in duration-200 ${
+                      demoResult?.verdict?.threat_level === 'CRITICAL' ? 'text-[var(--color-severity-critical)] bg-[var(--color-severity-critical-bg)] border-[var(--color-severity-critical-border)]' :
+                      demoResult?.verdict?.threat_level === 'HIGH' ? 'text-rose-400 bg-rose-500/10 border-rose-500/30' :
+                      demoResult?.verdict?.threat_level === 'MEDIUM' ? 'text-amber-400 bg-amber-500/10 border-amber-500/30' :
+                      'text-tertiary bg-tertiary/10 border-tertiary/20'
+                    }`}>
+                      SEV {demoResult?.verdict?.threat_score} {demoResult?.verdict?.threat_level}
+                    </span>
+                  ) : (
+                    <span className="font-mono text-[10px] text-text-dim px-2 py-0.5 rounded bg-surface border border-border-muted">
+                      SEV UNKNOWN
+                    </span>
+                  )}
                 </div>
 
                 {demoLoading ? (
                   <div className="bg-surface-dim p-4 rounded-xl h-52 flex flex-col justify-center gap-3 border border-border-muted animate-pulse">
-                    <div className="h-4 bg-tertiary/20 rounded w-3/4"></div>
+                    <div className="flex items-center gap-2 text-text-muted font-mono text-[11px]">
+                      <span className="w-2 h-2 rounded-full bg-tertiary animate-ping"></span>
+                      <span>EVALUATING ANOMALY SCORE...</span>
+                    </div>
+                    <div className="h-4 bg-tertiary/20 rounded w-2/3"></div>
                     <div className="h-3 bg-tertiary/15 rounded w-full"></div>
-                    <div className="h-3 bg-tertiary/15 rounded w-5/6"></div>
-                    <div className="h-6 bg-tertiary/10 rounded w-1/2"></div>
+                    <div className="h-3 bg-tertiary/15 rounded w-4/5"></div>
                   </div>
                 ) : demoError ? (
                   <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-text-dim h-52 flex items-center justify-center border border-border-muted">
                     <span>Analysis unavailable</span>
                   </div>
+                ) : !demoResult ? (
+                  <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-text-dim h-52 flex flex-col justify-center items-center text-center gap-2 border border-dashed border-border-muted">
+                    <span className="material-symbols-outlined text-3xl opacity-35">gpp_maybe</span>
+                    <p className="font-sans text-xs text-text-muted font-medium">Awaiting Verdict</p>
+                    <span className="text-[10px] text-text-dim">Click "ANALYZE LOG STREAM" to evaluate threat score.</span>
+                  </div>
                 ) : (
                   <div className="bg-surface-dim p-4 rounded-xl flex flex-col gap-2 h-52 justify-between border border-border-muted overflow-y-auto">
                     <div>
-                      <div className="flex items-center gap-2 text-primary font-display font-bold text-sm mb-1">
-                        <span className="material-symbols-outlined text-[18px]">gpp_maybe</span>
-                        <span>{demoResult?.verdict?.mitre_technique}</span>
+                      {revealStep >= 2 && (
+                        <div className="flex items-center gap-2 text-primary font-display font-bold text-sm mb-1 animate-in fade-in slide-in-from-bottom-1 duration-150">
+                          <span className="material-symbols-outlined text-[18px]">gpp_maybe</span>
+                          <span>{demoResult?.verdict?.mitre_technique}</span>
+                        </div>
+                      )}
+                      {revealStep >= 3 && (
+                        <p className="font-sans text-xs text-text-muted leading-relaxed font-normal animate-in fade-in slide-in-from-bottom-1 duration-200">
+                          <strong className="text-text-primary font-semibold">XAI Reasoning:</strong> {demoResult?.verdict?.xai_reasoning}
+                        </p>
+                      )}
+                    </div>
+                    {revealStep >= 5 && (
+                      <div className="p-2 bg-surface rounded font-mono text-[10px] text-tertiary flex items-center justify-between animate-in fade-in duration-200">
+                        <span>ACTION: {demoResult?.verdict?.action}</span>
+                        <span>✓ HASH VERIFIED</span>
                       </div>
-                      <p className="font-sans text-xs text-text-muted leading-relaxed font-normal">
-                        <strong className="text-text-primary font-semibold">XAI Reasoning:</strong> {demoResult?.verdict?.xai_reasoning}
-                      </p>
-                    </div>
-                    <div className="p-2 bg-surface rounded font-mono text-[10px] text-tertiary flex items-center justify-between">
-                      <span>ACTION: {demoResult?.verdict?.action}</span>
-                      <span>✓ HASH VERIFIED</span>
-                    </div>
+                    )}
                   </div>
                 )}
 
                 <div className="font-mono text-[11px] text-text-dim flex items-center justify-between pt-1">
-                  <span>MODE: STATELESS DEMO</span>
-                  <span>VERIFIED DIGEST</span>
+                  <span>MODE: {revealStep >= 6 && demoResult ? 'STATELESS DEMO' : 'AWAITING INPUT'}</span>
+                  <span>{revealStep >= 6 && demoResult ? 'VERIFIED DIGEST' : 'DISPATCH PENDING'}</span>
                 </div>
               </div>
 
