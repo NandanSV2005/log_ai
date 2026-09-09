@@ -63,16 +63,9 @@ export function DashboardPage({ pollingInterval }) {
     return () => clearInterval(timer);
   }, [pollingInterval]);
 
-  const handleIncidentClick = async (incident) => {
-    setSelectedIncident(incident);
-    try {
-      const detail = await api.getIncidentDetail(incident.incident_id);
-      if (detail?.events) {
-        setIncidentDetailEvents(detail.events);
-      }
-    } catch (err) {
-      console.error('Error loading incident details:', err);
-    }
+  const handleIncidentClick = (incident) => {
+    const incId = incident.incident_id || incident.id || 'inc_a81b5b';
+    navigate(`/forensics/investigation/${encodeURIComponent(incId)}`, { state: { incident } });
   };
 
   const handleIncidentStatusChange = async (incidentId, newStatus) => {
@@ -401,100 +394,6 @@ export function DashboardPage({ pollingInterval }) {
               )}
             </div>
           </div>
-
-          {/* EXPANDABLE INCIDENT RELATIONSHIP DRAWER / MODAL */}
-          {selectedIncident && (
-            <div
-              className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
-              onClick={(e) => {
-                if (e.target === e.currentTarget) setSelectedIncident(null);
-              }}
-            >
-              <div className="glass-panel w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border-muted p-4 sm:p-6 space-y-4 sm:space-y-6 shadow-2xl animate-in zoom-in-95 duration-200">
-                <div className="flex justify-between items-start border-b border-border-muted pb-3 gap-2">
-                  <div>
-                    <span className="font-mono text-xs text-rose-400 font-bold break-all">
-                      INCIDENT GRAPH #{(selectedIncident.incident_id || '').substring(0, 8)}
-                    </span>
-                    <h3 className="text-base sm:text-lg font-bold text-text-primary mt-0.5 break-all">
-                      Offending Source: {selectedIncident.source_ip || 'N/A'}
-                    </h3>
-                  </div>
-                  <button
-                    onClick={() => setSelectedIncident(null)}
-                    className="p-2 rounded-lg border border-border-muted hover:border-primary text-text-muted touch-target"
-                    aria-label="Close Incident Details"
-                  >
-                    <span className="material-symbols-outlined text-lg">close</span>
-                  </button>
-                </div>
-
-                <div className="space-y-4 font-mono text-xs">
-                  <div className="p-3 sm:p-4 rounded-xl bg-surface-dim border border-border-muted space-y-2">
-                    <div className="text-[10px] text-text-dim uppercase">Relationship Node Breakdown:</div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-center pt-1">
-                      <div className="p-2 rounded bg-surface border border-border-muted">
-                        <div className="text-[9px] text-text-dim">Source IP</div>
-                        <div className="font-bold text-text-primary text-xs mt-0.5 break-all">{selectedIncident.source_ip || '192.168.1.1'}</div>
-                      </div>
-                      <div className="p-2 rounded bg-surface border border-border-muted">
-                        <div className="text-[9px] text-text-dim">Events Count</div>
-                        <div className="font-bold text-text-primary text-xs mt-0.5">{selectedIncident.event_count || 1}</div>
-                      </div>
-                      <div className="p-2 rounded bg-surface border border-border-muted">
-                        <div className="text-[9px] text-text-dim">Threat Score</div>
-                        <div className="font-bold text-rose-400 text-xs mt-0.5">{(selectedIncident.threat_score || 85).toFixed(1)}</div>
-                      </div>
-                      <div className="p-2 rounded bg-surface border border-border-muted">
-                        <div className="text-[9px] text-text-dim">Status</div>
-                        <div className="font-bold text-emerald-400 text-xs mt-0.5">{selectedIncident.status || 'Active'}</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="text-text-muted text-xs font-bold">Correlated Events Stream:</div>
-                    <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar-touch">
-                      {incidentDetailEvents.length > 0 ? (
-                        incidentDetailEvents.map((evt, idx) => (
-                          <div key={idx} className="p-2.5 rounded bg-surface-dim border border-border-muted flex flex-col sm:flex-row justify-between sm:items-center gap-1 text-[11px]">
-                            <span className="text-text-primary font-bold">{evt.event_type || 'cisco_asa'}</span>
-                            <span className="text-text-muted break-all">{evt.source_ip} &rarr; {evt.destination_ip || '10.0.0.1'}</span>
-                            <span className="text-rose-400 font-bold self-start sm:self-auto">{evt.threat_level || 'HIGH'}</span>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="p-3 text-center text-text-dim text-[11px]">Loading correlated event records...</div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 pt-3 border-t border-border-muted">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleIncidentStatusChange(selectedIncident.incident_id, 'Resolved')}
-                      className="btn-primary px-4 py-2.5 rounded-xl text-xs font-bold flex-1 sm:flex-none touch-target"
-                    >
-                      Mark Resolved
-                    </button>
-                    <button
-                      onClick={() => handleIncidentStatusChange(selectedIncident.incident_id, 'Active')}
-                      className="btn-secondary px-4 py-2.5 rounded-xl text-xs font-bold flex-1 sm:flex-none touch-target"
-                    >
-                      Mark Active
-                    </button>
-                  </div>
-                  <button
-                    onClick={() => setSelectedIncident(null)}
-                    className="btn-secondary px-4 py-2.5 rounded-xl text-xs font-bold touch-target"
-                  >
-                    Close Drawer
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* SECTION D: RECENT TELEMETRY TABLE */}
           <div className="glass-panel rounded-2xl border border-border-muted shadow-xl overflow-hidden space-y-4">
