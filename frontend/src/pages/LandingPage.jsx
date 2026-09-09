@@ -142,7 +142,7 @@ function InteractiveCard({ card, activeCardId, setActiveCardId }) {
   const colorStyles = {
     primary: {
       border: 'border-primary/30 hover:border-primary',
-      activeBorder: 'border-primary shadow-[0_0_18px_rgba(167,139,250,0.2)]',
+      activeBorder: 'border-primary shadow-[0_0_18px_var(--color-border-glow)]',
       badgeBg: 'bg-primary/10 border-primary/30 text-primary',
       iconBg: 'bg-primary/15 text-primary',
       footerText: 'text-primary',
@@ -150,7 +150,7 @@ function InteractiveCard({ card, activeCardId, setActiveCardId }) {
     },
     secondary: {
       border: 'border-secondary/30 hover:border-secondary',
-      activeBorder: 'border-secondary shadow-[0_0_18px_rgba(123,208,255,0.2)]',
+      activeBorder: 'border-secondary shadow-[0_0_18px_var(--color-border-glow)]',
       badgeBg: 'bg-secondary/10 border-secondary/30 text-secondary',
       iconBg: 'bg-secondary/15 text-secondary',
       footerText: 'text-secondary',
@@ -158,7 +158,7 @@ function InteractiveCard({ card, activeCardId, setActiveCardId }) {
     },
     tertiary: {
       border: 'border-tertiary/30 hover:border-tertiary',
-      activeBorder: 'border-tertiary shadow-[0_0_18px_rgba(78,222,163,0.2)]',
+      activeBorder: 'border-tertiary shadow-[0_0_18px_var(--color-border-glow)]',
       badgeBg: 'bg-tertiary/10 border-tertiary/30 text-tertiary',
       iconBg: 'bg-tertiary/15 text-tertiary',
       footerText: 'text-tertiary',
@@ -296,7 +296,7 @@ function ZigZagSourceStream({ cards }) {
             <div
               className={`w-full md:w-[46%] p-5 rounded-2xl bg-surface/90 border transition-all duration-500 shadow-xl backdrop-blur-md group ${
                 isVisited
-                  ? 'border-secondary shadow-[0_0_20px_rgba(123,208,255,0.2)]'
+                  ? 'border-secondary shadow-[0_0_20px_var(--color-border-glow)]'
                   : 'border-border-muted hover:border-secondary/50'
               }`}
             >
@@ -341,7 +341,7 @@ function ZigZagSourceStream({ cards }) {
 
       {/* Converging Single Schema Closing Node */}
       <div className="w-full flex justify-center mt-3 relative z-10">
-        <div className="p-3.5 md:p-4 rounded-2xl bg-surface-bright border-2 border-secondary shadow-[0_0_24px_rgba(123,208,255,0.3)] flex items-center gap-3 font-mono text-xs text-secondary font-bold">
+        <div className="p-3.5 md:p-4 rounded-2xl bg-surface-bright border-2 border-secondary shadow-[0_0_24px_var(--color-border-glow)] flex items-center gap-3 font-mono text-xs text-secondary font-bold">
           <span className="material-symbols-outlined text-[22px] animate-pulse">schema</span>
           <span>&rarr; ONE UNIFIED OCSF SCHEMA CONDUIT</span>
           <span className="w-2 h-2 rounded-full bg-tertiary animate-ping ml-1"></span>
@@ -663,7 +663,7 @@ export function LandingPage() {
 
             <Link
               to="/dashboard"
-              className="px-4 py-2 rounded-lg bg-primary text-surface-dim font-sans font-bold text-sm shadow-[0_0_18px_rgba(167,139,250,0.45)] hover:bg-primary-fixed transition-all whitespace-nowrap"
+              className="px-4 py-2 rounded-lg bg-primary text-surface-dim font-sans font-bold text-sm shadow-[0_0_18px_var(--color-border-glow)] hover:bg-primary-fixed transition-all whitespace-nowrap"
             >
               Open SOC Console
             </Link>
@@ -780,7 +780,7 @@ export function LandingPage() {
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 <button
                   onClick={() => scrollToSection('pipeline')}
-                  className="px-6 py-3 rounded-xl bg-primary text-surface-dim font-sans font-bold text-sm shadow-[0_0_24px_rgba(167,139,250,0.45)] hover:bg-primary-fixed transition-all flex items-center gap-2"
+                  className="px-6 py-3 rounded-xl bg-primary text-surface-dim font-sans font-bold text-sm shadow-[0_0_24px_var(--color-border-glow)] hover:bg-primary-fixed transition-all flex items-center gap-2"
                 >
                   <span className="material-symbols-outlined text-[19px]">account_tree</span>
                   <span>Explore ULPF Pipeline</span>

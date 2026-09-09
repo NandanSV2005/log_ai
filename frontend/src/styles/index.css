@@ -90,66 +90,78 @@
 
 :root[data-theme="sage"] {
   color-scheme: light;
-  --color-bg-dim: #fafaf5;
+  --color-bg-dim: #f2f5ee;
   --color-bg-surface: #ffffff;
-  --color-bg-card: #f5f7f0;
+  --color-bg-card: #e8eee2;
   --color-surface-lowest: #ffffff;
-  --color-surface-highest: #e6ebdc;
-  --color-surface-dim: #d8dbd0;
+  --color-surface-highest: #dfe7d6;
+  --color-surface-dim: #d3ded0;
   --color-surface-bright: #ffffff;
-  --color-surface-variant: #e2e5db;
-  --color-surface-hover: #e8ece0;
-  --color-text-main: #1f2e15;
-  --color-text-muted: #637055;
-  --color-text-dim: #79886b;
-  --color-primary: #718355;
-  --color-primary-fixed: #a6c97a;
-  --color-primary-fixed-dim: #a6c97a;
-  --color-on-primary-container: #1f2e15;
-  --color-secondary: #5c7a6e;
-  --color-secondary-container: #cbe6d8;
-  --color-tertiary: #3b6957;
-  --color-tertiary-container: #bcece1;
-  --color-border: #d5dbcb;
-  --color-border-glow: rgba(113, 131, 85, 0.4);
-  --color-severity-critical: #c026d3;
-  --color-severity-critical-bg: rgba(192, 38, 211, 0.15);
-  --color-severity-critical-border: rgba(192, 38, 211, 0.40);
-  --color-severity-high: #dc2626;
-  --color-severity-high-bg: rgba(220, 38, 38, 0.12);
-  --color-severity-high-border: rgba(220, 38, 38, 0.3);
+  --color-surface-variant: #dce7d7;
+  --color-surface-hover: #d7e3d1;
+  --color-text-main: #182615;
+  --color-text-muted: #495842;
+  --color-text-dim: #677760;
+
+  /* Primary: Deep Organic Forest Sage (Identity Anchor) */
+  --color-primary: #386641;
+  --color-primary-fixed: #689e72;
+  --color-primary-fixed-dim: #447a4f;
+  --color-on-primary-container: #102616;
+
+  /* Secondary: Warm Ochre Terracotta Amber (Vibrant Warmth Accent) */
+  --color-secondary: #c86a28;
+  --color-secondary-container: #fdf0e6;
+  --color-on-secondary-container: #5c2b08;
+
+  /* Tertiary: Deep Slate Juniper Teal (Sophisticated Cool Accent) */
+  --color-tertiary: #196f7c;
+  --color-tertiary-container: #e0f3f6;
+  --color-on-tertiary-container: #0a363d;
+
+  --color-border: #cbd5bf;
+  --color-border-glow: rgba(200, 106, 40, 0.35);
+
+  --color-severity-critical: #be185d;
+  --color-severity-critical-bg: rgba(190, 24, 93, 0.12);
+  --color-severity-critical-border: rgba(190, 24, 93, 0.35);
+  --color-severity-high: #c86a28;
+  --color-severity-high-bg: rgba(200, 106, 40, 0.12);
+  --color-severity-high-border: rgba(200, 106, 40, 0.35);
   --color-severity-medium: #d97706;
   --color-severity-medium-bg: rgba(217, 119, 6, 0.12);
-  --color-severity-medium-border: rgba(217, 119, 6, 0.3);
-  --color-severity-low: #15803d;
-  --color-severity-low-bg: rgba(21, 128, 61, 0.12);
-  --color-severity-low-border: rgba(21, 128, 61, 0.3);
+  --color-severity-medium-border: rgba(217, 119, 6, 0.35);
+  --color-severity-low: #386641;
+  --color-severity-low-bg: rgba(56, 102, 65, 0.12);
+  --color-severity-low-border: rgba(56, 102, 65, 0.35);
 
-  --terminal-bg: #f0f4ea;
-  --terminal-header-bg: #e2e8d8;
-  --terminal-text-main: #1f2e15;
-  --terminal-text-muted: #637055;
-  --terminal-text-dim: #49543e;
+  /* High-Contrast Technical Terminal in Sage Mode */
+  --terminal-bg: #1c261e;
+  --terminal-header-bg: #243026;
+  --terminal-text-main: #f1f5ee;
+  --terminal-text-muted: #96aa94;
+  --terminal-text-dim: #6a7e68;
 
-  --color-chapter1-from: #f0eee8;
-  --color-chapter1-via: #e8e5dc;
-  --color-chapter1-to: #e0ddd3;
+  /* Earthy Natural Chapter Background Gradients */
+  --color-chapter1-from: #f5f4ed;
+  --color-chapter1-via: #ebe7da;
+  --color-chapter1-to: #e0dbcb;
 
-  --color-chapter2-from: #e8f2f8;
-  --color-chapter2-via: #e0ecf4;
-  --color-chapter2-to: #d8e6f0;
+  --color-chapter2-from: #edf4f8;
+  --color-chapter2-via: #dfecf4;
+  --color-chapter2-to: #d2e2ee;
 
-  --color-chapter3-from: #e6f5f0;
-  --color-chapter3-via: #def0ea;
-  --color-chapter3-to: #d6ebd3;
+  --color-chapter3-from: #edf7f2;
+  --color-chapter3-via: #def2e8;
+  --color-chapter3-to: #ceebd9;
 
-  --color-chapter4-from: #e6f7f2;
-  --color-chapter4-via: #def2eb;
-  --color-chapter4-to: #d6ebe3;
+  --color-chapter4-from: #f8f4ea;
+  --color-chapter4-via: #efe5d3;
+  --color-chapter4-to: #e4d6bf;
 
-  --color-chapter5-from: #f4f6f0;
-  --color-chapter5-via: #eff2e8;
-  --color-chapter5-to: #eaede2;
+  --color-chapter5-from: #f2f6f0;
+  --color-chapter5-via: #e6ece0;
+  --color-chapter5-to: #dad5c7;
 }
 
 .font-display {
