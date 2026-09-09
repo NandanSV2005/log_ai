@@ -82,7 +82,7 @@ export function LandingPage() {
   };
 
   // =========================================================================
-  // 4. FINANCIAL ROI ESTIMATOR STATE & FORMULAS
+  // 4. FINANCIAL ROI ESTIMATOR STATE & FORMULAS (Unchanged)
   // =========================================================================
   const [logVolume, setLogVolume] = useState(500000);
   const [devicesMonitored, setDevicesMonitored] = useState(25);
@@ -90,6 +90,10 @@ export function LandingPage() {
   const hoursSaved = ((logVolume * 0.001 * 0.85 * 3.5 * 30) / 60).toFixed(1);
   const mttrReduction = Math.min(85, (50 + devicesMonitored * 0.2)).toFixed(1);
   const monthlySavings = (hoursSaved * 65).toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+  // Calculation for Workload visualizer
+  const manualRatio = Math.max(10, Math.min(90, 100 - (logVolume / 50000)));
+  const automatedRatio = 100 - manualRatio;
 
   // =========================================================================
   // 5. RADAR INTERACTIVE NODES & DATA
@@ -324,8 +328,22 @@ export function LandingPage() {
   const currentDemoEvent = recentEvents[0] || recentEvents[0];
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg-dim)] text-[var(--color-text-main)] font-sans flex flex-col selection:bg-[var(--color-primary)] selection:text-[#0f131c]">
+    <div className="min-h-screen bg-[var(--color-bg-dim)] text-[var(--color-text-main)] font-sans flex flex-col selection:bg-[var(--color-primary)] selection:text-[#0f131c] relative overflow-x-hidden">
       
+      {/* Quiet Security Operations Atmosphere Background Elements */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute inset-0 bg-tech-grid opacity-60"></div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-[var(--color-primary)]/10 to-transparent blur-3xl rounded-full"></div>
+        
+        {/* Subtle Technical Axis Markers */}
+        <div className="absolute top-12 left-6 font-mono text-[9px] text-[var(--color-text-dim)] tracking-widest hidden lg:block">
+          + SYS//MONITOR [0x4F8A]
+        </div>
+        <div className="absolute top-12 right-6 font-mono text-[9px] text-[var(--color-text-dim)] tracking-widest hidden lg:block text-right">
+          LATENCY &lt; 1.1MS // OCSF 1.1 +
+        </div>
+      </div>
+
       {/* ========================================================================= */}
       {/* 1. TOP HEADER NAVIGATION BAR                                              */}
       {/* ========================================================================= */}
@@ -412,7 +430,7 @@ export function LandingPage() {
       {/* ========================================================================= */}
       {/* 2. HERO SECTION — EXTREMELY SIMPLE & PRODUCT-FIRST                        */}
       {/* ========================================================================= */}
-      <section className="relative px-4 lg:px-8 pt-16 sm:pt-24 pb-20 border-b border-[var(--color-border)] bg-tech-grid overflow-hidden">
+      <section className="relative px-4 lg:px-8 pt-16 sm:pt-24 pb-20 border-b border-[var(--color-border)] z-10">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
           {/* Hero Copy (Minimal, Spacious) */}
@@ -443,7 +461,7 @@ export function LandingPage() {
             </div>
           </div>
 
-          {/* Hero Central Visual (Vector Radar Scanner) */}
+          {/* Hero Central Visual (Vector Radar Scanner & Data Flow) */}
           <div className="lg:col-span-6 relative">
             <div className="relative aspect-square max-w-[360px] sm:max-w-[400px] mx-auto border border-[var(--color-border)] rounded-full bg-[var(--color-bg-card)] flex items-center justify-center overflow-hidden shadow-2xl">
               
@@ -506,7 +524,7 @@ export function LandingPage() {
       <section
         id="pipeline"
         ref={pipelineRef}
-        className="px-4 lg:px-8 py-28 border-b border-[var(--color-border)] max-w-6xl mx-auto w-full transition-opacity duration-300 relative"
+        className="px-4 lg:px-8 py-28 border-b border-[var(--color-border)] max-w-6xl mx-auto w-full transition-opacity duration-300 relative z-10"
       >
         {/* Chapter Header */}
         <div className="space-y-3 mb-16 text-center max-w-2xl mx-auto">
@@ -563,13 +581,43 @@ export function LandingPage() {
             })}
           </div>
 
-          {/* Right Column: Anchored Central Morphing Visualization */}
+          {/* Right Column: Anchored Central Visual Processing Machine */}
           <div className="lg:col-span-7 relative min-h-full">
             <div className="lg:sticky lg:top-28 w-full">
               <div className="p-6 sm:p-8 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl font-mono text-xs space-y-6 shadow-2xl transition-all duration-300">
                 
+                {/* Visual Connected Processing Machine Diagram */}
+                <div className="space-y-2">
+                  <div className="text-[10px] text-[var(--color-text-dim)] uppercase tracking-wider mb-2 flex items-center justify-between">
+                    <span>PROCESSING MACHINE PIPELINE ENGINE</span>
+                    <span className="text-[var(--color-primary)] font-bold">STAGE 0{activePipelineStage} ACTIVE</span>
+                  </div>
+
+                  <div className="grid grid-cols-6 gap-1 p-2 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-lg text-center text-[10px]">
+                    {PIPELINE_STAGES.map((stg) => {
+                      const isCurr = stg.id === activePipelineStage;
+                      const isPast = stg.id < activePipelineStage;
+                      return (
+                        <div
+                          key={stg.id}
+                          className={`p-1.5 rounded transition-all ${
+                            isCurr
+                              ? 'bg-[var(--color-primary)] text-[#0f131c] font-bold shadow'
+                              : isPast
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                              : 'bg-[var(--color-surface-variant)] text-[var(--color-text-dim)]'
+                          }`}
+                        >
+                          <div>0{stg.id}</div>
+                          <div className="text-[9px] truncate hidden sm:block">{stg.name.split(' ')[0]}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 {/* Header Stage Indicator */}
-                <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-4">
+                <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
                   <div className="flex items-center space-x-3">
                     <span className="px-2.5 py-1 rounded bg-[var(--color-primary)] text-[#0f131c] font-bold text-xs">
                       {currentPipelineData.num}
@@ -583,24 +631,11 @@ export function LandingPage() {
                   </span>
                 </div>
 
-                {/* Progress Indicators */}
-                <div className="grid grid-cols-6 gap-1.5 py-1">
-                  {PIPELINE_STAGES.map((s) => (
-                    <div
-                      key={s.id}
-                      className={`h-1.5 rounded-full transition-all duration-300 ${
-                        s.id === activePipelineStage
-                          ? 'bg-[var(--color-primary)]'
-                          : s.id < activePipelineStage
-                          ? 'bg-emerald-500'
-                          : 'bg-[var(--color-surface-variant)]'
-                      }`}
-                    ></div>
-                  ))}
-                </div>
-
                 {/* Morphing Payload Canvas */}
-                <div className="p-5 bg-[var(--terminal-bg)] text-[var(--terminal-text-main)] border border-[var(--color-border)] rounded-lg min-h-[160px] flex items-center">
+                <div className="p-5 bg-[var(--terminal-bg)] text-[var(--terminal-text-main)] border border-[var(--color-border)] rounded-lg min-h-[160px] flex items-center relative overflow-hidden">
+                  <div className="absolute top-2 right-2 text-[9px] text-[var(--color-text-dim)] uppercase">
+                    DATA STATE: MORPHING
+                  </div>
                   <pre className="overflow-x-auto text-xs leading-relaxed font-mono whitespace-pre-wrap w-full">
                     {currentPipelineData.payload}
                   </pre>
@@ -619,9 +654,14 @@ export function LandingPage() {
       <section
         id="capabilities"
         ref={capabilitiesRef}
-        className="px-4 lg:px-8 py-28 border-b border-[var(--color-border)] max-w-6xl mx-auto w-full transition-opacity duration-300 relative"
+        className="px-4 lg:px-8 py-28 border-b border-[var(--color-border)] max-w-6xl mx-auto w-full transition-opacity duration-300 relative z-10"
       >
-        <div className="space-y-3 mb-16 text-center max-w-2xl mx-auto">
+        {/* Phase 2: Synchronized Text Group Transition mapped to Section Active State */}
+        <div
+          className={`space-y-3 mb-16 text-center max-w-2xl mx-auto transition-all duration-500 ease-out ${
+            isCapabilitiesActive ? 'opacity-100 translate-y-0' : 'opacity-80 translate-y-2'
+          }`}
+        >
           <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase">
             02 // LOG SOURCES
           </div>
@@ -664,8 +704,25 @@ export function LandingPage() {
           })}
         </div>
 
-        {/* Central Source Visual Transformation Card */}
-        <div className="p-6 sm:p-8 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl font-mono text-xs space-y-6 shadow-xl">
+        {/* Central Source Visual Converging Stream Scene */}
+        <div className="p-6 sm:p-8 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl font-mono text-xs space-y-6 shadow-xl relative overflow-hidden">
+          
+          {/* SVG Converging Streams Connector */}
+          <div className="hidden md:block w-full h-16 relative">
+            <svg className="w-full h-full" viewBox="0 0 600 60" preserveAspectRatio="none">
+              <path d="M 50 10 Q 150 40 300 40" stroke="var(--color-border)" strokeWidth="2" fill="none" />
+              <path d="M 300 40 Q 450 40 550 10" stroke="var(--color-border)" strokeWidth="2" fill="none" />
+              <path
+                d="M 50 10 Q 150 40 300 40"
+                stroke="var(--color-primary)"
+                strokeWidth="2"
+                fill="none"
+                className="animate-flow-dash"
+              />
+              <circle cx="300" cy="40" r="5" fill="var(--color-primary)" className="animate-pulse" />
+            </svg>
+          </div>
+
           <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-4">
             <div>
               <span className="text-[10px] text-[var(--color-text-dim)] uppercase tracking-wider block">SOURCE APPLIANCE</span>
@@ -678,14 +735,14 @@ export function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <div className="text-[10px] text-[var(--color-text-dim)] uppercase mb-2">RAW INPUT STREAM</div>
+              <div className="text-[10px] text-[var(--color-text-dim)] uppercase mb-2">RAW INPUT TELEMETRY STREAM</div>
               <pre className="p-4 bg-[var(--terminal-bg)] text-[var(--terminal-text-main)] border border-[var(--color-border)] rounded-lg text-xs overflow-x-auto whitespace-pre-wrap min-h-[100px]">
                 {currentCapabilitiesData.sample}
               </pre>
             </div>
 
             <div>
-              <div className="text-[10px] text-[var(--color-text-dim)] uppercase mb-2">NORMALIZED OCSF OUTPUT</div>
+              <div className="text-[10px] text-[var(--color-text-dim)] uppercase mb-2">UNIFIED OCSF EVENT OUTPUT</div>
               <div className="p-4 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-lg text-xs text-emerald-400 font-bold min-h-[100px] flex items-center">
                 {currentCapabilitiesData.schema}
               </div>
@@ -700,7 +757,7 @@ export function LandingPage() {
       <section
         id="topology"
         ref={topologyRef}
-        className="px-4 lg:px-8 py-28 border-b border-[var(--color-border)] max-w-6xl mx-auto w-full transition-opacity duration-300"
+        className="px-4 lg:px-8 py-28 border-b border-[var(--color-border)] max-w-6xl mx-auto w-full transition-opacity duration-300 z-10"
       >
         <div className="space-y-3 mb-16 text-center max-w-2xl mx-auto">
           <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase">
@@ -767,7 +824,7 @@ export function LandingPage() {
       <section
         id="estimator"
         ref={estimatorRef}
-        className="px-4 lg:px-8 py-28 border-b border-[var(--color-border)] max-w-6xl mx-auto w-full"
+        className="px-4 lg:px-8 py-28 border-b border-[var(--color-border)] max-w-6xl mx-auto w-full z-10"
       >
         <div className="space-y-3 mb-16 text-center max-w-2xl mx-auto">
           <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase">
@@ -830,6 +887,24 @@ export function LandingPage() {
               </div>
             </div>
 
+            {/* Dynamic Workload Transformation Bar */}
+            <div className="p-4 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-lg font-mono text-xs space-y-2">
+              <div className="flex justify-between text-[10px] text-[var(--color-text-dim)] uppercase">
+                <span>MANUAL TRIAGE: {manualRatio.toFixed(0)}%</span>
+                <span className="text-emerald-400">AUTOMATED: {automatedRatio.toFixed(0)}%</span>
+              </div>
+              <div className="h-3 w-full bg-[var(--color-surface-variant)] rounded-full overflow-hidden flex">
+                <div
+                  style={{ width: `${manualRatio}%` }}
+                  className="bg-amber-500/70 h-full transition-all duration-300"
+                ></div>
+                <div
+                  style={{ width: `${automatedRatio}%` }}
+                  className="bg-emerald-500 h-full transition-all duration-300"
+                ></div>
+              </div>
+            </div>
+
           </div>
 
           {/* Large Primary Output Display */}
@@ -879,9 +954,9 @@ export function LandingPage() {
       </section>
 
       {/* ========================================================================= */}
-      {/* 7. CHAPTER 05: LOG UNDERSTANDING DEMONSTRATION                             */}
+      {/* 7. CHAPTER 05: LOG UNDERSTANDING & THREAT CORRELATION GRAPH              */}
       {/* ========================================================================= */}
-      <section className="px-4 lg:px-8 py-28 border-b border-[var(--color-border)] max-w-6xl mx-auto w-full">
+      <section className="px-4 lg:px-8 py-28 border-b border-[var(--color-border)] max-w-6xl mx-auto w-full z-10">
         <div className="space-y-3 mb-16 text-center max-w-2xl mx-auto">
           <div className="font-mono text-xs text-[var(--color-primary)] tracking-widest uppercase">
             05 // DEMONSTRATION
@@ -894,7 +969,7 @@ export function LandingPage() {
           </p>
         </div>
 
-        {/* 4-Step Event Understanding Story Card */}
+        {/* 4-Step Threat Correlation Relationship Graph */}
         <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl p-6 sm:p-10 shadow-2xl font-mono text-xs space-y-8">
           
           {/* Step 1: Raw Event */}
@@ -905,19 +980,22 @@ export function LandingPage() {
             </pre>
           </div>
 
-          {/* Step 2: Understood As */}
+          {/* Step 2: Interactive Threat Relationship Nodes */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-[var(--color-border)] pt-6">
-            <div className="p-4 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-lg">
-              <span className="text-[10px] text-[var(--color-text-dim)] uppercase block mb-1">UNDERSTOOD AS</span>
-              <span className="font-bold text-sm text-[var(--color-text-main)]">Blocked Network Connection</span>
+            <div className="p-4 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-lg space-y-1">
+              <span className="text-[10px] text-[var(--color-text-dim)] uppercase block">UNDERSTOOD AS</span>
+              <span className="font-bold text-sm text-[var(--color-text-main)] block">Blocked Connection</span>
+              <span className="text-[10px] text-[var(--color-text-muted)] block">Class 4001 Network Activity</span>
             </div>
-            <div className="p-4 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-lg">
-              <span className="text-[10px] text-[var(--color-text-dim)] uppercase block mb-1">SECURITY CONTEXT</span>
-              <span className="font-bold text-sm text-rose-400">Threat Score 88.5 / 100</span>
+            <div className="p-4 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-lg space-y-1">
+              <span className="text-[10px] text-[var(--color-text-dim)] uppercase block">SECURITY CONTEXT</span>
+              <span className="font-bold text-sm text-rose-400 block">Threat Score 88.5 / 100</span>
+              <span className="text-[10px] text-rose-400/80 block">Velocity Spike Anomaly</span>
             </div>
-            <div className="p-4 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-lg">
-              <span className="text-[10px] text-[var(--color-text-dim)] uppercase block mb-1">RECOMMENDED ACTION</span>
-              <span className="font-bold text-sm text-[var(--color-primary)]">Block IP on Edge ACL</span>
+            <div className="p-4 bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-lg space-y-1">
+              <span className="text-[10px] text-[var(--color-text-dim)] uppercase block">AUTOMATED ACTION</span>
+              <span className="font-bold text-sm text-[var(--color-primary)] block">Block IP on Edge ACL</span>
+              <span className="text-[10px] text-[var(--color-primary)]/80 block">iptables -A INPUT -s 185...</span>
             </div>
           </div>
 
@@ -927,7 +1005,7 @@ export function LandingPage() {
       {/* ========================================================================= */}
       {/* 8. EDITORIAL FOOTER                                                       */}
       {/* ========================================================================= */}
-      <footer className="px-4 lg:px-8 py-12 bg-[var(--color-bg-surface)] font-mono text-xs text-[var(--color-text-muted)]">
+      <footer className="px-4 lg:px-8 py-12 bg-[var(--color-bg-surface)] font-mono text-xs text-[var(--color-text-muted)] z-10">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center space-x-3">
             <StitchBrandMark size={22} />
