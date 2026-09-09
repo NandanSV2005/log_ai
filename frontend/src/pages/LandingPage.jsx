@@ -6,7 +6,6 @@ import { api } from '../services/api';
 
 // =============================================================================
 // ACCURATE VERIFIED TELEMETRY FALLBACK CONSTANTS
-// Derived directly from Python backend capabilities (app/audit, app/parsers, app/detection)
 // =============================================================================
 const FALLBACK_PIPELINE_LATENCY = '<10ms';     // Typical local API & parse dwell time
 const FALLBACK_MERKLE_PROOF_TYPE = 'SHA-256';  // In-memory SHA-256 hash tree
@@ -15,8 +14,7 @@ const FALLBACK_ANOMALY_THRESHOLD = '0.80';     // Isolation Forest default decis
 const FALLBACK_LEDGER_BLOCK = '#1,849';        // Verified log block index
 
 // =============================================================================
-// CHAPTER 01 & 02 CARD DEFINITIONS
-// Every card contains accurate badge tags and footer metadata lines
+// CHAPTER 01 CARD DEFINITIONS (PLAIN-LANGUAGE DESCRIPTIONS)
 // =============================================================================
 const PIPELINE_CARDS = [
   {
@@ -24,7 +22,7 @@ const PIPELINE_CARDS = [
     themeColor: 'primary',
     icon: 'input',
     title: 'Raw Ingestion Engine',
-    desc: 'Streams unparsed log records via HTTP endpoints, UDP/TCP syslog sockets, and file adapters.',
+    desc: 'Receives raw activity streams from servers, firewalls, and network endpoints.',
     badge: 'STAGE 01 // ASYNC INGEST',
     footer: 'CAPACITY: HIGH-THROUGHPUT BUFFER'
   },
@@ -33,7 +31,7 @@ const PIPELINE_CARDS = [
     themeColor: 'secondary',
     icon: 'code_blocks',
     title: 'Lexical Parser',
-    desc: 'Extracts key-value pairs, JSON structures, and syslog field definitions via pattern matchers.',
+    desc: 'Reads messy log text and breaks it into clear fields like timestamps, IP addresses, and actions.',
     badge: 'STAGE 02 // LEXICAL PARSER',
     footer: 'FORMAT: REGEX & KV EXTRACTION'
   },
@@ -42,7 +40,7 @@ const PIPELINE_CARDS = [
     themeColor: 'tertiary',
     icon: 'schema',
     title: 'Schema Normalization',
-    desc: 'Maps vendor-specific log fields into standard Open Cybersecurity Schema Framework structures.',
+    desc: 'Translates logs from different tools into one shared schema format (OCSF v1.1).',
     badge: 'STAGE 03 // OCSF NORM',
     footer: 'SCHEMA: OCSF CLASS MAPPING'
   },
@@ -51,7 +49,7 @@ const PIPELINE_CARDS = [
     themeColor: 'primary',
     icon: 'enhanced_encryption',
     title: 'SHA-256 Hashing',
-    desc: 'Links consecutive log record hashes into an in-memory SHA-256 Merkle tree verification ledger.',
+    desc: 'Calculates a unique SHA-256 digital fingerprint for every log so records cannot be altered.',
     badge: 'STAGE 04 // CRYPTO LEDGER',
     footer: 'SECURITY: SHA-256 HASH LINKED'
   },
@@ -60,7 +58,7 @@ const PIPELINE_CARDS = [
     themeColor: 'secondary',
     icon: 'troubleshoot',
     title: 'ML Anomaly Core',
-    desc: 'Evaluates event features with an Isolation Forest model to assign real-time anomaly scores.',
+    desc: 'Uses Machine Learning to spot suspicious behavior and rate how unusual an event is.',
     badge: 'STAGE 05 // ANOMALY DETECTOR',
     footer: 'ENGINE: NUMPY ISOLATION FOREST'
   },
@@ -69,20 +67,23 @@ const PIPELINE_CARDS = [
     themeColor: 'tertiary',
     icon: 'psychology',
     title: 'XAI Verdict Output',
-    desc: 'Generates human-readable explanations and feature contribution metrics for detected anomalies.',
+    desc: 'Explains in plain English why an alert triggered and maps it to MITRE ATT&CK guidelines.',
     badge: 'STAGE 06 // EXPLAINABLE VERDICT',
     footer: 'OUTPUT: MITRE ATT&CK ANNOTATED'
   }
 ];
 
+// =============================================================================
+// CHAPTER 02 LOG SOURCE CARDS (PARALLEL CONDUIT INPUTS)
+// =============================================================================
 const SOURCE_CARDS = [
   {
     id: 'src-1',
     themeColor: 'secondary',
     icon: 'router',
     title: 'Cisco ASA / Firepower',
-    desc: 'Extracts ACL deny logs, teardowns, NAT translations, and VPN authentication events.',
-    badge: 'DECODER // CISCO ASA',
+    desc: 'Reads firewall blocks, address translations, and VPN sign-in attempts.',
+    badge: 'SOURCE // CISCO ASA',
     footer: 'SYS_LOG: ASA-4-106023 PARSER'
   },
   {
@@ -90,8 +91,8 @@ const SOURCE_CARDS = [
     themeColor: 'secondary',
     icon: 'security',
     title: 'Fortinet FortiGate',
-    desc: 'Parses UTM security policies, virus detections, IPS events, and CEF traffic headers.',
-    badge: 'DECODER // FORTINET',
+    desc: 'Reads web security rules, malware alerts, and network traffic headers.',
+    badge: 'SOURCE // FORTINET',
     footer: 'FORMAT: CEF & KV PAIRS'
   },
   {
@@ -99,8 +100,8 @@ const SOURCE_CARDS = [
     themeColor: 'secondary',
     icon: 'troubleshoot',
     title: 'Suricata EVE-JSON',
-    desc: 'Parses JSON network alert records, DNS transactions, and TLS session metadata.',
-    badge: 'DECODER // SURICATA',
+    desc: 'Reads network intrusion alerts, web domain lookups, and secure connection details.',
+    badge: 'SOURCE // SURICATA',
     footer: 'DATA: STRUCTURED EVE-JSON'
   },
   {
@@ -108,8 +109,8 @@ const SOURCE_CARDS = [
     themeColor: 'secondary',
     icon: 'filter_alt',
     title: 'pfSense / FreeBSD PF',
-    desc: 'Processes CSV-formatted packet filter rule logs, interfaces, and TCP/UDP flags.',
-    badge: 'DECODER // PFSENSE',
+    desc: 'Reads router packet filtering rules, network interfaces, and connection flags.',
+    badge: 'SOURCE // PFSENSE',
     footer: 'HEADER: PACKET FILTER CSV'
   },
   {
@@ -117,8 +118,8 @@ const SOURCE_CARDS = [
     themeColor: 'secondary',
     icon: 'desktop_windows',
     title: 'Windows Security / Sysmon',
-    desc: 'Decodes Event ID 4624/4625 logons, process creation ID 1, and privilege assignments.',
-    badge: 'DECODER // WINDOWS',
+    desc: 'Reads user login attempts (Event ID 4624/4625), process launches, and privilege changes.',
+    badge: 'SOURCE // WINDOWS',
     footer: 'EVENT_ID: 4624 / 4625 / SYSMON'
   },
   {
@@ -126,16 +127,14 @@ const SOURCE_CARDS = [
     themeColor: 'secondary',
     icon: 'terminal',
     title: 'Linux Auditd',
-    desc: 'Captures system call invocations, user switching events, and file access audit trails.',
-    badge: 'DECODER // AUDITD',
+    desc: 'Tracks system calls, user account switches, and sensitive file access.',
+    badge: 'SOURCE // AUDITD',
     footer: 'TRACE: SYSCALL AUDIT LOG'
   }
 ];
 
 // =============================================================================
-// REUSABLE INTERACTIVE EXPAND/COLLAPSE CARD COMPONENT
-// Handles hover (desktop) & tap (touch devices), align-items: start reflow prevention,
-// smooth transitions, and theme token styling.
+// REUSABLE INTERACTIVE EXPAND/COLLAPSE CARD COMPONENT (CHAPTER 01)
 // =============================================================================
 function InteractiveCard({ card, activeCardId, setActiveCardId }) {
   const isExpanded = activeCardId === card.id;
@@ -178,7 +177,6 @@ function InteractiveCard({ card, activeCardId, setActiveCardId }) {
         isExpanded ? style.activeBorder : style.border
       }`}
     >
-      {/* Compact Card Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105 ${style.iconBg}`}>
@@ -191,12 +189,10 @@ function InteractiveCard({ card, activeCardId, setActiveCardId }) {
         </span>
       </div>
 
-      {/* Description */}
       <p className="font-sans text-xs text-text-muted leading-relaxed mt-3">
         {card.desc}
       </p>
 
-      {/* Expandable Badge Tag & Meta Footer */}
       <div
         className={`overflow-hidden transition-all duration-300 ease-in-out motion-reduce:transition-none ${
           isExpanded ? 'max-h-36 opacity-100 mt-3 pt-3 border-t border-border-muted' : 'max-h-0 opacity-0 mt-0 pt-0 border-t-0'
@@ -217,13 +213,150 @@ function InteractiveCard({ card, activeCardId, setActiveCardId }) {
   );
 }
 
+// =============================================================================
+// CHAPTER 02 ZIG-ZAG CONNECTED LOG SOURCE STREAM COMPONENT
+// Alternating left/right layout connected by an animated elbow path line,
+// reduced vertical spacing (~40-50%), checkmark connected state, and converging closing node.
+// =============================================================================
+function ZigZagSourceStream({ cards }) {
+  const [visitedCards, setVisitedCards] = useState(new Set());
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    // Respect prefers-reduced-motion OS setting
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (mediaQuery.matches) {
+      setReducedMotion(true);
+      setVisitedCards(new Set(cards.map(c => c.id)));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const cardId = entry.target.getAttribute('data-card-id');
+            if (cardId) {
+              setVisitedCards((prev) => new Set([...prev, cardId]));
+            }
+          }
+        });
+      },
+      { threshold: 0.25, rootMargin: '0px 0px -5% 0px' }
+    );
+
+    cards.forEach((card) => {
+      const el = document.getElementById(`source-card-${card.id}`);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [cards]);
+
+  return (
+    <div className="relative w-full max-w-5xl mx-auto flex flex-col gap-5 md:gap-7 py-2">
+      {/* Background SVG Elbow Connector Path (Desktop) */}
+      <svg
+        className="absolute inset-0 w-full h-full pointer-events-none hidden md:block"
+        fill="none"
+        preserveAspectRatio="none"
+        viewBox="0 0 1000 1200"
+      >
+        <path
+          d="M 230 100 L 230 180 L 770 180 L 770 300 L 230 300 L 230 480 L 770 480 L 770 660 L 230 660 L 230 840 L 770 840 L 770 1020 L 500 1020 L 500 1120"
+          stroke="currentColor"
+          className="text-secondary/15"
+          strokeWidth="3"
+          strokeDasharray="6 6"
+        />
+        <path
+          d="M 230 100 L 230 180 L 770 180 L 770 300 L 230 300 L 230 480 L 770 480 L 770 660 L 230 660 L 230 840 L 770 840 L 770 1020 L 500 1020 L 500 1120"
+          stroke="var(--color-secondary)"
+          strokeWidth="2.5"
+          className={`transition-all duration-700 ${reducedMotion ? 'opacity-100' : visitedCards.size > 0 ? 'opacity-90' : 'opacity-20'}`}
+          style={{
+            strokeDasharray: '2500',
+            strokeDashoffset: reducedMotion ? '0' : Math.max(0, 2500 - (visitedCards.size * 410))
+          }}
+        />
+      </svg>
+
+      {cards.map((card, idx) => {
+        const isEven = idx % 2 === 0; // Even = Left, Odd = Right
+        const isVisited = reducedMotion || visitedCards.has(card.id);
+
+        return (
+          <div
+            key={card.id}
+            id={`source-card-${card.id}`}
+            data-card-id={card.id}
+            className={`relative w-full flex ${isEven ? 'md:justify-start' : 'md:justify-end'} justify-center`}
+          >
+            {/* Card Shell */}
+            <div
+              className={`w-full md:w-[46%] p-5 rounded-2xl bg-surface/90 border transition-all duration-500 shadow-xl backdrop-blur-md group ${
+                isVisited
+                  ? 'border-secondary shadow-[0_0_20px_rgba(123,208,255,0.2)]'
+                  : 'border-border-muted hover:border-secondary/50'
+              }`}
+            >
+              {/* Card Header: Source Tag + Checkmark Connected Status */}
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-border-muted font-mono text-[11px]">
+                <div className="flex items-center gap-2 text-secondary font-bold">
+                  <span className={`w-2 h-2 rounded-full ${isVisited ? 'bg-secondary animate-pulse' : 'bg-text-dim'}`}></span>
+                  <span>{card.badge}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  {isVisited ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary/15 border border-tertiary/30 text-tertiary font-bold text-[10px] animate-in fade-in duration-300">
+                      <span className="material-symbols-outlined text-[13px]">check_circle</span>
+                      <span>Connected</span>
+                    </span>
+                  ) : (
+                    <span className="text-text-dim text-[10px]">Awaiting Stream</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-secondary/15 flex items-center justify-center text-secondary shrink-0 group-hover:scale-105 transition-transform">
+                  <span className="material-symbols-outlined text-[22px]">{card.icon}</span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <h3 className="font-display font-bold text-base text-text-primary leading-tight">{card.title}</h3>
+                  <p className="font-sans text-xs text-text-muted leading-relaxed font-normal">{card.desc}</p>
+                </div>
+              </div>
+
+              {/* Technical Evidence Tag Footer */}
+              <div className="mt-3 pt-2.5 border-t border-border-muted/50 flex items-center justify-between font-mono text-[10px] text-text-dim">
+                <span className="text-secondary font-bold">{card.footer}</span>
+                <span>OCSF COMPLIANT</span>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
+      {/* Converging Single Schema Closing Node */}
+      <div className="w-full flex justify-center mt-3 relative z-10">
+        <div className="p-3.5 md:p-4 rounded-2xl bg-surface-bright border-2 border-secondary shadow-[0_0_24px_rgba(123,208,255,0.3)] flex items-center gap-3 font-mono text-xs text-secondary font-bold">
+          <span className="material-symbols-outlined text-[22px] animate-pulse">schema</span>
+          <span>&rarr; ONE UNIFIED OCSF SCHEMA CONDUIT</span>
+          <span className="w-2 h-2 rounded-full bg-tertiary animate-ping ml-1"></span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function LandingPage() {
   const { theme, setTheme } = useTheme();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   // Active Expand/Collapse Card States
   const [activePipeCard, setActivePipeCard] = useState(null);
-  const [activeSourceCard, setActiveSourceCard] = useState(null);
 
   // Interactive Forensic Dissection Demo State (Chapter 05)
   const DEMO_PRESETS = [
@@ -443,7 +576,7 @@ export function LandingPage() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-surface-dim/90 backdrop-blur-xl border-b border-border-muted shadow-2xl">
         <div className="h-16 w-full max-w-[1600px] mx-auto px-4 md:px-8 flex items-center justify-between gap-6 lg:gap-10">
           
-          {/* Logical Group 1 (Left): Brand Logo & Status Chip */}
+          {/* Brand Logo & Status Chip */}
           <div className="flex items-center gap-4 xl:gap-6 flex-shrink-0">
             <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => scrollToSection('pipeline')}>
               <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shadow-[0_0_12px_rgba(167,139,250,0.35)]">
@@ -466,7 +599,7 @@ export function LandingPage() {
             </div>
           </div>
 
-          {/* Logical Group 2 (Center): Chapter Nav Links */}
+          {/* Chapter Nav Links */}
           <nav className="hidden xl:flex items-center gap-2 lg:gap-3 font-mono text-[12px] tracking-wide">
             <button onClick={() => scrollToSection('pipeline')} className="px-3.5 py-1.5 rounded-lg bg-surface border border-primary/30 text-primary font-bold hover:bg-surface-hover transition-colors whitespace-nowrap">
               01 // Pipeline
@@ -485,7 +618,7 @@ export function LandingPage() {
             </button>
           </nav>
 
-          {/* Logical Group 3 (Right): Theme Toggle & Open SOC Console CTA */}
+          {/* Theme Toggle & Open SOC Console CTA */}
           <div className="flex items-center gap-3 md:gap-5 flex-shrink-0">
             <div className="hidden md:flex items-center bg-surface-dim rounded-lg p-1 border border-border-muted">
               <button
@@ -601,7 +734,7 @@ export function LandingPage() {
           
           <div className="max-w-[1600px] mx-auto w-full grid grid-cols-1 xl:grid-cols-12 gap-10 lg:gap-12 relative z-10 items-center">
             
-            {/* Left Narrative Column */}
+            {/* Left Narrative Column (Plain-Language Rewrite) */}
             <div className="xl:col-span-6 flex flex-col gap-6">
               <div className="flex flex-wrap items-center gap-3">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-surface-bright/80 border border-primary/30 rounded-full">
@@ -618,7 +751,7 @@ export function LandingPage() {
               </h1>
 
               <p className="font-sans text-base lg:text-lg text-text-muted max-w-xl font-normal leading-relaxed">
-                Ingest heterogeneous logs across multi-vendor firewalls and network nodes. Normalize schemas, hash-chain raw events into an in-memory Merkle tree, and produce explainable threat verdicts to reduce alert noise.
+                Collect raw security logs from any firewall or server. Automatically convert them into a single clear format, verify their accuracy with cryptographic hash checks, and explain potential threats before alert volume overwhelms your team.
               </p>
 
               {/* Action CTAs */}
@@ -646,7 +779,7 @@ export function LandingPage() {
                   <span className="font-mono text-2xl lg:text-3xl text-primary font-extrabold tracking-tight mt-1">
                     {(stats.total_events_ingested || 48281).toLocaleString()}
                   </span>
-                  <span className="font-mono text-[10px] text-tertiary mt-0.5">Ingestion Count</span>
+                  <span className="font-mono text-[10px] text-tertiary mt-0.5">Total Logs Received</span>
                 </div>
 
                 <div className="p-3.5 bg-surface-lowest/80 border border-border-muted rounded-xl flex flex-col">
@@ -654,7 +787,7 @@ export function LandingPage() {
                   <span className="font-mono text-2xl lg:text-3xl text-secondary font-extrabold tracking-tight mt-1">
                     {FALLBACK_PIPELINE_LATENCY}
                   </span>
-                  <span className="font-mono text-[10px] text-text-dim mt-0.5">Average Dwell Time</span>
+                  <span className="font-mono text-[10px] text-text-dim mt-0.5">Average Processing Speed</span>
                 </div>
 
                 <div className="p-3.5 bg-surface-lowest/80 border border-border-muted rounded-xl flex flex-col">
@@ -662,7 +795,7 @@ export function LandingPage() {
                   <span className="font-mono text-2xl lg:text-3xl text-tertiary font-extrabold tracking-tight mt-1">
                     {FALLBACK_MERKLE_PROOF_TYPE}
                   </span>
-                  <span className="font-mono text-[10px] text-tertiary mt-0.5">Hash Chain Verified</span>
+                  <span className="font-mono text-[10px] text-tertiary mt-0.5">Tamper-Proof Verification</span>
                 </div>
               </div>
             </div>
@@ -735,7 +868,7 @@ export function LandingPage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* CHAPTER 01 // PIPELINE ARCHITECTURE (UNIFORM INTERACTIVE 6-CARD GRID)      */}
+        {/* CHAPTER 01 // PIPELINE ARCHITECTURE (PLAIN-LANGUAGE PROSE)               */}
         {/* ========================================================================= */}
         <section
           id="pipeline"
@@ -756,7 +889,7 @@ export function LandingPage() {
                 </h2>
               </div>
               <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
-                Six processing stages converting raw log streams into structured, hash-chained forensic records.
+                Six straightforward steps that convert raw server activity into structured, verified security records.
               </p>
             </div>
 
@@ -765,9 +898,9 @@ export function LandingPage() {
               <div className="flex items-center justify-between pb-4 mb-6 border-b border-border-muted font-mono text-xs">
                 <div className="flex items-center gap-2 text-primary font-bold">
                   <span className="material-symbols-outlined text-[18px]">account_tree</span>
-                  <span>LIVE PIPELINE TOPOLOGY &amp; STAGE BUS</span>
+                  <span>LIVE PIPELINE STAGES</span>
                 </div>
-                <span className="text-tertiary font-bold hidden sm:inline">PROCESSING DWELL: {FALLBACK_PIPELINE_LATENCY}</span>
+                <span className="text-tertiary font-bold hidden sm:inline">PROCESSING SPEED: {FALLBACK_PIPELINE_LATENCY}</span>
               </div>
 
               <div className="relative w-full">
@@ -824,7 +957,7 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* Uniform 6-Card Interactive Grid (align-items: start prevents row reflow) */}
+            {/* Uniform 6-Card Interactive Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
               {PIPELINE_CARDS.map(card => (
                 <InteractiveCard
@@ -840,7 +973,7 @@ export function LandingPage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* CHAPTER 02 // LOG SOURCES (UNIFORM INTERACTIVE 6-CARD GRID)               */}
+        {/* CHAPTER 02 // LOG SOURCES (ZIG-ZAG CONNECTED CONDUIT STREAM)             */}
         {/* ========================================================================= */}
         <section
           id="sources"
@@ -848,7 +981,7 @@ export function LandingPage() {
         >
           <div className="absolute top-16 right-1/4 w-[750px] h-[500px] bg-secondary/10 rounded-full blur-[150px] pointer-events-none"></div>
           
-          <div className="max-w-[1600px] mx-auto flex flex-col gap-12 relative z-10">
+          <div className="max-w-[1600px] mx-auto flex flex-col gap-10 relative z-10">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
@@ -861,21 +994,12 @@ export function LandingPage() {
                 </h2>
               </div>
               <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
-                Built-in decoders ingest syslog, JSON, and CSV records from firewalls, network appliances, and endpoints.
+                Collect logs from any firewall, network appliance, or operating system without complex setup.
               </p>
             </div>
 
-            {/* Uniform 6-Card Interactive Grid (align-items: start prevents row reflow) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
-              {SOURCE_CARDS.map(card => (
-                <InteractiveCard
-                  key={card.id}
-                  card={card}
-                  activeCardId={activeSourceCard}
-                  setActiveCardId={setActiveSourceCard}
-                />
-              ))}
-            </div>
+            {/* Zig-Zag Connected Log Source Stream Component */}
+            <ZigZagSourceStream cards={SOURCE_CARDS} />
 
           </div>
         </section>
@@ -902,7 +1026,7 @@ export function LandingPage() {
                 </h2>
               </div>
               <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
-                Real-time anomaly visualization paired with tamper-evident SHA-256 log hash chaining.
+                See suspicious network activity on a live radar map while verifying log integrity with SHA-256 hashes.
               </p>
             </div>
 
@@ -997,7 +1121,7 @@ export function LandingPage() {
                     <span className="font-mono text-[10px] font-bold text-tertiary px-2 py-0.5 rounded bg-tertiary/15 border border-tertiary/30">SHA-256 CHAIN</span>
                   </div>
                   <p className="font-sans text-xs text-text-muted leading-relaxed font-normal">
-                    Log batches are hashed and linked into a Merkle tree sequence using SHA-256 digests.
+                    Log entries are linked together with SHA-256 hashes so any tampering is detected instantly.
                   </p>
 
                   <div className="bg-surface-dim p-4 rounded-xl border border-tertiary/25 flex flex-col gap-2.5 font-mono text-[11px]">
@@ -1024,7 +1148,7 @@ export function LandingPage() {
                   <span className="material-symbols-outlined text-tertiary text-[24px]">verified_user</span>
                   <div className="flex flex-col">
                     <span className="font-sans font-bold text-xs text-text-primary">Forensic Export</span>
-                    <span className="font-sans text-[11px] text-text-muted">Tamper-evident log export for forensic review.</span>
+                    <span className="font-sans text-[11px] text-text-muted">Export verified log files with cryptographic proof for audits.</span>
                   </div>
                 </div>
               </div>
@@ -1055,7 +1179,7 @@ export function LandingPage() {
                 </h2>
               </div>
               <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
-                Calculate estimated cost savings achieved by filtering noise and normalizing log schemas prior to SIEM ingestion.
+                Estimate how much money and time you save by cleaning logs before sending them to expensive storage.
               </p>
             </div>
 
@@ -1131,7 +1255,7 @@ export function LandingPage() {
                     </span>
                     <span className="text-tertiary font-sans font-bold text-sm">/mo</span>
                   </div>
-                  <span className="font-sans text-xs text-text-muted font-normal">Payload size compressed ~66%</span>
+                  <span className="font-sans text-xs text-text-muted font-normal">Less data to index and store</span>
                 </div>
 
                 <div className="p-5 bg-surface-dim border border-primary/30 rounded-xl flex flex-col justify-between">
@@ -1142,7 +1266,7 @@ export function LandingPage() {
                     </span>
                     <span className="text-primary font-sans font-bold text-sm">hrs/wk</span>
                   </div>
-                  <span className="font-sans text-xs text-text-muted font-normal">Freed from triaging noise</span>
+                  <span className="font-sans text-xs text-text-muted font-normal">Time freed from checking false alarms</span>
                 </div>
 
                 <div className="p-5 bg-surface-dim border border-secondary/30 rounded-xl flex flex-col justify-between">
@@ -1150,7 +1274,7 @@ export function LandingPage() {
                   <div className="py-1">
                     <span className="font-mono text-3xl lg:text-4xl text-secondary font-black">78.4%</span>
                   </div>
-                  <span className="font-sans text-xs text-text-muted font-normal">Filtered prior to SIEM</span>
+                  <span className="font-sans text-xs text-text-muted font-normal">Unimportant noise dropped early</span>
                 </div>
 
                 <div className="p-5 bg-surface-dim border border-border-muted rounded-xl flex flex-col justify-between">
@@ -1159,7 +1283,7 @@ export function LandingPage() {
                     <span className="font-mono text-3xl lg:text-4xl text-text-primary font-black">&lt; 14</span>
                     <span className="text-text-primary font-sans font-bold text-sm">days</span>
                   </div>
-                  <span className="font-sans text-xs text-text-muted font-normal">Drop-in deployment</span>
+                  <span className="font-sans text-xs text-text-muted font-normal">Simple drop-in setup</span>
                 </div>
               </div>
 
@@ -1187,7 +1311,7 @@ export function LandingPage() {
                 </h2>
               </div>
               <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
-                Observe how a firewall log string undergoes lexical parsing, OCSF mapping, SHA-256 hashing, and anomaly explanation.
+                Test how a raw firewall log is parsed, converted to OCSF schema, hashed, and explained by AI.
               </p>
             </div>
 
