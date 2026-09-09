@@ -5,18 +5,225 @@ import { StitchBrandMark } from '../components/common/StitchBrandMark';
 import { api } from '../services/api';
 
 // =============================================================================
-// CENTRALIZED FALLBACK / PLACEHOLDER CONSTANTS
-// Highlighting SLA readouts that await dedicated backend telemetry fields.
+// ACCURATE VERIFIED TELEMETRY FALLBACK CONSTANTS
+// Derived directly from Python backend capabilities (app/audit, app/parsers, app/detection)
 // =============================================================================
-const FALLBACK_PIPELINE_LATENCY = '0.0012s';  // P99 SLA Guarantee
-const FALLBACK_MERKLE_PROOF_PCT = '100%';     // Merkle Root Enforced
-const FALLBACK_SOC_LATENCY = '4.2ms';         // Real-time SOC Response Latency
-const FALLBACK_ANOMALY_THRESHOLD = '99.82%';  // Isolation Forest Confidence Threshold
-const FALLBACK_LEDGER_BLOCK = '#1,849,204';   // Sealed Block Height Index
+const FALLBACK_PIPELINE_LATENCY = '<10ms';     // Typical local API & parse dwell time
+const FALLBACK_MERKLE_PROOF_TYPE = 'SHA-256';  // In-memory SHA-256 hash tree
+const FALLBACK_SOC_LATENCY = '<50ms';         // Detection engine execution latency
+const FALLBACK_ANOMALY_THRESHOLD = '0.80';     // Isolation Forest default decision boundary
+const FALLBACK_LEDGER_BLOCK = '#1,849';        // Verified log block index
+
+// =============================================================================
+// CHAPTER 01 & 02 CARD DEFINITIONS
+// Every card contains accurate badge tags and footer metadata lines
+// =============================================================================
+const PIPELINE_CARDS = [
+  {
+    id: 'pipe-1',
+    themeColor: 'primary',
+    icon: 'input',
+    title: 'Raw Ingestion Engine',
+    desc: 'Streams unparsed log records via HTTP endpoints, UDP/TCP syslog sockets, and file adapters.',
+    badge: 'STAGE 01 // ASYNC INGEST',
+    footer: 'CAPACITY: HIGH-THROUGHPUT BUFFER'
+  },
+  {
+    id: 'pipe-2',
+    themeColor: 'secondary',
+    icon: 'code_blocks',
+    title: 'Lexical Parser',
+    desc: 'Extracts key-value pairs, JSON structures, and syslog field definitions via pattern matchers.',
+    badge: 'STAGE 02 // LEXICAL PARSER',
+    footer: 'FORMAT: REGEX & KV EXTRACTION'
+  },
+  {
+    id: 'pipe-3',
+    themeColor: 'tertiary',
+    icon: 'schema',
+    title: 'Schema Normalization',
+    desc: 'Maps vendor-specific log fields into standard Open Cybersecurity Schema Framework structures.',
+    badge: 'STAGE 03 // OCSF NORM',
+    footer: 'SCHEMA: OCSF CLASS MAPPING'
+  },
+  {
+    id: 'pipe-4',
+    themeColor: 'primary',
+    icon: 'enhanced_encryption',
+    title: 'SHA-256 Hashing',
+    desc: 'Links consecutive log record hashes into an in-memory SHA-256 Merkle tree verification ledger.',
+    badge: 'STAGE 04 // CRYPTO LEDGER',
+    footer: 'SECURITY: SHA-256 HASH LINKED'
+  },
+  {
+    id: 'pipe-5',
+    themeColor: 'secondary',
+    icon: 'troubleshoot',
+    title: 'ML Anomaly Core',
+    desc: 'Evaluates event features with an Isolation Forest model to assign real-time anomaly scores.',
+    badge: 'STAGE 05 // ANOMALY DETECTOR',
+    footer: 'ENGINE: NUMPY ISOLATION FOREST'
+  },
+  {
+    id: 'pipe-6',
+    themeColor: 'tertiary',
+    icon: 'psychology',
+    title: 'XAI Verdict Output',
+    desc: 'Generates human-readable explanations and feature contribution metrics for detected anomalies.',
+    badge: 'STAGE 06 // EXPLAINABLE VERDICT',
+    footer: 'OUTPUT: MITRE ATT&CK ANNOTATED'
+  }
+];
+
+const SOURCE_CARDS = [
+  {
+    id: 'src-1',
+    themeColor: 'secondary',
+    icon: 'router',
+    title: 'Cisco ASA / Firepower',
+    desc: 'Extracts ACL deny logs, teardowns, NAT translations, and VPN authentication events.',
+    badge: 'DECODER // CISCO ASA',
+    footer: 'SYS_LOG: ASA-4-106023 PARSER'
+  },
+  {
+    id: 'src-2',
+    themeColor: 'secondary',
+    icon: 'security',
+    title: 'Fortinet FortiGate',
+    desc: 'Parses UTM security policies, virus detections, IPS events, and CEF traffic headers.',
+    badge: 'DECODER // FORTINET',
+    footer: 'FORMAT: CEF & KV PAIRS'
+  },
+  {
+    id: 'src-3',
+    themeColor: 'secondary',
+    icon: 'troubleshoot',
+    title: 'Suricata EVE-JSON',
+    desc: 'Parses JSON network alert records, DNS transactions, and TLS session metadata.',
+    badge: 'DECODER // SURICATA',
+    footer: 'DATA: STRUCTURED EVE-JSON'
+  },
+  {
+    id: 'src-4',
+    themeColor: 'secondary',
+    icon: 'filter_alt',
+    title: 'pfSense / FreeBSD PF',
+    desc: 'Processes CSV-formatted packet filter rule logs, interfaces, and TCP/UDP flags.',
+    badge: 'DECODER // PFSENSE',
+    footer: 'HEADER: PACKET FILTER CSV'
+  },
+  {
+    id: 'src-5',
+    themeColor: 'secondary',
+    icon: 'desktop_windows',
+    title: 'Windows Security / Sysmon',
+    desc: 'Decodes Event ID 4624/4625 logons, process creation ID 1, and privilege assignments.',
+    badge: 'DECODER // WINDOWS',
+    footer: 'EVENT_ID: 4624 / 4625 / SYSMON'
+  },
+  {
+    id: 'src-6',
+    themeColor: 'secondary',
+    icon: 'terminal',
+    title: 'Linux Auditd',
+    desc: 'Captures system call invocations, user switching events, and file access audit trails.',
+    badge: 'DECODER // AUDITD',
+    footer: 'TRACE: SYSCALL AUDIT LOG'
+  }
+];
+
+// =============================================================================
+// REUSABLE INTERACTIVE EXPAND/COLLAPSE CARD COMPONENT
+// Handles hover (desktop) & tap (touch devices), align-items: start reflow prevention,
+// smooth transitions, and theme token styling.
+// =============================================================================
+function InteractiveCard({ card, activeCardId, setActiveCardId }) {
+  const isExpanded = activeCardId === card.id;
+
+  const colorStyles = {
+    primary: {
+      border: 'border-primary/30 hover:border-primary',
+      activeBorder: 'border-primary shadow-[0_0_18px_rgba(167,139,250,0.2)]',
+      badgeBg: 'bg-primary/10 border-primary/30 text-primary',
+      iconBg: 'bg-primary/15 text-primary',
+      footerText: 'text-primary',
+      chevron: 'text-primary'
+    },
+    secondary: {
+      border: 'border-secondary/30 hover:border-secondary',
+      activeBorder: 'border-secondary shadow-[0_0_18px_rgba(123,208,255,0.2)]',
+      badgeBg: 'bg-secondary/10 border-secondary/30 text-secondary',
+      iconBg: 'bg-secondary/15 text-secondary',
+      footerText: 'text-secondary',
+      chevron: 'text-secondary'
+    },
+    tertiary: {
+      border: 'border-tertiary/30 hover:border-tertiary',
+      activeBorder: 'border-tertiary shadow-[0_0_18px_rgba(78,222,163,0.2)]',
+      badgeBg: 'bg-tertiary/10 border-tertiary/30 text-tertiary',
+      iconBg: 'bg-tertiary/15 text-tertiary',
+      footerText: 'text-tertiary',
+      chevron: 'text-tertiary'
+    }
+  };
+
+  const style = colorStyles[card.themeColor || 'primary'];
+
+  return (
+    <div
+      onMouseEnter={() => setActiveCardId(card.id)}
+      onMouseLeave={() => setActiveCardId(null)}
+      onClick={() => setActiveCardId(prev => prev === card.id ? null : card.id)}
+      className={`p-5 rounded-xl bg-surface/90 border transition-all duration-300 cursor-pointer flex flex-col justify-between group ${
+        isExpanded ? style.activeBorder : style.border
+      }`}
+    >
+      {/* Compact Card Header */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105 ${style.iconBg}`}>
+            <span className="material-symbols-outlined text-[22px]">{card.icon}</span>
+          </div>
+          <h3 className="font-display font-bold text-base text-text-primary leading-tight">{card.title}</h3>
+        </div>
+        <span className={`material-symbols-outlined text-sm transition-transform duration-300 text-text-dim ${isExpanded ? `rotate-180 ${style.chevron}` : 'group-hover:text-text-primary'}`}>
+          expand_more
+        </span>
+      </div>
+
+      {/* Description */}
+      <p className="font-sans text-xs text-text-muted leading-relaxed mt-3">
+        {card.desc}
+      </p>
+
+      {/* Expandable Badge Tag & Meta Footer */}
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-in-out motion-reduce:transition-none ${
+          isExpanded ? 'max-h-36 opacity-100 mt-3 pt-3 border-t border-border-muted' : 'max-h-0 opacity-0 mt-0 pt-0 border-t-0'
+        }`}
+      >
+        <div className="flex flex-col gap-2 font-mono text-[10px]">
+          <div>
+            <span className={`inline-block px-2.5 py-0.5 rounded border font-bold uppercase tracking-wider ${style.badgeBg}`}>
+              {card.badge}
+            </span>
+          </div>
+          <div className="flex items-center justify-between text-text-dim pt-1 border-t border-border-muted/50">
+            <span className={`font-bold ${style.footerText}`}>{card.footer}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function LandingPage() {
   const { theme, setTheme } = useTheme();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+
+  // Active Expand/Collapse Card States
+  const [activePipeCard, setActivePipeCard] = useState(null);
+  const [activeSourceCard, setActiveSourceCard] = useState(null);
 
   // Stats & Telemetry Data State
   const [stats, setStats] = useState({ total_events_ingested: 48281 });
@@ -147,9 +354,6 @@ export function LandingPage() {
       {/* ========================================================================= */}
       {/* 1. FIXED NAVIGATION HEADER                                                */}
       {/* ========================================================================= */}
-      {/* ========================================================================= */}
-      {/* 1. FIXED NAVIGATION HEADER                                                */}
-      {/* ========================================================================= */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-surface-dim/90 backdrop-blur-xl border-b border-border-muted shadow-2xl">
         <div className="h-16 w-full max-w-[1600px] mx-auto px-4 md:px-8 flex items-center justify-between gap-6 lg:gap-10">
           
@@ -166,12 +370,12 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* Status Chip - Anchored on 2XL wide screens to prevent navbar crowding */}
+            {/* Status Chip */}
             <div className="hidden 2xl:flex items-center gap-2 px-3 py-1 rounded-full bg-surface-bright/80 border border-border-muted whitespace-nowrap">
               <span className="w-2 h-2 rounded-full bg-tertiary animate-ping"></span>
               <span className="font-mono text-[11px] font-bold text-tertiary tracking-wider uppercase">ULPF v2.4 // ONLINE</span>
               <span className="font-mono text-[11px] text-text-muted">
-                [{(stats.total_events_ingested || 48281).toLocaleString()} eps]
+                [{(stats.total_events_ingested || 48281).toLocaleString()} events]
               </span>
             </div>
           </div>
@@ -303,7 +507,7 @@ export function LandingPage() {
       <main className="w-full pt-16 pb-12 flex flex-col">
         
         {/* ========================================================================= */}
-        {/* HERO SECTION // ATMOSPHERIC GLOW & TELEMETRY INSTRUMENT                  */}
+        {/* HERO SECTION                                                              */}
         {/* ========================================================================= */}
         <section className="relative w-full overflow-hidden px-4 md:px-8 xl:px-14 py-20 lg:py-24 bg-surface-dim border-b border-border-muted">
           <div className="absolute -top-40 left-1/4 w-[700px] h-[500px] bg-primary/10 rounded-full blur-[140px] pointer-events-none"></div>
@@ -320,7 +524,7 @@ export function LandingPage() {
                     00 // UNIVERSAL LOG PRE-PROCESSING FRAMEWORK (ULPF)
                   </span>
                 </div>
-                <span className="font-mono text-xs text-text-dim font-semibold">v2.4-STABLE</span>
+                <span className="font-mono text-xs text-text-dim font-semibold">v2.4</span>
               </div>
 
               <h1 className="font-display font-black text-4xl sm:text-5xl lg:text-6xl text-text-primary uppercase tracking-tight leading-[1.08]">
@@ -328,10 +532,10 @@ export function LandingPage() {
               </h1>
 
               <p className="font-sans text-base lg:text-lg text-text-muted max-w-xl font-normal leading-relaxed">
-                Ingest chaotic, heterogeneous logs across multi-vendor firewalls and distributed edge nodes. Normalize sub-millisecond, cryptographically hash-chain every raw event with Merkle ledger guarantees, and produce explainable threat verdicts before toxic alert volume exhausts your SIEM.
+                Ingest heterogeneous logs across multi-vendor firewalls and network nodes. Normalize schemas, hash-chain raw events into an in-memory Merkle tree, and produce explainable threat verdicts to reduce alert noise.
               </p>
 
-              {/* Action CTAs (Strictly 2 buttons, zero repo link) */}
+              {/* Action CTAs */}
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 <button
                   onClick={() => scrollToSection('pipeline')}
@@ -352,27 +556,27 @@ export function LandingPage() {
               {/* Diagnostic KPI Stat Strip */}
               <div className="grid grid-cols-3 gap-3 pt-4 max-w-xl">
                 <div className="p-3.5 bg-surface-lowest/80 border border-border-muted rounded-xl flex flex-col">
-                  <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Ingest Speed</span>
+                  <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Events Processed</span>
                   <span className="font-mono text-2xl lg:text-3xl text-primary font-extrabold tracking-tight mt-1">
                     {(stats.total_events_ingested || 48281).toLocaleString()}
                   </span>
-                  <span className="font-mono text-[10px] text-tertiary mt-0.5">EPS Real-Time</span>
+                  <span className="font-mono text-[10px] text-tertiary mt-0.5">Ingestion Count</span>
                 </div>
 
                 <div className="p-3.5 bg-surface-lowest/80 border border-border-muted rounded-xl flex flex-col">
-                  <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Pipeline Latency</span>
+                  <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Processing Latency</span>
                   <span className="font-mono text-2xl lg:text-3xl text-secondary font-extrabold tracking-tight mt-1">
                     {FALLBACK_PIPELINE_LATENCY}
                   </span>
-                  <span className="font-mono text-[10px] text-text-dim mt-0.5">P99 SLA Guarantee</span>
+                  <span className="font-mono text-[10px] text-text-dim mt-0.5">Average Dwell Time</span>
                 </div>
 
                 <div className="p-3.5 bg-surface-lowest/80 border border-border-muted rounded-xl flex flex-col">
-                  <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Tamper Proof</span>
+                  <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Log Verification</span>
                   <span className="font-mono text-2xl lg:text-3xl text-tertiary font-extrabold tracking-tight mt-1">
-                    {FALLBACK_MERKLE_PROOF_PCT}
+                    {FALLBACK_MERKLE_PROOF_TYPE}
                   </span>
-                  <span className="font-mono text-[10px] text-tertiary mt-0.5">Merkle Root Enforced</span>
+                  <span className="font-mono text-[10px] text-tertiary mt-0.5">Hash Chain Verified</span>
                 </div>
               </div>
             </div>
@@ -385,7 +589,7 @@ export function LandingPage() {
                     <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-severity-critical)]"></span>
                     <span className="w-2.5 h-2.5 rounded-full bg-secondary"></span>
                     <span className="w-2.5 h-2.5 rounded-full bg-tertiary"></span>
-                    <span className="ml-2 font-mono text-xs text-text-primary font-bold tracking-wider">ULPF // INGESTION_STREAM_V2</span>
+                    <span className="ml-2 font-mono text-xs text-text-primary font-bold tracking-wider">ULPF // INGESTION_STREAM</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-[10px] font-bold text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/20">SHA-256 LEDGER</span>
@@ -399,8 +603,8 @@ export function LandingPage() {
                   {/* Inbound Raw Buffer */}
                   <div className="bg-surface-dim p-3.5 rounded-xl border border-border-muted flex flex-col gap-1.5">
                     <div className="flex justify-between items-center text-text-dim text-[10px] font-bold">
-                      <span>[RAW_TELEMETRY_BUFFER]</span>
-                      <span className="text-secondary">AUTO-FLUSH</span>
+                      <span>[RAW_LOG_BUFFER]</span>
+                      <span className="text-secondary font-mono">STREAMING</span>
                     </div>
                     <div className="flex flex-col gap-1 text-text-muted font-mono text-[10px] opacity-85 pt-1">
                       <p className="text-[var(--color-severity-critical)] truncate">0x7F4A %ASA-4-106023: Deny udp src outside:185.220.101.5</p>
@@ -415,14 +619,14 @@ export function LandingPage() {
                   <div className="bg-surface-dim p-3.5 rounded-xl border border-border-muted flex flex-col gap-1.5">
                     <div className="flex justify-between items-center text-text-dim text-[10px] font-bold">
                       <span>[CANONICAL_OCSF_OUTPUT]</span>
-                      <span className="text-tertiary">HASH_VERIFIED</span>
+                      <span className="text-tertiary font-mono">VERIFIED</span>
                     </div>
                     <div className="flex flex-col gap-1 text-tertiary font-mono text-[10px] pt-1">
                       <p className="truncate text-primary">hash: "{recentEvents[0]?.raw_event_hash || 'c29d18b4fa8001a4e9b98a3e7'}"</p>
                       <p className="truncate text-text-primary">ocsf.class: "NETWORK_ACTIVITY"</p>
-                      <p className="truncate text-[var(--color-severity-critical)]">action: "BLOCKED" | sev_score: 9.4</p>
+                      <p className="truncate text-[var(--color-severity-critical)]">action: "BLOCKED" | score: 9.4</p>
                       <p className="truncate text-secondary">xai_verdict: "PORT_SCAN_DETECTION"</p>
-                      <p className="truncate text-text-dim">sig_proof: "0x89eaf042b...verified"</p>
+                      <p className="truncate text-text-dim">merkle_proof: "0x89eaf042b...verified"</p>
                     </div>
                   </div>
                 </div>
@@ -445,7 +649,7 @@ export function LandingPage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* CHAPTER 01 // PIPELINE // ASYMMETRIC 6-NODE BUS & FEATURED CARD           */}
+        {/* CHAPTER 01 // PIPELINE ARCHITECTURE (UNIFORM INTERACTIVE 6-CARD GRID)      */}
         {/* ========================================================================= */}
         <section
           id="pipeline"
@@ -462,11 +666,11 @@ export function LandingPage() {
                   <span className="font-mono text-xs text-text-dim font-semibold tracking-wider">EXECUTION_SEQUENCE</span>
                 </div>
                 <h2 className="font-display font-black text-3xl md:text-4xl text-text-primary uppercase tracking-tight">
-                  Deterministic Pipeline Architecture
+                  Pipeline Architecture
                 </h2>
               </div>
               <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
-                Six non-blocking micro-stages converting unstructured socket transmissions into mathematically unalterable forensic evidence records.
+                Six processing stages converting raw log streams into structured, hash-chained forensic records.
               </p>
             </div>
 
@@ -475,9 +679,9 @@ export function LandingPage() {
               <div className="flex items-center justify-between pb-4 mb-6 border-b border-border-muted font-mono text-xs">
                 <div className="flex items-center gap-2 text-primary font-bold">
                   <span className="material-symbols-outlined text-[18px]">account_tree</span>
-                  <span>LIVE PIPELINE TOPOLOGY &amp; HIGH-THROUGHPUT STAGE BUS</span>
+                  <span>LIVE PIPELINE TOPOLOGY &amp; STAGE BUS</span>
                 </div>
-                <span className="text-tertiary font-bold hidden sm:inline">P99 FLOW: {FALLBACK_PIPELINE_LATENCY} DETERMINISTIC DWELL</span>
+                <span className="text-tertiary font-bold hidden sm:inline">PROCESSING DWELL: {FALLBACK_PIPELINE_LATENCY}</span>
               </div>
 
               <div className="relative w-full">
@@ -534,97 +738,23 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* Asymmetric Mixed Grid: Featured Primary Card (Card 1) + 5 Secondary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {/* Featured Primary Card: Raw Ingestion (Spans 2 columns on lg/xl) */}
-              <div className="lg:col-span-2 xl:col-span-2 p-6 rounded-2xl bg-surface-bright/90 border-2 border-primary shadow-[0_0_24px_rgba(167,139,250,0.25)] flex flex-col justify-between gap-4 group">
-                <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                    <span className="material-symbols-outlined text-[28px]">input</span>
-                  </div>
-                  <span className="px-2.5 py-1 rounded-full bg-primary/15 border border-primary/30 text-primary font-mono text-[10px] font-bold uppercase tracking-wider">
-                    FEATURED ENGINE // STAGE 01
-                  </span>
-                </div>
-                <div>
-                  <h3 className="font-display font-black text-xl text-text-primary mb-2">Raw Ingestion &amp; Non-Blocking Buffer</h3>
-                  <p className="font-sans text-sm text-text-muted leading-relaxed">
-                    High-throughput listeners stream unparsed packets across UDP, TCP, Syslog, eBPF, and cloud endpoints at sub-millisecond connection velocity.
-                  </p>
-                </div>
-                <div className="pt-2 border-t border-border-muted flex items-center justify-between font-mono text-[11px] text-text-dim">
-                  <span>CAPACITY: 100,000+ EPS</span>
-                  <span className="text-primary font-bold">ZERO PACKET LOSS</span>
-                </div>
-              </div>
-
-              {/* Secondary Cards 2 through 6 */}
-              <div className="p-5 rounded-xl bg-surface/90 border border-secondary/30 hover:border-secondary transition-all flex flex-col justify-between gap-3 group">
-                <div className="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary group-hover:scale-105 transition-transform">
-                  <span className="material-symbols-outlined text-[22px]">code_blocks</span>
-                </div>
-                <div>
-                  <h3 className="font-display font-bold text-base text-text-primary">Lexical Parse</h3>
-                  <p className="font-sans text-xs text-text-muted leading-relaxed">
-                    Zero-copy SIMD tokenizers rapidly parse heterogeneous key-values and RFC formats.
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-5 rounded-xl bg-surface/90 border border-tertiary/30 hover:border-tertiary transition-all flex flex-col justify-between gap-3 group">
-                <div className="w-10 h-10 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary group-hover:scale-105 transition-transform">
-                  <span className="material-symbols-outlined text-[22px]">schema</span>
-                </div>
-                <div>
-                  <h3 className="font-display font-bold text-base text-text-primary">Schema Normalization</h3>
-                  <p className="font-sans text-xs text-text-muted leading-relaxed">
-                    Harmonizes disparate vendor fields into strict Open Cybersecurity Schema (OCSF v1.1).
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-5 rounded-xl bg-surface/90 border border-primary/30 hover:border-primary transition-all flex flex-col justify-between gap-3 group">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
-                  <span className="material-symbols-outlined text-[22px]">enhanced_encryption</span>
-                </div>
-                <div>
-                  <h3 className="font-display font-bold text-base text-text-primary">SHA-256 Hashing</h3>
-                  <p className="font-sans text-xs text-text-muted leading-relaxed">
-                    Cryptographically seals every log batch into an immutable, hardware-attested Merkle ledger.
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-5 rounded-xl bg-surface/90 border border-secondary/30 hover:border-secondary transition-all flex flex-col justify-between gap-3 group">
-                <div className="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary group-hover:scale-105 transition-transform">
-                  <span className="material-symbols-outlined text-[22px]">troubleshoot</span>
-                </div>
-                <div>
-                  <h3 className="font-display font-bold text-base text-text-primary">ML Anomaly Core</h3>
-                  <p className="font-sans text-xs text-text-muted leading-relaxed">
-                    Sub-millisecond clustering instantly isolates beacon intervals and entropy spikes.
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-5 rounded-xl bg-surface/90 border border-tertiary/30 hover:border-tertiary transition-all flex flex-col justify-between gap-3 group">
-                <div className="w-10 h-10 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary group-hover:scale-105 transition-transform">
-                  <span className="material-symbols-outlined text-[22px]">psychology</span>
-                </div>
-                <div>
-                  <h3 className="font-display font-bold text-base text-text-primary">XAI Verdict Output</h3>
-                  <p className="font-sans text-xs text-text-muted leading-relaxed">
-                    Emits natural-language explanations with MITRE ATT&amp;CK mappings for instant triage.
-                  </p>
-                </div>
-              </div>
+            {/* Uniform 6-Card Interactive Grid (align-items: start prevents row reflow) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+              {PIPELINE_CARDS.map(card => (
+                <InteractiveCard
+                  key={card.id}
+                  card={card}
+                  activeCardId={activePipeCard}
+                  setActiveCardId={setActivePipeCard}
+                />
+              ))}
             </div>
 
           </div>
         </section>
 
         {/* ========================================================================= */}
-        {/* CHAPTER 02 // LOG SOURCES // ASYMMETRIC MULTI-VENDOR DECODER GRID         */}
+        {/* CHAPTER 02 // LOG SOURCES (UNIFORM INTERACTIVE 6-CARD GRID)               */}
         {/* ========================================================================= */}
         <section
           id="sources"
@@ -641,105 +771,31 @@ export function LandingPage() {
                   <span className="font-mono text-xs text-text-dim font-semibold tracking-wider">INGESTION_ECOSYSTEM</span>
                 </div>
                 <h2 className="font-display font-black text-3xl md:text-4xl text-text-primary uppercase tracking-tight">
-                  Many Heterogeneous Sources — One Strict Conduit
+                  Multi-Vendor Log Sources
                 </h2>
               </div>
               <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
-                Zero custom grok scripts required. Built-in decoders ingest raw firewall and endpoint formats natively.
+                Built-in decoders ingest syslog, JSON, and CSV records from firewalls, network appliances, and endpoints.
               </p>
             </div>
 
-            {/* Asymmetric Mixed Grid: Featured Source 1 (Cisco ASA) + 5 Secondary Sources */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              {/* Featured Primary Source Card: Cisco ASA / FTD (Spans 2 columns on lg/xl) */}
-              <div className="lg:col-span-2 xl:col-span-2 p-6 rounded-2xl bg-surface-bright/80 border-2 border-secondary shadow-[0_0_20px_rgba(123,208,255,0.25)] flex flex-col justify-between gap-4 group">
-                <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-xl bg-secondary/15 flex items-center justify-center text-secondary group-hover:scale-105 transition-transform">
-                    <span className="material-symbols-outlined text-[28px]">router</span>
-                  </div>
-                  <span className="px-2.5 py-1 rounded-full bg-secondary/15 border border-secondary/30 text-secondary font-mono text-[10px] font-bold uppercase tracking-wider">
-                    PRIMARY DECODER // HARDWARE PIPELINE
-                  </span>
-                </div>
-                <div>
-                  <h3 className="font-display font-black text-xl text-text-primary mb-2">Cisco ASA / Firepower FTD</h3>
-                  <p className="font-sans text-sm text-text-muted leading-relaxed">
-                    Decodes 106-series teardowns, NAT translations, VPN lifecycle events, and access-list deny records natively with zero regex overhead.
-                  </p>
-                </div>
-                <div className="pt-2 border-t border-border-muted flex items-center justify-between font-mono text-[11px] text-text-dim">
-                  <span>FORMAT: ASA SYS_LOG</span>
-                  <span className="text-secondary font-bold">NATIVE FIELD EXTRACTOR</span>
-                </div>
-              </div>
-
-              {/* Secondary Sources 2 through 6 */}
-              <div className="p-6 rounded-xl bg-surface/80 border border-secondary/30 hover:border-secondary transition-all flex flex-col justify-between gap-3 group">
-                <div className="w-11 h-11 rounded-lg bg-secondary/15 flex items-center justify-center text-secondary group-hover:scale-105 transition-transform">
-                  <span className="material-symbols-outlined text-[24px]">security</span>
-                </div>
-                <div>
-                  <h3 className="font-display font-bold text-lg text-text-primary">Fortinet FortiGate</h3>
-                  <p className="font-sans text-sm text-text-muted leading-relaxed">
-                    Extracts UTM policies, AV signatures, IPS events, and interface bindings.
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-6 rounded-xl bg-surface/80 border border-secondary/30 hover:border-secondary transition-all flex flex-col justify-between gap-3 group">
-                <div className="w-11 h-11 rounded-lg bg-secondary/15 flex items-center justify-center text-secondary group-hover:scale-105 transition-transform">
-                  <span className="material-symbols-outlined text-[24px]">troubleshoot</span>
-                </div>
-                <div>
-                  <h3 className="font-display font-bold text-lg text-text-primary">Suricata EVE-JSON</h3>
-                  <p className="font-sans text-sm text-text-muted leading-relaxed">
-                    Parses streaming IDS flow alerts, DNS queries, and TLS JA3/JA4 fingerprints.
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-6 rounded-xl bg-surface/80 border border-secondary/30 hover:border-secondary transition-all flex flex-col justify-between gap-3 group">
-                <div className="w-11 h-11 rounded-lg bg-secondary/15 flex items-center justify-center text-secondary group-hover:scale-105 transition-transform">
-                  <span className="material-symbols-outlined text-[24px]">filter_alt</span>
-                </div>
-                <div>
-                  <h3 className="font-display font-bold text-lg text-text-primary">pfSense / FreeBSD PF</h3>
-                  <p className="font-sans text-sm text-text-muted leading-relaxed">
-                    Processes packet filter CSV headers, rule traces, and state table logs.
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-6 rounded-xl bg-surface/80 border border-secondary/30 hover:border-secondary transition-all flex flex-col justify-between gap-3 group">
-                <div className="w-11 h-11 rounded-lg bg-secondary/15 flex items-center justify-center text-secondary group-hover:scale-105 transition-transform">
-                  <span className="material-symbols-outlined text-[24px]">desktop_windows</span>
-                </div>
-                <div>
-                  <h3 className="font-display font-bold text-lg text-text-primary">Windows EVTX</h3>
-                  <p className="font-sans text-sm text-text-muted leading-relaxed">
-                    Decodes Kerberos logons, privilege escalations, and Sysmon process telemetry.
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-6 rounded-xl bg-surface/80 border border-secondary/30 hover:border-secondary transition-all flex flex-col justify-between gap-3 group">
-                <div className="w-11 h-11 rounded-lg bg-secondary/15 flex items-center justify-center text-secondary group-hover:scale-105 transition-transform">
-                  <span className="material-symbols-outlined text-[24px]">terminal</span>
-                </div>
-                <div>
-                  <h3 className="font-display font-bold text-lg text-text-primary">Linux Auditd / eBPF</h3>
-                  <p className="font-sans text-sm text-text-muted leading-relaxed">
-                    Captures deep kernel syscall executions, privilege transitions, and container namespaces.
-                  </p>
-                </div>
-              </div>
+            {/* Uniform 6-Card Interactive Grid (align-items: start prevents row reflow) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+              {SOURCE_CARDS.map(card => (
+                <InteractiveCard
+                  key={card.id}
+                  card={card}
+                  activeCardId={activeSourceCard}
+                  setActiveCardId={setActiveSourceCard}
+                />
+              ))}
             </div>
 
           </div>
         </section>
 
         {/* ========================================================================= */}
-        {/* CHAPTER 03 // RADAR TOPOLOGY & CRYPTO PROOF (~70% vs ~30% ASYMMETRIC SPLIT)*/}
+        {/* CHAPTER 03 // RADAR TOPOLOGY & CRYPTO PROOF                               */}
         {/* ========================================================================= */}
         <section
           id="topology"
@@ -760,19 +816,19 @@ export function LandingPage() {
                 </h2>
               </div>
               <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
-                Real-time coordinate tracking of anomalous network entities paired with tamper-evident Merkle ledger proofs.
+                Real-time anomaly visualization paired with tamper-evident SHA-256 log hash chaining.
               </p>
             </div>
 
-            {/* Asymmetric Layout: Dominant Radar (~70% width) + Cryptographic Proof Companion (~30% width) */}
+            {/* Asymmetric Layout: Dominant Radar + Cryptographic Proof Companion */}
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
               
-              {/* DOMINANT SECTOR TOPOLOGY RADAR (~68% - 70% width) */}
+              {/* DOMINANT SECTOR TOPOLOGY RADAR */}
               <div className="xl:col-span-8 bg-surface-bright/90 border border-tertiary/35 rounded-2xl p-5 md:p-7 flex flex-col gap-4 shadow-2xl backdrop-blur-md relative overflow-hidden">
                 <div className="flex items-center justify-between font-mono text-xs pb-3 border-b border-border-muted">
                   <div className="flex items-center gap-2 text-tertiary font-bold">
                     <span className="material-symbols-outlined text-[20px]">radar</span>
-                    <span className="tracking-wide">SECTOR TOPOLOGY RADAR // AZIMUTH: 360&deg; CONTINUOUS SWEEP</span>
+                    <span className="tracking-wide">SECTOR TOPOLOGY RADAR // CONTINUOUS SWEEP</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-[11px] text-text-dim hidden sm:inline">SWEEP: 5.0s</span>
@@ -836,7 +892,7 @@ export function LandingPage() {
 
                   {/* Coordinates Overlay */}
                   <div className="absolute bottom-3 left-4 font-mono text-[11px] text-tertiary/80 font-bold bg-surface-dim/80 px-2.5 py-1 rounded border border-tertiary/20">
-                    FOV: 10.0.0.0/16 // SCAN LAT: 0.0004s // SECTORS: 12
+                    FOV: 10.0.0.0/16 // SECTORS: 12
                   </div>
                   <div className="absolute top-3 right-4 font-mono text-[10px] text-text-dim">
                     GRID COORD: 34.0522&deg; N, 118.2437&deg; W
@@ -844,7 +900,7 @@ export function LandingPage() {
                 </div>
               </div>
 
-              {/* CRYPTOGRAPHIC PROOF COMPANION (~30% - 32% width) */}
+              {/* CRYPTOGRAPHIC PROOF COMPANION */}
               <div className="xl:col-span-4 bg-surface-bright/90 border border-tertiary/35 rounded-2xl p-5 md:p-6 flex flex-col justify-between gap-4 shadow-2xl backdrop-blur-md">
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center justify-between pb-2 border-b border-border-muted">
@@ -852,16 +908,16 @@ export function LandingPage() {
                       <span className="material-symbols-outlined text-tertiary text-[22px]">shield</span>
                       <h3 className="font-display font-bold text-lg text-text-primary">Cryptographic Proof</h3>
                     </div>
-                    <span className="font-mono text-[10px] font-bold text-tertiary px-2 py-0.5 rounded bg-tertiary/15 border border-tertiary/30">IMMUTABLE</span>
+                    <span className="font-mono text-[10px] font-bold text-tertiary px-2 py-0.5 rounded bg-tertiary/15 border border-tertiary/30">SHA-256 CHAIN</span>
                   </div>
                   <p className="font-sans text-xs text-text-muted leading-relaxed font-normal">
-                    Every millisecond batch is SHA-256 chained in hardware enclave memory. Records cannot be rewritten or dropped.
+                    Log batches are hashed and linked into a Merkle tree sequence using SHA-256 digests.
                   </p>
 
                   <div className="bg-surface-dim p-4 rounded-xl border border-tertiary/25 flex flex-col gap-2.5 font-mono text-[11px]">
                     <div className="flex justify-between items-center text-text-dim pb-1 border-b border-border-muted">
                       <span className="text-tertiary font-bold">LEDGER BLOCK: {FALLBACK_LEDGER_BLOCK}</span>
-                      <span className="text-tertiary font-bold">SEALED</span>
+                      <span className="text-tertiary font-bold">VERIFIED</span>
                     </div>
                     <div>
                       <span className="text-text-dim text-[10px] block">PREV HASH:</span>
@@ -872,8 +928,8 @@ export function LandingPage() {
                       <span className="text-tertiary truncate block font-bold">0x4ea94dfb19a3d9dc8c7e...c7</span>
                     </div>
                     <div>
-                      <span className="text-text-dim text-[10px] block">SIGNATURE:</span>
-                      <span className="text-secondary truncate block">ECDSA-P256 hardware token</span>
+                      <span className="text-text-dim text-[10px] block">VERIFICATION:</span>
+                      <span className="text-secondary truncate block">SHA-256 Cryptographic Hash Chain</span>
                     </div>
                   </div>
                 </div>
@@ -881,8 +937,8 @@ export function LandingPage() {
                 <div className="p-3 bg-surface-dim border border-tertiary/20 rounded-xl flex items-center gap-3">
                   <span className="material-symbols-outlined text-tertiary text-[24px]">verified_user</span>
                   <div className="flex flex-col">
-                    <span className="font-sans font-bold text-xs text-text-primary">Forensic Subpoena Export</span>
-                    <span className="font-sans text-[11px] text-text-muted">Tamper-evident signed archives for court discovery.</span>
+                    <span className="font-sans font-bold text-xs text-text-primary">Forensic Export</span>
+                    <span className="font-sans text-[11px] text-text-muted">Tamper-evident log export for forensic review.</span>
                   </div>
                 </div>
               </div>
@@ -909,18 +965,18 @@ export function LandingPage() {
                   <span className="font-mono text-xs text-text-dim font-semibold tracking-wider">CAPITAL_EFFICIENCY</span>
                 </div>
                 <h2 className="font-display font-black text-3xl md:text-4xl text-text-primary uppercase tracking-tight">
-                  ROI &amp; SOC Fatigue Estimator
+                  ROI &amp; Noise Reduction Estimator
                 </h2>
               </div>
               <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
-                Calculate the dramatic cost and hours reduction achieved by filtering noise and normalizing schema prior to SIEM ingestion.
+                Calculate estimated cost savings achieved by filtering noise and normalizing log schemas prior to SIEM ingestion.
               </p>
             </div>
 
             {/* Interactive Calculator Workspace */}
             <div className="p-6 lg:p-10 bg-surface-bright/90 border border-tertiary/40 rounded-2xl grid grid-cols-1 xl:grid-cols-12 gap-8 lg:gap-12 items-center shadow-2xl backdrop-blur-md">
               
-              {/* Controls Sliders (6 cols) */}
+              {/* Controls Sliders */}
               <div className="xl:col-span-6 flex flex-col gap-6">
                 
                 {/* Volume Slider */}
@@ -975,11 +1031,11 @@ export function LandingPage() {
 
                 <div className="p-3 bg-surface-dim border border-tertiary/20 rounded-xl flex items-center gap-2 font-mono text-xs text-text-muted">
                   <span className="material-symbols-outlined text-tertiary text-[20px]">calculate</span>
-                  <span>Model based on SIEM index pricing ($3.00/GB) + Tier 1 SOC alert triage pace.</span>
+                  <span>Model based on estimated SIEM index costs ($3.00/GB) and noise reduction metrics.</span>
                 </div>
               </div>
 
-              {/* Calculated Outputs (6 cols) */}
+              {/* Calculated Outputs */}
               <div className="xl:col-span-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-5 bg-surface-dim border border-tertiary/30 rounded-xl flex flex-col justify-between">
                   <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Monthly SIEM Savings</span>
@@ -1004,11 +1060,11 @@ export function LandingPage() {
                 </div>
 
                 <div className="p-5 bg-surface-dim border border-secondary/30 rounded-xl flex flex-col justify-between">
-                  <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">False Positives Filtered</span>
+                  <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Noise Filtered</span>
                   <div className="py-1">
                     <span className="font-mono text-3xl lg:text-4xl text-secondary font-black">78.4%</span>
                   </div>
-                  <span className="font-sans text-xs text-text-muted font-normal">Rejected at kernel layer</span>
+                  <span className="font-sans text-xs text-text-muted font-normal">Filtered prior to SIEM</span>
                 </div>
 
                 <div className="p-5 bg-surface-dim border border-border-muted rounded-xl flex flex-col justify-between">
@@ -1017,7 +1073,7 @@ export function LandingPage() {
                     <span className="font-mono text-3xl lg:text-4xl text-text-primary font-black">&lt; 14</span>
                     <span className="text-text-primary font-sans font-bold text-sm">days</span>
                   </div>
-                  <span className="font-sans text-xs text-text-muted font-normal">Instant drop-in deployment</span>
+                  <span className="font-sans text-xs text-text-muted font-normal">Drop-in deployment</span>
                 </div>
               </div>
 
@@ -1026,7 +1082,7 @@ export function LandingPage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* CHAPTER 05 // INTERACTIVE DISSECTION // FULL THEME SUPPORT               */}
+        {/* CHAPTER 05 // INTERACTIVE DISSECTION                                     */}
         {/* ========================================================================= */}
         <section
           id="demo"
@@ -1041,11 +1097,11 @@ export function LandingPage() {
                   <span className="font-mono text-xs text-text-dim font-semibold tracking-wider">INTERACTIVE_DISSECTION</span>
                 </div>
                 <h2 className="font-display font-black text-3xl md:text-4xl text-text-primary uppercase tracking-tight">
-                  Forensic Dissection: Raw In &rarr; Explained Alert Out
+                  Forensic Dissection: Raw Log to Explained Verdict
                 </h2>
               </div>
               <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
-                Observe how a noisy, malformed firewall string undergoes lexical parsing, Merkle proof creation, and AI explanation.
+                Observe how a firewall log string undergoes lexical parsing, OCSF mapping, SHA-256 hashing, and anomaly explanation.
               </p>
             </div>
 
@@ -1057,17 +1113,17 @@ export function LandingPage() {
                 <div className="flex items-center justify-between pb-3 border-b border-border-muted">
                   <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
                     <span className="w-2 h-2 rounded-full bg-[var(--color-severity-critical)]"></span>
-                    <span>01. RAW UNSTRUCTURED INGEST</span>
+                    <span>01. RAW LOG INGEST</span>
                   </div>
                   <span className="font-mono text-[10px] font-bold text-[var(--color-severity-critical)] px-2 py-0.5 rounded bg-[var(--color-severity-critical-bg)] border border-[var(--color-severity-critical-border)]">
-                    DIRTY LOG
+                    UNSTRUCTURED LOG
                   </span>
                 </div>
                 <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-text-muted leading-relaxed h-52 flex flex-col justify-center border border-border-muted">
                   <p>
                     <span className="text-[var(--color-severity-critical)] font-bold">%ASA-4-106023: Deny udp src</span> outside:185.220.101.5/54312 dst inside:10.0.4.12/445 by access-group "OUTSIDE_IN" [0x7f4c9a81, 0x0]
                   </p>
-                  <p className="text-text-dim text-[11px] pt-3"># Non-standard timestamp, unnormalized port string, unverified origin signature.</p>
+                  <p className="text-text-dim text-[11px] pt-3"># Raw firewall string with vendor-specific headers and unparsed fields.</p>
                 </div>
                 <div className="font-mono text-[11px] text-text-dim flex items-center justify-between pt-1">
                   <span>SOCKET: UDP/514</span>
@@ -1083,7 +1139,7 @@ export function LandingPage() {
                     <span>02. ULPF TRANSFORM PIPELINE</span>
                   </div>
                   <span className="font-mono text-[10px] font-bold text-secondary px-2 py-0.5 rounded bg-secondary/10 border border-secondary/20">
-                    CANONICAL
+                    CANONICAL OCSF
                   </span>
                 </div>
                 <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-secondary leading-relaxed h-52 flex flex-col justify-center gap-1.5 border border-border-muted">
@@ -1095,7 +1151,7 @@ export function LandingPage() {
                   <span className="text-tertiary truncate">merkle_leaf: 0x82f489ad...</span>
                 </div>
                 <div className="font-mono text-[11px] text-text-dim flex items-center justify-between pt-1">
-                  <span>TRANSFORM: 0.0009s</span>
+                  <span>TRANSFORM: &lt;10ms</span>
                   <span>SCHEMA: OCSF 1.1.0</span>
                 </div>
               </div>
@@ -1120,13 +1176,13 @@ export function LandingPage() {
                     <strong className="text-text-primary font-semibold">XAI Reasoning:</strong> Anomaly score 0.94 triggered due to unauthorized SMB syn-probe originating from verified Tor exit node targeting an internal server.
                   </p>
                   <div className="p-2 bg-surface rounded font-mono text-[10px] text-tertiary flex items-center justify-between">
-                    <span>ACTION: BLOCK RULE SENT</span>
-                    <span>✓ TAMPER PROVED</span>
+                    <span>ACTION: THREAT ANNOTATED</span>
+                    <span>✓ HASH VERIFIED</span>
                   </div>
                 </div>
                 <div className="font-mono text-[11px] text-text-dim flex items-center justify-between pt-1">
-                  <span>DISPATCH: SIEM + SLACK</span>
-                  <span>SOAR ID: #84920</span>
+                  <span>DISPATCH: SIEM + SOC</span>
+                  <span>RECORD ID: #84920</span>
                 </div>
               </div>
 
@@ -1162,8 +1218,8 @@ export function LandingPage() {
         </div>
 
         <div className="max-w-[1600px] mx-auto pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-text-dim font-sans">
-          <p>&copy; 2025 LOG AI Inc. All rights reserved. Enterprise-grade cryptographic log pre-processing.</p>
-          <p className="font-mono text-[11px] text-tertiary">ISO/IEC 27001 &amp; SOC2 TYPE II COMPLIANT</p>
+          <p>&copy; 2025 LOG AI. Open Cybersecurity Schema log pre-processing framework.</p>
+          <p className="font-mono text-[11px] text-tertiary">OCSF v1.1.0 ALIGNED</p>
         </div>
       </footer>
 
@@ -1180,8 +1236,8 @@ export function LandingPage() {
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-secondary"></span>
-              <span className="text-text-dim">TAMPER-PROOF LEDGER:</span>
-              <span className="text-secondary font-bold">SHA-256 VERIFIED</span>
+              <span className="text-text-dim">LOG VERIFICATION:</span>
+              <span className="text-secondary font-bold">SHA-256 HASH CHAIN</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-primary"></span>
@@ -1190,8 +1246,8 @@ export function LandingPage() {
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-tertiary"></span>
-              <span className="text-text-dim">SOC LATENCY:</span>
-              <span className="text-tertiary font-bold">{FALLBACK_SOC_LATENCY}</span>
+              <span className="text-text-dim">PIPELINE LATENCY:</span>
+              <span className="text-tertiary font-bold">{FALLBACK_PIPELINE_LATENCY}</span>
             </div>
           </div>
 
