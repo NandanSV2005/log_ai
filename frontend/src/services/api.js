@@ -229,4 +229,21 @@ export const api = {
     });
     return await handleResponse(res);
   },
+
+  // Public Forensic Demo APIs
+  async analyzeDemo(logLine) {
+    const res = await fetch(`${API_BASE_URL}/api/v1/demo/analyze`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ log_line: logLine }),
+    });
+    return await handleResponse(res);
+  },
+
+  async getDemoPresets() {
+    const res = await fetch(`${API_BASE_URL}/api/v1/demo/presets`, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return await handleResponse(res);
+  },
 };

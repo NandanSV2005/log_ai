@@ -9,7 +9,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi import _rate_limit_exceeded_handler
 
 from app.config import settings
-from app.routers import ingest, dashboard, auth, copilot
+from app.routers import ingest, dashboard, auth, copilot, demo
 from app.services.queue import queue_manager
 
 logging.basicConfig(
@@ -66,6 +66,7 @@ app.include_router(auth.router)
 app.include_router(ingest.router)
 app.include_router(dashboard.router)
 app.include_router(copilot.router)
+app.include_router(demo.router)
 
 frontend_dist = Path(__file__).parent.parent / "frontend" / "dist"
 legacy_static = Path(__file__).parent / "static"
