@@ -11,6 +11,7 @@ import { RegisterPage } from './pages/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { LogExplorerPage } from './pages/LogExplorerPage';
 import { ForensicsPage } from './pages/ForensicsPage';
+import { InvestigationReportPage } from './pages/InvestigationReportPage';
 import { RuleStudioPage } from './pages/RuleStudioPage';
 import { ThreatIntelPage } from './pages/ThreatIntelPage';
 import { SettingsPage } from './pages/SettingsPage';
@@ -69,6 +70,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ForensicsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/forensics/investigation/:incidentId"
+            element={
+              <ProtectedRoute>
+                <InvestigationReportPage />
               </ProtectedRoute>
             }
           />

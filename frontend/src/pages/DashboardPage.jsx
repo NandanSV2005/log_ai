@@ -563,7 +563,10 @@ export function DashboardPage({ pollingInterval }) {
                           </td>
                           <td className="py-2.5 px-3 text-right whitespace-nowrap">
                             <button
-                              onClick={() => setSelectedEventDrawer(evt)}
+                              onClick={() => {
+                                const incId = evt.incident_id || evt.id || 'inc_a81b5b';
+                                navigate(`/forensics/investigation/${encodeURIComponent(incId)}`, { state: { event: evt } });
+                              }}
                               className="btn-secondary px-3 py-1.5 rounded text-[10px] font-bold touch-target"
                             >
                               Inspect Stream
@@ -581,42 +584,6 @@ export function DashboardPage({ pollingInterval }) {
               )}
             </div>
           </div>
-
-          {/* EVENT DETAIL DRAWER */}
-          {selectedEventDrawer && (
-            <div
-              className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
-              onClick={(e) => {
-                if (e.target === e.currentTarget) setSelectedEventDrawer(null);
-              }}
-            >
-              <div className="glass-panel w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border-muted p-4 sm:p-6 space-y-4 shadow-2xl">
-                <div className="flex justify-between items-center border-b border-border-muted pb-3">
-                  <h3 className="text-base font-bold text-text-primary">OCSF Event Inspector</h3>
-                  <button
-                    onClick={() => setSelectedEventDrawer(null)}
-                    className="p-1.5 rounded text-text-muted hover:text-text-primary touch-target"
-                    aria-label="Close Event Inspector"
-                  >
-                    <span className="material-symbols-outlined text-lg">close</span>
-                  </button>
-                </div>
-                <div className="p-3 sm:p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-xs space-y-2 overflow-x-auto custom-scrollbar-touch">
-                  <pre className="text-emerald-400 text-[11px] leading-relaxed break-all whitespace-pre-wrap">
-                    {JSON.stringify(selectedEventDrawer, null, 2)}
-                  </pre>
-                </div>
-                <div className="text-right">
-                  <button
-                    onClick={() => setSelectedEventDrawer(null)}
-                    className="btn-secondary px-4 py-2 rounded-xl text-xs font-bold touch-target"
-                  >
-                    Close Inspector
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
 
         </div>
       )}

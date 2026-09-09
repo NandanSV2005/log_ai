@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 
 export function ForensicsPage() {
+  const navigate = useNavigate();
   const [activeCases, setActiveCases] = useState([]);
   const [recentEvents, setRecentEvents] = useState([]);
   const [selectedCase, setSelectedCase] = useState(null);
@@ -40,6 +42,13 @@ export function ForensicsPage() {
     }
   }, [topCase]);
 
+  const handleOpenReport = (incidentId, extraData = {}) => {
+    const id = incidentId || 'inc_a81b5b';
+    navigate(`/forensics/investigation/${encodeURIComponent(id)}`, {
+      state: { incident: topCase, events: caseEvents, ...extraData }
+    });
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       
@@ -47,7 +56,7 @@ export function ForensicsPage() {
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border-muted pb-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
-            Digital Forensics & <span className="text-primary">Entity Resolution</span>
+            Digital Forensics &amp; <span className="text-primary">Entity Resolution</span>
           </h1>
           <p className="text-xs sm:text-sm text-text-muted mt-1 font-sans">
             Cryptographic SHA-256 Merkle chain verification, multi-vector graph incident timelines, and root-cause entity analysis.
@@ -122,7 +131,7 @@ export function ForensicsPage() {
                   <div
                     key={incident.incident_id || idx}
                     onClick={() => setSelectedCase(incident)}
-                    className={`p-3.5 rounded-xl border transition-all cursor-pointer space-y-2.5 touch-target ${
+                    className={`p-3.5 rounded-xl border transition-all cursor-pointer space-y-3 ${
                       isSelected
                         ? 'bg-rose-500/15 border-rose-500/60 ring-1 ring-rose-500/30'
                         : 'bg-surface border-border-muted hover:border-primary/40'
@@ -136,13 +145,31 @@ export function ForensicsPage() {
                         {incident.status || 'Active'}
                       </span>
                     </div>
-                    <div className="text-xs text-text-primary font-mono font-medium flex items-center justify-between gap-1 flex-wrap">
-                      <span className="text-text-muted text-[11px]">Offending IP:</span>
-                      <span className="font-bold text-text-primary bg-surface-dim px-2 py-0.5 rounded border border-border-muted font-mono">{incident.source_ip || '192.168.1.100'}</span>
+
+                    {/* Fixed Structured Alignment Layout */}
+                    <div className="grid grid-cols-2 gap-2 text-[11px] font-mono border-t border-b border-border-muted/40 py-2">
+                      <div>
+                        <span className="text-text-muted block text-[10px] uppercase tracking-wider">OFFENDING IP</span>
+                        <span className="font-bold text-text-primary block truncate mt-0.5">{incident.source_ip || '192.168.1.100'}</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-text-muted block text-[10px] uppercase tracking-wider">CORRELATED EVENTS</span>
+                        <span className="font-bold text-text-primary block mt-0.5">{incident.event_count || 1} events</span>
+                      </div>
                     </div>
-                    <div className="text-[11px] text-text-muted flex items-center justify-between pt-1 border-t border-border-muted/40 font-mono">
-                      <span>Correlated burst</span>
-                      <span className="font-bold text-text-primary">{incident.event_count || 1} events</span>
+
+                    <div className="flex justify-between items-center pt-1 font-mono">
+                      <span className="text-[10px] text-text-muted">Score: <strong className="text-rose-400">{(incident.threat_score || 85.0).toFixed(1)}</strong></span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenReport(incident.incident_id);
+                        }}
+                        className="text-[11px] font-bold text-primary hover:text-text-primary transition-colors flex items-center space-x-1"
+                      >
+                        <span>Open Report</span>
+                        <span>&rarr;</span>
+                      </button>
                     </div>
                   </div>
                 );
@@ -156,8 +183,16 @@ export function ForensicsPage() {
         {/* Right Column: Case Deep Relationship Graph & Evidence (Span 8) */}
         <div className="lg:col-span-8 glass-panel p-4 sm:p-6 rounded-2xl border border-border-muted space-y-5 shadow-xl">
           <div className="flex justify-between items-center border-b border-border-muted pb-3 font-mono text-xs">
-            <span className="font-bold text-text-primary uppercase tracking-wider">Entity Relationship & Evidence Breakdown</span>
-            {topCase && <span className="text-rose-400 font-bold text-xs break-all">CASE-#{(topCase.incident_id || '').substring(0, 8)}</span>}
+            <span className="font-bold text-text-primary uppercase tracking-wider">Entity Relationship &amp; Evidence Breakdown</span>
+            {topCase && (
+              <button
+                onClick={() => handleOpenReport(topCase.incident_id)}
+                className="btn-primary px-3 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center space-x-1 shadow-sm"
+              >
+                <span>Inspect Full Report</span>
+                <span className="material-symbols-outlined text-xs">arrow_forward</span>
+              </button>
+            )}
           </div>
 
           {topCase ? (
@@ -165,19 +200,19 @@ export function ForensicsPage() {
               {/* Entity Node Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-center">
                 <div className="p-2.5 rounded-xl bg-surface-dim border border-border-muted">
-                  <div className="text-[9px] text-text-dim">Source Entity</div>
+                  <div className="text-[9px] text-text-dim uppercase">Source Entity</div>
                   <div className="font-bold text-text-primary text-xs mt-0.5 break-all">{topCase.source_ip || '192.168.1.100'}</div>
                 </div>
                 <div className="p-2.5 rounded-xl bg-surface-dim border border-border-muted">
-                  <div className="text-[9px] text-text-dim">Events Correlated</div>
+                  <div className="text-[9px] text-text-dim uppercase">Events Correlated</div>
                   <div className="font-bold text-text-primary text-xs mt-0.5">{topCase.event_count || 1}</div>
                 </div>
                 <div className="p-2.5 rounded-xl bg-surface-dim border border-border-muted">
-                  <div className="text-[9px] text-text-dim">Anomaly Threat Score</div>
+                  <div className="text-[9px] text-text-dim uppercase">Anomaly Threat Score</div>
                   <div className="font-bold text-rose-400 text-xs mt-0.5">{(topCase.threat_score || 85.0).toFixed(1)}</div>
                 </div>
                 <div className="p-2.5 rounded-xl bg-surface-dim border border-border-muted">
-                  <div className="text-[9px] text-text-dim">MITRE ATT&CK Tactic</div>
+                  <div className="text-[9px] text-text-dim uppercase">MITRE ATT&amp;CK Tactic</div>
                   <div className="font-bold text-text-primary text-xs mt-0.5 break-all">{topCase.mitre_tactics || 'T1110'}</div>
                 </div>
               </div>

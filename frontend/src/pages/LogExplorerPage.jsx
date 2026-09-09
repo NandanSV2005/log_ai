@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 
 export function LogExplorerPage() {
+  const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSeverities, setSelectedSeverities] = useState({
@@ -10,7 +12,6 @@ export function LogExplorerPage() {
     INFO: true,
   });
   const [expandedEventId, setExpandedEventId] = useState(null);
-  const [selectedEventDrawer, setSelectedEventDrawer] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 15;
@@ -32,19 +33,6 @@ export function LogExplorerPage() {
   useEffect(() => {
     fetchEvents();
   }, []);
-
-  // Listen for Escape key to close event inspect details modal
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        setSelectedEventDrawer(null);
-      }
-    };
-    if (selectedEventDrawer) {
-      window.addEventListener('keydown', handleKeyDown);
-    }
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedEventDrawer]);
 
   const handleSeverityToggle = (level) => {
     setSelectedSeverities((prev) => ({ ...prev, [level]: !prev[level] }));
@@ -271,7 +259,10 @@ export function LogExplorerPage() {
                     Score: <span className="font-bold text-text-primary">{(evt.threat_score || 12.0).toFixed(1)}</span>
                   </div>
                   <button
-                    onClick={() => setSelectedEventDrawer(evt)}
+                    onClick={() => {
+                      const incId = evt.incident_id || evt.incidentId || evt.id || 'INC-2026-8941';
+                      navigate(`/forensics/investigation/${encodeURIComponent(incId)}`, { state: { event: evt } });
+                    }}
                     className="btn-secondary px-3 py-1.5 rounded-lg text-[10px] font-bold touch-target"
                   >
                     Inspect Payload
@@ -338,9 +329,12 @@ export function LogExplorerPage() {
                           {evt.mitre_tactic || 'T1110 - Brute Force'}
                         </span>
                       </td>
-                      <td className="py-3.5 px-3 text-right whitespace-nowrap">
+                      <td className="py-3.5 px-3 text-text-right whitespace-nowrap">
                         <button
-                          onClick={() => setSelectedEventDrawer(evt)}
+                          onClick={() => {
+                            const incId = evt.incident_id || evt.incidentId || evt.id || 'INC-2026-8941';
+                            navigate(`/forensics/investigation/${encodeURIComponent(incId)}`, { state: { event: evt } });
+                          }}
                           className="btn-secondary px-3 py-1.5 rounded-lg text-[10px] font-bold touch-target"
                         >
                           Inspect Payload
@@ -377,60 +371,6 @@ export function LogExplorerPage() {
           </button>
         </div>
       </div>
-
-      {/* EVENT INSPECTOR DRAWER MODAL */}
-      {selectedEventDrawer && (
-        <div
-          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 cursor-pointer overflow-y-auto"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setSelectedEventDrawer(null);
-          }}
-        >
-          <div
-            className="glass-panel w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border-muted p-4 sm:p-6 space-y-4 shadow-2xl animate-in zoom-in-95 duration-200 cursor-default"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-start border-b border-border-muted pb-3 font-mono gap-2">
-              <div>
-                <span className="text-xs text-primary font-bold">OCSF 1.1 UNIFIED EVENT RECORD</span>
-                <h3 className="text-base font-bold text-text-primary mt-0.5 break-all">Source: {selectedEventDrawer.source_ip || '192.168.1.100'}</h3>
-              </div>
-              <button
-                onClick={() => setSelectedEventDrawer(null)}
-                aria-label="Close event details"
-                className="p-2 rounded-lg bg-surface-dim hover:bg-surface-hover border border-border-muted text-text-muted hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-primary transition-all flex items-center justify-center cursor-pointer touch-target"
-              >
-                <span className="material-symbols-outlined text-xl">close</span>
-              </button>
-            </div>
-
-            <div className="p-3 sm:p-4 rounded-xl bg-surface-dim border border-border-muted font-mono text-xs space-y-3 max-h-96 overflow-y-auto custom-scrollbar-touch">
-              <div className="text-[10px] text-text-dim uppercase">Original Syslog Payload:</div>
-              <div className="p-2.5 rounded bg-surface border border-border-muted text-text-primary break-all font-bold">
-                {selectedEventDrawer.original_event || selectedEventDrawer.payload || 'No raw payload available'}
-              </div>
-
-              <div className="text-[10px] text-text-dim uppercase pt-2">Structured OCSF JSON Object:</div>
-              <pre className="p-3 rounded bg-surface border border-border-muted text-emerald-400 text-[11px] leading-relaxed break-all whitespace-pre-wrap">
-                {JSON.stringify(selectedEventDrawer, null, 2)}
-              </pre>
-            </div>
-
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pt-3 border-t border-border-muted">
-              <span className="font-mono text-[10px] text-text-muted break-all">
-                SHA-256 Digest: {(selectedEventDrawer.raw_event_hash || '').substring(0, 16)}...
-              </span>
-              <button
-                onClick={() => setSelectedEventDrawer(null)}
-                className="btn-secondary px-4 py-2 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-primary touch-target"
-              >
-                Close Inspector
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }
