@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
+import { StitchBrandMark } from '../components/common/StitchBrandMark';
 import { api } from '../services/api';
 
 // =============================================================================
@@ -146,49 +147,56 @@ export function LandingPage() {
       {/* ========================================================================= */}
       {/* 1. FIXED NAVIGATION HEADER                                                */}
       {/* ========================================================================= */}
+      {/* ========================================================================= */}
+      {/* 1. FIXED NAVIGATION HEADER                                                */}
+      {/* ========================================================================= */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-surface-dim/90 backdrop-blur-xl border-b border-border-muted shadow-2xl">
-        <div className="h-16 w-full max-w-[1600px] mx-auto px-4 md:px-8 flex items-center justify-between">
+        <div className="h-16 w-full max-w-[1600px] mx-auto px-4 md:px-8 flex items-center justify-between gap-6 lg:gap-10">
           
-          {/* Brand Logo & Status Indicator */}
-          <div className="flex items-center gap-3 md:gap-5">
-            <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shadow-[0_0_12px_rgba(167,139,250,0.35)]">
-              <span className="material-symbols-outlined text-[20px]">security</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="font-display font-black text-xl md:text-2xl text-text-primary tracking-tight uppercase">
-                LOG AI
-              </span>
-              <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full bg-surface-bright/80 border border-border-muted">
-                <span className="w-2 h-2 rounded-full bg-tertiary animate-ping"></span>
-                <span className="font-mono text-[11px] font-bold text-tertiary tracking-wider uppercase">ULPF v2.4 // ONLINE</span>
-                <span className="font-mono text-[11px] text-text-muted">
-                  [{(stats.total_events_ingested || 48281).toLocaleString()} eps]
-                </span>
+          {/* Logical Group 1 (Left): Brand Logo & Status Chip */}
+          <div className="flex items-center gap-4 xl:gap-6 flex-shrink-0">
+            <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => scrollToSection('pipeline')}>
+              <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shadow-[0_0_12px_rgba(167,139,250,0.35)]">
+                <StitchBrandMark className="w-5 h-5 text-primary" size={20} />
               </div>
+              <div className="flex items-baseline font-display font-black text-xl md:text-2xl tracking-tight text-text-primary whitespace-nowrap">
+                <span>LOG</span>
+                <span className="font-mono text-primary text-sm md:text-base font-bold px-1.5">//</span>
+                <span>AI</span>
+              </div>
+            </div>
+
+            {/* Status Chip - Anchored on 2XL wide screens to prevent navbar crowding */}
+            <div className="hidden 2xl:flex items-center gap-2 px-3 py-1 rounded-full bg-surface-bright/80 border border-border-muted whitespace-nowrap">
+              <span className="w-2 h-2 rounded-full bg-tertiary animate-ping"></span>
+              <span className="font-mono text-[11px] font-bold text-tertiary tracking-wider uppercase">ULPF v2.4 // ONLINE</span>
+              <span className="font-mono text-[11px] text-text-muted">
+                [{(stats.total_events_ingested || 48281).toLocaleString()} eps]
+              </span>
             </div>
           </div>
 
-          {/* Desktop Navigation Section Jumpers */}
-          <nav className="hidden xl:flex items-center gap-1 font-mono text-[12px] tracking-wide">
-            <button onClick={() => scrollToSection('pipeline')} className="px-3 py-1.5 rounded-lg bg-surface border border-primary/30 text-primary font-bold hover:bg-surface-hover transition-colors">
+          {/* Logical Group 2 (Center): Chapter Nav Links */}
+          <nav className="hidden xl:flex items-center gap-2 lg:gap-3 font-mono text-[12px] tracking-wide">
+            <button onClick={() => scrollToSection('pipeline')} className="px-3.5 py-1.5 rounded-lg bg-surface border border-primary/30 text-primary font-bold hover:bg-surface-hover transition-colors whitespace-nowrap">
               01 // Pipeline
             </button>
-            <button onClick={() => scrollToSection('sources')} className="px-3 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors">
+            <button onClick={() => scrollToSection('sources')} className="px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
               02 // Sources
             </button>
-            <button onClick={() => scrollToSection('topology')} className="px-3 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors">
+            <button onClick={() => scrollToSection('topology')} className="px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
               03 // Topology
             </button>
-            <button onClick={() => scrollToSection('roi-engine')} className="px-3 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors">
+            <button onClick={() => scrollToSection('roi-engine')} className="px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
               04 // ROI Engine
             </button>
-            <button onClick={() => scrollToSection('demo')} className="px-3 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors">
+            <button onClick={() => scrollToSection('demo')} className="px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
               05 // Live Demo
             </button>
           </nav>
 
-          {/* Action CTAs & Theme Switcher */}
-          <div className="flex items-center gap-3 md:gap-4">
+          {/* Logical Group 3 (Right): Theme Toggle & Open SOC Console CTA */}
+          <div className="flex items-center gap-3 md:gap-5 flex-shrink-0">
             <div className="hidden md:flex items-center bg-surface-dim rounded-lg p-1 border border-border-muted">
               <button
                 onClick={() => setTheme('dark')}
@@ -210,7 +218,7 @@ export function LandingPage() {
 
             <Link
               to="/dashboard"
-              className="px-4 py-2 rounded-lg bg-primary text-surface-dim font-sans font-bold text-sm shadow-[0_0_18px_rgba(167,139,250,0.45)] hover:bg-primary-fixed transition-all"
+              className="px-4 py-2 rounded-lg bg-primary text-surface-dim font-sans font-bold text-sm shadow-[0_0_18px_rgba(167,139,250,0.45)] hover:bg-primary-fixed transition-all whitespace-nowrap"
             >
               Open SOC Console
             </Link>
@@ -1133,11 +1141,15 @@ export function LandingPage() {
       {/* ========================================================================= */}
       <footer className="w-full px-4 md:px-8 xl:px-14 py-16 bg-surface-dim border-t border-border-muted">
         <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-border-muted">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shadow-[0_0_12px_rgba(167,139,250,0.35)]">
-              <span className="material-symbols-outlined text-[20px]">security</span>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shadow-[0_0_12px_rgba(167,139,250,0.35)]">
+              <StitchBrandMark className="w-5 h-5 text-primary" size={20} />
             </div>
-            <span className="font-display font-black text-xl text-text-primary tracking-tight uppercase">LOG AI</span>
+            <div className="flex items-baseline font-display font-black text-xl tracking-tight text-text-primary uppercase whitespace-nowrap">
+              <span>LOG</span>
+              <span className="font-mono text-primary text-sm font-bold px-1.5">//</span>
+              <span>AI</span>
+            </div>
           </div>
 
           <nav className="flex flex-wrap items-center gap-6 font-mono text-xs text-text-muted">
