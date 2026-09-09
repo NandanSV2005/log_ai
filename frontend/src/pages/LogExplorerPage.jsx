@@ -59,7 +59,7 @@ export function LogExplorerPage() {
       (evt.original_event || '').toLowerCase().includes(q);
 
     const level = (evt.threat_level || 'LOW').toUpperCase();
-    const mappedLevel = level === 'HIGH' ? 'CRITICAL' : level === 'MEDIUM' ? 'WARN' : 'INFO';
+    const mappedLevel = (level === 'HIGH' || level === 'CRITICAL') ? 'CRITICAL' : level === 'MEDIUM' ? 'WARN' : 'INFO';
     const matchesSeverity = selectedSeverities[mappedLevel] !== false;
 
     return matchesSearch && matchesSeverity;
@@ -69,7 +69,7 @@ export function LogExplorerPage() {
   const paginatedEvents = filteredEvents.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   // Severity metrics
-  const criticalCount = events.filter((e) => (e.threat_level || '').toUpperCase() === 'HIGH').length;
+  const criticalCount = events.filter((e) => ['HIGH', 'CRITICAL'].includes((e.threat_level || '').toUpperCase())).length;
   const warnCount = events.filter((e) => (e.threat_level || '').toUpperCase() === 'MEDIUM').length;
   const infoCount = events.filter((e) => (e.threat_level || '').toUpperCase() === 'LOW').length;
 
@@ -244,8 +244,9 @@ export function LogExplorerPage() {
                 <div className="flex justify-between items-center text-[11px]">
                   <span className="text-text-muted">{evt.timestamp || '2026-08-31 19:40'}</span>
                   <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                    evt.threat_level === 'HIGH' ? 'bg-rose-500/20 text-rose-400' :
-                    evt.threat_level === 'MEDIUM' ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'
+                    evt.threat_level === 'CRITICAL' ? 'bg-[var(--color-severity-critical-bg)] text-[var(--color-severity-critical)] border border-[var(--color-severity-critical-border)]' :
+                    evt.threat_level === 'HIGH' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
+                    evt.threat_level === 'MEDIUM' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                   }`}>
                     {evt.threat_level || 'LOW'}
                   </span>
@@ -314,7 +315,8 @@ export function LogExplorerPage() {
                       </td>
                       <td className="py-3.5 px-3 whitespace-nowrap">
                         <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold ${
-                          evt.threat_level === 'HIGH' || evt.threat_level === 'CRITICAL' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
+                          evt.threat_level === 'CRITICAL' ? 'bg-[var(--color-severity-critical-bg)] text-[var(--color-severity-critical)] border border-[var(--color-severity-critical-border)]' :
+                          evt.threat_level === 'HIGH' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
                           evt.threat_level === 'MEDIUM' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                         }`}>
                           {evt.threat_level || 'LOW'}

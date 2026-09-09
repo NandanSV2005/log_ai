@@ -138,7 +138,9 @@ export function StreamInspectionModal({ event, onClose }) {
                     <strong className="text-rose-400">{evt.source_ip}</strong> &rarr; <strong className="text-text-primary">{evt.destination_ip || '10.0.0.10'}</strong>
                   </div>
                   <span className={`px-2 py-0.5 rounded text-[10px] font-bold self-start sm:self-auto ${
-                    evt.threat_level === 'HIGH' || evt.threat_level === 'CRITICAL' ? 'bg-rose-500/20 text-rose-400' : 'bg-emerald-500/20 text-emerald-400'
+                    evt.threat_level === 'CRITICAL' ? 'bg-[var(--color-severity-critical-bg)] text-[var(--color-severity-critical)] border border-[var(--color-severity-critical-border)]' :
+                    evt.threat_level === 'HIGH' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
+                    evt.threat_level === 'MEDIUM' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                   }`}>
                     {evt.threat_level || 'HIGH'}
                   </span>

@@ -19,6 +19,9 @@
   --color-tertiary: var(--color-tertiary);
   --color-tertiary-container: var(--color-tertiary-container);
   --color-border-muted: var(--color-border);
+  --color-severity-critical: var(--color-severity-critical);
+  --color-severity-critical-bg: var(--color-severity-critical-bg);
+  --color-severity-critical-border: var(--color-severity-critical-border);
 }
 
 :root, :root[data-theme="dark"] {
@@ -45,6 +48,9 @@
   --color-tertiary-container: #00a572;
   --color-border: #1f293d;
   --color-border-glow: rgba(167, 139, 250, 0.4);
+  --color-severity-critical: #f43f5e;
+  --color-severity-critical-bg: rgba(244, 63, 94, 0.18);
+  --color-severity-critical-border: rgba(244, 63, 94, 0.45);
   --color-severity-high: #ef4444;
   --color-severity-high-bg: rgba(239, 68, 68, 0.15);
   --color-severity-high-border: rgba(239, 68, 68, 0.4);
@@ -86,6 +92,9 @@
   --color-tertiary-container: #bcece1;
   --color-border: #d5dbcb;
   --color-border-glow: rgba(113, 131, 85, 0.4);
+  --color-severity-critical: #e11d48;
+  --color-severity-critical-bg: rgba(225, 29, 72, 0.15);
+  --color-severity-critical-border: rgba(225, 29, 72, 0.4);
   --color-severity-high: #dc2626;
   --color-severity-high-bg: rgba(220, 38, 38, 0.12);
   --color-severity-high-border: rgba(220, 38, 38, 0.3);
@@ -381,6 +390,7 @@ input[type="range"]:focus::-moz-range-thumb {
   );
 }
 
+.kpi-accent-critical { border-left: 3px solid var(--color-severity-critical); }
 .kpi-accent-danger { border-left: 3px solid var(--color-severity-high); }
 .kpi-accent-command { border-left: 3px solid var(--color-severity-medium); }
 .kpi-accent-ai { border-left: 3px solid var(--color-primary); }

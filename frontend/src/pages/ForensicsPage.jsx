@@ -238,7 +238,9 @@ export function ForensicsPage() {
                               <span className="font-bold text-text-primary">{evt.event_type || 'cisco_asa:deny:outside_acl'}</span>
                             </div>
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                              evt.threat_level === 'CRITICAL' || evt.threat_level === 'HIGH' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                              evt.threat_level === 'CRITICAL' ? 'bg-[var(--color-severity-critical-bg)] text-[var(--color-severity-critical)] border border-[var(--color-severity-critical-border)]' :
+                              evt.threat_level === 'HIGH' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
+                              evt.threat_level === 'MEDIUM' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                             }`}>
                               {evt.threat_level || 'HIGH'}
                             </span>

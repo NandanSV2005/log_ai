@@ -150,8 +150,7 @@ export function InvestigationReportPage() {
     category_uid: 4,
     category_name: 'Network Activity',
     activity_id: activeEvt.action === 'PASS' ? 1 : 2,
-    activity_name: activeEvt.action === 'PASS' ? 'Allowed' : 'Blocked',
-    severity_id: activeEvt.threat_level === 'HIGH' || activeEvt.threat_level === 'CRITICAL' ? 4 : 2,
+    severity_id: activeEvt.threat_level === 'CRITICAL' ? 5 : activeEvt.threat_level === 'HIGH' ? 4 : activeEvt.threat_level === 'MEDIUM' ? 3 : 2,
     severity_name: activeEvt.threat_level || 'HIGH',
     time: activeEvt.timestamp || new Date().toISOString(),
     src_endpoint: {

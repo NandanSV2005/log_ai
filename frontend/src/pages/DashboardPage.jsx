@@ -8,7 +8,7 @@ export function DashboardPage({ pollingInterval }) {
   const [activeSubTab, setActiveSubTab] = useState('overview'); // 'overview' | 'add-log' | 'reports'
   const [stats, setStats] = useState({
     total_events_ingested: 0,
-    threat_level_counts: { HIGH: 0, MEDIUM: 0, LOW: 0 },
+    threat_level_counts: { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 },
     vendor_parser_counts: {},
   });
   const [incidents, setIncidents] = useState([]);
@@ -138,13 +138,14 @@ export function DashboardPage({ pollingInterval }) {
   };
 
   // Compute threat level metrics
+  const critThreats = stats?.threat_level_counts?.CRITICAL || 0;
   const highThreats = stats?.threat_level_counts?.HIGH || 0;
   const medThreats = stats?.threat_level_counts?.MEDIUM || 0;
   const lowThreats = stats?.threat_level_counts?.LOW || 0;
   const totalIngested = stats?.total_events_ingested || 0;
   const activeIncidentCount = incidents.length;
 
-  const isElevated = highThreats > 0 || activeIncidentCount > 0;
+  const isElevated = critThreats > 0 || highThreats > 0 || activeIncidentCount > 0;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
@@ -249,6 +250,16 @@ export function DashboardPage({ pollingInterval }) {
                 </div>
 
                 <div className="space-y-3 font-mono text-xs">
+                  <div>
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span className="text-[var(--color-severity-critical)] font-bold">CRITICAL SEVERITY</span>
+                      <span className="text-text-primary font-bold">{critThreats}</span>
+                    </div>
+                    <div className="h-2 w-full bg-surface rounded-full overflow-hidden">
+                      <div className="h-full bg-[var(--color-severity-critical)] rounded-full" style={{ width: `${totalIngested ? (critThreats / totalIngested) * 100 : 0}%` }}></div>
+                    </div>
+                  </div>
+
                   <div>
                     <div className="flex justify-between text-[11px] mb-1">
                       <span className="text-rose-400 font-bold">HIGH SEVERITY</span>
@@ -431,7 +442,7 @@ export function DashboardPage({ pollingInterval }) {
                       const deviceVendor = evt.event_type ? evt.event_type.split(':')[0].toUpperCase() : 'CISCO_ASA';
                       const actionTag = (evt.event_type || '').includes('permit') || (evt.event_type || '').includes('pass') ? 'PERMIT' : 'DENY';
                       return (
-                        <tr key={evt.raw_event_hash || idx} className="hover:bg-surface-hover transition-colors">
+                        <tr key={`${evt.raw_event_hash || 'evt'}_${idx}`} className="hover:bg-surface-hover transition-colors">
                           <td className="py-2.5 px-3 text-text-muted text-[11px] whitespace-nowrap">
                             {evt.timestamp || '2026-09-08 16:10:43'}
                           </td>
@@ -441,7 +452,7 @@ export function DashboardPage({ pollingInterval }) {
                             </span>
                           </td>
                           <td className="py-2.5 px-3 font-bold text-text-primary whitespace-nowrap">
-                            {evt.source_ip || '203.0.113.45'}
+                            {evt.source_ip || 'Local Host'}
                           </td>
                           <td className="py-2.5 px-3 whitespace-nowrap">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
@@ -452,8 +463,9 @@ export function DashboardPage({ pollingInterval }) {
                           </td>
                           <td className="py-2.5 px-3 whitespace-nowrap">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                              evt.threat_level === 'HIGH' || evt.threat_level === 'CRITICAL' ? 'bg-rose-500/20 text-rose-400' :
-                              evt.threat_level === 'MEDIUM' ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'
+                              evt.threat_level === 'CRITICAL' ? 'bg-[var(--color-severity-critical-bg)] text-[var(--color-severity-critical)] border border-[var(--color-severity-critical-border)]' :
+                              evt.threat_level === 'HIGH' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
+                              evt.threat_level === 'MEDIUM' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                             }`}>
                               {evt.threat_level || 'LOW'}
                             </span>

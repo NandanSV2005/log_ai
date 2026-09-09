@@ -2,6 +2,7 @@ import json
 import io
 import csv
 import uuid
+import logging
 import datetime
 from pathlib import Path
 from typing import Dict, Any, List, Optional
@@ -13,6 +14,8 @@ from app.detection.correlation import incident_engine
 from app.detection.engine import anomaly_engine
 from app.routers.auth import get_current_user
 from app.services.geoip import geoip_resolver
+
+logger = logging.getLogger("log_ai.dashboard")
 
 router = APIRouter(prefix="/api/v1/dashboard", tags=["Dashboard"])
 
@@ -127,7 +130,7 @@ async def get_dashboard_stats(current_user=Depends(get_current_user)):
     all_records = _read_all_normalized_records(owner_username=username)
 
     total_events = len(all_records)
-    threat_counts = {"HIGH": 0, "MEDIUM": 0, "LOW": 0}
+    threat_counts = {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0}
     vendor_counts: Dict[str, int] = {}
 
     for record in all_records:
@@ -136,7 +139,8 @@ async def get_dashboard_stats(current_user=Depends(get_current_user)):
         if level in threat_counts:
             threat_counts[level] += 1
         else:
-            threat_counts["LOW"] += 1
+            logger.warning("Unrecognized threat_level '%s' in record %s, bucketing as UNKNOWN", level, record.get("raw_event_hash"))
+            threat_counts["UNKNOWN"] = threat_counts.get("UNKNOWN", 0) + 1
 
         # Vendor parser aggregate derived from event_type prefix
         evt_type = str(record.get("event_type", "unstructured_log")).lower()
