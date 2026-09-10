@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'motion/react';
 import { useTheme } from '../contexts/ThemeContext';
 import { StitchBrandMark } from '../components/common/StitchBrandMark';
 import { api } from '../services/api';
+import { TextEffect, InView, AnimatedGroup, SpotlightCard, BorderGlow } from '../components/motion-primitives';
 
 // =============================================================================
 // ACCURATE VERIFIED TELEMETRY FALLBACK CONSTANTS
@@ -135,6 +137,7 @@ const SOURCE_CARDS = [
 
 // =============================================================================
 // REUSABLE INTERACTIVE EXPAND/COLLAPSE CARD COMPONENT (CHAPTER 01)
+// Enhanced with Motion Primitives SpotlightCard & Smooth Framer Motion Animations
 // =============================================================================
 function InteractiveCard({ card, activeCardId, setActiveCardId }) {
   const isExpanded = activeCardId === card.id;
@@ -146,7 +149,8 @@ function InteractiveCard({ card, activeCardId, setActiveCardId }) {
       badgeBg: 'bg-primary/10 border-primary/30 text-primary',
       iconBg: 'bg-primary/15 text-primary',
       footerText: 'text-primary',
-      chevron: 'text-primary'
+      chevron: 'text-primary',
+      spotlight: 'rgba(167, 139, 250, 0.15)'
     },
     secondary: {
       border: 'border-secondary/30 hover:border-secondary',
@@ -154,7 +158,8 @@ function InteractiveCard({ card, activeCardId, setActiveCardId }) {
       badgeBg: 'bg-secondary/10 border-secondary/30 text-secondary',
       iconBg: 'bg-secondary/15 text-secondary',
       footerText: 'text-secondary',
-      chevron: 'text-secondary'
+      chevron: 'text-secondary',
+      spotlight: 'rgba(123, 208, 255, 0.15)'
     },
     tertiary: {
       border: 'border-tertiary/30 hover:border-tertiary',
@@ -162,14 +167,16 @@ function InteractiveCard({ card, activeCardId, setActiveCardId }) {
       badgeBg: 'bg-tertiary/10 border-tertiary/30 text-tertiary',
       iconBg: 'bg-tertiary/15 text-tertiary',
       footerText: 'text-tertiary',
-      chevron: 'text-tertiary'
+      chevron: 'text-tertiary',
+      spotlight: 'rgba(78, 222, 163, 0.15)'
     }
   };
 
   const style = colorStyles[card.themeColor || 'primary'];
 
   return (
-    <div
+    <SpotlightCard
+      spotlightColor={style.spotlight}
       onMouseEnter={() => setActiveCardId(card.id)}
       onMouseLeave={() => setActiveCardId(null)}
       onClick={() => setActiveCardId(prev => prev === card.id ? null : card.id)}
@@ -209,14 +216,13 @@ function InteractiveCard({ card, activeCardId, setActiveCardId }) {
           </div>
         </div>
       </div>
-    </div>
+    </SpotlightCard>
   );
 }
 
 // =============================================================================
 // CHAPTER 02 ZIG-ZAG CONNECTED LOG SOURCE STREAM COMPONENT
-// Alternating left/right layout connected by an animated elbow path line,
-// reduced vertical spacing (~40-50%), checkmark connected state, and converging closing node.
+// Enhanced with Motion Primitives SpotlightCard & Viewport Intersections
 // =============================================================================
 function ZigZagSourceStream({ cards }) {
   const [visitedCards, setVisitedCards] = useState(new Set());
@@ -292,8 +298,9 @@ function ZigZagSourceStream({ cards }) {
             data-card-id={card.id}
             className={`relative w-full flex ${isEven ? 'md:justify-start' : 'md:justify-end'} justify-center`}
           >
-            {/* Card Shell */}
-            <div
+            {/* Card Shell with Spotlight Hover Primitive */}
+            <SpotlightCard
+              spotlightColor="rgba(123, 208, 255, 0.15)"
               className={`w-full md:w-[46%] p-5 rounded-2xl bg-surface/90 border transition-all duration-500 shadow-xl backdrop-blur-md group ${
                 isVisited
                   ? 'border-secondary shadow-[0_0_20px_var(--color-border-glow)]'
@@ -334,18 +341,20 @@ function ZigZagSourceStream({ cards }) {
                 <span className="text-secondary font-bold">{card.footer}</span>
                 <span>OCSF COMPLIANT</span>
               </div>
-            </div>
+            </SpotlightCard>
           </div>
         );
       })}
 
       {/* Converging Single Schema Closing Node */}
       <div className="w-full flex justify-center mt-3 relative z-10">
-        <div className="p-3.5 md:p-4 rounded-2xl bg-surface-bright border-2 border-secondary shadow-[0_0_24px_var(--color-border-glow)] flex items-center gap-3 font-mono text-xs text-secondary font-bold">
-          <span className="material-symbols-outlined text-[22px] animate-pulse">schema</span>
-          <span>&rarr; ONE UNIFIED OCSF SCHEMA CONDUIT</span>
-          <span className="w-2 h-2 rounded-full bg-tertiary animate-ping ml-1"></span>
-        </div>
+        <BorderGlow glowColor="var(--color-secondary)" borderRadius="1rem">
+          <div className="p-3.5 md:p-4 bg-surface-bright border-2 border-secondary shadow-[0_0_24px_var(--color-border-glow)] flex items-center gap-3 font-mono text-xs text-secondary font-bold">
+            <span className="material-symbols-outlined text-[22px] animate-pulse">schema</span>
+            <span>&rarr; ONE UNIFIED OCSF SCHEMA CONDUIT</span>
+            <span className="w-2 h-2 rounded-full bg-tertiary animate-ping ml-1"></span>
+          </div>
+        </BorderGlow>
       </div>
     </div>
   );
@@ -386,7 +395,7 @@ export function LandingPage() {
   const [selectedPresetId, setSelectedPresetId] = useState('cisco-asa');
   const [demoLoading, setDemoLoading] = useState(false);
   const [demoError, setDemoError] = useState(null);
-  const [demoResult, setDemoResult] = useState(null); // Defaults to null (Awaiting state!)
+  const [demoResult, setDemoResult] = useState(null); // Defaults to null
   const [revealStep, setRevealStep] = useState(0);
 
   // Trigger staggered reveal sequence whenever demoResult changes to a non-null object
@@ -398,7 +407,7 @@ export function LandingPage() {
 
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     if (mediaQuery.matches) {
-      setRevealStep(10); // Skip reveal animation if reduced motion is requested
+      setRevealStep(10);
       return;
     }
 
@@ -418,14 +427,14 @@ export function LandingPage() {
   const handlePresetClick = (preset) => {
     setSelectedPresetId(preset.id);
     setDemoInput(preset.log_line);
-    setDemoResult(null); // Reset Columns 2 & 3 back to Awaiting Analysis state!
+    setDemoResult(null);
     setDemoError(null);
   };
 
   const handleTextareaChange = (e) => {
     setDemoInput(e.target.value);
     setSelectedPresetId(null);
-    setDemoResult(null); // Reset Columns 2 & 3 back to Awaiting Analysis state on edit!
+    setDemoResult(null);
     setDemoError(null);
   };
 
@@ -439,7 +448,7 @@ export function LandingPage() {
   };
 
   const runDemoAnalysis = async (logLine) => {
-    setDemoResult(null); // Reset prior result immediately
+    setDemoResult(null);
     setDemoLoading(true);
     setDemoError(null);
     const startTime = Date.now();
@@ -447,7 +456,6 @@ export function LandingPage() {
     try {
       const res = await api.analyzeDemo(logLine);
 
-      // Enforce minimum loading duration of 600ms so user registers processing happening
       const elapsed = Date.now() - startTime;
       const remaining = Math.max(0, 600 - elapsed);
       if (remaining > 0) {
@@ -748,7 +756,7 @@ export function LandingPage() {
       <main className="w-full pt-16 pb-12 flex flex-col">
         
         {/* ========================================================================= */}
-        {/* HERO SECTION                                                              */}
+        {/* HERO SECTION WITH MOTION PRIMITIVES                                        */}
         {/* ========================================================================= */}
         <section className="relative w-full overflow-hidden px-4 md:px-8 xl:px-14 py-20 lg:py-24 bg-surface-dim border-b border-border-muted">
           <div className="absolute -top-40 left-1/4 w-[700px] h-[500px] bg-primary/10 rounded-full blur-[140px] pointer-events-none"></div>
@@ -756,141 +764,191 @@ export function LandingPage() {
           
           <div className="max-w-[1600px] mx-auto w-full grid grid-cols-1 xl:grid-cols-12 gap-10 lg:gap-12 relative z-10 items-center">
             
-            {/* Left Narrative Column (Plain-Language Rewrite) */}
+            {/* Left Narrative Column */}
             <div className="xl:col-span-6 flex flex-col gap-6">
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-surface-bright/80 border border-primary/30 rounded-full">
-                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                  <span className="font-mono text-[11px] font-bold text-primary uppercase tracking-wider">
-                    00 // UNIVERSAL LOG PRE-PROCESSING FRAMEWORK (ULPF)
-                  </span>
+              <InView
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0 }
+                }}
+              >
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-surface-bright/80 border border-primary/30 rounded-full">
+                    <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                    <span className="font-mono text-[11px] font-bold text-primary uppercase tracking-wider">
+                      00 // UNIVERSAL LOG PRE-PROCESSING FRAMEWORK (ULPF)
+                    </span>
+                  </div>
+                  <span className="font-mono text-xs text-text-dim font-semibold">v2.4</span>
                 </div>
-                <span className="font-mono text-xs text-text-dim font-semibold">v2.4</span>
-              </div>
+              </InView>
 
-              <h1 className="font-display font-black text-4xl sm:text-5xl lg:text-6xl text-text-primary uppercase tracking-tight leading-[1.08]">
+              {/* Motion Primitives Text Effect for Hero Headline */}
+              <TextEffect
+                per="word"
+                as="h1"
+                className="font-display font-black text-4xl sm:text-5xl lg:text-6xl text-text-primary uppercase tracking-tight leading-[1.08]"
+                delay={0.1}
+              >
                 Understand what your systems are doing.
-              </h1>
+              </TextEffect>
 
-              <p className="font-sans text-base lg:text-lg text-text-muted max-w-xl font-normal leading-relaxed">
-                Collect raw security logs from any firewall or server. Automatically convert them into a single clear format, verify their accuracy with cryptographic hash checks, and explain potential threats before alert volume overwhelms your team.
-              </p>
+              <InView
+                variants={{
+                  hidden: { opacity: 0, y: 15 },
+                  visible: { opacity: 1, y: 0 }
+                }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <p className="font-sans text-base lg:text-lg text-text-muted max-w-xl font-normal leading-relaxed">
+                  Collect raw security logs from any firewall or server. Automatically convert them into a single clear format, verify their accuracy with cryptographic hash checks, and explain potential threats before alert volume overwhelms your team.
+                </p>
+              </InView>
 
               {/* Action CTAs */}
-              <div className="flex flex-wrap items-center gap-4 pt-2">
-                <button
-                  onClick={() => scrollToSection('pipeline')}
-                  className="px-6 py-3 rounded-xl bg-primary text-surface-dim font-sans font-bold text-sm shadow-[0_0_24px_var(--color-border-glow)] hover:bg-primary-fixed transition-all flex items-center gap-2"
-                >
-                  <span className="material-symbols-outlined text-[19px]">account_tree</span>
-                  <span>Explore ULPF Pipeline</span>
-                </button>
-                <button
-                  onClick={() => scrollToSection('demo')}
-                  className="px-6 py-3 rounded-xl bg-surface-bright hover:bg-surface-hover text-text-primary font-sans font-bold text-sm border border-border-muted transition-colors flex items-center gap-2"
-                >
-                  <span className="material-symbols-outlined text-[19px]">play_circle</span>
-                  <span>Live Interactive Demo</span>
-                </button>
-              </div>
+              <InView
+                variants={{
+                  hidden: { opacity: 0, y: 15 },
+                  visible: { opacity: 1, y: 0 }
+                }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <div className="flex flex-wrap items-center gap-4 pt-2">
+                  <button
+                    onClick={() => scrollToSection('pipeline')}
+                    className="px-6 py-3 rounded-xl bg-primary text-surface-dim font-sans font-bold text-sm shadow-[0_0_24px_var(--color-border-glow)] hover:bg-primary-fixed transition-all flex items-center gap-2"
+                  >
+                    <span className="material-symbols-outlined text-[19px]">account_tree</span>
+                    <span>Explore ULPF Pipeline</span>
+                  </button>
+                  <button
+                    onClick={() => scrollToSection('demo')}
+                    className="px-6 py-3 rounded-xl bg-surface-bright hover:bg-surface-hover text-text-primary font-sans font-bold text-sm border border-border-muted transition-colors flex items-center gap-2"
+                  >
+                    <span className="material-symbols-outlined text-[19px]">play_circle</span>
+                    <span>Live Interactive Demo</span>
+                  </button>
+                </div>
+              </InView>
 
-              {/* Diagnostic KPI Stat Strip */}
-              <div className="grid grid-cols-3 gap-3 pt-4 max-w-xl">
-                <div className="p-3.5 bg-surface-lowest/80 border border-border-muted rounded-xl flex flex-col">
+              {/* Diagnostic KPI Stat Strip with Spotlight Cards */}
+              <AnimatedGroup
+                className="grid grid-cols-3 gap-3 pt-4 max-w-xl"
+                variants={{
+                  container: {
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+                  },
+                  item: {
+                    hidden: { opacity: 0, y: 15 },
+                    visible: { opacity: 1, y: 0 }
+                  }
+                }}
+              >
+                <SpotlightCard spotlightColor="rgba(167, 139, 250, 0.12)" className="p-3.5 bg-surface-lowest/80 border border-border-muted rounded-xl flex flex-col">
                   <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Events Processed</span>
                   <span className="font-mono text-2xl lg:text-3xl text-primary font-extrabold tracking-tight mt-1">
                     {(stats.total_events_ingested || 48281).toLocaleString()}
                   </span>
                   <span className="font-mono text-[10px] text-tertiary mt-0.5">Total Logs Received</span>
-                </div>
+                </SpotlightCard>
 
-                <div className="p-3.5 bg-surface-lowest/80 border border-border-muted rounded-xl flex flex-col">
+                <SpotlightCard spotlightColor="rgba(123, 208, 255, 0.12)" className="p-3.5 bg-surface-lowest/80 border border-border-muted rounded-xl flex flex-col">
                   <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Processing Latency</span>
                   <span className="font-mono text-2xl lg:text-3xl text-secondary font-extrabold tracking-tight mt-1">
                     {FALLBACK_PIPELINE_LATENCY}
                   </span>
                   <span className="font-mono text-[10px] text-text-dim mt-0.5">Average Processing Speed</span>
-                </div>
+                </SpotlightCard>
 
-                <div className="p-3.5 bg-surface-lowest/80 border border-border-muted rounded-xl flex flex-col">
+                <SpotlightCard spotlightColor="rgba(78, 222, 163, 0.12)" className="p-3.5 bg-surface-lowest/80 border border-border-muted rounded-xl flex flex-col">
                   <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Log Verification</span>
                   <span className="font-mono text-2xl lg:text-3xl text-tertiary font-extrabold tracking-tight mt-1">
                     {FALLBACK_MERKLE_PROOF_TYPE}
                   </span>
                   <span className="font-mono text-[10px] text-tertiary mt-0.5">Tamper-Proof Verification</span>
-                </div>
-              </div>
+                </SpotlightCard>
+              </AnimatedGroup>
             </div>
 
             {/* Right HUD Stream Instrument */}
-            <div className="xl:col-span-6 relative mt-4 xl:mt-0">
-              <div className="relative w-full rounded-2xl bg-surface-lowest border border-border-muted p-4 md:p-6 overflow-hidden shadow-2xl">
-                <div className="flex items-center justify-between pb-3 mb-3 border-b border-border-muted">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-severity-critical)]"></span>
-                    <span className="w-2.5 h-2.5 rounded-full bg-secondary"></span>
-                    <span className="w-2.5 h-2.5 rounded-full bg-tertiary"></span>
-                    <span className="ml-2 font-mono text-xs text-text-primary font-bold tracking-wider">ULPF // INGESTION_STREAM</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-[10px] font-bold text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/20">SHA-256 LEDGER</span>
-                    <span className="font-mono text-[10px] text-tertiary font-bold flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-tertiary animate-ping"></span> LIVE
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-[11px]">
-                  {/* Inbound Raw Buffer */}
-                  <div className="bg-surface-dim p-3.5 rounded-xl border border-border-muted flex flex-col gap-1.5">
-                    <div className="flex justify-between items-center text-text-dim text-[10px] font-bold">
-                      <span>[RAW_LOG_BUFFER]</span>
-                      <span className="text-secondary font-mono">STREAMING</span>
+            <InView
+              className="xl:col-span-6 relative mt-4 xl:mt-0"
+              variants={{
+                hidden: { opacity: 0, scale: 0.96, y: 20 },
+                visible: { opacity: 1, scale: 1, y: 0 }
+              }}
+              transition={{ duration: 0.6 }}
+            >
+              <BorderGlow glowColor="var(--color-primary)" borderRadius="1rem">
+                <div className="relative w-full rounded-2xl bg-surface-lowest border border-border-muted p-4 md:p-6 overflow-hidden shadow-2xl">
+                  <div className="flex items-center justify-between pb-3 mb-3 border-b border-border-muted">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-severity-critical)]"></span>
+                      <span className="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+                      <span className="w-2.5 h-2.5 rounded-full bg-tertiary"></span>
+                      <span className="ml-2 font-mono text-xs text-text-primary font-bold tracking-wider">ULPF // INGESTION_STREAM</span>
                     </div>
-                    <div className="flex flex-col gap-1 text-text-muted font-mono text-[10px] opacity-85 pt-1">
-                      <p className="text-[var(--color-severity-critical)] truncate">0x7F4A %ASA-4-106023: Deny udp src outside:185.220.101.5</p>
-                      <p className="truncate">0x7F4B CEF:0|Fortinet|FortiGate|v7.2|traffic:denied|src=10.0.4.12</p>
-                      <p className="text-secondary truncate">0x7F4C pf: rule 42/(match) pass in on igb0: 192.168.1.104</p>
-                      <p className="truncate">0x7F4D Suricata[3819]: [1:2018959:4] ET Suspicious Inbound TLS</p>
-                      <p className="text-tertiary truncate">0x7F4E {"{EventID:4624,TargetUserName:SYSTEM}"}</p>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-[10px] font-bold text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/20">SHA-256 LEDGER</span>
+                      <span className="font-mono text-[10px] text-tertiary font-bold flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-tertiary animate-ping"></span> LIVE
+                      </span>
                     </div>
                   </div>
 
-                  {/* Canonical OCSF Output */}
-                  <div className="bg-surface-dim p-3.5 rounded-xl border border-border-muted flex flex-col gap-1.5">
-                    <div className="flex justify-between items-center text-text-dim text-[10px] font-bold">
-                      <span>[CANONICAL_OCSF_OUTPUT]</span>
-                      <span className="text-tertiary font-mono">VERIFIED</span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-[11px]">
+                    {/* Inbound Raw Buffer */}
+                    <div className="bg-surface-dim p-3.5 rounded-xl border border-border-muted flex flex-col gap-1.5">
+                      <div className="flex justify-between items-center text-text-dim text-[10px] font-bold">
+                        <span>[RAW_LOG_BUFFER]</span>
+                        <span className="text-secondary font-mono">STREAMING</span>
+                      </div>
+                      <div className="flex flex-col gap-1 text-text-muted font-mono text-[10px] opacity-85 pt-1">
+                        <p className="text-[var(--color-severity-critical)] truncate">0x7F4A %ASA-4-106023: Deny udp src outside:185.220.101.5</p>
+                        <p className="truncate">0x7F4B CEF:0|Fortinet|FortiGate|v7.2|traffic:denied|src=10.0.4.12</p>
+                        <p className="text-secondary truncate">0x7F4C pf: rule 42/(match) pass in on igb0: 192.168.1.104</p>
+                        <p className="truncate">0x7F4D Suricata[3819]: [1:2018959:4] ET Suspicious Inbound TLS</p>
+                        <p className="text-tertiary truncate">0x7F4E {"{EventID:4624,TargetUserName:SYSTEM}"}</p>
+                      </div>
                     </div>
-                    <div className="flex flex-col gap-1 text-tertiary font-mono text-[10px] pt-1">
-                      <p className="truncate text-primary">hash: "{recentEvents[0]?.raw_event_hash || 'c29d18b4fa8001a4e9b98a3e7'}"</p>
-                      <p className="truncate text-text-primary">ocsf.class: "NETWORK_ACTIVITY"</p>
-                      <p className="truncate text-[var(--color-severity-critical)]">action: "BLOCKED" | score: 9.4</p>
-                      <p className="truncate text-secondary">xai_verdict: "PORT_SCAN_DETECTION"</p>
-                      <p className="truncate text-text-dim">merkle_proof: "0x89eaf042b...verified"</p>
+
+                    {/* Canonical OCSF Output */}
+                    <div className="bg-surface-dim p-3.5 rounded-xl border border-border-muted flex flex-col gap-1.5">
+                      <div className="flex justify-between items-center text-text-dim text-[10px] font-bold">
+                        <span>[CANONICAL_OCSF_OUTPUT]</span>
+                        <span className="text-tertiary font-mono">VERIFIED</span>
+                      </div>
+                      <div className="flex flex-col gap-1 text-tertiary font-mono text-[10px] pt-1">
+                        <p className="truncate text-primary">hash: "{recentEvents[0]?.raw_event_hash || 'c29d18b4fa8001a4e9b98a3e7'}"</p>
+                        <p className="truncate text-text-primary">ocsf.class: "NETWORK_ACTIVITY"</p>
+                        <p className="truncate text-[var(--color-severity-critical)]">action: "BLOCKED" | score: 9.4</p>
+                        <p className="truncate text-secondary">xai_verdict: "PORT_SCAN_DETECTION"</p>
+                        <p className="truncate text-text-dim">merkle_proof: "0x89eaf042b...verified"</p>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="mt-3 p-2.5 bg-surface-dim border border-border-muted rounded-xl flex items-center justify-between text-[10px] font-mono text-text-dim">
-                  <span className="text-primary font-bold">01 INGEST</span>
-                  <span>&rarr;</span>
-                  <span className="text-secondary font-bold">02 PARSE</span>
-                  <span>&rarr;</span>
-                  <span className="text-tertiary font-bold">03 OCSF</span>
-                  <span>&rarr;</span>
-                  <span className="text-primary font-bold">04 HASH</span>
-                  <span>&rarr;</span>
-                  <span className="text-tertiary font-bold">05 VERDICT</span>
+                  <div className="mt-3 p-2.5 bg-surface-dim border border-border-muted rounded-xl flex items-center justify-between text-[10px] font-mono text-text-dim">
+                    <span className="text-primary font-bold">01 INGEST</span>
+                    <span>&rarr;</span>
+                    <span className="text-secondary font-bold">02 PARSE</span>
+                    <span>&rarr;</span>
+                    <span className="text-tertiary font-bold">03 OCSF</span>
+                    <span>&rarr;</span>
+                    <span className="text-primary font-bold">04 HASH</span>
+                    <span>&rarr;</span>
+                    <span className="text-tertiary font-bold">05 VERDICT</span>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </BorderGlow>
+            </InView>
 
           </div>
         </section>
 
         {/* ========================================================================= */}
-        {/* CHAPTER 01 // PIPELINE ARCHITECTURE (PLAIN-LANGUAGE PROSE)               */}
+        {/* CHAPTER 01 // PIPELINE ARCHITECTURE WITH ANIMATEDGROUP                    */}
         {/* ========================================================================= */}
         <section
           id="pipeline"
@@ -899,7 +957,7 @@ export function LandingPage() {
           <div className="absolute top-10 left-1/3 w-[800px] h-[550px] bg-primary/10 rounded-full blur-[160px] pointer-events-none"></div>
           
           <div className="max-w-[1600px] mx-auto flex flex-col gap-12 relative z-10">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <InView className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-xs font-bold text-primary uppercase tracking-widest">CHAPTER 01</span>
@@ -913,10 +971,10 @@ export function LandingPage() {
               <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
                 Six straightforward steps that convert raw server activity into structured, verified security records.
               </p>
-            </div>
+            </InView>
 
             {/* Connected Visual Stage Diagram */}
-            <div className="w-full bg-surface-lowest/90 border border-primary/30 rounded-2xl p-6 lg:p-8 shadow-2xl relative overflow-hidden backdrop-blur-md">
+            <InView className="w-full bg-surface-lowest/90 border border-primary/30 rounded-2xl p-6 lg:p-8 shadow-2xl relative overflow-hidden backdrop-blur-md">
               <div className="flex items-center justify-between pb-4 mb-6 border-b border-border-muted font-mono text-xs">
                 <div className="flex items-center gap-2 text-primary font-bold">
                   <span className="material-symbols-outlined text-[18px]">account_tree</span>
@@ -977,10 +1035,10 @@ export function LandingPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </InView>
 
-            {/* Uniform 6-Card Interactive Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+            {/* Uniform 6-Card Interactive Grid with AnimatedGroup Motion Primitive */}
+            <AnimatedGroup className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
               {PIPELINE_CARDS.map(card => (
                 <InteractiveCard
                   key={card.id}
@@ -989,7 +1047,7 @@ export function LandingPage() {
                   setActiveCardId={setActivePipeCard}
                 />
               ))}
-            </div>
+            </AnimatedGroup>
 
           </div>
         </section>
@@ -1004,7 +1062,7 @@ export function LandingPage() {
           <div className="absolute top-16 right-1/4 w-[750px] h-[500px] bg-secondary/10 rounded-full blur-[150px] pointer-events-none"></div>
           
           <div className="max-w-[1600px] mx-auto flex flex-col gap-10 relative z-10">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <InView className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-xs font-bold text-secondary uppercase tracking-widest">CHAPTER 02</span>
@@ -1018,7 +1076,7 @@ export function LandingPage() {
               <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
                 Collect logs from any firewall, network appliance, or operating system without complex setup.
               </p>
-            </div>
+            </InView>
 
             {/* Zig-Zag Connected Log Source Stream Component */}
             <ZigZagSourceStream cards={SOURCE_CARDS} />
@@ -1036,7 +1094,7 @@ export function LandingPage() {
           <div className="absolute top-10 left-1/4 w-[850px] h-[550px] bg-tertiary/10 rounded-full blur-[170px] pointer-events-none"></div>
           
           <div className="max-w-[1600px] mx-auto flex flex-col gap-10 relative z-10">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <InView className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-xs font-bold text-tertiary uppercase tracking-widest">CHAPTER 03</span>
@@ -1050,13 +1108,13 @@ export function LandingPage() {
               <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
                 See suspicious network activity on a live radar map while verifying log integrity with SHA-256 hashes.
               </p>
-            </div>
+            </InView>
 
             {/* Asymmetric Layout: Dominant Radar + Cryptographic Proof Companion */}
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
               
               {/* DOMINANT SECTOR TOPOLOGY RADAR */}
-              <div className="xl:col-span-8 bg-surface-bright/90 border border-tertiary/35 rounded-2xl p-5 md:p-7 flex flex-col gap-4 shadow-2xl backdrop-blur-md relative overflow-hidden">
+              <InView className="xl:col-span-8 bg-surface-bright/90 border border-tertiary/35 rounded-2xl p-5 md:p-7 flex flex-col gap-4 shadow-2xl backdrop-blur-md relative overflow-hidden">
                 <div className="flex items-center justify-between font-mono text-xs pb-3 border-b border-border-muted">
                   <div className="flex items-center gap-2 text-tertiary font-bold">
                     <span className="material-symbols-outlined text-[20px]">radar</span>
@@ -1130,50 +1188,52 @@ export function LandingPage() {
                     GRID COORD: 34.0522&deg; N, 118.2437&deg; W
                   </div>
                 </div>
-              </div>
+              </InView>
 
-              {/* CRYPTOGRAPHIC PROOF COMPANION */}
-              <div className="xl:col-span-4 bg-surface-bright/90 border border-tertiary/35 rounded-2xl p-5 md:p-6 flex flex-col justify-between gap-4 shadow-2xl backdrop-blur-md">
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-border-muted">
-                    <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-tertiary text-[22px]">shield</span>
-                      <h3 className="font-display font-bold text-lg text-text-primary">Cryptographic Proof</h3>
+              {/* CRYPTOGRAPHIC PROOF COMPANION WITH SPOTLIGHT & BORDER GLOW */}
+              <InView className="xl:col-span-4">
+                <SpotlightCard spotlightColor="rgba(78, 222, 163, 0.15)" className="h-full bg-surface-bright/90 border border-tertiary/35 rounded-2xl p-5 md:p-6 flex flex-col justify-between gap-4 shadow-2xl backdrop-blur-md">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-border-muted">
+                      <div className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-tertiary text-[22px]">shield</span>
+                        <h3 className="font-display font-bold text-lg text-text-primary">Cryptographic Proof</h3>
+                      </div>
+                      <span className="font-mono text-[10px] font-bold text-tertiary px-2 py-0.5 rounded bg-tertiary/15 border border-tertiary/30">SHA-256 CHAIN</span>
                     </div>
-                    <span className="font-mono text-[10px] font-bold text-tertiary px-2 py-0.5 rounded bg-tertiary/15 border border-tertiary/30">SHA-256 CHAIN</span>
-                  </div>
-                  <p className="font-sans text-xs text-text-muted leading-relaxed font-normal">
-                    Log entries are linked together with SHA-256 hashes so any tampering is detected instantly.
-                  </p>
+                    <p className="font-sans text-xs text-text-muted leading-relaxed font-normal">
+                      Log entries are linked together with SHA-256 hashes so any tampering is detected instantly.
+                    </p>
 
-                  <div className="bg-surface-dim p-4 rounded-xl border border-tertiary/25 flex flex-col gap-2.5 font-mono text-[11px]">
-                    <div className="flex justify-between items-center text-text-dim pb-1 border-b border-border-muted">
-                      <span className="text-tertiary font-bold">LEDGER BLOCK: {FALLBACK_LEDGER_BLOCK}</span>
-                      <span className="text-tertiary font-bold">VERIFIED</span>
-                    </div>
-                    <div>
-                      <span className="text-text-dim text-[10px] block">PREV HASH:</span>
-                      <span className="text-text-muted truncate block">0x8f3c49e28ba709320e1d...9a</span>
-                    </div>
-                    <div>
-                      <span className="text-text-dim text-[10px] block">MERKLE ROOT:</span>
-                      <span className="text-tertiary truncate block font-bold">0x4ea94dfb19a3d9dc8c7e...c7</span>
-                    </div>
-                    <div>
-                      <span className="text-text-dim text-[10px] block">VERIFICATION:</span>
-                      <span className="text-secondary truncate block">SHA-256 Cryptographic Hash Chain</span>
+                    <div className="bg-surface-dim p-4 rounded-xl border border-tertiary/25 flex flex-col gap-2.5 font-mono text-[11px]">
+                      <div className="flex justify-between items-center text-text-dim pb-1 border-b border-border-muted">
+                        <span className="text-tertiary font-bold">LEDGER BLOCK: {FALLBACK_LEDGER_BLOCK}</span>
+                        <span className="text-tertiary font-bold">VERIFIED</span>
+                      </div>
+                      <div>
+                        <span className="text-text-dim text-[10px] block">PREV HASH:</span>
+                        <span className="text-text-muted truncate block">0x8f3c49e28ba709320e1d...9a</span>
+                      </div>
+                      <div>
+                        <span className="text-text-dim text-[10px] block">MERKLE ROOT:</span>
+                        <span className="text-tertiary truncate block font-bold">0x4ea94dfb19a3d9dc8c7e...c7</span>
+                      </div>
+                      <div>
+                        <span className="text-text-dim text-[10px] block">VERIFICATION:</span>
+                        <span className="text-secondary truncate block">SHA-256 Cryptographic Hash Chain</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="p-3 bg-surface-dim border border-tertiary/20 rounded-xl flex items-center gap-3">
-                  <span className="material-symbols-outlined text-tertiary text-[24px]">verified_user</span>
-                  <div className="flex flex-col">
-                    <span className="font-sans font-bold text-xs text-text-primary">Forensic Export</span>
-                    <span className="font-sans text-[11px] text-text-muted">Export verified log files with cryptographic proof for audits.</span>
+                  <div className="p-3 bg-surface-dim border border-tertiary/20 rounded-xl flex items-center gap-3">
+                    <span className="material-symbols-outlined text-tertiary text-[24px]">verified_user</span>
+                    <div className="flex flex-col">
+                      <span className="font-sans font-bold text-xs text-text-primary">Forensic Export</span>
+                      <span className="font-sans text-[11px] text-text-muted">Export verified log files with cryptographic proof for audits.</span>
+                    </div>
                   </div>
-                </div>
-              </div>
+                </SpotlightCard>
+              </InView>
 
             </div>
           </div>
@@ -1189,7 +1249,7 @@ export function LandingPage() {
           <div className="absolute top-10 left-1/3 w-[850px] h-[500px] bg-tertiary/15 rounded-full blur-[160px] pointer-events-none"></div>
           
           <div className="max-w-[1600px] mx-auto flex flex-col gap-12 relative z-10">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <InView className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-xs font-bold text-tertiary uppercase tracking-widest">CHAPTER 04</span>
@@ -1203,10 +1263,10 @@ export function LandingPage() {
               <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
                 Estimate how much money and time you save by cleaning logs before sending them to expensive storage.
               </p>
-            </div>
+            </InView>
 
             {/* Interactive Calculator Workspace */}
-            <div className="p-6 lg:p-10 bg-surface-bright/90 border border-tertiary/40 rounded-2xl grid grid-cols-1 xl:grid-cols-12 gap-8 lg:gap-12 items-center shadow-2xl backdrop-blur-md">
+            <InView className="p-6 lg:p-10 bg-surface-bright/90 border border-tertiary/40 rounded-2xl grid grid-cols-1 xl:grid-cols-12 gap-8 lg:gap-12 items-center shadow-2xl backdrop-blur-md">
               
               {/* Controls Sliders */}
               <div className="xl:col-span-6 flex flex-col gap-6">
@@ -1267,9 +1327,9 @@ export function LandingPage() {
                 </div>
               </div>
 
-              {/* Calculated Outputs */}
-              <div className="xl:col-span-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-5 bg-surface-dim border border-tertiary/30 rounded-xl flex flex-col justify-between">
+              {/* Calculated Outputs with Spotlight Cards */}
+              <AnimatedGroup className="xl:col-span-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <SpotlightCard spotlightColor="rgba(78, 222, 163, 0.15)" className="p-5 bg-surface-dim border border-tertiary/30 rounded-xl flex flex-col justify-between">
                   <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Monthly SIEM Savings</span>
                   <div className="py-1">
                     <span className="font-mono text-3xl lg:text-4xl text-tertiary font-black">
@@ -1278,9 +1338,9 @@ export function LandingPage() {
                     <span className="text-tertiary font-sans font-bold text-sm">/mo</span>
                   </div>
                   <span className="font-sans text-xs text-text-muted font-normal">Less data to index and store</span>
-                </div>
+                </SpotlightCard>
 
-                <div className="p-5 bg-surface-dim border border-primary/30 rounded-xl flex flex-col justify-between">
+                <SpotlightCard spotlightColor="rgba(167, 139, 250, 0.15)" className="p-5 bg-surface-dim border border-primary/30 rounded-xl flex flex-col justify-between">
                   <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Analyst Time Preserved</span>
                   <div className="py-1">
                     <span className="font-mono text-3xl lg:text-4xl text-primary font-black">
@@ -1289,27 +1349,27 @@ export function LandingPage() {
                     <span className="text-primary font-sans font-bold text-sm">hrs/wk</span>
                   </div>
                   <span className="font-sans text-xs text-text-muted font-normal">Time freed from checking false alarms</span>
-                </div>
+                </SpotlightCard>
 
-                <div className="p-5 bg-surface-dim border border-secondary/30 rounded-xl flex flex-col justify-between">
+                <SpotlightCard spotlightColor="rgba(123, 208, 255, 0.15)" className="p-5 bg-surface-dim border border-secondary/30 rounded-xl flex flex-col justify-between">
                   <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Noise Filtered</span>
                   <div className="py-1">
                     <span className="font-mono text-3xl lg:text-4xl text-secondary font-black">78.4%</span>
                   </div>
                   <span className="font-sans text-xs text-text-muted font-normal">Unimportant noise dropped early</span>
-                </div>
+                </SpotlightCard>
 
-                <div className="p-5 bg-surface-dim border border-border-muted rounded-xl flex flex-col justify-between">
+                <SpotlightCard spotlightColor="rgba(255, 255, 255, 0.08)" className="p-5 bg-surface-dim border border-border-muted rounded-xl flex flex-col justify-between">
                   <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Payback Timeline</span>
                   <div className="py-1">
                     <span className="font-mono text-3xl lg:text-4xl text-text-primary font-black">&lt; 14</span>
                     <span className="text-text-primary font-sans font-bold text-sm">days</span>
                   </div>
                   <span className="font-sans text-xs text-text-muted font-normal">Simple drop-in setup</span>
-                </div>
-              </div>
+                </SpotlightCard>
+              </AnimatedGroup>
 
-            </div>
+            </InView>
           </div>
         </section>
 
@@ -1321,7 +1381,7 @@ export function LandingPage() {
           className="w-full px-4 md:px-8 xl:px-14 py-20 relative bg-gradient-to-b from-[var(--color-chapter5-from)] via-[var(--color-chapter5-via)] to-[var(--color-chapter5-to)] border-b border-border-muted"
         >
           <div className="max-w-[1600px] mx-auto flex flex-col gap-12 relative z-10">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <InView className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-xs font-bold text-primary uppercase tracking-widest">CHAPTER 05</span>
@@ -1335,216 +1395,222 @@ export function LandingPage() {
               <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
                 Test how a raw firewall log is parsed, converted to OCSF schema, hashed, and explained by AI.
               </p>
-            </div>
+            </InView>
 
             {/* 3-Column Dissection Workspace */}
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
               
               {/* Column 1: Raw Inbound Interactive Input */}
-              <div className="xl:col-span-4 bg-surface-bright/90 rounded-2xl border border-primary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between pb-3 border-b border-border-muted">
-                    <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
-                      <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                      <span>01. RAW LOG INGEST</span>
+              <InView className="xl:col-span-4">
+                <SpotlightCard spotlightColor="rgba(167, 139, 250, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-primary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between pb-3 border-b border-border-muted">
+                      <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
+                        <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                        <span>01. RAW LOG INGEST</span>
+                      </div>
+                      <span className="font-mono text-[10px] font-bold text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/20">
+                        INTERACTIVE INPUT
+                      </span>
                     </div>
-                    <span className="font-mono text-[10px] font-bold text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/20">
-                      INTERACTIVE INPUT
-                    </span>
+
+                    {/* Quick-Pick Presets */}
+                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                      <span className="font-mono text-[10px] text-text-dim uppercase font-bold mr-1">PRESETS:</span>
+                      {DEMO_PRESETS.map((preset) => (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          onClick={() => handlePresetClick(preset)}
+                          className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-all cursor-pointer ${
+                            selectedPresetId === preset.id
+                              ? 'bg-primary text-surface-dim shadow-sm'
+                              : 'bg-surface border border-border-muted text-text-muted hover:text-text-primary'
+                          }`}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
-                  {/* Quick-Pick Presets */}
-                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                    <span className="font-mono text-[10px] text-text-dim uppercase font-bold mr-1">PRESETS:</span>
-                    {DEMO_PRESETS.map((preset) => (
-                      <button
-                        key={preset.id}
-                        type="button"
-                        onClick={() => handlePresetClick(preset)}
-                        className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-all cursor-pointer ${
-                          selectedPresetId === preset.id
-                            ? 'bg-primary text-surface-dim shadow-sm'
-                            : 'bg-surface border border-border-muted text-text-muted hover:text-text-primary'
-                        }`}
-                      >
-                        {preset.label}
-                      </button>
-                    ))}
+                  {/* Interactive Textarea */}
+                  <div className="flex flex-col gap-2">
+                    <textarea
+                      value={demoInput}
+                      onChange={handleTextareaChange}
+                      rows={4}
+                      placeholder="Paste a raw firewall string, syslog line, or JSON alert..."
+                      className="w-full bg-surface-dim p-3 rounded-xl font-mono text-xs text-text-primary border border-border-muted focus:border-primary focus:outline-none resize-none leading-relaxed shadow-inner"
+                    />
                   </div>
-                </div>
 
-                {/* Interactive Textarea */}
-                <div className="flex flex-col gap-2">
-                  <textarea
-                    value={demoInput}
-                    onChange={handleTextareaChange}
-                    rows={4}
-                    placeholder="Paste a raw firewall string, syslog line, or JSON alert..."
-                    className="w-full bg-surface-dim p-3 rounded-xl font-mono text-xs text-text-primary border border-border-muted focus:border-primary focus:outline-none resize-none leading-relaxed shadow-inner"
-                  />
-                </div>
-
-                {/* Submit Button */}
-                <button
-                  type="button"
-                  onClick={handleDemoSubmit}
-                  disabled={demoLoading}
-                  className="w-full py-2.5 rounded-xl bg-primary text-surface-dim font-mono font-bold text-xs shadow-[0_0_16px_rgba(167,139,250,0.4)] hover:bg-primary-fixed transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                >
-                  {demoLoading ? (
-                    <>
-                      <span className="w-3.5 h-3.5 border-2 border-surface-dim border-t-transparent rounded-full animate-spin"></span>
-                      <span>PARSING LOG STREAM...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="material-symbols-outlined text-[16px]">play_arrow</span>
-                      <span>ANALYZE LOG STREAM</span>
-                    </>
-                  )}
-                </button>
-              </div>
+                  {/* Submit Button */}
+                  <button
+                    type="button"
+                    onClick={handleDemoSubmit}
+                    disabled={demoLoading}
+                    className="w-full py-2.5 rounded-xl bg-primary text-surface-dim font-mono font-bold text-xs shadow-[0_0_16px_rgba(167,139,250,0.4)] hover:bg-primary-fixed transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  >
+                    {demoLoading ? (
+                      <>
+                        <span className="w-3.5 h-3.5 border-2 border-surface-dim border-t-transparent rounded-full animate-spin"></span>
+                        <span>PARSING LOG STREAM...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="material-symbols-outlined text-[16px]">play_arrow</span>
+                        <span>ANALYZE LOG STREAM</span>
+                      </>
+                    )}
+                  </button>
+                </SpotlightCard>
+              </InView>
 
               {/* Column 2: ULPF Transform Engine Dynamic Output */}
-              <div className="xl:col-span-4 bg-surface-bright/90 rounded-2xl border border-secondary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
-                <div className="flex items-center justify-between pb-3 border-b border-border-muted">
-                  <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
-                    <span className="w-2 h-2 rounded-full bg-secondary"></span>
-                    <span>02. ULPF TRANSFORM PIPELINE</span>
-                  </div>
-                  <span className="font-mono text-[10px] font-bold text-secondary px-2 py-0.5 rounded bg-secondary/10 border border-secondary/20">
-                    {demoResult?.classification_metadata?.schema_version || 'CANONICAL OCSF'}
-                  </span>
-                </div>
-
-                {demoLoading ? (
-                  <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-secondary h-52 flex flex-col justify-center gap-3 border border-border-muted animate-pulse">
-                    <div className="flex items-center gap-2 text-text-muted text-[11px]">
-                      <span className="w-2 h-2 rounded-full bg-secondary animate-ping"></span>
-                      <span>PARSING &amp; MAPPING FIELDS...</span>
+              <InView className="xl:col-span-4">
+                <SpotlightCard spotlightColor="rgba(123, 208, 255, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-secondary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
+                  <div className="flex items-center justify-between pb-3 border-b border-border-muted">
+                    <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
+                      <span className="w-2 h-2 rounded-full bg-secondary"></span>
+                      <span>02. ULPF TRANSFORM PIPELINE</span>
                     </div>
-                    <div className="h-3.5 bg-secondary/20 rounded w-2/3"></div>
-                    <div className="h-3 bg-secondary/15 rounded w-5/6"></div>
-                    <div className="h-3 bg-secondary/15 rounded w-4/5"></div>
-                    <div className="h-3 bg-secondary/10 rounded w-2/3"></div>
-                  </div>
-                ) : demoError ? (
-                  <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-[var(--color-severity-critical)] h-52 flex flex-col justify-center items-center text-center gap-2 border border-[var(--color-severity-critical-border)]">
-                    <span className="material-symbols-outlined text-2xl">error_outline</span>
-                    <p>{demoError}</p>
-                    <span className="text-text-dim text-[10px]">Select one of the sample presets or check your input syntax.</span>
-                  </div>
-                ) : !demoResult ? (
-                  <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-text-dim h-52 flex flex-col justify-center items-center text-center gap-2 border border-dashed border-border-muted">
-                    <span className="material-symbols-outlined text-3xl opacity-35">hourglass_empty</span>
-                    <p className="font-sans text-xs text-text-muted font-medium">Awaiting Analysis</p>
-                    <span className="text-[10px] text-text-dim">Click "ANALYZE LOG STREAM" to run extraction.</span>
-                  </div>
-                ) : (
-                  <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-secondary leading-relaxed h-52 flex flex-col justify-center gap-1.5 border border-border-muted overflow-y-auto">
-                    {revealStep >= 1 && (
-                      <span className="text-text-primary font-bold animate-in fade-in duration-150">[EXTRACTED_VECTORS]</span>
-                    )}
-                    {revealStep >= 2 && (
-                      <>
-                        <span className="animate-in fade-in slide-in-from-bottom-1 duration-150">src_ip: {demoResult?.extracted_fields?.source_ip}</span>
-                        <span className="animate-in fade-in slide-in-from-bottom-1 duration-150">dst_ip: {demoResult?.extracted_fields?.destination_ip}</span>
-                      </>
-                    )}
-                    {revealStep >= 3 && (
-                      <span className="animate-in fade-in slide-in-from-bottom-1 duration-150">event_type: {demoResult?.extracted_fields?.event_type}</span>
-                    )}
-                    {revealStep >= 4 && (
-                      <>
-                        <span className="text-primary truncate animate-in fade-in slide-in-from-bottom-1 duration-150" title={demoResult?.extracted_fields?.full_sha256}>
-                          sha256: {demoResult?.extracted_fields?.sha256}
-                        </span>
-                        <span className="text-tertiary truncate animate-in fade-in slide-in-from-bottom-1 duration-150">
-                          merkle_leaf: {demoResult?.extracted_fields?.merkle_leaf}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                )}
-
-                <div className="font-mono text-[11px] text-text-dim flex items-center justify-between pt-1">
-                  <span>TRANSFORM: {revealStep >= 6 && demoResult ? demoResult?.classification_metadata?.transform_time : 'AWAITING...'}</span>
-                  <span>CLASS: {revealStep >= 6 && demoResult ? demoResult?.classification_metadata?.parsed_class : 'PENDING'}</span>
-                </div>
-              </div>
-
-              {/* Column 3: Enriched XAI Threat Verdict Dynamic Output */}
-              <div className="xl:col-span-4 bg-surface-bright/90 rounded-2xl border border-tertiary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
-                <div className="flex items-center justify-between pb-3 border-b border-border-muted">
-                  <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
-                    <span className="w-2 h-2 rounded-full bg-tertiary"></span>
-                    <span>03. EXPLAINABLE THREAT VERDICT</span>
-                  </div>
-                  {demoResult && revealStep >= 1 ? (
-                    <span className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded border animate-in fade-in duration-200 ${
-                      demoResult?.verdict?.threat_level === 'CRITICAL' ? 'text-[var(--color-severity-critical)] bg-[var(--color-severity-critical-bg)] border-[var(--color-severity-critical-border)]' :
-                      demoResult?.verdict?.threat_level === 'HIGH' ? 'text-rose-400 bg-rose-500/10 border-rose-500/30' :
-                      demoResult?.verdict?.threat_level === 'MEDIUM' ? 'text-amber-400 bg-amber-500/10 border-amber-500/30' :
-                      'text-tertiary bg-tertiary/10 border-tertiary/20'
-                    }`}>
-                      SEV {demoResult?.verdict?.threat_score} {demoResult?.verdict?.threat_level}
+                    <span className="font-mono text-[10px] font-bold text-secondary px-2 py-0.5 rounded bg-secondary/10 border border-secondary/20">
+                      {demoResult?.classification_metadata?.schema_version || 'CANONICAL OCSF'}
                     </span>
+                  </div>
+
+                  {demoLoading ? (
+                    <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-secondary h-52 flex flex-col justify-center gap-3 border border-border-muted animate-pulse">
+                      <div className="flex items-center gap-2 text-text-muted text-[11px]">
+                        <span className="w-2 h-2 rounded-full bg-secondary animate-ping"></span>
+                        <span>PARSING &amp; MAPPING FIELDS...</span>
+                      </div>
+                      <div className="h-3.5 bg-secondary/20 rounded w-2/3"></div>
+                      <div className="h-3 bg-secondary/15 rounded w-5/6"></div>
+                      <div className="h-3 bg-secondary/15 rounded w-4/5"></div>
+                      <div className="h-3 bg-secondary/10 rounded w-2/3"></div>
+                    </div>
+                  ) : demoError ? (
+                    <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-[var(--color-severity-critical)] h-52 flex flex-col justify-center items-center text-center gap-2 border border-[var(--color-severity-critical-border)]">
+                      <span className="material-symbols-outlined text-2xl">error_outline</span>
+                      <p>{demoError}</p>
+                      <span className="text-text-dim text-[10px]">Select one of the sample presets or check your input syntax.</span>
+                    </div>
+                  ) : !demoResult ? (
+                    <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-text-dim h-52 flex flex-col justify-center items-center text-center gap-2 border border-dashed border-border-muted">
+                      <span className="material-symbols-outlined text-3xl opacity-35">hourglass_empty</span>
+                      <p className="font-sans text-xs text-text-muted font-medium">Awaiting Analysis</p>
+                      <span className="text-[10px] text-text-dim">Click "ANALYZE LOG STREAM" to run extraction.</span>
+                    </div>
                   ) : (
-                    <span className="font-mono text-[10px] text-text-dim px-2 py-0.5 rounded bg-surface border border-border-muted">
-                      SEV UNKNOWN
-                    </span>
-                  )}
-                </div>
-
-                {demoLoading ? (
-                  <div className="bg-surface-dim p-4 rounded-xl h-52 flex flex-col justify-center gap-3 border border-border-muted animate-pulse">
-                    <div className="flex items-center gap-2 text-text-muted font-mono text-[11px]">
-                      <span className="w-2 h-2 rounded-full bg-tertiary animate-ping"></span>
-                      <span>EVALUATING ANOMALY SCORE...</span>
-                    </div>
-                    <div className="h-4 bg-tertiary/20 rounded w-2/3"></div>
-                    <div className="h-3 bg-tertiary/15 rounded w-full"></div>
-                    <div className="h-3 bg-tertiary/15 rounded w-4/5"></div>
-                  </div>
-                ) : demoError ? (
-                  <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-text-dim h-52 flex items-center justify-center border border-border-muted">
-                    <span>Analysis unavailable</span>
-                  </div>
-                ) : !demoResult ? (
-                  <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-text-dim h-52 flex flex-col justify-center items-center text-center gap-2 border border-dashed border-border-muted">
-                    <span className="material-symbols-outlined text-3xl opacity-35">gpp_maybe</span>
-                    <p className="font-sans text-xs text-text-muted font-medium">Awaiting Verdict</p>
-                    <span className="text-[10px] text-text-dim">Click "ANALYZE LOG STREAM" to evaluate threat score.</span>
-                  </div>
-                ) : (
-                  <div className="bg-surface-dim p-4 rounded-xl flex flex-col gap-2 h-52 justify-between border border-border-muted overflow-y-auto">
-                    <div>
+                    <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-secondary leading-relaxed h-52 flex flex-col justify-center gap-1.5 border border-border-muted overflow-y-auto">
+                      {revealStep >= 1 && (
+                        <span className="text-text-primary font-bold animate-in fade-in duration-150">[EXTRACTED_VECTORS]</span>
+                      )}
                       {revealStep >= 2 && (
-                        <div className="flex items-center gap-2 text-primary font-display font-bold text-sm mb-1 animate-in fade-in slide-in-from-bottom-1 duration-150">
-                          <span className="material-symbols-outlined text-[18px]">gpp_maybe</span>
-                          <span>{demoResult?.verdict?.mitre_technique}</span>
-                        </div>
+                        <>
+                          <span className="animate-in fade-in slide-in-from-bottom-1 duration-150">src_ip: {demoResult?.extracted_fields?.source_ip}</span>
+                          <span className="animate-in fade-in slide-in-from-bottom-1 duration-150">dst_ip: {demoResult?.extracted_fields?.destination_ip}</span>
+                        </>
                       )}
                       {revealStep >= 3 && (
-                        <p className="font-sans text-xs text-text-muted leading-relaxed font-normal animate-in fade-in slide-in-from-bottom-1 duration-200">
-                          <strong className="text-text-primary font-semibold">XAI Reasoning:</strong> {demoResult?.verdict?.xai_reasoning}
-                        </p>
+                        <span className="animate-in fade-in slide-in-from-bottom-1 duration-150">event_type: {demoResult?.extracted_fields?.event_type}</span>
+                      )}
+                      {revealStep >= 4 && (
+                        <>
+                          <span className="text-primary truncate animate-in fade-in slide-in-from-bottom-1 duration-150" title={demoResult?.extracted_fields?.full_sha256}>
+                            sha256: {demoResult?.extracted_fields?.sha256}
+                          </span>
+                          <span className="text-tertiary truncate animate-in fade-in slide-in-from-bottom-1 duration-150">
+                            merkle_leaf: {demoResult?.extracted_fields?.merkle_leaf}
+                          </span>
+                        </>
                       )}
                     </div>
-                    {revealStep >= 5 && (
-                      <div className="p-2 bg-surface rounded font-mono text-[10px] text-tertiary flex items-center justify-between animate-in fade-in duration-200">
-                        <span>ACTION: {demoResult?.verdict?.action}</span>
-                        <span>✓ HASH VERIFIED</span>
-                      </div>
+                  )}
+
+                  <div className="font-mono text-[11px] text-text-dim flex items-center justify-between pt-1">
+                    <span>TRANSFORM: {revealStep >= 6 && demoResult ? demoResult?.classification_metadata?.transform_time : 'AWAITING...'}</span>
+                    <span>CLASS: {revealStep >= 6 && demoResult ? demoResult?.classification_metadata?.parsed_class : 'PENDING'}</span>
+                  </div>
+                </SpotlightCard>
+              </InView>
+
+              {/* Column 3: Enriched XAI Threat Verdict Dynamic Output */}
+              <InView className="xl:col-span-4">
+                <SpotlightCard spotlightColor="rgba(78, 222, 163, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-tertiary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
+                  <div className="flex items-center justify-between pb-3 border-b border-border-muted">
+                    <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
+                      <span className="w-2 h-2 rounded-full bg-tertiary"></span>
+                      <span>03. EXPLAINABLE THREAT VERDICT</span>
+                    </div>
+                    {demoResult && revealStep >= 1 ? (
+                      <span className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded border animate-in fade-in duration-200 ${
+                        demoResult?.verdict?.threat_level === 'CRITICAL' ? 'text-[var(--color-severity-critical)] bg-[var(--color-severity-critical-bg)] border-[var(--color-severity-critical-border)]' :
+                        demoResult?.verdict?.threat_level === 'HIGH' ? 'text-rose-400 bg-rose-500/10 border-rose-500/30' :
+                        demoResult?.verdict?.threat_level === 'MEDIUM' ? 'text-amber-400 bg-amber-500/10 border-amber-500/30' :
+                        'text-tertiary bg-tertiary/10 border-tertiary/20'
+                      }`}>
+                        SEV {demoResult?.verdict?.threat_score} {demoResult?.verdict?.threat_level}
+                      </span>
+                    ) : (
+                      <span className="font-mono text-[10px] text-text-dim px-2 py-0.5 rounded bg-surface border border-border-muted">
+                        SEV UNKNOWN
+                      </span>
                     )}
                   </div>
-                )}
 
-                <div className="font-mono text-[11px] text-text-dim flex items-center justify-between pt-1">
-                  <span>MODE: {revealStep >= 6 && demoResult ? 'STATELESS DEMO' : 'AWAITING INPUT'}</span>
-                  <span>{revealStep >= 6 && demoResult ? 'VERIFIED DIGEST' : 'DISPATCH PENDING'}</span>
-                </div>
-              </div>
+                  {demoLoading ? (
+                    <div className="bg-surface-dim p-4 rounded-xl h-52 flex flex-col justify-center gap-3 border border-border-muted animate-pulse">
+                      <div className="flex items-center gap-2 text-text-muted font-mono text-[11px]">
+                        <span className="w-2 h-2 rounded-full bg-tertiary animate-ping"></span>
+                        <span>EVALUATING ANOMALY SCORE...</span>
+                      </div>
+                      <div className="h-4 bg-tertiary/20 rounded w-2/3"></div>
+                      <div className="h-3 bg-tertiary/15 rounded w-full"></div>
+                      <div className="h-3 bg-tertiary/15 rounded w-4/5"></div>
+                    </div>
+                  ) : demoError ? (
+                    <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-text-dim h-52 flex items-center justify-center border border-border-muted">
+                      <span>Analysis unavailable</span>
+                    </div>
+                  ) : !demoResult ? (
+                    <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-text-dim h-52 flex flex-col justify-center items-center text-center gap-2 border border-dashed border-border-muted">
+                      <span className="material-symbols-outlined text-3xl opacity-35">gpp_maybe</span>
+                      <p className="font-sans text-xs text-text-muted font-medium">Awaiting Verdict</p>
+                      <span className="text-[10px] text-text-dim">Click "ANALYZE LOG STREAM" to evaluate threat score.</span>
+                    </div>
+                  ) : (
+                    <div className="bg-surface-dim p-4 rounded-xl flex flex-col gap-2 h-52 justify-between border border-border-muted overflow-y-auto">
+                      <div>
+                        {revealStep >= 2 && (
+                          <div className="flex items-center gap-2 text-primary font-display font-bold text-sm mb-1 animate-in fade-in slide-in-from-bottom-1 duration-150">
+                            <span className="material-symbols-outlined text-[18px]">gpp_maybe</span>
+                            <span>{demoResult?.verdict?.mitre_technique}</span>
+                          </div>
+                        )}
+                        {revealStep >= 3 && (
+                          <p className="font-sans text-xs text-text-muted leading-relaxed font-normal animate-in fade-in slide-in-from-bottom-1 duration-200">
+                            <strong className="text-text-primary font-semibold">XAI Reasoning:</strong> {demoResult?.verdict?.xai_reasoning}
+                          </p>
+                        )}
+                      </div>
+                      {revealStep >= 5 && (
+                        <div className="p-2 bg-surface rounded font-mono text-[10px] text-tertiary flex items-center justify-between animate-in fade-in duration-200">
+                          <span>ACTION: {demoResult?.verdict?.action}</span>
+                          <span>✓ HASH VERIFIED</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="font-mono text-[11px] text-text-dim flex items-center justify-between pt-1">
+                    <span>MODE: {revealStep >= 6 && demoResult ? 'STATELESS DEMO' : 'AWAITING INPUT'}</span>
+                    <span>{revealStep >= 6 && demoResult ? 'VERIFIED DIGEST' : 'DISPATCH PENDING'}</span>
+                  </div>
+                </SpotlightCard>
+              </InView>
 
             </div>
           </div>
