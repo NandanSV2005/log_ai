@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Text } from '@react-three/drei';
 import * as THREE from 'three';
 
@@ -62,7 +62,7 @@ export const CHECKPOINTS = [
 export function TunnelCheckpointGates({ colors, progress }) {
   return (
     <group>
-      {CHECKPOINTS.map((cp, idx) => {
+      {CHECKPOINTS.map((cp) => {
         const stageColor = colors[cp.colorKey] || colors.primary;
         const stageColorStr = colors[`${cp.colorKey}Str`] || colors.primaryStr;
 
@@ -98,49 +98,72 @@ export function TunnelCheckpointGates({ colors, progress }) {
               />
             </mesh>
 
-            {/* Top Overhead Signboard Frame */}
-            <group position={[0, 2.7, 0]}>
-              <mesh>
-                <planeGeometry args={[2.8, 0.65]} />
+            {/* Top Overhead Signboard Frame (Solid Backing + Clean Architectural Borders) */}
+            <group position={[0, 2.75, 0]}>
+              {/* Solid High-Contrast Background Backing Panel */}
+              <mesh position={[0, 0, 0]}>
+                <planeGeometry args={[3.1, 0.78]} />
                 <meshBasicMaterial
-                  color={colors.surfaceLowest}
+                  color={colors.isSage ? '#ffffff' : '#07090e'}
                   transparent
-                  opacity={0.88}
-                />
-              </mesh>
-              <mesh position={[0, 0, 0.01]}>
-                <planeGeometry args={[2.84, 0.69]} />
-                <meshBasicMaterial
-                  color={stageColor}
-                  wireframe
-                  transparent
-                  opacity={gateOpacity}
+                  opacity={0.96}
+                  side={THREE.DoubleSide}
                 />
               </mesh>
 
-              {/* Stage Number & Title */}
+              {/* Clean Outer Perimeter Border Frame (No diagonal wireframe crossing text) */}
+              <mesh position={[0, 0.38, 0.01]}>
+                <planeGeometry args={[3.12, 0.02]} />
+                <meshBasicMaterial color={stageColor} transparent opacity={gateOpacity} />
+              </mesh>
+              <mesh position={[0, -0.38, 0.01]}>
+                <planeGeometry args={[3.12, 0.02]} />
+                <meshBasicMaterial color={stageColor} transparent opacity={gateOpacity} />
+              </mesh>
+              <mesh position={[-1.55, 0, 0.01]}>
+                <planeGeometry args={[0.02, 0.78]} />
+                <meshBasicMaterial color={stageColor} transparent opacity={gateOpacity} />
+              </mesh>
+              <mesh position={[1.55, 0, 0.01]}>
+                <planeGeometry args={[0.02, 0.78]} />
+                <meshBasicMaterial color={stageColor} transparent opacity={gateOpacity} />
+              </mesh>
+
+              {/* Architectural Vertical Partition Divider */}
+              <mesh position={[-0.68, 0, 0.02]}>
+                <planeGeometry args={[0.02, 0.54]} />
+                <meshBasicMaterial color={stageColor} transparent opacity={gateOpacity * 0.75} />
+              </mesh>
+
+              {/* Stage Number (Dedicated Left Column) */}
               <Text
-                position={[-1.0, 0.05, 0.02]}
-                fontSize={0.22}
+                position={[-1.12, 0.02, 0.03]}
+                fontSize={0.24}
+                letterSpacing={0.04}
                 color={stageColorStr}
                 anchorX="center"
                 anchorY="middle"
-                font={undefined}
               >
                 {cp.number}
               </Text>
+
+              {/* Stage Title (Dedicated Right Column - Distinct Gap from Number) */}
               <Text
-                position={[0.2, 0.1, 0.02]}
+                position={[-0.48, 0.11, 0.03]}
                 fontSize={0.16}
-                color={colors.isSage ? '#182615' : '#f8fafc'}
+                letterSpacing={0.08}
+                color={colors.isSage ? '#121f14' : '#ffffff'}
                 anchorX="left"
                 anchorY="middle"
               >
                 {cp.title}
               </Text>
+
+              {/* Stage Subtitle */}
               <Text
-                position={[0.2, -0.12, 0.02]}
-                fontSize={0.08}
+                position={[-0.48, -0.11, 0.03]}
+                fontSize={0.085}
+                letterSpacing={0.05}
                 color={stageColorStr}
                 anchorX="left"
                 anchorY="middle"

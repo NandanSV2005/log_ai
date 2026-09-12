@@ -627,10 +627,10 @@ export function LandingPage() {
       {/* 1. FIXED NAVIGATION HEADER                                                */}
       {/* ========================================================================= */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-surface-dim/90 backdrop-blur-xl border-b border-border-muted shadow-2xl">
-        <div className="h-16 w-full max-w-[1600px] mx-auto px-4 md:px-8 flex items-center justify-between gap-6 lg:gap-10">
+        <div className="h-16 w-full max-w-[1600px] mx-auto px-4 md:px-6 lg:px-8 flex items-center justify-between gap-3 md:gap-4 lg:gap-6">
           
           {/* Brand Logo & Status Chip */}
-          <div className="flex items-center gap-4 xl:gap-6 flex-shrink-0">
+          <div className="flex items-center gap-3 xl:gap-5 flex-shrink-0">
             <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => scrollToSection('pipeline')}>
               <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shadow-[0_0_12px_rgba(167,139,250,0.35)]">
                 <StitchBrandMark className="w-5 h-5 text-primary" size={20} />
@@ -642,7 +642,7 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* Status Chip */}
+            {/* Status Chip (Gracefully hidden on <2xl screens to preserve width budget) */}
             <div className="hidden 2xl:flex items-center gap-2 px-3 py-1 rounded-full bg-surface-bright/80 border border-border-muted whitespace-nowrap">
               <span className="w-2 h-2 rounded-full bg-tertiary animate-ping"></span>
               <span className="font-mono text-[11px] font-bold text-tertiary tracking-wider uppercase">ULPF v2.4 // ONLINE</span>
@@ -653,85 +653,92 @@ export function LandingPage() {
           </div>
 
           {/* Chapter Nav Links */}
-          <nav className="hidden xl:flex items-center gap-2 lg:gap-3 font-mono text-[12px] tracking-wide">
-            <button onClick={() => scrollToSection('pipeline')} className="px-3.5 py-1.5 rounded-lg bg-surface border border-primary/30 text-primary font-bold hover:bg-surface-hover transition-colors whitespace-nowrap">
+          <nav className="hidden xl:flex items-center gap-1.5 2xl:gap-2 font-mono text-[11px] 2xl:text-[12px] tracking-wide">
+            <button onClick={() => scrollToSection('pipeline')} className="px-2.5 2xl:px-3.5 py-1.5 rounded-lg bg-surface border border-primary/30 text-primary font-bold hover:bg-surface-hover transition-colors whitespace-nowrap">
               01 // Pipeline
             </button>
-            <button onClick={() => scrollToSection('sources')} className="px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
+            <button onClick={() => scrollToSection('sources')} className="px-2.5 2xl:px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
               02 // Sources
             </button>
-            <button onClick={() => scrollToSection('topology')} className="px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
+            <button onClick={() => scrollToSection('topology')} className="px-2.5 2xl:px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
               03 // Topology
             </button>
-            <button onClick={() => scrollToSection('roi-engine')} className="px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
+            <button onClick={() => scrollToSection('roi-engine')} className="px-2.5 2xl:px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
               04 // ROI Engine
             </button>
-            <button onClick={() => scrollToSection('demo')} className="px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
+            <button onClick={() => scrollToSection('demo')} className="px-2.5 2xl:px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
               05 // Live Demo
             </button>
           </nav>
 
-          {/* 3D / 2D Render Mode Toggle, Theme Toggle & Open SOC Console CTA */}
-          <div className="flex items-center gap-2.5 sm:gap-3 md:gap-4 flex-shrink-0">
-            {/* 3D / 2D Experience Toggle Pill (Sibling to Theme Toggle) */}
-            <div
-              className="flex items-center bg-surface-dim rounded-lg p-1 border border-border-muted"
-              role="group"
-              aria-label="Experience rendering mode"
-            >
-              <button
-                type="button"
-                role="switch"
-                aria-checked={is3D}
-                onClick={() => setRenderMode('3d')}
-                className={`px-2.5 py-1 font-mono text-[11px] font-bold rounded transition-all cursor-pointer ${
-                  is3D
-                    ? 'bg-primary text-surface-dim shadow-sm'
-                    : 'text-text-muted hover:text-text-primary'
-                }`}
-                title="Enable immersive 3D flythroughs and spatial models"
+          {/* Controls Cluster & Open SOC Console CTA */}
+          <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 flex-shrink-0">
+            {/* Unified Render Mode & Theme Control Cluster */}
+            <div className="hidden sm:flex items-center bg-surface-dim rounded-lg p-1 border border-border-muted gap-1.5">
+              {/* 3D / 2D Experience Toggle */}
+              <div
+                className="flex items-center"
+                role="group"
+                aria-label="Experience rendering mode"
               >
-                3D
-              </button>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={is2D}
-                onClick={() => setRenderMode('2d')}
-                className={`px-2.5 py-1 font-mono text-[11px] font-bold rounded transition-all cursor-pointer ${
-                  is2D
-                    ? 'bg-primary text-surface-dim shadow-sm'
-                    : 'text-text-muted hover:text-text-primary'
-                }`}
-                title="Enable 2D high-efficiency reduced rendering mode"
-              >
-                2D
-              </button>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={is3D}
+                  onClick={() => setRenderMode('3d')}
+                  className={`px-2 py-1 font-mono text-[10px] 2xl:text-[11px] font-bold rounded transition-all cursor-pointer ${
+                    is3D
+                      ? 'bg-primary text-surface-dim shadow-sm'
+                      : 'text-text-muted hover:text-text-primary'
+                  }`}
+                  title="Enable immersive 3D flythroughs and spatial models"
+                >
+                  3D
+                </button>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={is2D}
+                  onClick={() => setRenderMode('2d')}
+                  className={`px-2 py-1 font-mono text-[10px] 2xl:text-[11px] font-bold rounded transition-all cursor-pointer ${
+                    is2D
+                      ? 'bg-primary text-surface-dim shadow-sm'
+                      : 'text-text-muted hover:text-text-primary'
+                  }`}
+                  title="Enable 2D high-efficiency reduced rendering mode"
+                >
+                  2D
+                </button>
+              </div>
+
+              {/* Vertical subtle divider between matched controls */}
+              <div className="w-[1px] h-3.5 bg-border-muted" />
+
+              {/* Operations Theme Toggle */}
+              <div className="flex items-center">
+                <button
+                  onClick={() => setTheme('dark')}
+                  className={`px-2 py-1 font-mono text-[10px] 2xl:text-[11px] font-bold rounded transition-all cursor-pointer ${
+                    theme === 'dark' ? 'bg-primary text-surface-dim shadow-sm' : 'text-text-muted hover:text-text-primary'
+                  }`}
+                >
+                  CYBERVOID
+                </button>
+                <button
+                  onClick={() => setTheme('sage')}
+                  className={`px-2 py-1 font-mono text-[10px] 2xl:text-[11px] font-bold rounded transition-all cursor-pointer ${
+                    theme === 'sage' ? 'bg-primary text-surface-dim shadow-sm' : 'text-text-muted hover:text-text-primary'
+                  }`}
+                >
+                  SAGE
+                </button>
+              </div>
             </div>
 
-            {/* Operations Theme Toggle */}
-            <div className="hidden md:flex items-center bg-surface-dim rounded-lg p-1 border border-border-muted">
-              <button
-                onClick={() => setTheme('dark')}
-                className={`px-2.5 py-1 font-mono text-[11px] font-bold rounded transition-all cursor-pointer ${
-                  theme === 'dark' ? 'bg-primary text-surface-dim shadow-sm' : 'text-text-muted hover:text-text-primary'
-                }`}
-              >
-                CYBERVOID
-              </button>
-              <button
-                onClick={() => setTheme('sage')}
-                className={`px-2.5 py-1 font-mono text-[11px] font-bold rounded transition-all cursor-pointer ${
-                  theme === 'sage' ? 'bg-primary text-surface-dim shadow-sm' : 'text-text-muted hover:text-text-primary'
-                }`}
-              >
-                SAGE
-              </button>
-            </div>
-
+            {/* Primary CTA: Open SOC Console - strictly prioritized with flex-shrink-0 */}
             <Link
               to="/dashboard"
-              className="px-4 py-2 rounded-lg bg-primary text-surface-dim font-sans font-bold text-sm shadow-[0_0_18px_var(--color-border-glow)] hover:bg-primary-fixed transition-all whitespace-nowrap"
+              className="px-3.5 2xl:px-4 py-2 rounded-lg bg-primary text-surface-dim font-sans font-bold text-xs 2xl:text-sm shadow-[0_0_18px_var(--color-border-glow)] hover:bg-primary-fixed transition-all whitespace-nowrap flex-shrink-0"
             >
               Open SOC Console
             </Link>
