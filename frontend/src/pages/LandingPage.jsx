@@ -10,7 +10,7 @@ import { PipelineHero2DFallback } from '../components/tunnel/PipelineHero2DFallb
 import { SourceCardStack } from '../components/sources/SourceCardStack';
 import { ThreatRadar3D } from '../components/radar/ThreatRadar3D';
 import { CryptoChain3D } from '../components/radar/CryptoChain3D';
-import { RoiWorkload3D } from '../components/roi/RoiWorkload3D';
+import { RoiWorkload3D, RoiStatCards } from '../components/roi/RoiWorkload3D';
 import { DissectionConduitStream } from '../components/demo/DissectionConduitStream';
 import { TiltCard3D } from '../components/demo/TiltCard3D';
 
@@ -1029,79 +1029,102 @@ export function LandingPage() {
             </InView>
 
             {/* Interactive Calculator Workspace */}
-            <InView className="p-6 lg:p-10 bg-surface-bright/90 border border-tertiary/40 rounded-2xl grid grid-cols-1 xl:grid-cols-12 gap-8 lg:gap-12 items-center shadow-2xl backdrop-blur-md">
-              
-              {/* Controls Sliders (Functional 2D Form Inputs) */}
-              <div className="xl:col-span-5 flex flex-col gap-6">
+            <div className="flex flex-col gap-6">
+              <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8 items-stretch">
                 
-                {/* Volume Slider */}
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="slider-volume" className="font-sans font-bold text-sm text-text-primary">
-                      Daily Ingested Log Volume
-                    </label>
-                    <span className="font-mono text-2xl text-tertiary font-extrabold">{roiVolume} GB</span>
+                {/* Left Panel: Controls Sliders (Functional 2D Form Inputs) */}
+                <InView className="xl:col-span-5 bg-surface-bright/90 border border-tertiary/35 rounded-2xl p-6 md:p-8 flex flex-col justify-between shadow-2xl backdrop-blur-md h-full">
+                  {/* Panel Header */}
+                  <div className="flex items-center justify-between pb-4 border-b border-border-muted">
+                    <div className="flex items-center gap-2 font-mono text-xs text-tertiary font-bold">
+                      <span className="material-symbols-outlined text-tertiary text-[20px]">tune</span>
+                      <span className="tracking-wide">INFRASTRUCTURE TELEMETRY // ESTIMATOR</span>
+                    </div>
+                    <span className="font-mono text-[10px] text-text-dim uppercase font-bold px-2 py-0.5 rounded bg-tertiary/10 border border-tertiary/20">
+                      INPUT PARAMS
+                    </span>
                   </div>
-                  <input
-                    id="slider-volume"
-                    type="range"
-                    min="100"
-                    max="5000"
-                    step="50"
-                    value={roiVolume}
-                    onChange={(e) => setRoiVolume(parseInt(e.target.value, 10))}
-                    className="w-full h-2.5 bg-surface-dim border border-tertiary/30 rounded-lg appearance-none cursor-pointer accent-tertiary"
-                  />
-                  <div className="flex justify-between font-mono text-[10px] text-text-dim">
-                    <span>100 GB</span>
-                    <span>2,500 GB</span>
-                    <span>5,000 GB/day</span>
-                  </div>
-                </div>
 
-                {/* Devices Slider */}
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="slider-devices" className="font-sans font-bold text-sm text-text-primary">
-                      Active Firewalls &amp; Network Nodes
-                    </label>
-                    <span className="font-mono text-2xl text-primary font-extrabold">{roiDevices} Units</span>
-                  </div>
-                  <input
-                    id="slider-devices"
-                    type="range"
-                    min="10"
-                    max="1000"
-                    step="10"
-                    value={roiDevices}
-                    onChange={(e) => setRoiDevices(parseInt(e.target.value, 10))}
-                    className="w-full h-2.5 bg-surface-dim border border-primary/30 rounded-lg appearance-none cursor-pointer accent-primary"
-                  />
-                  <div className="flex justify-between font-mono text-[10px] text-text-dim">
-                    <span>10 Nodes</span>
-                    <span>500 Nodes</span>
-                    <span>1,000 Nodes</span>
-                  </div>
-                </div>
+                  {/* Sliders Container: Starts at the top, perfectly spaced */}
+                  <div className="flex flex-col gap-6 py-4 my-auto">
+                    {/* Volume Slider */}
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <label htmlFor="slider-volume" className="font-sans font-bold text-sm text-text-primary">
+                          Daily Ingested Log Volume
+                        </label>
+                        <span className="font-mono text-2xl text-tertiary font-extrabold">{roiVolume} GB</span>
+                      </div>
+                      <input
+                        id="slider-volume"
+                        type="range"
+                        min="100"
+                        max="5000"
+                        step="50"
+                        value={roiVolume}
+                        onChange={(e) => setRoiVolume(parseInt(e.target.value, 10))}
+                        className="w-full h-2.5 bg-surface-dim border border-tertiary/30 rounded-lg appearance-none cursor-pointer accent-tertiary"
+                      />
+                      <div className="flex justify-between font-mono text-[10px] text-text-dim">
+                        <span>100 GB</span>
+                        <span>2,500 GB</span>
+                        <span>5,000 GB/day</span>
+                      </div>
+                    </div>
 
-                <div className="p-3.5 bg-surface-dim border border-tertiary/20 rounded-xl flex items-center gap-2.5 font-mono text-xs text-text-muted">
-                  <span className="material-symbols-outlined text-tertiary text-[20px]">calculate</span>
-                  <span>Model based on estimated SIEM index costs ($3.00/GB) and 78.4% noise reduction metrics.</span>
-                </div>
+                    {/* Devices Slider */}
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <label htmlFor="slider-devices" className="font-sans font-bold text-sm text-text-primary">
+                          Active Firewalls &amp; Network Nodes
+                        </label>
+                        <span className="font-mono text-2xl text-primary font-extrabold">{roiDevices} Units</span>
+                      </div>
+                      <input
+                        id="slider-devices"
+                        type="range"
+                        min="10"
+                        max="1000"
+                        step="10"
+                        value={roiDevices}
+                        onChange={(e) => setRoiDevices(parseInt(e.target.value, 10))}
+                        className="w-full h-2.5 bg-surface-dim border border-primary/30 rounded-lg appearance-none cursor-pointer accent-primary"
+                      />
+                      <div className="flex justify-between font-mono text-[10px] text-text-dim">
+                        <span>10 Nodes</span>
+                        <span>500 Nodes</span>
+                        <span>1,000 Nodes</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Calculation Model Footer Callout */}
+                  <div className="p-3.5 bg-surface-dim border border-tertiary/20 rounded-xl flex items-center gap-2.5 font-mono text-xs text-text-muted">
+                    <span className="material-symbols-outlined text-tertiary text-[20px]">calculate</span>
+                    <span>Model based on estimated SIEM index costs ($3.00/GB) and 78.4% noise reduction metrics.</span>
+                  </div>
+                </InView>
+
+                {/* Right Panel: Real-time 3D Isometric Workload Stacks */}
+                <InView className="xl:col-span-7 flex flex-col h-full">
+                  <RoiWorkload3D
+                    roiVolume={roiVolume}
+                    roiDevices={roiDevices}
+                    calculatedSavings={calculatedSavings}
+                    calculatedHours={calculatedHours}
+                    force2D={is2D}
+                    showStatCards={false}
+                  />
+                </InView>
               </div>
 
-              {/* Real-time 3D Isometric Workload Stacks & Stat Readouts */}
-              <div className="xl:col-span-7 flex flex-col gap-6">
-                <RoiWorkload3D
-                  roiVolume={roiVolume}
-                  roiDevices={roiDevices}
-                  calculatedSavings={calculatedSavings}
-                  calculatedHours={calculatedHours}
-                  force2D={is2D}
-                />
-              </div>
-
-            </InView>
+              {/* 4 Secondary Stat Cards Row with Restrained 3D Card-Tilt on Hover */}
+              <RoiStatCards
+                calculatedSavings={calculatedSavings}
+                calculatedHours={calculatedHours}
+                isFlat2D={is2D}
+              />
+            </div>
           </div>
         </section>
 
