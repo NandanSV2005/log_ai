@@ -4,6 +4,9 @@ from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, Request, HTTPException, status
 from pydantic import BaseModel, Field
 from app.routers.ingest import limiter
+from app.parsers.dynamic_parser import DynamicParser
+from app.detection.engine import anomaly_engine
+from app.xai.explainer import xai_explainer
 
 router = APIRouter(prefix="/api/v1/demo", tags=["Public Forensic Demo"])
 

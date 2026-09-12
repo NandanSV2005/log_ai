@@ -127,7 +127,7 @@ export function DissectionConduitStream({
                 : 'bg-surface-dim/80 border-border-muted text-text-dim scale-95 opacity-60'
             }`}
           >
-            {isFlowingToCol2 ? 'INGEST \u2192 PARSE' : 'CONDUIT 01'}
+            {isFlowingToCol2 ? 'EXTRACTING FIELDS...' : 'FIELD EXTRACTION'}
           </div>
         </div>
 
@@ -238,7 +238,7 @@ export function DissectionConduitStream({
                 : 'bg-surface-dim/80 border-border-muted text-text-dim scale-95 opacity-60'
             }`}
           >
-            {isFlowingToCol3 ? 'OCSF \u2192 VERDICT' : 'CONDUIT 02'}
+            {isFlowingToCol3 ? 'CLASSIFYING THREAT...' : 'THREAT CLASSIFICATION'}
           </div>
         </div>
       </div>

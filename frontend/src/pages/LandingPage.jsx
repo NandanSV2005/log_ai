@@ -13,6 +13,7 @@ import { CryptoChain3D } from '../components/radar/CryptoChain3D';
 import { RoiWorkload3D, RoiStatCards } from '../components/roi/RoiWorkload3D';
 import { DissectionConduitStream } from '../components/demo/DissectionConduitStream';
 import { TiltCard3D } from '../components/demo/TiltCard3D';
+import { DissectionScanner } from '../components/demo/DissectionScanner';
 
 const TunnelSection = React.lazy(() =>
   import('../components/tunnel/TunnelSection').then((m) => ({ default: m.TunnelSection }))
@@ -1204,15 +1205,23 @@ export function LandingPage() {
                     </div>
                   </div>
 
-                  {/* Interactive Textarea */}
+                  {/* Interactive Textarea with 3D Dissection Scan & Peel Effect */}
                   <div className="flex flex-col gap-2">
-                    <textarea
-                      value={demoInput}
-                      onChange={handleTextareaChange}
-                      rows={4}
-                      placeholder="Paste a raw firewall string, syslog line, or JSON alert..."
-                      className="w-full bg-surface-dim p-3 rounded-xl font-mono text-xs text-text-primary border border-border-muted focus:border-primary focus:outline-none resize-none leading-relaxed shadow-inner"
-                    />
+                    <DissectionScanner
+                      rawLogText={demoInput}
+                      isAnalyzing={demoLoading}
+                      demoResult={demoResult}
+                      revealStep={revealStep}
+                      disabled={is2D}
+                    >
+                      <textarea
+                        value={demoInput}
+                        onChange={handleTextareaChange}
+                        rows={4}
+                        placeholder="Paste a raw firewall string, syslog line, or JSON alert..."
+                        className="w-full bg-surface-dim p-3 rounded-xl font-mono text-xs text-text-primary border border-border-muted focus:border-primary focus:outline-none resize-none leading-relaxed shadow-inner"
+                      />
+                    </DissectionScanner>
                   </div>
 
                   {/* Submit Button */}
