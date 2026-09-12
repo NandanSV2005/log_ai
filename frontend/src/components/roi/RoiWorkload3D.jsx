@@ -5,8 +5,21 @@ export function RoiWorkload3D({
   roiVolume,
   roiDevices,
   calculatedSavings,
-  calculatedHours
+  calculatedHours,
+  force2D = false
 }) {
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  React.useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReducedMotion(mq.matches);
+    const handler = (e) => setReducedMotion(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  const isFlat2D = force2D || reducedMotion;
+
   // Height calculation for 3D stacks (in pixels)
   // Max height ~220px, min height ~40px
   const volumeNorm = Math.min(1, Math.max(0, (roiVolume - 100) / 4900));
@@ -20,6 +33,7 @@ export function RoiWorkload3D({
   const [tiltCard, setTiltCard] = useState(null);
 
   const handleMouseMove = (e, cardKey) => {
+    if (isFlat2D) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
@@ -43,7 +57,11 @@ export function RoiWorkload3D({
           <div className="flex flex-col">
             <div className="flex items-center gap-2 font-mono text-xs text-tertiary font-bold">
               <span className="w-2 h-2 rounded-full bg-tertiary animate-pulse" />
-              <span>DIMENSIONAL WORKLOAD COMPARISON // REAL-TIME 3D</span>
+              <span>
+                {isFlat2D
+                  ? 'VOLUMETRIC WORKLOAD COMPARISON // FLAT 2D EFFICIENCY'
+                  : 'DIMENSIONAL WORKLOAD COMPARISON // REAL-TIME 3D'}
+              </span>
             </div>
             <span className="font-sans text-xs text-text-muted mt-0.5">
               Live volumetric feedback comparing manual SIEM triaging vs automated ingestion
@@ -67,16 +85,63 @@ export function RoiWorkload3D({
           </div>
         </div>
 
-        {/* CSS 3D Isometric Pedestal & Dynamic Extruded Blocks */}
-        <div className="relative w-full min-h-[280px] md:min-h-[300px] flex items-center justify-center py-6 my-2">
-          {/* Isometric Perspective Scene */}
-          <div
-            className="relative flex items-end justify-center gap-14 sm:gap-24 md:gap-32"
-            style={{
-              perspective: '1000px',
-              perspectiveOrigin: '50% 120px'
-            }}
-          >
+        {/* Comparison Stage: 2D Clean Meter if isFlat2D, else CSS 3D Isometric Pedestal */}
+        {isFlat2D ? (
+          <div className="relative w-full min-h-[220px] flex flex-col justify-center py-6 px-2 md:px-6 my-2">
+            <div className="max-w-xl mx-auto w-full flex flex-col gap-6">
+              {/* Manual Fatigue Bar */}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between font-mono text-xs">
+                  <span className="text-rose-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-rose-500" />
+                    Manual Fatigue (Unfiltered Ingestion)
+                  </span>
+                  <span className="text-rose-300 font-bold">{calculatedHours} hrs/wk</span>
+                </div>
+                <div className="w-full h-4 bg-surface rounded-full overflow-hidden border border-rose-500/30 p-0.5">
+                  <div
+                    className="h-full bg-gradient-to-r from-rose-900 to-rose-500 rounded-full transition-all duration-300"
+                    style={{ width: `${Math.min(100, Math.max(20, Math.round(combinedLoad * 100)))}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Automated Engine Bar */}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between font-mono text-xs">
+                  <span className="text-tertiary font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-tertiary animate-pulse" />
+                    Automated ULPF Engine (De-duplicated &amp; Verified)
+                  </span>
+                  <span className="text-tertiary font-bold">
+                    {Math.round(calculatedHours * 0.216)} hrs/wk (-78.4%)
+                  </span>
+                </div>
+                <div className="w-full h-4 bg-surface rounded-full overflow-hidden border border-tertiary/30 p-0.5">
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-800 to-tertiary rounded-full transition-all duration-300"
+                    style={{ width: `${Math.min(100, Math.max(6, Math.round(combinedLoad * 21.6)))}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-center pt-2">
+                <span className="px-3.5 py-1 rounded-full bg-tertiary/15 border border-tertiary/40 text-tertiary font-mono text-xs font-black shadow-[0_0_14px_rgba(78,222,163,0.3)]">
+                  78.4% DATA NOISE SHED PRE-INDEX
+                </span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="relative w-full min-h-[280px] md:min-h-[300px] flex items-center justify-center py-6 my-2">
+            {/* Isometric Perspective Scene */}
+            <div
+              className="relative flex items-end justify-center gap-14 sm:gap-24 md:gap-32"
+              style={{
+                perspective: '1000px',
+                perspectiveOrigin: '50% 120px'
+              }}
+            >
             {/* Ground Isometric Grid Platter */}
             <div
               className="absolute -bottom-8 w-72 sm:w-96 h-40 border border-tertiary/20 rounded-3xl bg-surface/50 shadow-2xl pointer-events-none"
@@ -237,6 +302,7 @@ export function RoiWorkload3D({
             </div>
           </div>
         </div>
+        )}
       </div>
 
       {/* 4 Secondary Stat Cards with Restrained 3D Card-Tilt on Hover */}

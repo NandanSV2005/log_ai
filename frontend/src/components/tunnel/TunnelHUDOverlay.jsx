@@ -109,15 +109,6 @@ export function TunnelHUDOverlay({
             );
           })}
         </nav>
-
-        {/* Quick Bypass Button */}
-        <button
-          onClick={onSkipToSources}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-lowest/90 hover:bg-surface-hover border border-border-muted text-text-muted hover:text-text-primary font-mono text-xs transition-colors backdrop-blur-md"
-        >
-          <span>Skip to 2D Content</span>
-          <span className="material-symbols-outlined text-[15px]">arrow_downward</span>
-        </button>
       </header>
 
       {/* Middle Center / Left Overlay */}

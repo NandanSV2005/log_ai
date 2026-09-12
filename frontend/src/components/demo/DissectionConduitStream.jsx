@@ -1,6 +1,8 @@
 import React from 'react';
 
-export function DissectionConduitStream({ isActive, revealStep = 0 }) {
+export function DissectionConduitStream({ isActive, revealStep = 0, forceDisable = false }) {
+  if (forceDisable) return null;
+
   // Reveal step mapping to flow stage
   // Step 0-3: Flowing into Col 2
   // Step 4+: Flowing into Col 3

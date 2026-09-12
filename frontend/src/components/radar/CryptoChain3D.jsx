@@ -37,7 +37,7 @@ const CHAIN_BLOCKS = [
   }
 ];
 
-export function CryptoChain3D({ fallbackBlock = '48281' }) {
+export function CryptoChain3D({ fallbackBlock = '48281', force2D = false }) {
   const [hoveredBlock, setHoveredBlock] = useState(null);
 
   return (
@@ -47,32 +47,38 @@ export function CryptoChain3D({ fallbackBlock = '48281' }) {
           <span className="w-2 h-2 rounded-full bg-tertiary animate-pulse" />
           <span>IMMUTABLE LEDGER // 3-BLOCK CHAIN</span>
         </span>
-        <span className="text-text-dim text-[10px]">HOVER CUBE TO ROTATE</span>
+        <span className="text-text-dim text-[10px]">
+          {force2D ? 'SHA-256 VERIFIED' : 'HOVER CUBE TO ROTATE'}
+        </span>
       </div>
 
-      {/* 3D Linked Chain Container */}
+      {/* 3D or 2D Linked Chain Container */}
       <div
         className="relative py-4 px-2 flex flex-col gap-3 items-center justify-center"
-        style={{ perspective: '1000px' }}
+        style={force2D ? {} : { perspective: '1000px' }}
       >
         {CHAIN_BLOCKS.map((block, idx) => {
-          const isHovered = hoveredBlock === block.index;
+          const isHovered = !force2D && hoveredBlock === block.index;
           const isCurrent = block.index === Number(fallbackBlock) || block.active;
 
           return (
             <React.Fragment key={block.index}>
-              {/* 3D Dimensional Block Cube */}
+              {/* Dimensional Block Cube (or Flat in 2D Mode) */}
               <div
-                onMouseEnter={() => setHoveredBlock(block.index)}
-                onMouseLeave={() => setHoveredBlock(null)}
+                onMouseEnter={() => !force2D && setHoveredBlock(block.index)}
+                onMouseLeave={() => !force2D && setHoveredBlock(null)}
                 className="w-full relative cursor-pointer group"
-                style={{
-                  transformStyle: 'preserve-3d',
-                  transform: isHovered
-                    ? 'rotateY(-18deg) rotateX(8deg) translateZ(12px)'
-                    : 'rotateY(0deg) rotateX(0deg) translateZ(0px)',
-                  transition: 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)'
-                }}
+                style={
+                  force2D
+                    ? {}
+                    : {
+                        transformStyle: 'preserve-3d',
+                        transform: isHovered
+                          ? 'rotateY(-18deg) rotateX(8deg) translateZ(12px)'
+                          : 'rotateY(0deg) rotateX(0deg) translateZ(0px)',
+                        transition: 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)'
+                      }
+                }
               >
                 {/* 3D Shadow Plate behind the block */}
                 <div

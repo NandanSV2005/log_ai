@@ -2,6 +2,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useRenderMode } from '../contexts/RenderModeContext';
 import { StitchBrandMark } from '../components/common/StitchBrandMark';
 import { api } from '../services/api';
 import { TextEffect, InView, AnimatedGroup, SpotlightCard, BorderGlow } from '../components/motion-primitives';
@@ -373,6 +374,7 @@ function ZigZagSourceStream({ cards }) {
 
 export function LandingPage() {
   const { theme, setTheme } = useTheme();
+  const { renderMode, is3D, is2D, setRenderMode, toggleRenderMode } = useRenderMode();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   // Active Expand/Collapse Card States
@@ -672,12 +674,49 @@ export function LandingPage() {
             </button>
           </nav>
 
-          {/* Theme Toggle & Open SOC Console CTA */}
-          <div className="flex items-center gap-3 md:gap-5 flex-shrink-0">
+          {/* 3D / 2D Render Mode Toggle, Theme Toggle & Open SOC Console CTA */}
+          <div className="flex items-center gap-2.5 sm:gap-3 md:gap-4 flex-shrink-0">
+            {/* 3D / 2D Experience Toggle Pill (Sibling to Theme Toggle) */}
+            <div
+              className="flex items-center bg-surface-dim rounded-lg p-1 border border-border-muted"
+              role="group"
+              aria-label="Experience rendering mode"
+            >
+              <button
+                type="button"
+                role="switch"
+                aria-checked={is3D}
+                onClick={() => setRenderMode('3d')}
+                className={`px-2.5 py-1 font-mono text-[11px] font-bold rounded transition-all cursor-pointer ${
+                  is3D
+                    ? 'bg-primary text-surface-dim shadow-sm'
+                    : 'text-text-muted hover:text-text-primary'
+                }`}
+                title="Enable immersive 3D flythroughs and spatial models"
+              >
+                3D
+              </button>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={is2D}
+                onClick={() => setRenderMode('2d')}
+                className={`px-2.5 py-1 font-mono text-[11px] font-bold rounded transition-all cursor-pointer ${
+                  is2D
+                    ? 'bg-primary text-surface-dim shadow-sm'
+                    : 'text-text-muted hover:text-text-primary'
+                }`}
+                title="Enable 2D high-efficiency reduced rendering mode"
+              >
+                2D
+              </button>
+            </div>
+
+            {/* Operations Theme Toggle */}
             <div className="hidden md:flex items-center bg-surface-dim rounded-lg p-1 border border-border-muted">
               <button
                 onClick={() => setTheme('dark')}
-                className={`px-2.5 py-1 font-mono text-[11px] font-bold rounded transition-all ${
+                className={`px-2.5 py-1 font-mono text-[11px] font-bold rounded transition-all cursor-pointer ${
                   theme === 'dark' ? 'bg-primary text-surface-dim shadow-sm' : 'text-text-muted hover:text-text-primary'
                 }`}
               >
@@ -685,7 +724,7 @@ export function LandingPage() {
               </button>
               <button
                 onClick={() => setTheme('sage')}
-                className={`px-2.5 py-1 font-mono text-[11px] font-bold rounded transition-all ${
+                className={`px-2.5 py-1 font-mono text-[11px] font-bold rounded transition-all cursor-pointer ${
                   theme === 'sage' ? 'bg-primary text-surface-dim shadow-sm' : 'text-text-muted hover:text-text-primary'
                 }`}
               >
@@ -703,7 +742,7 @@ export function LandingPage() {
             {/* Mobile Menu Toggle Button */}
             <button
               onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
-              className="xl:hidden p-2 rounded-lg bg-surface border border-border-muted text-text-primary"
+              className="xl:hidden p-2 rounded-lg bg-surface border border-border-muted text-text-primary cursor-pointer"
               aria-label="Toggle Navigation Menu"
             >
               <span className="material-symbols-outlined text-xl">{isMobileNavOpen ? 'close' : 'menu'}</span>
@@ -729,11 +768,37 @@ export function LandingPage() {
             <button onClick={() => scrollToSection('demo')} className="block w-full text-left px-3 py-2 rounded bg-surface border border-border-muted text-text-primary">
               05 // Interactive Dissection
             </button>
-            <div className="pt-2 flex items-center justify-between font-sans">
+
+            {/* Mobile Experience Render Mode */}
+            <div className="pt-2 flex items-center justify-between font-sans border-t border-border-muted/40">
+              <span className="text-text-muted">Render Mode:</span>
+              <div className="flex items-center bg-surface rounded-lg p-0.5 border border-border-muted">
+                <button
+                  type="button"
+                  onClick={() => setRenderMode('3d')}
+                  className={`px-2.5 py-1 font-mono text-xs font-bold rounded transition-all cursor-pointer ${
+                    is3D ? 'bg-primary text-surface-dim' : 'text-text-muted'
+                  }`}
+                >
+                  3D
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRenderMode('2d')}
+                  className={`px-2.5 py-1 font-mono text-xs font-bold rounded transition-all cursor-pointer ${
+                    is2D ? 'bg-primary text-surface-dim' : 'text-text-muted'
+                  }`}
+                >
+                  2D
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-1 flex items-center justify-between font-sans">
               <span className="text-text-muted">Operations Theme:</span>
               <button
                 onClick={() => setTheme(theme === 'dark' ? 'sage' : 'dark')}
-                className="px-3 py-1 rounded bg-primary text-surface-dim font-mono font-bold text-xs"
+                className="px-3 py-1 rounded bg-primary text-surface-dim font-mono font-bold text-xs cursor-pointer"
               >
                 TOGGLE ({theme.toUpperCase()})
               </button>
@@ -780,43 +845,78 @@ export function LandingPage() {
       <main className="w-full pt-16 pb-12 flex flex-col">
         
         {/* ========================================================================= */}
-        {/* 3D SCROLL-DRIVEN PIPELINE FLYTHROUGH TUNNEL (HERO + CHAPTER 01)            */}
+        {/* HERO + CHAPTER 01: 3D PIPELINE TUNNEL VS 2D STATIC FALLBACK               */}
         {/* ========================================================================= */}
-        <Suspense
-          fallback={
-            <div className="w-full h-screen bg-surface-dim flex flex-col items-center justify-center font-mono text-xs text-text-muted gap-3">
-              <span className="w-3 h-3 rounded-full bg-primary animate-ping"></span>
-              <span className="text-primary font-bold">INITIALIZING ULPF 3D TUNNEL EXPERIENCE...</span>
-            </div>
-          }
-        >
-          <TunnelSection
-            stats={stats}
-            fallback2D={
-              <PipelineHero2DFallback
-                stats={stats}
-                recentEvents={recentEvents}
-                pipelineLatency={FALLBACK_PIPELINE_LATENCY}
-                merkleProofType={FALLBACK_MERKLE_PROOF_TYPE}
-                pipelineCards={PIPELINE_CARDS}
-                activePipeCard={activePipeCard}
-                setActivePipeCard={setActivePipeCard}
-                scrollToSection={scrollToSection}
-                InteractiveCardComponent={InteractiveCard}
-              />
+        {is3D ? (
+          <Suspense
+            fallback={
+              <div className="w-full h-screen bg-surface-dim flex flex-col items-center justify-center font-mono text-xs text-text-muted gap-3">
+                <span className="w-3 h-3 rounded-full bg-primary animate-ping"></span>
+                <span className="text-primary font-bold">INITIALIZING ULPF 3D TUNNEL EXPERIENCE...</span>
+              </div>
             }
+          >
+            <TunnelSection
+              stats={stats}
+              fallback2D={
+                <PipelineHero2DFallback
+                  stats={stats}
+                  recentEvents={recentEvents}
+                  pipelineLatency={FALLBACK_PIPELINE_LATENCY}
+                  merkleProofType={FALLBACK_MERKLE_PROOF_TYPE}
+                  pipelineCards={PIPELINE_CARDS}
+                  activePipeCard={activePipeCard}
+                  setActivePipeCard={setActivePipeCard}
+                  scrollToSection={scrollToSection}
+                  InteractiveCardComponent={InteractiveCard}
+                />
+              }
+            />
+          </Suspense>
+        ) : (
+          <PipelineHero2DFallback
+            stats={stats}
+            recentEvents={recentEvents}
+            pipelineLatency={FALLBACK_PIPELINE_LATENCY}
+            merkleProofType={FALLBACK_MERKLE_PROOF_TYPE}
+            pipelineCards={PIPELINE_CARDS}
+            activePipeCard={activePipeCard}
+            setActivePipeCard={setActivePipeCard}
+            scrollToSection={scrollToSection}
+            InteractiveCardComponent={InteractiveCard}
           />
-        </Suspense>
+        )}
 
         {/* ========================================================================= */}
-        {/* CHAPTER 02 // LOG SOURCES (PINNED SCROLL-DRIVEN 3D CARD STACK)            */}
+        {/* CHAPTER 02 // LOG SOURCES (PINNED 3D CARD STACK VS 2D ZIG-ZAG STREAM)     */}
         {/* ========================================================================= */}
         <section
           id="sources"
           className="w-full relative bg-gradient-to-b from-[var(--color-chapter2-from)] via-[var(--color-chapter2-via)] to-[var(--color-chapter2-to)] border-b border-secondary/20"
         >
           <div className="absolute top-16 right-1/4 w-[750px] h-[500px] bg-secondary/10 rounded-full blur-[150px] pointer-events-none"></div>
-          <SourceCardStack cards={SOURCE_CARDS} />
+          {is3D ? (
+            <SourceCardStack cards={SOURCE_CARDS} />
+          ) : (
+            <div className="max-w-[1600px] mx-auto px-4 md:px-8 xl:px-14 py-20 relative z-10 flex flex-col gap-10">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-bold text-secondary uppercase tracking-widest">CHAPTER 02</span>
+                    <span className="text-text-dim font-mono">//</span>
+                    <span className="font-mono text-xs text-text-dim font-semibold tracking-wider">SOURCE_INGEST_MATRIX</span>
+                  </div>
+                  <h2 className="font-display font-black text-3xl md:text-4xl text-text-primary uppercase tracking-tight">
+                    Multi-Vendor Log Sources
+                  </h2>
+                </div>
+                <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
+                  Standardized ingestion streams across enterprise perimeter appliances, operating systems, and host intrusion sensors.
+                </p>
+              </div>
+              <ZigZagSourceStream cards={SOURCE_CARDS} />
+            </div>
+          )}
         </section>
 
         {/* ========================================================================= */}
@@ -868,6 +968,7 @@ export function LandingPage() {
                   blips={RADAR_BLIPS}
                   selectedBlip={selectedBlip}
                   onSelectBlip={setSelectedBlip}
+                  force2D={is2D}
                 />
               </InView>
 
@@ -887,7 +988,7 @@ export function LandingPage() {
                     </p>
 
                     {/* 3D Cryptographic Chain Links */}
-                    <CryptoChain3D fallbackBlock={FALLBACK_LEDGER_BLOCK} />
+                    <CryptoChain3D fallbackBlock={FALLBACK_LEDGER_BLOCK} force2D={is2D} />
                   </div>
 
                   <div className="p-3 bg-surface-dim border border-tertiary/20 rounded-xl flex items-center gap-3">
@@ -999,6 +1100,7 @@ export function LandingPage() {
                   roiDevices={roiDevices}
                   calculatedSavings={calculatedSavings}
                   calculatedHours={calculatedHours}
+                  force2D={is2D}
                 />
               </div>
 
@@ -1034,6 +1136,7 @@ export function LandingPage() {
             <DissectionConduitStream
               isActive={demoLoading || (revealStep > 0 && revealStep < 7)}
               revealStep={revealStep}
+              forceDisable={is2D}
             />
 
             {/* 3-Column Dissection Workspace */}
@@ -1041,7 +1144,7 @@ export function LandingPage() {
               
               {/* Column 1: Raw Inbound Interactive Input */}
               <InView className="xl:col-span-4 h-full">
-                <TiltCard3D>
+                <TiltCard3D disabled={is2D}>
                   <SpotlightCard spotlightColor="rgba(167, 139, 250, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-primary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center justify-between pb-3 border-b border-border-muted">
@@ -1110,7 +1213,7 @@ export function LandingPage() {
 
               {/* Column 2: ULPF Transform Engine Dynamic Output */}
               <InView className="xl:col-span-4 h-full">
-                <TiltCard3D>
+                <TiltCard3D disabled={is2D}>
                   <SpotlightCard spotlightColor="rgba(123, 208, 255, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-secondary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
                   <div className="flex items-center justify-between pb-3 border-b border-border-muted">
                     <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
@@ -1182,7 +1285,7 @@ export function LandingPage() {
 
               {/* Column 3: Enriched XAI Threat Verdict Dynamic Output */}
               <InView className="xl:col-span-4 h-full">
-                <TiltCard3D>
+                <TiltCard3D disabled={is2D}>
                   <SpotlightCard spotlightColor="rgba(78, 222, 163, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-tertiary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
                   <div className="flex items-center justify-between pb-3 border-b border-border-muted">
                     <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">

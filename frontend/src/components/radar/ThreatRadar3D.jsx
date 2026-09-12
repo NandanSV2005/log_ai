@@ -239,7 +239,8 @@ function FlatRadarFallback({ blips, selectedBlip, onSelectBlip }) {
 export function ThreatRadar3D({
   blips = DEFAULT_RADAR_BLIPS,
   selectedBlip,
-  onSelectBlip
+  onSelectBlip,
+  force2D = false
 }) {
   const [hasWebGL, setHasWebGL] = useState(true);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -264,7 +265,7 @@ export function ThreatRadar3D({
         {/* Subtle grid background */}
         <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#4edea3_1px,transparent_1px)] [background-size:24px_24px]" />
 
-        {hasWebGL && !reducedMotion ? (
+        {hasWebGL && !reducedMotion && !force2D ? (
           <Canvas
             camera={{ position: [0, 3.8, 5.2], fov: 42 }}
             gl={{ antialias: true, alpha: true }}

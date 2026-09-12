@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export function TiltCard3D({ children, className = '', maxTilt = 4 }) {
+export function TiltCard3D({ children, className = '', maxTilt = 4, disabled = false }) {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
   const [canTilt, setCanTilt] = useState(true);
@@ -12,8 +12,10 @@ export function TiltCard3D({ children, className = '', maxTilt = 4 }) {
     setCanTilt(!isTouch && !reduced);
   }, []);
 
+  const isEnabled = canTilt && !disabled;
+
   const handleMouseMove = (e) => {
-    if (!canTilt) return;
+    if (!isEnabled) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
@@ -24,7 +26,7 @@ export function TiltCard3D({ children, className = '', maxTilt = 4 }) {
   };
 
   const handleMouseEnter = () => {
-    if (canTilt) setIsHovered(true);
+    if (isEnabled) setIsHovered(true);
   };
 
   const handleMouseLeave = () => {
@@ -39,12 +41,12 @@ export function TiltCard3D({ children, className = '', maxTilt = 4 }) {
       onMouseLeave={handleMouseLeave}
       className={`h-full transition-transform duration-200 ease-out ${className}`}
       style={{
-        perspective: '1000px',
+        perspective: isEnabled ? '1000px' : 'none',
         transform:
-          canTilt && isHovered
+          isEnabled && isHovered
             ? `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) translateZ(4px)`
             : 'none',
-        transformStyle: 'preserve-3d'
+        transformStyle: isEnabled ? 'preserve-3d' : 'flat'
       }}
     >
       {children}
