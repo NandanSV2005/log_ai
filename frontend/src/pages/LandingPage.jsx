@@ -7,6 +7,11 @@ import { api } from '../services/api';
 import { TextEffect, InView, AnimatedGroup, SpotlightCard, BorderGlow } from '../components/motion-primitives';
 import { PipelineHero2DFallback } from '../components/tunnel/PipelineHero2DFallback';
 import { SourceCardStack } from '../components/sources/SourceCardStack';
+import { ThreatRadar3D } from '../components/radar/ThreatRadar3D';
+import { CryptoChain3D } from '../components/radar/CryptoChain3D';
+import { RoiWorkload3D } from '../components/roi/RoiWorkload3D';
+import { DissectionConduitStream } from '../components/demo/DissectionConduitStream';
+import { TiltCard3D } from '../components/demo/TiltCard3D';
 
 const TunnelSection = React.lazy(() =>
   import('../components/tunnel/TunnelSection').then((m) => ({ default: m.TunnelSection }))
@@ -563,33 +568,39 @@ export function LandingPage() {
       id: 1,
       top: '26%',
       left: '70%',
+      pos3d: [1.8, 0.45, -1.2],
       host: '10.0.4.12 [SMB]',
       rule: 'T1021.002 Lateral Probe',
       sev: 'SEV 9.4',
       score: 9.4,
       level: 'CRITICAL',
+      colorHex: '#ef4444',
       colorClass: 'text-[var(--color-severity-critical)] border-[var(--color-severity-critical-border)] bg-[#160c0e]/95'
     },
     {
       id: 2,
       top: '68%',
       left: '28%',
+      pos3d: [-1.6, 0.65, 1.4],
       host: '192.168.1.104',
       rule: 'C2 Egress Jitter',
       sev: 'SEV 6.2',
       score: 6.2,
       level: 'MEDIUM',
+      colorHex: '#38bdf8',
       colorClass: 'text-secondary border-secondary/50 bg-[#0a1824]/95'
     },
     {
       id: 3,
       top: '48%',
       left: '44%',
+      pos3d: [-0.4, 0.3, -0.2],
       host: 'pfSense [10.0.0.1]',
       rule: 'GATEWAY SECURE',
       sev: 'NORMAL',
       score: 0.2,
       level: 'LOW',
+      colorHex: '#34d399',
       colorClass: 'text-tertiary border-tertiary/50 bg-[#091e17]/95'
     }
   ];
@@ -842,79 +853,25 @@ export function LandingPage() {
                 <div className="flex items-center justify-between font-mono text-xs pb-3 border-b border-border-muted">
                   <div className="flex items-center gap-2 text-tertiary font-bold">
                     <span className="material-symbols-outlined text-[20px]">radar</span>
-                    <span className="tracking-wide">SECTOR TOPOLOGY RADAR // CONTINUOUS SWEEP</span>
+                    <span className="tracking-wide">SECTOR TOPOLOGY RADAR // 3D DIMENSIONAL SWEEP</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-[11px] text-text-dim hidden sm:inline">SWEEP: 5.0s</span>
                     <span className="px-2 py-0.5 rounded bg-tertiary/15 text-tertiary font-mono text-[10px] font-bold border border-tertiary/30 animate-pulse">
-                      2 DETECTIONS ACTIVE
+                      3 TARGETS ACTIVE
                     </span>
                   </div>
                 </div>
 
-                {/* Radar Viewport Canvas */}
-                <div className="relative w-full aspect-[16/10] md:aspect-[16/9] bg-surface-dim rounded-xl overflow-hidden border border-border-muted flex items-center justify-center">
-                  <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#4edea3_1px,transparent_1px)] [background-size:20px_20px]"></div>
-
-                  {/* Concentric Range Rings */}
-                  <div className="absolute w-[85%] h-[85%] rounded-full border border-tertiary/20"></div>
-                  <div className="absolute w-[62%] h-[62%] rounded-full border border-tertiary/30"></div>
-                  <div className="absolute w-[40%] h-[40%] rounded-full border border-tertiary/40"></div>
-                  <div className="absolute w-[18%] h-[18%] rounded-full border border-tertiary/50"></div>
-
-                  {/* Degree Crosshairs */}
-                  <div className="absolute w-full h-[1px] bg-tertiary/25"></div>
-                  <div className="absolute h-full w-[1px] bg-tertiary/25"></div>
-                  <div className="absolute w-full h-[1px] bg-tertiary/15 rotate-45"></div>
-                  <div className="absolute w-full h-[1px] bg-tertiary/15 -rotate-45"></div>
-
-                  {/* 360-Degree Rotating Sweep Beam */}
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none animate-radar">
-                    <div className="w-1/2 h-1/2 origin-bottom-right bg-gradient-to-br from-tertiary/30 via-tertiary/5 to-transparent"></div>
-                  </div>
-
-                  {/* Radar Target Blips */}
-                  {RADAR_BLIPS.map((blip) => (
-                    <div
-                      key={blip.id}
-                      style={{ top: blip.top, left: blip.left }}
-                      onClick={() => setSelectedBlip(blip)}
-                      className="absolute group cursor-pointer z-20"
-                    >
-                      <span className="relative flex h-5 w-5">
-                        <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${
-                          blip.level === 'CRITICAL' ? 'bg-[var(--color-severity-critical)] opacity-80' :
-                          blip.level === 'MEDIUM' ? 'bg-secondary opacity-70' : 'bg-tertiary opacity-60'
-                        }`}></span>
-                        <span className={`relative inline-flex rounded-full h-5 w-5 border-2 border-surface-bright shadow-lg ${
-                          blip.level === 'CRITICAL' ? 'bg-[var(--color-severity-critical)]' :
-                          blip.level === 'MEDIUM' ? 'bg-secondary' : 'bg-tertiary'
-                        }`}></span>
-                      </span>
-
-                      {/* Anchored Tooltip Card */}
-                      <div className={`absolute -top-16 -left-28 border p-2.5 rounded-lg shadow-2xl w-48 font-mono text-[10px] transition-all ${blip.colorClass}`}>
-                        <div className="font-bold flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>
-                          <span>ANOMALY // {blip.sev}</span>
-                        </div>
-                        <div className="text-text-primary font-semibold">HOST: {blip.host}</div>
-                        <div className="text-text-dim">{blip.rule}</div>
-                      </div>
-                    </div>
-                  ))}
-
-                  {/* Coordinates Overlay */}
-                  <div className="absolute bottom-3 left-4 font-mono text-[11px] text-tertiary/80 font-bold bg-surface-dim/80 px-2.5 py-1 rounded border border-tertiary/20">
-                    FOV: 10.0.0.0/16 // SECTORS: 12
-                  </div>
-                  <div className="absolute top-3 right-4 font-mono text-[10px] text-text-dim">
-                    GRID COORD: 34.0522&deg; N, 118.2437&deg; W
-                  </div>
-                </div>
+                {/* 3D Radar Viewport Canvas with WebGL Check & 2D Fallback */}
+                <ThreatRadar3D
+                  blips={RADAR_BLIPS}
+                  selectedBlip={selectedBlip}
+                  onSelectBlip={setSelectedBlip}
+                />
               </InView>
 
-              {/* CRYPTOGRAPHIC PROOF COMPANION WITH SPOTLIGHT & BORDER GLOW */}
+              {/* CRYPTOGRAPHIC PROOF COMPANION WITH 3D LINKED CHAIN */}
               <InView className="xl:col-span-4">
                 <SpotlightCard spotlightColor="rgba(78, 222, 163, 0.15)" className="h-full bg-surface-bright/90 border border-tertiary/35 rounded-2xl p-5 md:p-6 flex flex-col justify-between gap-4 shadow-2xl backdrop-blur-md">
                   <div className="flex flex-col gap-3">
@@ -929,24 +886,8 @@ export function LandingPage() {
                       Log entries are linked together with SHA-256 hashes so any tampering is detected instantly.
                     </p>
 
-                    <div className="bg-surface-dim p-4 rounded-xl border border-tertiary/25 flex flex-col gap-2.5 font-mono text-[11px]">
-                      <div className="flex justify-between items-center text-text-dim pb-1 border-b border-border-muted">
-                        <span className="text-tertiary font-bold">LEDGER BLOCK: {FALLBACK_LEDGER_BLOCK}</span>
-                        <span className="text-tertiary font-bold">VERIFIED</span>
-                      </div>
-                      <div>
-                        <span className="text-text-dim text-[10px] block">PREV HASH:</span>
-                        <span className="text-text-muted truncate block">0x8f3c49e28ba709320e1d...9a</span>
-                      </div>
-                      <div>
-                        <span className="text-text-dim text-[10px] block">MERKLE ROOT:</span>
-                        <span className="text-tertiary truncate block font-bold">0x4ea94dfb19a3d9dc8c7e...c7</span>
-                      </div>
-                      <div>
-                        <span className="text-text-dim text-[10px] block">VERIFICATION:</span>
-                        <span className="text-secondary truncate block">SHA-256 Cryptographic Hash Chain</span>
-                      </div>
-                    </div>
+                    {/* 3D Cryptographic Chain Links */}
+                    <CryptoChain3D fallbackBlock={FALLBACK_LEDGER_BLOCK} />
                   </div>
 
                   <div className="p-3 bg-surface-dim border border-tertiary/20 rounded-xl flex items-center gap-3">
@@ -992,8 +933,8 @@ export function LandingPage() {
             {/* Interactive Calculator Workspace */}
             <InView className="p-6 lg:p-10 bg-surface-bright/90 border border-tertiary/40 rounded-2xl grid grid-cols-1 xl:grid-cols-12 gap-8 lg:gap-12 items-center shadow-2xl backdrop-blur-md">
               
-              {/* Controls Sliders */}
-              <div className="xl:col-span-6 flex flex-col gap-6">
+              {/* Controls Sliders (Functional 2D Form Inputs) */}
+              <div className="xl:col-span-5 flex flex-col gap-6">
                 
                 {/* Volume Slider */}
                 <div className="flex flex-col gap-2">
@@ -1045,53 +986,21 @@ export function LandingPage() {
                   </div>
                 </div>
 
-                <div className="p-3 bg-surface-dim border border-tertiary/20 rounded-xl flex items-center gap-2 font-mono text-xs text-text-muted">
+                <div className="p-3.5 bg-surface-dim border border-tertiary/20 rounded-xl flex items-center gap-2.5 font-mono text-xs text-text-muted">
                   <span className="material-symbols-outlined text-tertiary text-[20px]">calculate</span>
-                  <span>Model based on estimated SIEM index costs ($3.00/GB) and noise reduction metrics.</span>
+                  <span>Model based on estimated SIEM index costs ($3.00/GB) and 78.4% noise reduction metrics.</span>
                 </div>
               </div>
 
-              {/* Calculated Outputs with Spotlight Cards */}
-              <AnimatedGroup className="xl:col-span-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <SpotlightCard spotlightColor="rgba(78, 222, 163, 0.15)" className="p-5 bg-surface-dim border border-tertiary/30 rounded-xl flex flex-col justify-between">
-                  <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Monthly SIEM Savings</span>
-                  <div className="py-1">
-                    <span className="font-mono text-3xl lg:text-4xl text-tertiary font-black">
-                      ${calculatedSavings.toLocaleString()}
-                    </span>
-                    <span className="text-tertiary font-sans font-bold text-sm">/mo</span>
-                  </div>
-                  <span className="font-sans text-xs text-text-muted font-normal">Less data to index and store</span>
-                </SpotlightCard>
-
-                <SpotlightCard spotlightColor="rgba(167, 139, 250, 0.15)" className="p-5 bg-surface-dim border border-primary/30 rounded-xl flex flex-col justify-between">
-                  <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Analyst Time Preserved</span>
-                  <div className="py-1">
-                    <span className="font-mono text-3xl lg:text-4xl text-primary font-black">
-                      {calculatedHours.toLocaleString()}
-                    </span>
-                    <span className="text-primary font-sans font-bold text-sm">hrs/wk</span>
-                  </div>
-                  <span className="font-sans text-xs text-text-muted font-normal">Time freed from checking false alarms</span>
-                </SpotlightCard>
-
-                <SpotlightCard spotlightColor="rgba(123, 208, 255, 0.15)" className="p-5 bg-surface-dim border border-secondary/30 rounded-xl flex flex-col justify-between">
-                  <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Noise Filtered</span>
-                  <div className="py-1">
-                    <span className="font-mono text-3xl lg:text-4xl text-secondary font-black">78.4%</span>
-                  </div>
-                  <span className="font-sans text-xs text-text-muted font-normal">Unimportant noise dropped early</span>
-                </SpotlightCard>
-
-                <SpotlightCard spotlightColor="rgba(255, 255, 255, 0.08)" className="p-5 bg-surface-dim border border-border-muted rounded-xl flex flex-col justify-between">
-                  <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Payback Timeline</span>
-                  <div className="py-1">
-                    <span className="font-mono text-3xl lg:text-4xl text-text-primary font-black">&lt; 14</span>
-                    <span className="text-text-primary font-sans font-bold text-sm">days</span>
-                  </div>
-                  <span className="font-sans text-xs text-text-muted font-normal">Simple drop-in setup</span>
-                </SpotlightCard>
-              </AnimatedGroup>
+              {/* Real-time 3D Isometric Workload Stacks & Stat Readouts */}
+              <div className="xl:col-span-7 flex flex-col gap-6">
+                <RoiWorkload3D
+                  roiVolume={roiVolume}
+                  roiDevices={roiDevices}
+                  calculatedSavings={calculatedSavings}
+                  calculatedHours={calculatedHours}
+                />
+              </div>
 
             </InView>
           </div>
@@ -1121,12 +1030,19 @@ export function LandingPage() {
               </p>
             </InView>
 
+            {/* Animated 3D Data Conduit Stream Between Columns */}
+            <DissectionConduitStream
+              isActive={demoLoading || (revealStep > 0 && revealStep < 7)}
+              revealStep={revealStep}
+            />
+
             {/* 3-Column Dissection Workspace */}
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 relative z-10">
               
               {/* Column 1: Raw Inbound Interactive Input */}
-              <InView className="xl:col-span-4">
-                <SpotlightCard spotlightColor="rgba(167, 139, 250, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-primary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
+              <InView className="xl:col-span-4 h-full">
+                <TiltCard3D>
+                  <SpotlightCard spotlightColor="rgba(167, 139, 250, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-primary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center justify-between pb-3 border-b border-border-muted">
                       <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
@@ -1189,11 +1105,13 @@ export function LandingPage() {
                     )}
                   </button>
                 </SpotlightCard>
+                </TiltCard3D>
               </InView>
 
               {/* Column 2: ULPF Transform Engine Dynamic Output */}
-              <InView className="xl:col-span-4">
-                <SpotlightCard spotlightColor="rgba(123, 208, 255, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-secondary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
+              <InView className="xl:col-span-4 h-full">
+                <TiltCard3D>
+                  <SpotlightCard spotlightColor="rgba(123, 208, 255, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-secondary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
                   <div className="flex items-center justify-between pb-3 border-b border-border-muted">
                     <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
                       <span className="w-2 h-2 rounded-full bg-secondary"></span>
@@ -1259,11 +1177,13 @@ export function LandingPage() {
                     <span>CLASS: {revealStep >= 6 && demoResult ? demoResult?.classification_metadata?.parsed_class : 'PENDING'}</span>
                   </div>
                 </SpotlightCard>
+                </TiltCard3D>
               </InView>
 
               {/* Column 3: Enriched XAI Threat Verdict Dynamic Output */}
-              <InView className="xl:col-span-4">
-                <SpotlightCard spotlightColor="rgba(78, 222, 163, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-tertiary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
+              <InView className="xl:col-span-4 h-full">
+                <TiltCard3D>
+                  <SpotlightCard spotlightColor="rgba(78, 222, 163, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-tertiary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
                   <div className="flex items-center justify-between pb-3 border-b border-border-muted">
                     <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
                       <span className="w-2 h-2 rounded-full bg-tertiary"></span>
@@ -1334,6 +1254,7 @@ export function LandingPage() {
                     <span>{revealStep >= 6 && demoResult ? 'VERIFIED DIGEST' : 'DISPATCH PENDING'}</span>
                   </div>
                 </SpotlightCard>
+                </TiltCard3D>
               </InView>
 
             </div>
