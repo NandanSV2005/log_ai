@@ -7,6 +7,7 @@ import { TunnelCheckpointGates } from './TunnelCheckpointGates';
 export function TunnelScene({ progress = 0, colors, isMobile = false }) {
   const { camera } = useThree();
   const mouse = useRef({ x: 0, y: 0 });
+  const pulseRef = useRef(0);
 
   // Camera spline / tunnel bounds
   // Z starts at +7.0 (Hero / Raw Ingest) and travels down to -95 (Stage 06 Verdict)
@@ -17,25 +18,25 @@ export function TunnelScene({ progress = 0, colors, isMobile = false }) {
   const currentCameraZ = useRef(START_Z);
 
   // Generate tunnel structural ribs
-  const ribCount = isMobile ? 32 : 55;
+  const ribCount = isMobile ? 28 : 46;
   const ribs = useMemo(() => {
     const items = [];
-    const step = (START_Z + 15 - (END_Z - 10)) / ribCount;
+    const totalDist = START_Z + 12 - (END_Z - 10);
+    const step = totalDist / ribCount;
     for (let i = 0; i < ribCount; i++) {
-      const z = START_Z + 10 - i * step;
+      const z = START_Z + 8 - i * step;
       items.push({ id: i, z });
     }
     return items;
   }, [ribCount]);
 
   // Data stream particles floating in corridor
-  const particleCount = isMobile ? 120 : 380;
+  const particleCount = isMobile ? 100 : 260;
   const particlePositions = useMemo(() => {
     const arr = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount; i++) {
-      // Cylinder distribution around tunnel radius ~3.2
       const angle = Math.random() * Math.PI * 2;
-      const radius = 2.4 + Math.random() * 1.5;
+      const radius = 1.6 + Math.random() * 1.5;
       arr[i * 3] = Math.cos(angle) * radius;
       arr[i * 3 + 1] = Math.sin(angle) * radius;
       arr[i * 3 + 2] = START_Z + 10 - Math.random() * (START_Z - END_Z + 20);
@@ -51,6 +52,9 @@ export function TunnelScene({ progress = 0, colors, isMobile = false }) {
   };
 
   useFrame((state, delta) => {
+    const t = state.clock.getElapsedTime();
+    pulseRef.current = t;
+
     // Target camera Z based on scroll progress
     const targetZ = START_Z + progress * (END_Z - START_Z);
 
@@ -61,101 +65,165 @@ export function TunnelScene({ progress = 0, colors, isMobile = false }) {
       delta * 5.0
     );
 
-    // Parallax mouse offsets
-    const targetX = mouse.current.x * 0.4;
-    const targetY = mouse.current.y * 0.25;
+    // Camera offset: shift slightly right when at Hero (progress < 0.15) to leave room for text
+    const heroShiftX = Math.max(0, 1 - progress * 6) * -0.65;
+    const targetX = heroShiftX + (mouse.current.x * 0.35);
+    const targetY = (mouse.current.y * 0.22);
 
     camera.position.x = THREE.MathUtils.lerp(camera.position.x, targetX, delta * 3.0);
     camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetY, delta * 3.0);
     camera.position.z = currentCameraZ.current;
 
     // Look slightly ahead along tunnel
+    const lookAtX = heroShiftX * 0.4;
     const lookAtZ = currentCameraZ.current - 12;
-    camera.lookAt(0, 0, lookAtZ);
+    camera.lookAt(lookAtX, 0, lookAtZ);
   });
 
-  // Log packet travels ~5.2 units in front of the camera
-  const packetZ = currentCameraZ.current - 5.2;
+  // Log packet travels ~5.0 units in front of the camera
+  const packetZ = currentCameraZ.current - 5.0;
 
   return (
     <group onPointerMove={handlePointerMove}>
-      {/* Dynamic Lighting tuned to active theme */}
-      <ambientLight color={colors.ambient} intensity={colors.isSage ? 1.4 : 0.9} />
+      {/* Dynamic Lighting */}
+      <ambientLight color={colors.ambient} intensity={colors.isSage ? 1.8 : 1.2} />
       <directionalLight
-        position={[0, 8, currentCameraZ.current + 2]}
+        position={[4, 10, currentCameraZ.current + 4]}
         color={colors.primary}
-        intensity={colors.isSage ? 1.6 : 1.2}
+        intensity={2.0}
+      />
+      <directionalLight
+        position={[-4, -6, currentCameraZ.current]}
+        color={colors.secondary}
+        intensity={1.2}
       />
       <pointLight
         position={[0, 0, packetZ]}
         color={colors.secondary}
-        intensity={2.2}
-        distance={14}
+        intensity={3.0}
+        distance={15}
         decay={2}
       />
       <pointLight
-        position={[0, 2, packetZ - 8]}
+        position={[0, 2, packetZ - 10]}
         color={colors.tertiary}
-        intensity={1.8}
-        distance={16}
+        intensity={2.5}
+        distance={18}
         decay={2}
       />
 
       {/* Atmospheric Tunnel Fog */}
-      <fog attach="fog" args={[colors.fog.getHex(), 8, 48]} />
+      <fog attach="fog" args={[colors.fog.getHex(), 10, 55]} />
 
-      {/* Repeating Cybernetic Tunnel Ribs */}
-      {ribs.map((rib) => (
-        <group key={rib.id} position={[0, 0, rib.z]}>
-          {/* Hexagonal Rib Ring */}
-          <mesh>
-            <ringGeometry args={[3.25, 3.32, 6]} />
-            <meshBasicMaterial
-              color={colors.primary}
-              transparent
-              opacity={0.28}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
+      {/* ========================================================================= */}
+      {/* 1. SOLID CYBERNETIC TUNNEL HULL (Guarantees visible corridor in all themes)*/}
+      {/* ========================================================================= */}
+      <group position={[0, 0, -45]} rotation={[0, 0, Math.PI / 6]}>
+        {/* Outer Conduit Shell */}
+        <mesh>
+          <cylinderGeometry args={[3.8, 3.8, 120, 6, 30, true]} />
+          <meshStandardMaterial
+            color={colors.tunnelHull}
+            roughness={0.6}
+            metalness={0.4}
+            side={THREE.BackSide}
+          />
+        </mesh>
 
-          {/* Sub Rib Accent */}
-          <mesh position={[0, 0, 0.05]}>
-            <ringGeometry args={[3.38, 3.42, 6]} />
-            <meshBasicMaterial
-              color={colors.secondary}
-              transparent
-              opacity={0.14}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
+        {/* Cybernetic Wireframe Grid Over Conduit Walls */}
+        <mesh scale={[0.995, 1, 0.995]}>
+          <cylinderGeometry args={[3.8, 3.8, 120, 12, 60, true]} />
+          <meshBasicMaterial
+            color={colors.tunnelWire}
+            wireframe
+            transparent
+            opacity={colors.isSage ? 0.28 : 0.22}
+            side={THREE.BackSide}
+          />
+        </mesh>
+      </group>
 
-          {/* Lateral Floor Rail Segments */}
-          <mesh position={[-1.6, -2.6, 0]}>
-            <boxGeometry args={[0.08, 0.08, 1.8]} />
-            <meshBasicMaterial color={colors.secondary} transparent opacity={0.3} />
-          </mesh>
-          <mesh position={[1.6, -2.6, 0]}>
-            <boxGeometry args={[0.08, 0.08, 1.8]} />
-            <meshBasicMaterial color={colors.secondary} transparent opacity={0.3} />
-          </mesh>
-        </group>
-      ))}
+      {/* ========================================================================= */}
+      {/* 2. VOLUMETRIC HEXAGONAL STRUCTURAL RIBS                                    */}
+      {/* ========================================================================= */}
+      {ribs.map((rib, idx) => {
+        const isAccent = idx % 3 === 0;
+        const ribColor = isAccent ? colors.secondary : colors.primary;
 
-      {/* Long Guide Rails along the corridor */}
-      {/* Ceiling Rail */}
-      <mesh position={[0, 3.25, -45]}>
-        <boxGeometry args={[0.06, 0.06, 120]} />
-        <meshBasicMaterial color={colors.primary} transparent opacity={0.4} />
+        return (
+          <group key={rib.id} position={[0, 0, rib.z]}>
+            {/* Volumetric Hexagonal Torus Arch */}
+            <mesh rotation={[0, 0, Math.PI / 6]}>
+              <torusGeometry args={[3.6, 0.05, 8, 6]} />
+              <meshStandardMaterial
+                color={ribColor}
+                emissive={ribColor}
+                emissiveIntensity={isAccent ? 0.7 : 0.3}
+                roughness={0.3}
+                metalness={0.7}
+              />
+            </mesh>
+
+            {/* Glowing Floor Support Brackets */}
+            <mesh position={[-1.7, -2.8, 0]}>
+              <boxGeometry args={[0.1, 0.35, 0.2]} />
+              <meshStandardMaterial
+                color={ribColor}
+                emissive={ribColor}
+                emissiveIntensity={0.5}
+              />
+            </mesh>
+            <mesh position={[1.7, -2.8, 0]}>
+              <boxGeometry args={[0.1, 0.35, 0.2]} />
+              <meshStandardMaterial
+                color={ribColor}
+                emissive={ribColor}
+                emissiveIntensity={0.5}
+              />
+            </mesh>
+          </group>
+        );
+      })}
+
+      {/* ========================================================================= */}
+      {/* 3. CONTINUOUS LONGITUDINAL GUIDE RAILS (Floor & Ceiling Power Tracks)      */}
+      {/* ========================================================================= */}
+      {/* Ceiling Neon Track */}
+      <mesh position={[0, 3.3, -45]}>
+        <boxGeometry args={[0.08, 0.08, 120]} />
+        <meshStandardMaterial
+          color={colors.primary}
+          emissive={colors.primary}
+          emissiveIntensity={0.8}
+        />
       </mesh>
-      {/* Floor Guide Rail Left */}
-      <mesh position={[-1.2, -2.65, -45]}>
-        <boxGeometry args={[0.04, 0.04, 120]} />
-        <meshBasicMaterial color={colors.secondary} transparent opacity={0.35} />
+      {/* Left Floor Guide Beam */}
+      <mesh position={[-1.4, -2.8, -45]}>
+        <boxGeometry args={[0.07, 0.07, 120]} />
+        <meshStandardMaterial
+          color={colors.secondary}
+          emissive={colors.secondary}
+          emissiveIntensity={0.9}
+        />
       </mesh>
-      {/* Floor Guide Rail Right */}
-      <mesh position={[1.2, -2.65, -45]}>
-        <boxGeometry args={[0.04, 0.04, 120]} />
-        <meshBasicMaterial color={colors.secondary} transparent opacity={0.35} />
+      {/* Right Floor Guide Beam */}
+      <mesh position={[1.4, -2.8, -45]}>
+        <boxGeometry args={[0.07, 0.07, 120]} />
+        <meshStandardMaterial
+          color={colors.secondary}
+          emissive={colors.secondary}
+          emissiveIntensity={0.9}
+        />
+      </mesh>
+      {/* Center Floor Laser Runway Line */}
+      <mesh position={[0, -2.82, -45]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[0.6, 120]} />
+        <meshBasicMaterial
+          color={colors.tertiary}
+          transparent
+          opacity={0.3}
+          side={THREE.DoubleSide}
+        />
       </mesh>
 
       {/* Checkpoint Architectural Portals */}
@@ -177,10 +245,10 @@ export function TunnelScene({ progress = 0, colors, isMobile = false }) {
           />
         </bufferGeometry>
         <pointsMaterial
-          size={isMobile ? 0.06 : 0.08}
+          size={isMobile ? 0.07 : 0.09}
           color={colors.secondary}
           transparent
-          opacity={0.5}
+          opacity={0.65}
           sizeAttenuation
         />
       </points>

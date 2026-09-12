@@ -65,7 +65,6 @@ export function TunnelHUDOverlay({
   onJumpToStage,
   onSkipToSources
 }) {
-  // Determine active stage index (0 to 5)
   let activeIndex = 0;
   if (progress < 0.16) activeIndex = 0;
   else if (progress < 0.33) activeIndex = 1;
@@ -81,7 +80,7 @@ export function TunnelHUDOverlay({
     <div className="absolute inset-0 pointer-events-none z-20 flex flex-col justify-between p-4 md:p-8 xl:p-12 overflow-hidden">
       {/* Top HUD Status Bar */}
       <header className="w-full flex items-center justify-between gap-4 pointer-events-auto">
-        <div className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-surface/85 border border-primary/30 backdrop-blur-md shadow-lg font-mono text-[11px]">
+        <div className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-surface-lowest/90 border border-primary/40 backdrop-blur-md shadow-lg font-mono text-[11px]">
           <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
           <span className="font-bold text-primary tracking-wider uppercase">3D TUNNEL ENGINE // LIVE</span>
           <span className="text-text-dim">|</span>
@@ -91,7 +90,7 @@ export function TunnelHUDOverlay({
         </div>
 
         {/* Stage Scrubber Quick Jump Pills */}
-        <nav className="hidden lg:flex items-center gap-1.5 p-1 rounded-full bg-surface-dim/85 border border-border-muted backdrop-blur-md shadow-lg" aria-label="Tunnel Stage Navigation">
+        <nav className="hidden lg:flex items-center gap-1.5 p-1 rounded-full bg-surface-lowest/90 border border-border-muted backdrop-blur-md shadow-lg" aria-label="Tunnel Stage Navigation">
           {CHECKPOINTS.map((cp, idx) => {
             const isActive = idx === activeIndex;
             return (
@@ -114,7 +113,7 @@ export function TunnelHUDOverlay({
         {/* Quick Bypass Button */}
         <button
           onClick={onSkipToSources}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface/80 hover:bg-surface-hover border border-border-muted text-text-muted hover:text-text-primary font-mono text-xs transition-colors backdrop-blur-md"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-lowest/90 hover:bg-surface-hover border border-border-muted text-text-muted hover:text-text-primary font-mono text-xs transition-colors backdrop-blur-md"
         >
           <span>Skip to 2D Content</span>
           <span className="material-symbols-outlined text-[15px]">arrow_downward</span>
@@ -122,60 +121,60 @@ export function TunnelHUDOverlay({
       </header>
 
       {/* Middle Center / Left Overlay */}
-      <div className="w-full max-w-7xl mx-auto my-auto relative pointer-events-none">
-        {/* HERO TITLE NARRATIVE (Fades out as user scrolls past 0.12) */}
+      <div className="w-full max-w-7xl mx-auto my-auto relative pointer-events-none flex items-center justify-between">
+        {/* HERO TITLE NARRATIVE (Positioned on Left Side so Tunnel is fully visible) */}
         <AnimatePresence>
           {isHeroState && (
             <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -30 }}
               transition={{ duration: 0.35 }}
-              className="max-w-2xl flex flex-col gap-5 pointer-events-auto bg-surface/75 lg:bg-transparent p-6 lg:p-0 rounded-2xl backdrop-blur-md lg:backdrop-blur-none border border-border-muted lg:border-none shadow-xl lg:shadow-none"
+              className="max-w-lg lg:max-w-xl flex flex-col gap-4 pointer-events-auto bg-surface-lowest/85 p-6 md:p-7 rounded-2xl backdrop-blur-xl border border-border-muted shadow-2xl mr-auto"
             >
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface-bright/80 border border-primary/30 rounded-full w-fit">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface-bright/90 border border-primary/30 rounded-full w-fit">
                 <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                <span className="font-mono text-[11px] font-bold text-primary uppercase tracking-wider">
+                <span className="font-mono text-[10px] sm:text-[11px] font-bold text-primary uppercase tracking-wider">
                   00 // UNIVERSAL LOG PRE-PROCESSING FRAMEWORK
                 </span>
               </div>
 
-              <h1 className="font-display font-black text-3xl sm:text-5xl lg:text-6xl text-text-primary uppercase tracking-tight leading-[1.08] drop-shadow-sm">
+              <h1 className="font-display font-black text-2xl sm:text-4xl lg:text-5xl text-text-primary uppercase tracking-tight leading-[1.1] drop-shadow-sm">
                 Understand what your systems are doing.
               </h1>
 
-              <p className="font-sans text-sm sm:text-base text-text-muted leading-relaxed font-normal">
+              <p className="font-sans text-xs sm:text-sm text-text-muted leading-relaxed font-normal">
                 Collect raw security logs from any firewall or server. Watch the 3D log packet transform through six validation checkpoints as you scroll down the neural pipeline corridor.
               </p>
 
               {/* KPI Strip */}
-              <div className="grid grid-cols-3 gap-2.5 pt-1">
-                <div className="p-3 bg-surface-lowest/85 border border-border-muted rounded-xl flex flex-col backdrop-blur-md">
-                  <span className="font-mono text-[9px] font-bold text-text-dim uppercase tracking-wider">Events Ingested</span>
-                  <span className="font-mono text-lg sm:text-xl text-primary font-bold mt-0.5">
+              <div className="grid grid-cols-3 gap-2 pt-1">
+                <div className="p-2.5 bg-surface-dim/90 border border-border-muted rounded-xl flex flex-col">
+                  <span className="font-mono text-[9px] font-bold text-text-dim uppercase tracking-wider">Events</span>
+                  <span className="font-mono text-base sm:text-lg text-primary font-bold mt-0.5">
                     {(stats.total_events_ingested || 48281).toLocaleString()}
                   </span>
                 </div>
-                <div className="p-3 bg-surface-lowest/85 border border-border-muted rounded-xl flex flex-col backdrop-blur-md">
+                <div className="p-2.5 bg-surface-dim/90 border border-border-muted rounded-xl flex flex-col">
                   <span className="font-mono text-[9px] font-bold text-text-dim uppercase tracking-wider">Latency</span>
-                  <span className="font-mono text-lg sm:text-xl text-secondary font-bold mt-0.5">&lt;10ms</span>
+                  <span className="font-mono text-base sm:text-lg text-secondary font-bold mt-0.5">&lt;10ms</span>
                 </div>
-                <div className="p-3 bg-surface-lowest/85 border border-border-muted rounded-xl flex flex-col backdrop-blur-md">
-                  <span className="font-mono text-[9px] font-bold text-text-dim uppercase tracking-wider">Ledger Hash</span>
-                  <span className="font-mono text-lg sm:text-xl text-tertiary font-bold mt-0.5">SHA-256</span>
+                <div className="p-2.5 bg-surface-dim/90 border border-border-muted rounded-xl flex flex-col">
+                  <span className="font-mono text-[9px] font-bold text-text-dim uppercase tracking-wider">Verification</span>
+                  <span className="font-mono text-base sm:text-lg text-tertiary font-bold mt-0.5">SHA-256</span>
                 </div>
               </div>
 
               {/* Scroll Callout Cue */}
-              <div className="flex items-center gap-3 pt-2 text-text-muted font-mono text-xs">
-                <div className="w-5 h-8 rounded-full border-2 border-primary/50 flex items-start justify-center p-1">
+              <div className="flex items-center gap-3 pt-1 text-text-muted font-mono text-xs">
+                <div className="w-4 h-7 rounded-full border-2 border-primary/60 flex items-start justify-center p-1">
                   <motion.div
-                    animate={{ y: [0, 10, 0] }}
+                    animate={{ y: [0, 8, 0] }}
                     transition={{ repeat: Infinity, duration: 1.5 }}
-                    className="w-1.5 h-1.5 rounded-full bg-primary"
+                    className="w-1 h-1 rounded-full bg-primary"
                   />
                 </div>
-                <span className="animate-pulse text-text-primary font-semibold">Scroll down to enter 3D pipeline tunnel &rarr;</span>
+                <span className="animate-pulse text-text-primary font-semibold text-[11px]">Scroll down to fly into 3D corridor &rarr;</span>
               </div>
             </motion.div>
           )}
@@ -190,7 +189,7 @@ export function TunnelHUDOverlay({
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: 25, scale: 0.96 }}
               transition={{ duration: 0.28 }}
-              className="max-w-md pointer-events-auto p-5 md:p-6 rounded-2xl bg-surface-lowest/90 border border-border-muted shadow-2xl backdrop-blur-xl flex flex-col gap-3"
+              className="max-w-md pointer-events-auto p-5 md:p-6 rounded-2xl bg-surface-lowest/90 border border-border-muted shadow-2xl backdrop-blur-xl flex flex-col gap-3 mr-auto"
             >
               {/* Badge & Stage Number */}
               <div className="flex items-center justify-between pb-2 border-b border-border-muted font-mono text-[11px]">
@@ -236,9 +235,9 @@ export function TunnelHUDOverlay({
 
       {/* Bottom Floating Scrubber Bar & Progress Indicator */}
       <footer className="w-full flex items-center justify-between gap-4 pointer-events-auto font-mono text-xs text-text-dim">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 bg-surface-lowest/80 px-3 py-1.5 rounded-full border border-border-muted backdrop-blur-md">
           <span className="hidden sm:inline">PROGRESS:</span>
-          <div className="w-32 sm:w-48 h-2 bg-surface-bright rounded-full overflow-hidden border border-border-muted">
+          <div className="w-28 sm:w-44 h-2 bg-surface-bright rounded-full overflow-hidden border border-border-muted">
             <div
               className="h-full bg-primary transition-all duration-150 ease-out"
               style={{ width: `${Math.min(100, Math.max(0, progress * 100))}%` }}
@@ -248,7 +247,7 @@ export function TunnelHUDOverlay({
         </div>
 
         {/* Mobile Stage Dots */}
-        <div className="flex lg:hidden items-center gap-1.5">
+        <div className="flex lg:hidden items-center gap-1.5 bg-surface-lowest/80 px-2.5 py-1.5 rounded-full border border-border-muted backdrop-blur-md">
           {CHECKPOINTS.map((cp, idx) => (
             <button
               key={cp.id}
@@ -261,7 +260,7 @@ export function TunnelHUDOverlay({
           ))}
         </div>
 
-        <div className="text-[11px] text-text-muted hidden md:inline">
+        <div className="text-[11px] text-text-muted hidden md:inline bg-surface-lowest/80 px-3 py-1.5 rounded-full border border-border-muted backdrop-blur-md">
           {activeIndex === 5
             ? 'Transitioning to Chapter 02: Multi-Vendor Log Sources ↓'
             : 'Scroll down to travel through next checkpoint ↓'}
