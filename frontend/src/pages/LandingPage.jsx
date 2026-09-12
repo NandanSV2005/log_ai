@@ -576,8 +576,7 @@ export function LandingPage() {
       sev: 'SEV 9.4',
       score: 9.4,
       level: 'CRITICAL',
-      colorHex: '#ef4444',
-      colorClass: 'text-[var(--color-severity-critical)] border-[var(--color-severity-critical-border)] bg-[#160c0e]/95'
+      colorHex: '#ef4444'
     },
     {
       id: 2,
@@ -589,8 +588,7 @@ export function LandingPage() {
       sev: 'SEV 6.2',
       score: 6.2,
       level: 'MEDIUM',
-      colorHex: '#38bdf8',
-      colorClass: 'text-secondary border-secondary/50 bg-[#0a1824]/95'
+      colorHex: '#38bdf8'
     },
     {
       id: 3,
@@ -602,8 +600,7 @@ export function LandingPage() {
       sev: 'NORMAL',
       score: 0.2,
       level: 'LOW',
-      colorHex: '#34d399',
-      colorClass: 'text-tertiary border-tertiary/50 bg-[#091e17]/95'
+      colorHex: '#34d399'
     }
   ];
   const [selectedBlip, setSelectedBlip] = useState(RADAR_BLIPS[0]);
@@ -949,7 +946,7 @@ export function LandingPage() {
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
               
               {/* DOMINANT SECTOR TOPOLOGY RADAR */}
-              <InView className="xl:col-span-8 bg-surface-bright/90 border border-tertiary/35 rounded-2xl p-5 md:p-7 flex flex-col gap-4 shadow-2xl backdrop-blur-md relative overflow-hidden">
+              <InView className="xl:col-span-8 bg-surface-bright/90 border border-tertiary/35 rounded-2xl p-5 md:p-7 flex flex-col justify-between gap-4 shadow-2xl backdrop-blur-md relative overflow-hidden">
                 <div className="flex items-center justify-between font-mono text-xs pb-3 border-b border-border-muted">
                   <div className="flex items-center gap-2 text-tertiary font-bold">
                     <span className="material-symbols-outlined text-[20px]">radar</span>
