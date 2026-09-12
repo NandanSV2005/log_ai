@@ -66,15 +66,15 @@ export function TunnelHUDOverlay({
   onSkipToSources
 }) {
   let activeIndex = 0;
-  if (progress < 0.16) activeIndex = 0;
-  else if (progress < 0.33) activeIndex = 1;
+  if (progress < 0.14) activeIndex = 0;
+  else if (progress < 0.31) activeIndex = 1;
   else if (progress < 0.50) activeIndex = 2;
-  else if (progress < 0.67) activeIndex = 3;
-  else if (progress < 0.84) activeIndex = 4;
+  else if (progress < 0.69) activeIndex = 3;
+  else if (progress < 0.86) activeIndex = 4;
   else activeIndex = 5;
 
   const currentStage = STAGE_DETAILS[activeIndex];
-  const isHeroState = progress < 0.12;
+  const isHeroState = progress < 0.10;
 
   return (
     <div className="absolute inset-0 pointer-events-none z-20 flex flex-col justify-between p-4 md:p-8 xl:p-12 overflow-hidden">
@@ -126,10 +126,10 @@ export function TunnelHUDOverlay({
         <AnimatePresence>
           {isHeroState && (
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
+              initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -30 }}
-              transition={{ duration: 0.35 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
               className="max-w-lg lg:max-w-xl flex flex-col gap-4 pointer-events-auto bg-surface-lowest/85 p-6 md:p-7 rounded-2xl backdrop-blur-xl border border-border-muted shadow-2xl mr-auto"
             >
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface-bright/90 border border-primary/30 rounded-full w-fit">
@@ -180,15 +180,15 @@ export function TunnelHUDOverlay({
           )}
         </AnimatePresence>
 
-        {/* CHECKPOINT STAGE CARD (Fades in when scrolling past 0.12) */}
+        {/* CHECKPOINT STAGE CARD (Smooth vertical cross-fade with 380ms ease) */}
         <AnimatePresence mode="wait">
           {!isHeroState && (
             <motion.div
               key={currentStage.id}
-              initial={{ opacity: 0, x: -25, scale: 0.96 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 25, scale: 0.96 }}
-              transition={{ duration: 0.28 }}
+              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -12, scale: 0.98 }}
+              transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
               className="max-w-md pointer-events-auto p-5 md:p-6 rounded-2xl bg-surface-lowest/90 border border-border-muted shadow-2xl backdrop-blur-xl flex flex-col gap-3 mr-auto"
             >
               {/* Badge & Stage Number */}

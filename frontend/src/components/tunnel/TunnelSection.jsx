@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react';
-import { useScroll } from 'motion/react';
+import { useScroll, useSpring } from 'motion/react';
 import { TunnelCanvas } from './TunnelCanvas';
 import { TunnelHUDOverlay } from './TunnelHUDOverlay';
 
@@ -75,18 +75,25 @@ export function TunnelSection({
     };
   }, []);
 
-  // Framer Motion useScroll tied to container
+  // Framer Motion useScroll tied to container smoothed via spring interpolation
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end end']
   });
 
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 45,
+    damping: 20,
+    mass: 0.8,
+    restDelta: 0.0005
+  });
+
   useEffect(() => {
-    const unsubscribe = scrollYProgress.on('change', (latest) => {
+    const unsubscribe = smoothProgress.on('change', (latest) => {
       setProgress(Math.max(0, Math.min(1, latest)));
     });
     return () => unsubscribe();
-  }, [scrollYProgress]);
+  }, [smoothProgress]);
 
   // Jump to specific checkpoint stage
   const handleJumpToStage = (stageIdx) => {
@@ -146,6 +153,14 @@ export function TunnelSection({
         <Suspense fallback={<TunnelLoader />}>
           <TunnelCanvas progress={progress} isMobile={isMobile} />
         </Suspense>
+
+        {/* Smooth Settle/Fade Overlay into Chapter 02 at the tail of the tunnel */}
+        <div
+          className="absolute inset-0 bg-surface-lowest pointer-events-none transition-opacity duration-300 z-10"
+          style={{
+            opacity: Math.max(0, Math.min(1, (progress - 0.93) / 0.07))
+          }}
+        />
 
         <TunnelHUDOverlay
           progress={progress}

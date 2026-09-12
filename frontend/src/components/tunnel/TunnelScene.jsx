@@ -17,8 +17,8 @@ export function TunnelScene({ progress = 0, colors, isMobile = false }) {
   // Track target vs current camera Z for silky smooth interpolation
   const currentCameraZ = useRef(START_Z);
 
-  // Generate tunnel structural ribs
-  const ribCount = isMobile ? 28 : 46;
+  // Generate tunnel structural ribs - simplified count for reduced visual noise
+  const ribCount = isMobile ? 14 : 22;
   const ribs = useMemo(() => {
     const items = [];
     const totalDist = START_Z + 12 - (END_Z - 10);
@@ -30,13 +30,13 @@ export function TunnelScene({ progress = 0, colors, isMobile = false }) {
     return items;
   }, [ribCount]);
 
-  // Data stream particles floating in corridor
-  const particleCount = isMobile ? 100 : 260;
+  // Subtle data slipstream particles (reduced count for cleaner focus)
+  const particleCount = isMobile ? 35 : 70;
   const particlePositions = useMemo(() => {
     const arr = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const radius = 1.6 + Math.random() * 1.5;
+      const radius = 1.8 + Math.random() * 1.2;
       arr[i * 3] = Math.cos(angle) * radius;
       arr[i * 3 + 1] = Math.sin(angle) * radius;
       arr[i * 3 + 2] = START_Z + 10 - Math.random() * (START_Z - END_Z + 20);
@@ -44,7 +44,7 @@ export function TunnelScene({ progress = 0, colors, isMobile = false }) {
     return arr;
   }, [particleCount]);
 
-  // Mouse move listener for tactile parallax
+  // Mouse move listener for subtle, calm parallax
   const handlePointerMove = (e) => {
     if (isMobile) return;
     mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -55,29 +55,26 @@ export function TunnelScene({ progress = 0, colors, isMobile = false }) {
     const t = state.clock.getElapsedTime();
     pulseRef.current = t;
 
-    // Target camera Z based on scroll progress
+    // Target camera Z based on smoothed scroll progress
     const targetZ = START_Z + progress * (END_Z - START_Z);
 
-    // Smooth lerp camera position
+    // Smooth lerp camera position along tunnel
     currentCameraZ.current = THREE.MathUtils.lerp(
       currentCameraZ.current,
       targetZ,
-      delta * 5.0
+      delta * 4.5
     );
 
-    // Camera offset: shift slightly right when at Hero (progress < 0.15) to leave room for text
-    const heroShiftX = Math.max(0, 1 - progress * 6) * -0.65;
-    const targetX = heroShiftX + (mouse.current.x * 0.35);
-    const targetY = (mouse.current.y * 0.22);
+    // Calm, forward-moving camera path with gentle mouse parallax (no jarring horizontal shifts)
+    const targetX = mouse.current.x * 0.12;
+    const targetY = mouse.current.y * 0.08;
 
-    camera.position.x = THREE.MathUtils.lerp(camera.position.x, targetX, delta * 3.0);
-    camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetY, delta * 3.0);
+    camera.position.x = THREE.MathUtils.lerp(camera.position.x, targetX, delta * 2.5);
+    camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetY, delta * 2.5);
     camera.position.z = currentCameraZ.current;
 
-    // Look slightly ahead along tunnel
-    const lookAtX = heroShiftX * 0.4;
-    const lookAtZ = currentCameraZ.current - 12;
-    camera.lookAt(lookAtX, 0, lookAtZ);
+    // Look straight forward along corridor axis
+    camera.lookAt(0, 0, currentCameraZ.current - 14);
   });
 
   // Log packet travels ~5.0 units in front of the camera
@@ -85,30 +82,24 @@ export function TunnelScene({ progress = 0, colors, isMobile = false }) {
 
   return (
     <group onPointerMove={handlePointerMove}>
-      {/* Dynamic Lighting */}
-      <ambientLight color={colors.ambient} intensity={colors.isSage ? 1.8 : 1.2} />
+      {/* Calm, Balanced Lighting */}
+      <ambientLight color={colors.ambient} intensity={colors.isSage ? 1.6 : 1.1} />
       <directionalLight
-        position={[4, 10, currentCameraZ.current + 4]}
+        position={[3, 8, currentCameraZ.current + 6]}
         color={colors.primary}
-        intensity={2.0}
+        intensity={1.6}
       />
       <directionalLight
-        position={[-4, -6, currentCameraZ.current]}
+        position={[-3, -4, currentCameraZ.current]}
+        color={colors.secondary}
+        intensity={0.9}
+      />
+      {/* Soft packet aura light */}
+      <pointLight
+        position={[0, 0.3, packetZ]}
         color={colors.secondary}
         intensity={1.2}
-      />
-      <pointLight
-        position={[0, 0, packetZ]}
-        color={colors.secondary}
-        intensity={3.0}
-        distance={15}
-        decay={2}
-      />
-      <pointLight
-        position={[0, 2, packetZ - 10]}
-        color={colors.tertiary}
-        intensity={2.5}
-        distance={18}
+        distance={12}
         decay={2}
       />
 
@@ -245,10 +236,10 @@ export function TunnelScene({ progress = 0, colors, isMobile = false }) {
           />
         </bufferGeometry>
         <pointsMaterial
-          size={isMobile ? 0.07 : 0.09}
+          size={isMobile ? 0.04 : 0.055}
           color={colors.secondary}
           transparent
-          opacity={0.65}
+          opacity={0.25}
           sizeAttenuation
         />
       </points>
