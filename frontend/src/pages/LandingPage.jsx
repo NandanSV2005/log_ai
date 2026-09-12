@@ -6,6 +6,7 @@ import { StitchBrandMark } from '../components/common/StitchBrandMark';
 import { api } from '../services/api';
 import { TextEffect, InView, AnimatedGroup, SpotlightCard, BorderGlow } from '../components/motion-primitives';
 import { PipelineHero2DFallback } from '../components/tunnel/PipelineHero2DFallback';
+import { SourceCardStack } from '../components/sources/SourceCardStack';
 
 const TunnelSection = React.lazy(() =>
   import('../components/tunnel/TunnelSection').then((m) => ({ default: m.TunnelSection }))
@@ -797,35 +798,14 @@ export function LandingPage() {
         </Suspense>
 
         {/* ========================================================================= */}
-        {/* CHAPTER 02 // LOG SOURCES (ZIG-ZAG CONNECTED CONDUIT STREAM)             */}
+        {/* CHAPTER 02 // LOG SOURCES (PINNED SCROLL-DRIVEN 3D CARD STACK)            */}
         {/* ========================================================================= */}
         <section
           id="sources"
-          className="w-full px-4 md:px-8 xl:px-14 py-20 relative bg-gradient-to-b from-[var(--color-chapter2-from)] via-[var(--color-chapter2-via)] to-[var(--color-chapter2-to)] border-b border-secondary/20"
+          className="w-full relative bg-gradient-to-b from-[var(--color-chapter2-from)] via-[var(--color-chapter2-via)] to-[var(--color-chapter2-to)] border-b border-secondary/20"
         >
           <div className="absolute top-16 right-1/4 w-[750px] h-[500px] bg-secondary/10 rounded-full blur-[150px] pointer-events-none"></div>
-          
-          <div className="max-w-[1600px] mx-auto flex flex-col gap-10 relative z-10">
-            <InView className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-secondary uppercase tracking-widest">CHAPTER 02</span>
-                  <span className="text-text-dim font-mono">//</span>
-                  <span className="font-mono text-xs text-text-dim font-semibold tracking-wider">INGESTION_ECOSYSTEM</span>
-                </div>
-                <h2 className="font-display font-black text-3xl md:text-4xl text-text-primary uppercase tracking-tight">
-                  Multi-Vendor Log Sources
-                </h2>
-              </div>
-              <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
-                Collect logs from any firewall, network appliance, or operating system without complex setup.
-              </p>
-            </InView>
-
-            {/* Zig-Zag Connected Log Source Stream Component */}
-            <ZigZagSourceStream cards={SOURCE_CARDS} />
-
-          </div>
+          <SourceCardStack cards={SOURCE_CARDS} />
         </section>
 
         {/* ========================================================================= */}
