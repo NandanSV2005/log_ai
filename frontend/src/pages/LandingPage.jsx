@@ -1,10 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useRenderMode } from '../contexts/RenderModeContext';
 import { StitchBrandMark } from '../components/common/StitchBrandMark';
 import { api } from '../services/api';
 import { TextEffect, InView, AnimatedGroup, SpotlightCard, BorderGlow } from '../components/motion-primitives';
+import { PipelineHero2DFallback } from '../components/tunnel/PipelineHero2DFallback';
+import { SourceCardStack } from '../components/sources/SourceCardStack';
+import { ThreatRadar3D } from '../components/radar/ThreatRadar3D';
+import { CryptoChain3D } from '../components/radar/CryptoChain3D';
+import { RoiWorkload3D, RoiStatCards } from '../components/roi/RoiWorkload3D';
+import { DissectionConduitStream } from '../components/demo/DissectionConduitStream';
+import { TiltCard3D } from '../components/demo/TiltCard3D';
+
+const TunnelSection = React.lazy(() =>
+  import('../components/tunnel/TunnelSection').then((m) => ({ default: m.TunnelSection }))
+);
 
 // =============================================================================
 // ACCURATE VERIFIED TELEMETRY FALLBACK CONSTANTS
@@ -362,6 +374,7 @@ function ZigZagSourceStream({ cards }) {
 
 export function LandingPage() {
   const { theme, setTheme } = useTheme();
+  const { renderMode, is3D, is2D, setRenderMode, toggleRenderMode } = useRenderMode();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   // Active Expand/Collapse Card States
@@ -557,40 +570,50 @@ export function LandingPage() {
       id: 1,
       top: '26%',
       left: '70%',
+      pos3d: [1.8, 0.45, -1.2],
       host: '10.0.4.12 [SMB]',
       rule: 'T1021.002 Lateral Probe',
       sev: 'SEV 9.4',
       score: 9.4,
       level: 'CRITICAL',
-      colorClass: 'text-[var(--color-severity-critical)] border-[var(--color-severity-critical-border)] bg-[#160c0e]/95'
+      colorHex: '#ef4444'
     },
     {
       id: 2,
       top: '68%',
       left: '28%',
+      pos3d: [-1.6, 0.65, 1.4],
       host: '192.168.1.104',
       rule: 'C2 Egress Jitter',
       sev: 'SEV 6.2',
       score: 6.2,
       level: 'MEDIUM',
-      colorClass: 'text-secondary border-secondary/50 bg-[#0a1824]/95'
+      colorHex: '#38bdf8'
     },
     {
       id: 3,
       top: '48%',
       left: '44%',
+      pos3d: [-0.4, 0.3, -0.2],
       host: 'pfSense [10.0.0.1]',
       rule: 'GATEWAY SECURE',
       sev: 'NORMAL',
       score: 0.2,
       level: 'LOW',
-      colorClass: 'text-tertiary border-tertiary/50 bg-[#091e17]/95'
+      colorHex: '#34d399'
     }
   ];
   const [selectedBlip, setSelectedBlip] = useState(RADAR_BLIPS[0]);
 
   const scrollToSection = (id) => {
     setIsMobileNavOpen(false);
+    if (id === 'pipeline') {
+      const el = document.getElementById('pipeline-tunnel') || document.getElementById('pipeline');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+    }
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -604,10 +627,10 @@ export function LandingPage() {
       {/* 1. FIXED NAVIGATION HEADER                                                */}
       {/* ========================================================================= */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-surface-dim/90 backdrop-blur-xl border-b border-border-muted shadow-2xl">
-        <div className="h-16 w-full max-w-[1600px] mx-auto px-4 md:px-8 flex items-center justify-between gap-6 lg:gap-10">
+        <div className="h-16 w-full max-w-[1600px] mx-auto px-4 md:px-6 lg:px-8 flex items-center justify-between gap-3 md:gap-4 lg:gap-6">
           
           {/* Brand Logo & Status Chip */}
-          <div className="flex items-center gap-4 xl:gap-6 flex-shrink-0">
+          <div className="flex items-center gap-3 xl:gap-5 flex-shrink-0">
             <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => scrollToSection('pipeline')}>
               <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shadow-[0_0_12px_rgba(167,139,250,0.35)]">
                 <StitchBrandMark className="w-5 h-5 text-primary" size={20} />
@@ -619,7 +642,7 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* Status Chip */}
+            {/* Status Chip (Gracefully hidden on <2xl screens to preserve width budget) */}
             <div className="hidden 2xl:flex items-center gap-2 px-3 py-1 rounded-full bg-surface-bright/80 border border-border-muted whitespace-nowrap">
               <span className="w-2 h-2 rounded-full bg-tertiary animate-ping"></span>
               <span className="font-mono text-[11px] font-bold text-tertiary tracking-wider uppercase">ULPF v2.4 // ONLINE</span>
@@ -630,48 +653,92 @@ export function LandingPage() {
           </div>
 
           {/* Chapter Nav Links */}
-          <nav className="hidden xl:flex items-center gap-2 lg:gap-3 font-mono text-[12px] tracking-wide">
-            <button onClick={() => scrollToSection('pipeline')} className="px-3.5 py-1.5 rounded-lg bg-surface border border-primary/30 text-primary font-bold hover:bg-surface-hover transition-colors whitespace-nowrap">
+          <nav className="hidden xl:flex items-center gap-1.5 2xl:gap-2 font-mono text-[11px] 2xl:text-[12px] tracking-wide">
+            <button onClick={() => scrollToSection('pipeline')} className="px-2.5 2xl:px-3.5 py-1.5 rounded-lg bg-surface border border-primary/30 text-primary font-bold hover:bg-surface-hover transition-colors whitespace-nowrap">
               01 // Pipeline
             </button>
-            <button onClick={() => scrollToSection('sources')} className="px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
+            <button onClick={() => scrollToSection('sources')} className="px-2.5 2xl:px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
               02 // Sources
             </button>
-            <button onClick={() => scrollToSection('topology')} className="px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
+            <button onClick={() => scrollToSection('topology')} className="px-2.5 2xl:px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
               03 // Topology
             </button>
-            <button onClick={() => scrollToSection('roi-engine')} className="px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
+            <button onClick={() => scrollToSection('roi-engine')} className="px-2.5 2xl:px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
               04 // ROI Engine
             </button>
-            <button onClick={() => scrollToSection('demo')} className="px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
+            <button onClick={() => scrollToSection('demo')} className="px-2.5 2xl:px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
               05 // Live Demo
             </button>
           </nav>
 
-          {/* Theme Toggle & Open SOC Console CTA */}
-          <div className="flex items-center gap-3 md:gap-5 flex-shrink-0">
-            <div className="hidden md:flex items-center bg-surface-dim rounded-lg p-1 border border-border-muted">
-              <button
-                onClick={() => setTheme('dark')}
-                className={`px-2.5 py-1 font-mono text-[11px] font-bold rounded transition-all ${
-                  theme === 'dark' ? 'bg-primary text-surface-dim shadow-sm' : 'text-text-muted hover:text-text-primary'
-                }`}
+          {/* Controls Cluster & Open SOC Console CTA */}
+          <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 flex-shrink-0">
+            {/* Unified Render Mode & Theme Control Cluster */}
+            <div className="hidden sm:flex items-center bg-surface-dim rounded-lg p-1 border border-border-muted gap-1.5">
+              {/* 3D / 2D Experience Toggle */}
+              <div
+                className="flex items-center"
+                role="group"
+                aria-label="Experience rendering mode"
               >
-                CYBERVOID
-              </button>
-              <button
-                onClick={() => setTheme('sage')}
-                className={`px-2.5 py-1 font-mono text-[11px] font-bold rounded transition-all ${
-                  theme === 'sage' ? 'bg-primary text-surface-dim shadow-sm' : 'text-text-muted hover:text-text-primary'
-                }`}
-              >
-                SAGE
-              </button>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={is3D}
+                  onClick={() => setRenderMode('3d')}
+                  className={`px-2 py-1 font-mono text-[10px] 2xl:text-[11px] font-bold rounded transition-all cursor-pointer ${
+                    is3D
+                      ? 'bg-primary text-surface-dim shadow-sm'
+                      : 'text-text-muted hover:text-text-primary'
+                  }`}
+                  title="Enable immersive 3D flythroughs and spatial models"
+                >
+                  3D
+                </button>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={is2D}
+                  onClick={() => setRenderMode('2d')}
+                  className={`px-2 py-1 font-mono text-[10px] 2xl:text-[11px] font-bold rounded transition-all cursor-pointer ${
+                    is2D
+                      ? 'bg-primary text-surface-dim shadow-sm'
+                      : 'text-text-muted hover:text-text-primary'
+                  }`}
+                  title="Enable 2D high-efficiency reduced rendering mode"
+                >
+                  2D
+                </button>
+              </div>
+
+              {/* Vertical subtle divider between matched controls */}
+              <div className="w-[1px] h-3.5 bg-border-muted" />
+
+              {/* Operations Theme Toggle */}
+              <div className="flex items-center">
+                <button
+                  onClick={() => setTheme('dark')}
+                  className={`px-2 py-1 font-mono text-[10px] 2xl:text-[11px] font-bold rounded transition-all cursor-pointer ${
+                    theme === 'dark' ? 'bg-primary text-surface-dim shadow-sm' : 'text-text-muted hover:text-text-primary'
+                  }`}
+                >
+                  CYBERVOID
+                </button>
+                <button
+                  onClick={() => setTheme('sage')}
+                  className={`px-2 py-1 font-mono text-[10px] 2xl:text-[11px] font-bold rounded transition-all cursor-pointer ${
+                    theme === 'sage' ? 'bg-primary text-surface-dim shadow-sm' : 'text-text-muted hover:text-text-primary'
+                  }`}
+                >
+                  SAGE
+                </button>
+              </div>
             </div>
 
+            {/* Primary CTA: Open SOC Console - strictly prioritized with flex-shrink-0 */}
             <Link
               to="/dashboard"
-              className="px-4 py-2 rounded-lg bg-primary text-surface-dim font-sans font-bold text-sm shadow-[0_0_18px_var(--color-border-glow)] hover:bg-primary-fixed transition-all whitespace-nowrap"
+              className="px-3.5 2xl:px-4 py-2 rounded-lg bg-primary text-surface-dim font-sans font-bold text-xs 2xl:text-sm shadow-[0_0_18px_var(--color-border-glow)] hover:bg-primary-fixed transition-all whitespace-nowrap flex-shrink-0"
             >
               Open SOC Console
             </Link>
@@ -679,7 +746,7 @@ export function LandingPage() {
             {/* Mobile Menu Toggle Button */}
             <button
               onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
-              className="xl:hidden p-2 rounded-lg bg-surface border border-border-muted text-text-primary"
+              className="xl:hidden p-2 rounded-lg bg-surface border border-border-muted text-text-primary cursor-pointer"
               aria-label="Toggle Navigation Menu"
             >
               <span className="material-symbols-outlined text-xl">{isMobileNavOpen ? 'close' : 'menu'}</span>
@@ -705,11 +772,37 @@ export function LandingPage() {
             <button onClick={() => scrollToSection('demo')} className="block w-full text-left px-3 py-2 rounded bg-surface border border-border-muted text-text-primary">
               05 // Interactive Dissection
             </button>
-            <div className="pt-2 flex items-center justify-between font-sans">
+
+            {/* Mobile Experience Render Mode */}
+            <div className="pt-2 flex items-center justify-between font-sans border-t border-border-muted/40">
+              <span className="text-text-muted">Render Mode:</span>
+              <div className="flex items-center bg-surface rounded-lg p-0.5 border border-border-muted">
+                <button
+                  type="button"
+                  onClick={() => setRenderMode('3d')}
+                  className={`px-2.5 py-1 font-mono text-xs font-bold rounded transition-all cursor-pointer ${
+                    is3D ? 'bg-primary text-surface-dim' : 'text-text-muted'
+                  }`}
+                >
+                  3D
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRenderMode('2d')}
+                  className={`px-2.5 py-1 font-mono text-xs font-bold rounded transition-all cursor-pointer ${
+                    is2D ? 'bg-primary text-surface-dim' : 'text-text-muted'
+                  }`}
+                >
+                  2D
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-1 flex items-center justify-between font-sans">
               <span className="text-text-muted">Operations Theme:</span>
               <button
                 onClick={() => setTheme(theme === 'dark' ? 'sage' : 'dark')}
-                className="px-3 py-1 rounded bg-primary text-surface-dim font-mono font-bold text-xs"
+                className="px-3 py-1 rounded bg-primary text-surface-dim font-mono font-bold text-xs cursor-pointer"
               >
                 TOGGLE ({theme.toUpperCase()})
               </button>
@@ -756,332 +849,78 @@ export function LandingPage() {
       <main className="w-full pt-16 pb-12 flex flex-col">
         
         {/* ========================================================================= */}
-        {/* HERO SECTION WITH MOTION PRIMITIVES                                        */}
+        {/* HERO + CHAPTER 01: 3D PIPELINE TUNNEL VS 2D STATIC FALLBACK               */}
         {/* ========================================================================= */}
-        <section className="relative w-full overflow-hidden px-4 md:px-8 xl:px-14 py-20 lg:py-24 bg-surface-dim border-b border-border-muted">
-          <div className="absolute -top-40 left-1/4 w-[700px] h-[500px] bg-primary/10 rounded-full blur-[140px] pointer-events-none"></div>
-          <div className="absolute top-1/3 -right-20 w-[550px] h-[450px] bg-secondary/10 rounded-full blur-[130px] pointer-events-none"></div>
-          
-          <div className="max-w-[1600px] mx-auto w-full grid grid-cols-1 xl:grid-cols-12 gap-10 lg:gap-12 relative z-10 items-center">
-            
-            {/* Left Narrative Column */}
-            <div className="xl:col-span-6 flex flex-col gap-6">
-              <InView
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  visible: { opacity: 1, y: 0 }
-                }}
-              >
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-surface-bright/80 border border-primary/30 rounded-full">
-                    <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                    <span className="font-mono text-[11px] font-bold text-primary uppercase tracking-wider">
-                      00 // UNIVERSAL LOG PRE-PROCESSING FRAMEWORK (ULPF)
-                    </span>
-                  </div>
-                  <span className="font-mono text-xs text-text-dim font-semibold">v2.4</span>
-                </div>
-              </InView>
-
-              {/* Motion Primitives Text Effect for Hero Headline */}
-              <TextEffect
-                per="word"
-                as="h1"
-                className="font-display font-black text-4xl sm:text-5xl lg:text-6xl text-text-primary uppercase tracking-tight leading-[1.08]"
-                delay={0.1}
-              >
-                Understand what your systems are doing.
-              </TextEffect>
-
-              <InView
-                variants={{
-                  hidden: { opacity: 0, y: 15 },
-                  visible: { opacity: 1, y: 0 }
-                }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
-                <p className="font-sans text-base lg:text-lg text-text-muted max-w-xl font-normal leading-relaxed">
-                  Collect raw security logs from any firewall or server. Automatically convert them into a single clear format, verify their accuracy with cryptographic hash checks, and explain potential threats before alert volume overwhelms your team.
-                </p>
-              </InView>
-
-              {/* Action CTAs */}
-              <InView
-                variants={{
-                  hidden: { opacity: 0, y: 15 },
-                  visible: { opacity: 1, y: 0 }
-                }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-              >
-                <div className="flex flex-wrap items-center gap-4 pt-2">
-                  <button
-                    onClick={() => scrollToSection('pipeline')}
-                    className="px-6 py-3 rounded-xl bg-primary text-surface-dim font-sans font-bold text-sm shadow-[0_0_24px_var(--color-border-glow)] hover:bg-primary-fixed transition-all flex items-center gap-2"
-                  >
-                    <span className="material-symbols-outlined text-[19px]">account_tree</span>
-                    <span>Explore ULPF Pipeline</span>
-                  </button>
-                  <button
-                    onClick={() => scrollToSection('demo')}
-                    className="px-6 py-3 rounded-xl bg-surface-bright hover:bg-surface-hover text-text-primary font-sans font-bold text-sm border border-border-muted transition-colors flex items-center gap-2"
-                  >
-                    <span className="material-symbols-outlined text-[19px]">play_circle</span>
-                    <span>Live Interactive Demo</span>
-                  </button>
-                </div>
-              </InView>
-
-              {/* Diagnostic KPI Stat Strip with Spotlight Cards */}
-              <AnimatedGroup
-                className="grid grid-cols-3 gap-3 pt-4 max-w-xl"
-                variants={{
-                  container: {
-                    hidden: { opacity: 0 },
-                    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
-                  },
-                  item: {
-                    hidden: { opacity: 0, y: 15 },
-                    visible: { opacity: 1, y: 0 }
-                  }
-                }}
-              >
-                <SpotlightCard spotlightColor="rgba(167, 139, 250, 0.12)" className="p-3.5 bg-surface-lowest/80 border border-border-muted rounded-xl flex flex-col">
-                  <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Events Processed</span>
-                  <span className="font-mono text-2xl lg:text-3xl text-primary font-extrabold tracking-tight mt-1">
-                    {(stats.total_events_ingested || 48281).toLocaleString()}
-                  </span>
-                  <span className="font-mono text-[10px] text-tertiary mt-0.5">Total Logs Received</span>
-                </SpotlightCard>
-
-                <SpotlightCard spotlightColor="rgba(123, 208, 255, 0.12)" className="p-3.5 bg-surface-lowest/80 border border-border-muted rounded-xl flex flex-col">
-                  <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Processing Latency</span>
-                  <span className="font-mono text-2xl lg:text-3xl text-secondary font-extrabold tracking-tight mt-1">
-                    {FALLBACK_PIPELINE_LATENCY}
-                  </span>
-                  <span className="font-mono text-[10px] text-text-dim mt-0.5">Average Processing Speed</span>
-                </SpotlightCard>
-
-                <SpotlightCard spotlightColor="rgba(78, 222, 163, 0.12)" className="p-3.5 bg-surface-lowest/80 border border-border-muted rounded-xl flex flex-col">
-                  <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Log Verification</span>
-                  <span className="font-mono text-2xl lg:text-3xl text-tertiary font-extrabold tracking-tight mt-1">
-                    {FALLBACK_MERKLE_PROOF_TYPE}
-                  </span>
-                  <span className="font-mono text-[10px] text-tertiary mt-0.5">Tamper-Proof Verification</span>
-                </SpotlightCard>
-              </AnimatedGroup>
-            </div>
-
-            {/* Right HUD Stream Instrument */}
-            <InView
-              className="xl:col-span-6 relative mt-4 xl:mt-0"
-              variants={{
-                hidden: { opacity: 0, scale: 0.96, y: 20 },
-                visible: { opacity: 1, scale: 1, y: 0 }
-              }}
-              transition={{ duration: 0.6 }}
-            >
-              <BorderGlow glowColor="var(--color-primary)" borderRadius="1rem">
-                <div className="relative w-full rounded-2xl bg-surface-lowest border border-border-muted p-4 md:p-6 overflow-hidden shadow-2xl">
-                  <div className="flex items-center justify-between pb-3 mb-3 border-b border-border-muted">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-severity-critical)]"></span>
-                      <span className="w-2.5 h-2.5 rounded-full bg-secondary"></span>
-                      <span className="w-2.5 h-2.5 rounded-full bg-tertiary"></span>
-                      <span className="ml-2 font-mono text-xs text-text-primary font-bold tracking-wider">ULPF // INGESTION_STREAM</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-[10px] font-bold text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/20">SHA-256 LEDGER</span>
-                      <span className="font-mono text-[10px] text-tertiary font-bold flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-tertiary animate-ping"></span> LIVE
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-[11px]">
-                    {/* Inbound Raw Buffer */}
-                    <div className="bg-surface-dim p-3.5 rounded-xl border border-border-muted flex flex-col gap-1.5">
-                      <div className="flex justify-between items-center text-text-dim text-[10px] font-bold">
-                        <span>[RAW_LOG_BUFFER]</span>
-                        <span className="text-secondary font-mono">STREAMING</span>
-                      </div>
-                      <div className="flex flex-col gap-1 text-text-muted font-mono text-[10px] opacity-85 pt-1">
-                        <p className="text-[var(--color-severity-critical)] truncate">0x7F4A %ASA-4-106023: Deny udp src outside:185.220.101.5</p>
-                        <p className="truncate">0x7F4B CEF:0|Fortinet|FortiGate|v7.2|traffic:denied|src=10.0.4.12</p>
-                        <p className="text-secondary truncate">0x7F4C pf: rule 42/(match) pass in on igb0: 192.168.1.104</p>
-                        <p className="truncate">0x7F4D Suricata[3819]: [1:2018959:4] ET Suspicious Inbound TLS</p>
-                        <p className="text-tertiary truncate">0x7F4E {"{EventID:4624,TargetUserName:SYSTEM}"}</p>
-                      </div>
-                    </div>
-
-                    {/* Canonical OCSF Output */}
-                    <div className="bg-surface-dim p-3.5 rounded-xl border border-border-muted flex flex-col gap-1.5">
-                      <div className="flex justify-between items-center text-text-dim text-[10px] font-bold">
-                        <span>[CANONICAL_OCSF_OUTPUT]</span>
-                        <span className="text-tertiary font-mono">VERIFIED</span>
-                      </div>
-                      <div className="flex flex-col gap-1 text-tertiary font-mono text-[10px] pt-1">
-                        <p className="truncate text-primary">hash: "{recentEvents[0]?.raw_event_hash || 'c29d18b4fa8001a4e9b98a3e7'}"</p>
-                        <p className="truncate text-text-primary">ocsf.class: "NETWORK_ACTIVITY"</p>
-                        <p className="truncate text-[var(--color-severity-critical)]">action: "BLOCKED" | score: 9.4</p>
-                        <p className="truncate text-secondary">xai_verdict: "PORT_SCAN_DETECTION"</p>
-                        <p className="truncate text-text-dim">merkle_proof: "0x89eaf042b...verified"</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 p-2.5 bg-surface-dim border border-border-muted rounded-xl flex items-center justify-between text-[10px] font-mono text-text-dim">
-                    <span className="text-primary font-bold">01 INGEST</span>
-                    <span>&rarr;</span>
-                    <span className="text-secondary font-bold">02 PARSE</span>
-                    <span>&rarr;</span>
-                    <span className="text-tertiary font-bold">03 OCSF</span>
-                    <span>&rarr;</span>
-                    <span className="text-primary font-bold">04 HASH</span>
-                    <span>&rarr;</span>
-                    <span className="text-tertiary font-bold">05 VERDICT</span>
-                  </div>
-                </div>
-              </BorderGlow>
-            </InView>
-
-          </div>
-        </section>
-
-        {/* ========================================================================= */}
-        {/* CHAPTER 01 // PIPELINE ARCHITECTURE WITH ANIMATEDGROUP                    */}
-        {/* ========================================================================= */}
-        <section
-          id="pipeline"
-          className="w-full px-4 md:px-8 xl:px-14 py-20 relative bg-gradient-to-b from-[var(--color-chapter1-from)] via-[var(--color-chapter1-via)] to-[var(--color-chapter1-to)] border-b border-primary/20"
-        >
-          <div className="absolute top-10 left-1/3 w-[800px] h-[550px] bg-primary/10 rounded-full blur-[160px] pointer-events-none"></div>
-          
-          <div className="max-w-[1600px] mx-auto flex flex-col gap-12 relative z-10">
-            <InView className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-primary uppercase tracking-widest">CHAPTER 01</span>
-                  <span className="text-text-dim font-mono">//</span>
-                  <span className="font-mono text-xs text-text-dim font-semibold tracking-wider">EXECUTION_SEQUENCE</span>
-                </div>
-                <h2 className="font-display font-black text-3xl md:text-4xl text-text-primary uppercase tracking-tight">
-                  Pipeline Architecture
-                </h2>
+        {is3D ? (
+          <Suspense
+            fallback={
+              <div className="w-full h-screen bg-surface-dim flex flex-col items-center justify-center font-mono text-xs text-text-muted gap-3">
+                <span className="w-3 h-3 rounded-full bg-primary animate-ping"></span>
+                <span className="text-primary font-bold">INITIALIZING ULPF 3D TUNNEL EXPERIENCE...</span>
               </div>
-              <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
-                Six straightforward steps that convert raw server activity into structured, verified security records.
-              </p>
-            </InView>
-
-            {/* Connected Visual Stage Diagram */}
-            <InView className="w-full bg-surface-lowest/90 border border-primary/30 rounded-2xl p-6 lg:p-8 shadow-2xl relative overflow-hidden backdrop-blur-md">
-              <div className="flex items-center justify-between pb-4 mb-6 border-b border-border-muted font-mono text-xs">
-                <div className="flex items-center gap-2 text-primary font-bold">
-                  <span className="material-symbols-outlined text-[18px]">account_tree</span>
-                  <span>LIVE PIPELINE STAGES</span>
-                </div>
-                <span className="text-tertiary font-bold hidden sm:inline">PROCESSING SPEED: {FALLBACK_PIPELINE_LATENCY}</span>
-              </div>
-
-              <div className="relative w-full">
-                <svg className="w-full h-24 hidden md:block" fill="none" preserveAspectRatio="none" viewBox="0 0 1200 80">
-                  <path d="M 60 40 L 1140 40" stroke="currentColor" className="text-primary/20" strokeWidth="4"></path>
-                  <path className="animate-dash-flow" d="M 60 40 L 1140 40" stroke="url(#pipeGrad)" strokeDasharray="10 14" strokeWidth="2.5"></path>
-                  <defs>
-                    <linearGradient id="pipeGrad" x1="0" x2="1200" y1="0" y2="0" gradientUnits="userSpaceOnUse">
-                      <stop offset="0%" stopColor="var(--color-primary)"></stop>
-                      <stop offset="50%" stopColor="var(--color-secondary)"></stop>
-                      <stop offset="100%" stopColor="var(--color-tertiary)"></stop>
-                    </linearGradient>
-                  </defs>
-                </svg>
-
-                <div className="grid grid-cols-2 md:grid-cols-6 gap-3 lg:gap-4 -mt-10 relative z-10">
-                  <div className="flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-xl bg-surface-dim border-2 border-primary flex items-center justify-center text-primary shadow-[0_0_16px_rgba(167,139,250,0.4)] mb-2">
-                      <span className="font-mono font-black text-xs">01</span>
-                    </div>
-                    <span className="font-mono text-[11px] font-bold text-primary uppercase">RAW INGEST</span>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-xl bg-surface-dim border-2 border-secondary flex items-center justify-center text-secondary shadow-[0_0_16px_rgba(123,208,255,0.3)] mb-2">
-                      <span className="font-mono font-black text-xs">02</span>
-                    </div>
-                    <span className="font-mono text-[11px] font-bold text-secondary uppercase">TOKENIZE</span>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-xl bg-surface-dim border-2 border-tertiary flex items-center justify-center text-tertiary shadow-[0_0_16px_rgba(78,222,163,0.3)] mb-2">
-                      <span className="font-mono font-black text-xs">03</span>
-                    </div>
-                    <span className="font-mono text-[11px] font-bold text-tertiary uppercase">OCSF NORM</span>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-xl bg-surface-dim border-2 border-primary flex items-center justify-center text-primary shadow-[0_0_16px_rgba(167,139,250,0.4)] mb-2">
-                      <span className="font-mono font-black text-xs">04</span>
-                    </div>
-                    <span className="font-mono text-[11px] font-bold text-primary uppercase">SHA-256 SEAL</span>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-xl bg-surface-dim border-2 border-secondary flex items-center justify-center text-secondary shadow-[0_0_16px_rgba(123,208,255,0.3)] mb-2">
-                      <span className="font-mono font-black text-xs">05</span>
-                    </div>
-                    <span className="font-mono text-[11px] font-bold text-secondary uppercase">ANOMALY ML</span>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <div className="w-12 h-12 rounded-xl bg-surface-dim border-2 border-tertiary flex items-center justify-center text-tertiary shadow-[0_0_16px_rgba(78,222,163,0.4)] mb-2">
-                      <span className="font-mono font-black text-xs">06</span>
-                    </div>
-                    <span className="font-mono text-[11px] font-bold text-tertiary uppercase">XAI VERDICT</span>
-                  </div>
-                </div>
-              </div>
-            </InView>
-
-            {/* Uniform 6-Card Interactive Grid with AnimatedGroup Motion Primitive */}
-            <AnimatedGroup className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
-              {PIPELINE_CARDS.map(card => (
-                <InteractiveCard
-                  key={card.id}
-                  card={card}
-                  activeCardId={activePipeCard}
-                  setActiveCardId={setActivePipeCard}
+            }
+          >
+            <TunnelSection
+              stats={stats}
+              fallback2D={
+                <PipelineHero2DFallback
+                  stats={stats}
+                  recentEvents={recentEvents}
+                  pipelineLatency={FALLBACK_PIPELINE_LATENCY}
+                  merkleProofType={FALLBACK_MERKLE_PROOF_TYPE}
+                  pipelineCards={PIPELINE_CARDS}
+                  activePipeCard={activePipeCard}
+                  setActivePipeCard={setActivePipeCard}
+                  scrollToSection={scrollToSection}
+                  InteractiveCardComponent={InteractiveCard}
                 />
-              ))}
-            </AnimatedGroup>
-
-          </div>
-        </section>
+              }
+            />
+          </Suspense>
+        ) : (
+          <PipelineHero2DFallback
+            stats={stats}
+            recentEvents={recentEvents}
+            pipelineLatency={FALLBACK_PIPELINE_LATENCY}
+            merkleProofType={FALLBACK_MERKLE_PROOF_TYPE}
+            pipelineCards={PIPELINE_CARDS}
+            activePipeCard={activePipeCard}
+            setActivePipeCard={setActivePipeCard}
+            scrollToSection={scrollToSection}
+            InteractiveCardComponent={InteractiveCard}
+          />
+        )}
 
         {/* ========================================================================= */}
-        {/* CHAPTER 02 // LOG SOURCES (ZIG-ZAG CONNECTED CONDUIT STREAM)             */}
+        {/* CHAPTER 02 // LOG SOURCES (PINNED 3D CARD STACK VS 2D ZIG-ZAG STREAM)     */}
         {/* ========================================================================= */}
         <section
           id="sources"
-          className="w-full px-4 md:px-8 xl:px-14 py-20 relative bg-gradient-to-b from-[var(--color-chapter2-from)] via-[var(--color-chapter2-via)] to-[var(--color-chapter2-to)] border-b border-secondary/20"
+          className="w-full relative bg-gradient-to-b from-[var(--color-chapter2-from)] via-[var(--color-chapter2-via)] to-[var(--color-chapter2-to)] border-b border-secondary/20"
         >
           <div className="absolute top-16 right-1/4 w-[750px] h-[500px] bg-secondary/10 rounded-full blur-[150px] pointer-events-none"></div>
-          
-          <div className="max-w-[1600px] mx-auto flex flex-col gap-10 relative z-10">
-            <InView className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-secondary uppercase tracking-widest">CHAPTER 02</span>
-                  <span className="text-text-dim font-mono">//</span>
-                  <span className="font-mono text-xs text-text-dim font-semibold tracking-wider">INGESTION_ECOSYSTEM</span>
+          {is3D ? (
+            <SourceCardStack cards={SOURCE_CARDS} />
+          ) : (
+            <div className="max-w-[1600px] mx-auto px-4 md:px-8 xl:px-14 py-20 relative z-10 flex flex-col gap-10">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-bold text-secondary uppercase tracking-widest">CHAPTER 02</span>
+                    <span className="text-text-dim font-mono">//</span>
+                    <span className="font-mono text-xs text-text-dim font-semibold tracking-wider">SOURCE_INGEST_MATRIX</span>
+                  </div>
+                  <h2 className="font-display font-black text-3xl md:text-4xl text-text-primary uppercase tracking-tight">
+                    Multi-Vendor Log Sources
+                  </h2>
                 </div>
-                <h2 className="font-display font-black text-3xl md:text-4xl text-text-primary uppercase tracking-tight">
-                  Multi-Vendor Log Sources
-                </h2>
+                <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
+                  Standardized ingestion streams across enterprise perimeter appliances, operating systems, and host intrusion sensors.
+                </p>
               </div>
-              <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
-                Collect logs from any firewall, network appliance, or operating system without complex setup.
-              </p>
-            </InView>
-
-            {/* Zig-Zag Connected Log Source Stream Component */}
-            <ZigZagSourceStream cards={SOURCE_CARDS} />
-
-          </div>
+              <ZigZagSourceStream cards={SOURCE_CARDS} />
+            </div>
+          )}
         </section>
 
         {/* ========================================================================= */}
@@ -1114,83 +953,30 @@ export function LandingPage() {
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
               
               {/* DOMINANT SECTOR TOPOLOGY RADAR */}
-              <InView className="xl:col-span-8 bg-surface-bright/90 border border-tertiary/35 rounded-2xl p-5 md:p-7 flex flex-col gap-4 shadow-2xl backdrop-blur-md relative overflow-hidden">
+              <InView className="xl:col-span-8 bg-surface-bright/90 border border-tertiary/35 rounded-2xl p-5 md:p-7 flex flex-col justify-between gap-4 shadow-2xl backdrop-blur-md relative overflow-hidden">
                 <div className="flex items-center justify-between font-mono text-xs pb-3 border-b border-border-muted">
                   <div className="flex items-center gap-2 text-tertiary font-bold">
                     <span className="material-symbols-outlined text-[20px]">radar</span>
-                    <span className="tracking-wide">SECTOR TOPOLOGY RADAR // CONTINUOUS SWEEP</span>
+                    <span className="tracking-wide">SECTOR TOPOLOGY RADAR // 3D DIMENSIONAL SWEEP</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-[11px] text-text-dim hidden sm:inline">SWEEP: 5.0s</span>
                     <span className="px-2 py-0.5 rounded bg-tertiary/15 text-tertiary font-mono text-[10px] font-bold border border-tertiary/30 animate-pulse">
-                      2 DETECTIONS ACTIVE
+                      3 TARGETS ACTIVE
                     </span>
                   </div>
                 </div>
 
-                {/* Radar Viewport Canvas */}
-                <div className="relative w-full aspect-[16/10] md:aspect-[16/9] bg-surface-dim rounded-xl overflow-hidden border border-border-muted flex items-center justify-center">
-                  <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#4edea3_1px,transparent_1px)] [background-size:20px_20px]"></div>
-
-                  {/* Concentric Range Rings */}
-                  <div className="absolute w-[85%] h-[85%] rounded-full border border-tertiary/20"></div>
-                  <div className="absolute w-[62%] h-[62%] rounded-full border border-tertiary/30"></div>
-                  <div className="absolute w-[40%] h-[40%] rounded-full border border-tertiary/40"></div>
-                  <div className="absolute w-[18%] h-[18%] rounded-full border border-tertiary/50"></div>
-
-                  {/* Degree Crosshairs */}
-                  <div className="absolute w-full h-[1px] bg-tertiary/25"></div>
-                  <div className="absolute h-full w-[1px] bg-tertiary/25"></div>
-                  <div className="absolute w-full h-[1px] bg-tertiary/15 rotate-45"></div>
-                  <div className="absolute w-full h-[1px] bg-tertiary/15 -rotate-45"></div>
-
-                  {/* 360-Degree Rotating Sweep Beam */}
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none animate-radar">
-                    <div className="w-1/2 h-1/2 origin-bottom-right bg-gradient-to-br from-tertiary/30 via-tertiary/5 to-transparent"></div>
-                  </div>
-
-                  {/* Radar Target Blips */}
-                  {RADAR_BLIPS.map((blip) => (
-                    <div
-                      key={blip.id}
-                      style={{ top: blip.top, left: blip.left }}
-                      onClick={() => setSelectedBlip(blip)}
-                      className="absolute group cursor-pointer z-20"
-                    >
-                      <span className="relative flex h-5 w-5">
-                        <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${
-                          blip.level === 'CRITICAL' ? 'bg-[var(--color-severity-critical)] opacity-80' :
-                          blip.level === 'MEDIUM' ? 'bg-secondary opacity-70' : 'bg-tertiary opacity-60'
-                        }`}></span>
-                        <span className={`relative inline-flex rounded-full h-5 w-5 border-2 border-surface-bright shadow-lg ${
-                          blip.level === 'CRITICAL' ? 'bg-[var(--color-severity-critical)]' :
-                          blip.level === 'MEDIUM' ? 'bg-secondary' : 'bg-tertiary'
-                        }`}></span>
-                      </span>
-
-                      {/* Anchored Tooltip Card */}
-                      <div className={`absolute -top-16 -left-28 border p-2.5 rounded-lg shadow-2xl w-48 font-mono text-[10px] transition-all ${blip.colorClass}`}>
-                        <div className="font-bold flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-current animate-ping"></span>
-                          <span>ANOMALY // {blip.sev}</span>
-                        </div>
-                        <div className="text-text-primary font-semibold">HOST: {blip.host}</div>
-                        <div className="text-text-dim">{blip.rule}</div>
-                      </div>
-                    </div>
-                  ))}
-
-                  {/* Coordinates Overlay */}
-                  <div className="absolute bottom-3 left-4 font-mono text-[11px] text-tertiary/80 font-bold bg-surface-dim/80 px-2.5 py-1 rounded border border-tertiary/20">
-                    FOV: 10.0.0.0/16 // SECTORS: 12
-                  </div>
-                  <div className="absolute top-3 right-4 font-mono text-[10px] text-text-dim">
-                    GRID COORD: 34.0522&deg; N, 118.2437&deg; W
-                  </div>
-                </div>
+                {/* 3D Radar Viewport Canvas with WebGL Check & 2D Fallback */}
+                <ThreatRadar3D
+                  blips={RADAR_BLIPS}
+                  selectedBlip={selectedBlip}
+                  onSelectBlip={setSelectedBlip}
+                  force2D={is2D}
+                />
               </InView>
 
-              {/* CRYPTOGRAPHIC PROOF COMPANION WITH SPOTLIGHT & BORDER GLOW */}
+              {/* CRYPTOGRAPHIC PROOF COMPANION WITH 3D LINKED CHAIN */}
               <InView className="xl:col-span-4">
                 <SpotlightCard spotlightColor="rgba(78, 222, 163, 0.15)" className="h-full bg-surface-bright/90 border border-tertiary/35 rounded-2xl p-5 md:p-6 flex flex-col justify-between gap-4 shadow-2xl backdrop-blur-md">
                   <div className="flex flex-col gap-3">
@@ -1205,24 +991,8 @@ export function LandingPage() {
                       Log entries are linked together with SHA-256 hashes so any tampering is detected instantly.
                     </p>
 
-                    <div className="bg-surface-dim p-4 rounded-xl border border-tertiary/25 flex flex-col gap-2.5 font-mono text-[11px]">
-                      <div className="flex justify-between items-center text-text-dim pb-1 border-b border-border-muted">
-                        <span className="text-tertiary font-bold">LEDGER BLOCK: {FALLBACK_LEDGER_BLOCK}</span>
-                        <span className="text-tertiary font-bold">VERIFIED</span>
-                      </div>
-                      <div>
-                        <span className="text-text-dim text-[10px] block">PREV HASH:</span>
-                        <span className="text-text-muted truncate block">0x8f3c49e28ba709320e1d...9a</span>
-                      </div>
-                      <div>
-                        <span className="text-text-dim text-[10px] block">MERKLE ROOT:</span>
-                        <span className="text-tertiary truncate block font-bold">0x4ea94dfb19a3d9dc8c7e...c7</span>
-                      </div>
-                      <div>
-                        <span className="text-text-dim text-[10px] block">VERIFICATION:</span>
-                        <span className="text-secondary truncate block">SHA-256 Cryptographic Hash Chain</span>
-                      </div>
-                    </div>
+                    {/* 3D Cryptographic Chain Links */}
+                    <CryptoChain3D fallbackBlock={FALLBACK_LEDGER_BLOCK} force2D={is2D} />
                   </div>
 
                   <div className="p-3 bg-surface-dim border border-tertiary/20 rounded-xl flex items-center gap-3">
@@ -1266,110 +1036,102 @@ export function LandingPage() {
             </InView>
 
             {/* Interactive Calculator Workspace */}
-            <InView className="p-6 lg:p-10 bg-surface-bright/90 border border-tertiary/40 rounded-2xl grid grid-cols-1 xl:grid-cols-12 gap-8 lg:gap-12 items-center shadow-2xl backdrop-blur-md">
-              
-              {/* Controls Sliders */}
-              <div className="xl:col-span-6 flex flex-col gap-6">
+            <div className="flex flex-col gap-6">
+              <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8 items-stretch">
                 
-                {/* Volume Slider */}
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="slider-volume" className="font-sans font-bold text-sm text-text-primary">
-                      Daily Ingested Log Volume
-                    </label>
-                    <span className="font-mono text-2xl text-tertiary font-extrabold">{roiVolume} GB</span>
+                {/* Left Panel: Controls Sliders (Functional 2D Form Inputs) */}
+                <InView className="xl:col-span-5 bg-surface-bright/90 border border-tertiary/35 rounded-2xl p-6 md:p-8 flex flex-col justify-between shadow-2xl backdrop-blur-md h-full">
+                  {/* Panel Header */}
+                  <div className="flex items-center justify-between pb-4 border-b border-border-muted">
+                    <div className="flex items-center gap-2 font-mono text-xs text-tertiary font-bold">
+                      <span className="material-symbols-outlined text-tertiary text-[20px]">tune</span>
+                      <span className="tracking-wide">INFRASTRUCTURE TELEMETRY // ESTIMATOR</span>
+                    </div>
+                    <span className="font-mono text-[10px] text-text-dim uppercase font-bold px-2 py-0.5 rounded bg-tertiary/10 border border-tertiary/20">
+                      INPUT PARAMS
+                    </span>
                   </div>
-                  <input
-                    id="slider-volume"
-                    type="range"
-                    min="100"
-                    max="5000"
-                    step="50"
-                    value={roiVolume}
-                    onChange={(e) => setRoiVolume(parseInt(e.target.value, 10))}
-                    className="w-full h-2.5 bg-surface-dim border border-tertiary/30 rounded-lg appearance-none cursor-pointer accent-tertiary"
-                  />
-                  <div className="flex justify-between font-mono text-[10px] text-text-dim">
-                    <span>100 GB</span>
-                    <span>2,500 GB</span>
-                    <span>5,000 GB/day</span>
-                  </div>
-                </div>
 
-                {/* Devices Slider */}
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="slider-devices" className="font-sans font-bold text-sm text-text-primary">
-                      Active Firewalls &amp; Network Nodes
-                    </label>
-                    <span className="font-mono text-2xl text-primary font-extrabold">{roiDevices} Units</span>
-                  </div>
-                  <input
-                    id="slider-devices"
-                    type="range"
-                    min="10"
-                    max="1000"
-                    step="10"
-                    value={roiDevices}
-                    onChange={(e) => setRoiDevices(parseInt(e.target.value, 10))}
-                    className="w-full h-2.5 bg-surface-dim border border-primary/30 rounded-lg appearance-none cursor-pointer accent-primary"
-                  />
-                  <div className="flex justify-between font-mono text-[10px] text-text-dim">
-                    <span>10 Nodes</span>
-                    <span>500 Nodes</span>
-                    <span>1,000 Nodes</span>
-                  </div>
-                </div>
+                  {/* Sliders Container: Starts at the top, perfectly spaced */}
+                  <div className="flex flex-col gap-6 py-4 my-auto">
+                    {/* Volume Slider */}
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <label htmlFor="slider-volume" className="font-sans font-bold text-sm text-text-primary">
+                          Daily Ingested Log Volume
+                        </label>
+                        <span className="font-mono text-2xl text-tertiary font-extrabold">{roiVolume} GB</span>
+                      </div>
+                      <input
+                        id="slider-volume"
+                        type="range"
+                        min="100"
+                        max="5000"
+                        step="50"
+                        value={roiVolume}
+                        onChange={(e) => setRoiVolume(parseInt(e.target.value, 10))}
+                        className="w-full h-2.5 bg-surface-dim border border-tertiary/30 rounded-lg appearance-none cursor-pointer accent-tertiary"
+                      />
+                      <div className="flex justify-between font-mono text-[10px] text-text-dim">
+                        <span>100 GB</span>
+                        <span>2,500 GB</span>
+                        <span>5,000 GB/day</span>
+                      </div>
+                    </div>
 
-                <div className="p-3 bg-surface-dim border border-tertiary/20 rounded-xl flex items-center gap-2 font-mono text-xs text-text-muted">
-                  <span className="material-symbols-outlined text-tertiary text-[20px]">calculate</span>
-                  <span>Model based on estimated SIEM index costs ($3.00/GB) and noise reduction metrics.</span>
-                </div>
+                    {/* Devices Slider */}
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <label htmlFor="slider-devices" className="font-sans font-bold text-sm text-text-primary">
+                          Active Firewalls &amp; Network Nodes
+                        </label>
+                        <span className="font-mono text-2xl text-primary font-extrabold">{roiDevices} Units</span>
+                      </div>
+                      <input
+                        id="slider-devices"
+                        type="range"
+                        min="10"
+                        max="1000"
+                        step="10"
+                        value={roiDevices}
+                        onChange={(e) => setRoiDevices(parseInt(e.target.value, 10))}
+                        className="w-full h-2.5 bg-surface-dim border border-primary/30 rounded-lg appearance-none cursor-pointer accent-primary"
+                      />
+                      <div className="flex justify-between font-mono text-[10px] text-text-dim">
+                        <span>10 Nodes</span>
+                        <span>500 Nodes</span>
+                        <span>1,000 Nodes</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Calculation Model Footer Callout */}
+                  <div className="p-3.5 bg-surface-dim border border-tertiary/20 rounded-xl flex items-center gap-2.5 font-mono text-xs text-text-muted">
+                    <span className="material-symbols-outlined text-tertiary text-[20px]">calculate</span>
+                    <span>Model based on estimated SIEM index costs ($3.00/GB) and 78.4% noise reduction metrics.</span>
+                  </div>
+                </InView>
+
+                {/* Right Panel: Real-time 3D Isometric Workload Stacks */}
+                <InView className="xl:col-span-7 flex flex-col h-full">
+                  <RoiWorkload3D
+                    roiVolume={roiVolume}
+                    roiDevices={roiDevices}
+                    calculatedSavings={calculatedSavings}
+                    calculatedHours={calculatedHours}
+                    force2D={is2D}
+                    showStatCards={false}
+                  />
+                </InView>
               </div>
 
-              {/* Calculated Outputs with Spotlight Cards */}
-              <AnimatedGroup className="xl:col-span-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <SpotlightCard spotlightColor="rgba(78, 222, 163, 0.15)" className="p-5 bg-surface-dim border border-tertiary/30 rounded-xl flex flex-col justify-between">
-                  <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Monthly SIEM Savings</span>
-                  <div className="py-1">
-                    <span className="font-mono text-3xl lg:text-4xl text-tertiary font-black">
-                      ${calculatedSavings.toLocaleString()}
-                    </span>
-                    <span className="text-tertiary font-sans font-bold text-sm">/mo</span>
-                  </div>
-                  <span className="font-sans text-xs text-text-muted font-normal">Less data to index and store</span>
-                </SpotlightCard>
-
-                <SpotlightCard spotlightColor="rgba(167, 139, 250, 0.15)" className="p-5 bg-surface-dim border border-primary/30 rounded-xl flex flex-col justify-between">
-                  <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Analyst Time Preserved</span>
-                  <div className="py-1">
-                    <span className="font-mono text-3xl lg:text-4xl text-primary font-black">
-                      {calculatedHours.toLocaleString()}
-                    </span>
-                    <span className="text-primary font-sans font-bold text-sm">hrs/wk</span>
-                  </div>
-                  <span className="font-sans text-xs text-text-muted font-normal">Time freed from checking false alarms</span>
-                </SpotlightCard>
-
-                <SpotlightCard spotlightColor="rgba(123, 208, 255, 0.15)" className="p-5 bg-surface-dim border border-secondary/30 rounded-xl flex flex-col justify-between">
-                  <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Noise Filtered</span>
-                  <div className="py-1">
-                    <span className="font-mono text-3xl lg:text-4xl text-secondary font-black">78.4%</span>
-                  </div>
-                  <span className="font-sans text-xs text-text-muted font-normal">Unimportant noise dropped early</span>
-                </SpotlightCard>
-
-                <SpotlightCard spotlightColor="rgba(255, 255, 255, 0.08)" className="p-5 bg-surface-dim border border-border-muted rounded-xl flex flex-col justify-between">
-                  <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Payback Timeline</span>
-                  <div className="py-1">
-                    <span className="font-mono text-3xl lg:text-4xl text-text-primary font-black">&lt; 14</span>
-                    <span className="text-text-primary font-sans font-bold text-sm">days</span>
-                  </div>
-                  <span className="font-sans text-xs text-text-muted font-normal">Simple drop-in setup</span>
-                </SpotlightCard>
-              </AnimatedGroup>
-
-            </InView>
+              {/* 4 Secondary Stat Cards Row with Restrained 3D Card-Tilt on Hover */}
+              <RoiStatCards
+                calculatedSavings={calculatedSavings}
+                calculatedHours={calculatedHours}
+                isFlat2D={is2D}
+              />
+            </div>
           </div>
         </section>
 
@@ -1397,12 +1159,20 @@ export function LandingPage() {
               </p>
             </InView>
 
+            {/* Animated 3D Data Conduit Stream Between Columns */}
+            <DissectionConduitStream
+              isActive={demoLoading || (revealStep > 0 && revealStep < 7)}
+              revealStep={revealStep}
+              forceDisable={is2D}
+            />
+
             {/* 3-Column Dissection Workspace */}
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 relative z-10">
               
               {/* Column 1: Raw Inbound Interactive Input */}
-              <InView className="xl:col-span-4">
-                <SpotlightCard spotlightColor="rgba(167, 139, 250, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-primary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
+              <InView className="xl:col-span-4 h-full">
+                <TiltCard3D disabled={is2D}>
+                  <SpotlightCard spotlightColor="rgba(167, 139, 250, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-primary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center justify-between pb-3 border-b border-border-muted">
                       <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
@@ -1465,11 +1235,13 @@ export function LandingPage() {
                     )}
                   </button>
                 </SpotlightCard>
+                </TiltCard3D>
               </InView>
 
               {/* Column 2: ULPF Transform Engine Dynamic Output */}
-              <InView className="xl:col-span-4">
-                <SpotlightCard spotlightColor="rgba(123, 208, 255, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-secondary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
+              <InView className="xl:col-span-4 h-full">
+                <TiltCard3D disabled={is2D}>
+                  <SpotlightCard spotlightColor="rgba(123, 208, 255, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-secondary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
                   <div className="flex items-center justify-between pb-3 border-b border-border-muted">
                     <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
                       <span className="w-2 h-2 rounded-full bg-secondary"></span>
@@ -1535,11 +1307,13 @@ export function LandingPage() {
                     <span>CLASS: {revealStep >= 6 && demoResult ? demoResult?.classification_metadata?.parsed_class : 'PENDING'}</span>
                   </div>
                 </SpotlightCard>
+                </TiltCard3D>
               </InView>
 
               {/* Column 3: Enriched XAI Threat Verdict Dynamic Output */}
-              <InView className="xl:col-span-4">
-                <SpotlightCard spotlightColor="rgba(78, 222, 163, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-tertiary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
+              <InView className="xl:col-span-4 h-full">
+                <TiltCard3D disabled={is2D}>
+                  <SpotlightCard spotlightColor="rgba(78, 222, 163, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-tertiary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
                   <div className="flex items-center justify-between pb-3 border-b border-border-muted">
                     <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
                       <span className="w-2 h-2 rounded-full bg-tertiary"></span>
@@ -1610,6 +1384,7 @@ export function LandingPage() {
                     <span>{revealStep >= 6 && demoResult ? 'VERIFIED DIGEST' : 'DISPATCH PENDING'}</span>
                   </div>
                 </SpotlightCard>
+                </TiltCard3D>
               </InView>
 
             </div>
