@@ -3,14 +3,7 @@ import time
 from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, Request, HTTPException, status
 from pydantic import BaseModel, Field
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-
-from app.parsers.dynamic_parser import DynamicParser
-from app.detection.anomaly_engine import anomaly_engine
-from app.xai.explainer import xai_explainer
-
-limiter = Limiter(key_func=get_remote_address)
+from app.routers.ingest import limiter
 
 router = APIRouter(prefix="/api/v1/demo", tags=["Public Forensic Demo"])
 
@@ -49,7 +42,7 @@ async def get_demo_presets():
     summary="Stateless, rate-limited public log analysis demo",
     description="Processes a raw log string through parsing, OCSF mapping, SHA-256 calculation, and XAI threat analysis without persisting data or modifying audit chains."
 )
-@limiter.limit("10/minute")
+@limiter.limit("60/minute")
 async def analyze_demo_log(request: Request, body: DemoAnalyzeRequest):
     raw_line = body.log_line.strip() if body.log_line else ""
     if not raw_line:
