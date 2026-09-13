@@ -82,7 +82,7 @@ async def analyze_demo_log(request: Request, body: DemoAnalyzeRequest):
 
         # Stage 3: ML Anomaly Evaluation
         enriched_events = anomaly_engine.evaluate_events([event])
-        enriched = enriched_events[0]
+        enriched = enriched_events[0] if enriched_events else event
 
         # Stage 4: XAI Reasoning Explanation
         xai_reasoning = xai_explainer.generate_explanation(enriched)
@@ -90,7 +90,10 @@ async def analyze_demo_log(request: Request, body: DemoAnalyzeRequest):
         elapsed_ms = (time.perf_counter() - start_time) * 1000
         transform_time_str = f"{elapsed_ms:.2f}ms" if elapsed_ms >= 1.0 else f"<{max(0.01, elapsed_ms):.2f}ms"
 
-        level = enriched.threat_level.upper()
+        threat_score_val = getattr(enriched, "threat_score", 0.0)
+        threat_score_float = float(threat_score_val) if threat_score_val is not None else 0.0
+
+        level = (getattr(enriched, "threat_level", None) or "LOW").upper()
         if level in ["CRITICAL", "HIGH"]:
             action = "BLOCKED"
         elif level == "MEDIUM":
@@ -100,7 +103,7 @@ async def analyze_demo_log(request: Request, body: DemoAnalyzeRequest):
 
         mitre_tactic = getattr(enriched, "mitre_tactic", None)
         if not mitre_tactic:
-            if enriched.threat_score >= 80.0 or level in ["CRITICAL", "HIGH"]:
+            if threat_score_float >= 80.0 or level in ["CRITICAL", "HIGH"]:
                 mitre_tactic = "T1021.002: Lateral SMB Probe"
             elif "fail" in raw_line.lower() or "deny" in raw_line.lower() or "brute" in raw_line.lower():
                 mitre_tactic = "T1110: Brute Force Authentication"
@@ -111,10 +114,10 @@ async def analyze_demo_log(request: Request, body: DemoAnalyzeRequest):
             "status": "success",
             "raw_line": raw_line,
             "extracted_fields": {
-                "source_ip": enriched.source_ip or "N/A",
-                "destination_ip": enriched.destination_ip or "N/A",
-                "event_type": enriched.event_type or "unstructured_log",
-                "severity": str(enriched.severity),
+                "source_ip": getattr(enriched, "source_ip", None) or "N/A",
+                "destination_ip": getattr(enriched, "destination_ip", None) or "N/A",
+                "event_type": getattr(enriched, "event_type", None) or "unstructured_log",
+                "severity": str(getattr(enriched, "severity", "INFORMATIONAL")),
                 "sha256": f"{computed_hash[:20]}...",
                 "full_sha256": computed_hash,
                 "merkle_leaf": merkle_leaf
@@ -122,11 +125,11 @@ async def analyze_demo_log(request: Request, body: DemoAnalyzeRequest):
             "classification_metadata": {
                 "schema_version": "OCSF 1.1.0",
                 "transform_time": transform_time_str,
-                "parsed_class": (enriched.event_type or "NETWORK_ACTIVITY").upper()
+                "parsed_class": (getattr(enriched, "event_type", None) or "NETWORK_ACTIVITY").upper()
             },
             "verdict": {
                 "threat_level": level,
-                "threat_score": round(float(enriched.threat_score), 1),
+                "threat_score": round(threat_score_float, 1),
                 "mitre_technique": mitre_tactic,
                 "xai_reasoning": xai_reasoning,
                 "action": action
@@ -138,5 +141,5 @@ async def analyze_demo_log(request: Request, body: DemoAnalyzeRequest):
         logger.error("Exception in analyze_demo_log: %s", e, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to parse and analyze log line: {str(e)}"
+            detail="Failed to parse and analyze log line. Please ensure format is valid text."
         )
