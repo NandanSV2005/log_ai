@@ -370,10 +370,154 @@ function ZigZagSourceStream({ cards }) {
   );
 }
 
+// =============================================================================
+// CHAPTER REGISTRY & NAVIGATION TARGET DEFINITION
+// =============================================================================
+const CHAPTERS = [
+  {
+    id: 'pipeline',
+    targets: ['pipeline-tunnel', 'pipeline'],
+    navLabel: '01 // Pipeline',
+    mobileLabel: '01 // Pipeline Architecture',
+    railLabel: 'PIPE',
+    num: '01',
+    textClass: 'text-primary',
+    bgClass: 'bg-primary',
+    borderClass: 'border-primary/40',
+    glowClass: 'shadow-[0_0_12px_rgba(167,139,250,0.35)]'
+  },
+  {
+    id: 'sources',
+    targets: ['sources'],
+    navLabel: '02 // Sources',
+    mobileLabel: '02 // Log Sources',
+    railLabel: 'SRC',
+    num: '02',
+    textClass: 'text-secondary',
+    bgClass: 'bg-secondary',
+    borderClass: 'border-secondary/40',
+    glowClass: 'shadow-[0_0_12px_rgba(123,208,255,0.35)]'
+  },
+  {
+    id: 'topology',
+    targets: ['topology'],
+    navLabel: '03 // Topology',
+    mobileLabel: '03 // Network Topology Radar',
+    railLabel: 'TOPO',
+    num: '03',
+    textClass: 'text-tertiary',
+    bgClass: 'bg-tertiary',
+    borderClass: 'border-tertiary/40',
+    glowClass: 'shadow-[0_0_12px_rgba(78,222,163,0.35)]'
+  },
+  {
+    id: 'roi-engine',
+    targets: ['roi-engine'],
+    navLabel: '04 // ROI Engine',
+    mobileLabel: '04 // ROI Estimator',
+    railLabel: 'ROI',
+    num: '04',
+    textClass: 'text-tertiary',
+    bgClass: 'bg-tertiary',
+    borderClass: 'border-tertiary/40',
+    glowClass: 'shadow-[0_0_12px_rgba(78,222,163,0.35)]'
+  },
+  {
+    id: 'demo',
+    targets: ['demo'],
+    navLabel: '05 // Live Demo',
+    mobileLabel: '05 // Interactive Dissection',
+    railLabel: 'DEMO',
+    num: '05',
+    textClass: 'text-primary',
+    bgClass: 'bg-primary',
+    borderClass: 'border-primary/40',
+    glowClass: 'shadow-[0_0_12px_rgba(167,139,250,0.35)]'
+  }
+];
+
 export function LandingPage() {
   const { theme, setTheme } = useTheme();
   const { renderMode, is3D, is2D, setRenderMode, toggleRenderMode } = useRenderMode();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [activeChapter, setActiveChapter] = useState('pipeline');
+
+  // Dynamic Viewport Scroll Tracker for Active Chapter Highlighting
+  useEffect(() => {
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollY = window.scrollY || window.pageYOffset;
+          const windowHeight = window.innerHeight;
+          const docHeight = document.documentElement.scrollHeight;
+
+          // 1. Extreme boundary cases: top or bottom of page
+          if (scrollY < 120) {
+            setActiveChapter('pipeline');
+            ticking = false;
+            return;
+          }
+          if (windowHeight + scrollY >= docHeight - 80) {
+            setActiveChapter('demo');
+            ticking = false;
+            return;
+          }
+
+          // 2. Focal line 30% down viewport (below 64px fixed header)
+          const focalPoint = Math.max(100, windowHeight * 0.30);
+
+          let matched = null;
+          for (let i = 0; i < CHAPTERS.length; i++) {
+            const ch = CHAPTERS[i];
+            const el = ch.targets.map((tid) => document.getElementById(tid)).find(Boolean);
+            if (!el) continue;
+
+            const rect = el.getBoundingClientRect();
+            // Section contains the focal point during its entire scroll/pinned height
+            if (rect.top <= focalPoint && rect.bottom > focalPoint) {
+              matched = ch.id;
+              break;
+            }
+          }
+
+          if (matched) {
+            setActiveChapter(matched);
+          } else {
+            // Fallback to whichever section top is closest to the focal line
+            let closestId = 'pipeline';
+            let minDistance = Infinity;
+            for (const ch of CHAPTERS) {
+              const el = ch.targets.map((tid) => document.getElementById(tid)).find(Boolean);
+              if (!el) continue;
+              const rect = el.getBoundingClientRect();
+              const dist = Math.abs(rect.top - focalPoint);
+              if (dist < minDistance) {
+                minDistance = dist;
+                closestId = ch.id;
+              }
+            }
+            setActiveChapter(closestId);
+          }
+
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll, { passive: true });
+
+    // Initial check
+    handleScroll();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [renderMode]);
 
   // Active Expand/Collapse Card States
   const [activePipeCard, setActivePipeCard] = useState(null);
@@ -605,6 +749,7 @@ export function LandingPage() {
 
   const scrollToSection = (id) => {
     setIsMobileNavOpen(false);
+    setActiveChapter(id);
     if (id === 'pipeline') {
       const el = document.getElementById('pipeline-tunnel') || document.getElementById('pipeline');
       if (el) {
@@ -652,21 +797,22 @@ export function LandingPage() {
 
           {/* Chapter Nav Links */}
           <nav className="hidden xl:flex items-center gap-1.5 2xl:gap-2 font-mono text-[11px] 2xl:text-[12px] tracking-wide">
-            <button onClick={() => scrollToSection('pipeline')} className="px-2.5 2xl:px-3.5 py-1.5 rounded-lg bg-surface border border-primary/30 text-primary font-bold hover:bg-surface-hover transition-colors whitespace-nowrap">
-              01 // Pipeline
-            </button>
-            <button onClick={() => scrollToSection('sources')} className="px-2.5 2xl:px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
-              02 // Sources
-            </button>
-            <button onClick={() => scrollToSection('topology')} className="px-2.5 2xl:px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
-              03 // Topology
-            </button>
-            <button onClick={() => scrollToSection('roi-engine')} className="px-2.5 2xl:px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
-              04 // ROI Engine
-            </button>
-            <button onClick={() => scrollToSection('demo')} className="px-2.5 2xl:px-3.5 py-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors whitespace-nowrap">
-              05 // Live Demo
-            </button>
+            {CHAPTERS.map((ch) => {
+              const isActive = activeChapter === ch.id;
+              return (
+                <button
+                  key={ch.id}
+                  onClick={() => scrollToSection(ch.id)}
+                  className={`px-2.5 2xl:px-3.5 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap cursor-pointer ${
+                    isActive
+                      ? `bg-surface border ${ch.borderClass} ${ch.textClass} ${ch.glowClass}`
+                      : 'text-text-muted hover:text-text-primary hover:bg-surface-hover border border-transparent'
+                  }`}
+                >
+                  {ch.navLabel}
+                </button>
+              );
+            })}
           </nav>
 
           {/* Controls Cluster & Open SOC Console CTA */}
@@ -755,21 +901,22 @@ export function LandingPage() {
         {/* Mobile Navigation Viewport */}
         {isMobileNavOpen && (
           <div className="xl:hidden bg-surface-dim border-b border-border-muted px-4 py-4 space-y-2 font-mono text-xs animate-in slide-in-from-top duration-200">
-            <button onClick={() => scrollToSection('pipeline')} className="block w-full text-left px-3 py-2 rounded bg-surface border border-border-muted text-primary font-bold">
-              01 // Pipeline Architecture
-            </button>
-            <button onClick={() => scrollToSection('sources')} className="block w-full text-left px-3 py-2 rounded bg-surface border border-border-muted text-text-primary">
-              02 // Log Sources
-            </button>
-            <button onClick={() => scrollToSection('topology')} className="block w-full text-left px-3 py-2 rounded bg-surface border border-border-muted text-text-primary">
-              03 // Network Topology Radar
-            </button>
-            <button onClick={() => scrollToSection('roi-engine')} className="block w-full text-left px-3 py-2 rounded bg-surface border border-border-muted text-text-primary">
-              04 // ROI Estimator
-            </button>
-            <button onClick={() => scrollToSection('demo')} className="block w-full text-left px-3 py-2 rounded bg-surface border border-border-muted text-text-primary">
-              05 // Interactive Dissection
-            </button>
+            {CHAPTERS.map((ch) => {
+              const isActive = activeChapter === ch.id;
+              return (
+                <button
+                  key={ch.id}
+                  onClick={() => scrollToSection(ch.id)}
+                  className={`block w-full text-left px-3 py-2 rounded font-bold transition-colors ${
+                    isActive
+                      ? `bg-surface border ${ch.borderClass} ${ch.textClass}`
+                      : 'bg-surface/50 border border-transparent text-text-muted hover:text-text-primary'
+                  }`}
+                >
+                  {ch.mobileLabel}
+                </button>
+              );
+            })}
 
             {/* Mobile Experience Render Mode */}
             <div className="pt-2 flex items-center justify-between font-sans border-t border-border-muted/40">
@@ -813,35 +960,35 @@ export function LandingPage() {
       {/* 2. CHAPTER QUICK DOCK (RIGHT DESKTOP RAIL)                                */}
       {/* ========================================================================= */}
       <aside className="fixed right-6 top-1/2 -translate-y-1/2 z-40 hidden 2xl:flex flex-col gap-3 bg-surface-dim/80 backdrop-blur-md p-2.5 rounded-2xl border border-border-muted shadow-2xl">
-        <button onClick={() => scrollToSection('pipeline')} className="flex flex-col items-center gap-1 group py-1">
-          <span className="font-mono text-[10px] text-primary font-bold">01</span>
-          <div className="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_8px_rgba(167,139,250,0.8)]"></div>
-          <span className="font-mono text-[9px] text-text-muted group-hover:text-primary transition-colors">PIPE</span>
-        </button>
-        <div className="w-px h-4 bg-border-muted mx-auto"></div>
-        <button onClick={() => scrollToSection('sources')} className="flex flex-col items-center gap-1 group py-1">
-          <span className="font-mono text-[10px] text-secondary font-bold">02</span>
-          <div className="w-2.5 h-2.5 rounded-full bg-secondary shadow-[0_0_8px_rgba(123,208,255,0.8)]"></div>
-          <span className="font-mono text-[9px] text-text-muted group-hover:text-secondary transition-colors">SRC</span>
-        </button>
-        <div className="w-px h-4 bg-border-muted mx-auto"></div>
-        <button onClick={() => scrollToSection('topology')} className="flex flex-col items-center gap-1 group py-1">
-          <span className="font-mono text-[10px] text-tertiary font-bold">03</span>
-          <div className="w-2.5 h-2.5 rounded-full bg-tertiary shadow-[0_0_8px_rgba(78,222,163,0.8)]"></div>
-          <span className="font-mono text-[9px] text-text-muted group-hover:text-tertiary transition-colors">TOPO</span>
-        </button>
-        <div className="w-px h-4 bg-border-muted mx-auto"></div>
-        <button onClick={() => scrollToSection('roi-engine')} className="flex flex-col items-center gap-1 group py-1">
-          <span className="font-mono text-[10px] text-tertiary-container font-bold">04</span>
-          <div className="w-2.5 h-2.5 rounded-full bg-tertiary-container"></div>
-          <span className="font-mono text-[9px] text-text-muted group-hover:text-tertiary transition-colors">ROI</span>
-        </button>
-        <div className="w-px h-4 bg-border-muted mx-auto"></div>
-        <button onClick={() => scrollToSection('demo')} className="flex flex-col items-center gap-1 group py-1">
-          <span className="font-mono text-[10px] text-primary font-bold">05</span>
-          <div className="w-2.5 h-2.5 rounded-full bg-primary"></div>
-          <span className="font-mono text-[9px] text-text-muted group-hover:text-primary transition-colors">DEMO</span>
-        </button>
+        {CHAPTERS.map((ch, idx) => {
+          const isActive = activeChapter === ch.id;
+          return (
+            <React.Fragment key={ch.id}>
+              {idx > 0 && <div className="w-px h-4 bg-border-muted mx-auto" />}
+              <button
+                onClick={() => scrollToSection(ch.id)}
+                className={`flex flex-col items-center gap-1 group py-1 transition-all cursor-pointer ${
+                  isActive ? 'scale-110' : 'opacity-60 hover:opacity-100'
+                }`}
+                title={ch.navLabel}
+              >
+                <span className={`font-mono text-[10px] font-bold transition-colors ${isActive ? ch.textClass : 'text-text-muted group-hover:text-text-primary'}`}>
+                  {ch.num}
+                </span>
+                <div
+                  className={`w-2.5 h-2.5 rounded-full transition-all ${
+                    isActive
+                      ? `${ch.bgClass} ${ch.glowClass} scale-125`
+                      : 'bg-surface-bright border border-border-muted group-hover:border-text-muted'
+                  }`}
+                />
+                <span className={`font-mono text-[9px] transition-colors ${isActive ? `${ch.textClass} font-bold` : 'text-text-muted group-hover:text-text-primary'}`}>
+                  {ch.railLabel}
+                </span>
+              </button>
+            </React.Fragment>
+          );
+        })}
       </aside>
 
       <main className="w-full pt-16 pb-12 flex flex-col">
@@ -894,7 +1041,7 @@ export function LandingPage() {
         {/* ========================================================================= */}
         <section
           id="sources"
-          className="w-full relative bg-gradient-to-b from-[var(--color-chapter2-from)] via-[var(--color-chapter2-via)] to-[var(--color-chapter2-to)] border-b border-secondary/20"
+          className="w-full relative scroll-mt-16 bg-gradient-to-b from-[var(--color-chapter2-from)] via-[var(--color-chapter2-via)] to-[var(--color-chapter2-to)] border-b border-secondary/20"
         >
           <div className="absolute top-16 right-1/4 w-[750px] h-[500px] bg-secondary/10 rounded-full blur-[150px] pointer-events-none"></div>
           {is3D ? (
@@ -926,7 +1073,7 @@ export function LandingPage() {
         {/* ========================================================================= */}
         <section
           id="topology"
-          className="w-full px-4 md:px-8 xl:px-14 py-20 relative bg-gradient-to-b from-[var(--color-chapter3-from)] via-[var(--color-chapter3-via)] to-[var(--color-chapter3-to)] border-b border-tertiary/20"
+          className="w-full px-4 md:px-8 xl:px-14 py-20 relative scroll-mt-16 bg-gradient-to-b from-[var(--color-chapter3-from)] via-[var(--color-chapter3-via)] to-[var(--color-chapter3-to)] border-b border-tertiary/20"
         >
           <div className="absolute top-10 left-1/4 w-[850px] h-[550px] bg-tertiary/10 rounded-full blur-[170px] pointer-events-none"></div>
           
@@ -1012,7 +1159,7 @@ export function LandingPage() {
         {/* ========================================================================= */}
         <section
           id="roi-engine"
-          className="w-full px-4 md:px-8 xl:px-14 py-20 relative bg-gradient-to-b from-[var(--color-chapter4-from)] via-[var(--color-chapter4-via)] to-[var(--color-chapter4-to)] border-b border-tertiary/30"
+          className="w-full px-4 md:px-8 xl:px-14 py-20 relative scroll-mt-16 bg-gradient-to-b from-[var(--color-chapter4-from)] via-[var(--color-chapter4-via)] to-[var(--color-chapter4-to)] border-b border-tertiary/30"
         >
           <div className="absolute top-10 left-1/3 w-[850px] h-[500px] bg-tertiary/15 rounded-full blur-[160px] pointer-events-none"></div>
           
@@ -1138,7 +1285,7 @@ export function LandingPage() {
         {/* ========================================================================= */}
         <section
           id="demo"
-          className="w-full px-4 md:px-8 xl:px-14 py-20 relative bg-gradient-to-b from-[var(--color-chapter5-from)] via-[var(--color-chapter5-via)] to-[var(--color-chapter5-to)] border-b border-border-muted"
+          className="w-full px-4 md:px-8 xl:px-14 py-20 relative scroll-mt-16 bg-gradient-to-b from-[var(--color-chapter5-from)] via-[var(--color-chapter5-via)] to-[var(--color-chapter5-to)] border-b border-border-muted"
         >
           <div className="max-w-[1600px] mx-auto flex flex-col gap-12 relative z-10">
             <InView className="flex flex-col md:flex-row md:items-end justify-between gap-4">
