@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Text } from '@react-three/drei';
 import * as THREE from 'three';
 
@@ -135,41 +135,44 @@ export function TunnelCheckpointGates({ colors, progress }) {
                 <meshBasicMaterial color={stageColor} transparent opacity={gateOpacity * 0.75} />
               </mesh>
 
-              {/* Stage Number (Dedicated Left Column) */}
-              <Text
-                position={[-1.12, 0.02, 0.03]}
-                fontSize={0.24}
-                letterSpacing={0.04}
-                color={stageColorStr}
-                anchorX="center"
-                anchorY="middle"
-              >
-                {cp.number}
-              </Text>
+              {/* Checkpoint Signboard Text (Isolated Suspense to prevent blocking 3D scene) */}
+              <Suspense fallback={null}>
+                {/* Stage Number (Dedicated Left Column) */}
+                <Text
+                  position={[-1.12, 0.02, 0.03]}
+                  fontSize={0.24}
+                  letterSpacing={0.04}
+                  color={stageColorStr}
+                  anchorX="center"
+                  anchorY="middle"
+                >
+                  {cp.number}
+                </Text>
 
-              {/* Stage Title (Dedicated Right Column - Distinct Gap from Number) */}
-              <Text
-                position={[-0.48, 0.11, 0.03]}
-                fontSize={0.16}
-                letterSpacing={0.08}
-                color={colors.isSage ? '#121f14' : '#ffffff'}
-                anchorX="left"
-                anchorY="middle"
-              >
-                {cp.title}
-              </Text>
+                {/* Stage Title (Dedicated Right Column - Distinct Gap from Number) */}
+                <Text
+                  position={[-0.48, 0.11, 0.03]}
+                  fontSize={0.16}
+                  letterSpacing={0.08}
+                  color={colors.isSage ? '#121f14' : '#ffffff'}
+                  anchorX="left"
+                  anchorY="middle"
+                >
+                  {cp.title}
+                </Text>
 
-              {/* Stage Subtitle */}
-              <Text
-                position={[-0.48, -0.11, 0.03]}
-                fontSize={0.085}
-                letterSpacing={0.05}
-                color={stageColorStr}
-                anchorX="left"
-                anchorY="middle"
-              >
-                {cp.subtitle}
-              </Text>
+                {/* Stage Subtitle */}
+                <Text
+                  position={[-0.48, -0.11, 0.03]}
+                  fontSize={0.085}
+                  letterSpacing={0.05}
+                  color={stageColorStr}
+                  anchorX="left"
+                  anchorY="middle"
+                >
+                  {cp.subtitle}
+                </Text>
+              </Suspense>
             </group>
 
             {/* Vertical Left and Right Beacon Pylons */}

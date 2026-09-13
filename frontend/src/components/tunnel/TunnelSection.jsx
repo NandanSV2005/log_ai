@@ -1,22 +1,8 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useScroll, useSpring } from 'motion/react';
+import { checkWebGLSupport } from '../../utils/webgl';
 import { TunnelCanvas } from './TunnelCanvas';
 import { TunnelHUDOverlay } from './TunnelHUDOverlay';
-
-function checkWebGLSupport() {
-  if (typeof window === 'undefined') return false;
-  try {
-    const canvas = document.createElement('canvas');
-    return Boolean(
-      window.WebGLRenderingContext &&
-      (canvas.getContext('webgl') ||
-        canvas.getContext('experimental-webgl') ||
-        canvas.getContext('webgl2'))
-    );
-  } catch {
-    return false;
-  }
-}
 
 function TunnelLoader() {
   return (
@@ -149,7 +135,10 @@ export function TunnelSection({
       className="relative w-full h-[450vh] bg-surface-lowest"
     >
       {/* Sticky Fullscreen 3D Viewport */}
-      <div className="sticky top-0 w-full h-screen overflow-hidden">
+      <div
+        className="sticky top-0 w-full h-screen overflow-hidden"
+        style={{ width: '100%', height: '100vh', minHeight: '100vh' }}
+      >
         <Suspense fallback={<TunnelLoader />}>
           <TunnelCanvas progress={progress} isMobile={isMobile} />
         </Suspense>

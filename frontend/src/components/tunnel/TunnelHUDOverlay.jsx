@@ -155,18 +155,6 @@ export function TunnelHUDOverlay({
                   <span className="font-mono text-base sm:text-lg text-tertiary font-bold mt-0.5">SHA-256</span>
                 </div>
               </div>
-
-              {/* Scroll Callout Cue */}
-              <div className="flex items-center gap-3 pt-1 text-text-muted font-mono text-xs">
-                <div className="w-4 h-7 rounded-full border-2 border-primary/60 flex items-start justify-center p-1">
-                  <motion.div
-                    animate={{ y: [0, 8, 0] }}
-                    transition={{ repeat: Infinity, duration: 1.5 }}
-                    className="w-1 h-1 rounded-full bg-primary"
-                  />
-                </div>
-                <span className="animate-pulse text-text-primary font-semibold text-[11px]">Scroll down to fly into 3D corridor &rarr;</span>
-              </div>
             </motion.div>
           )}
         </AnimatePresence>

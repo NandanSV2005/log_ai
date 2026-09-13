@@ -104,21 +104,22 @@ async def ask_copilot(
 
             if answer_text:
                 return {
-                    "answer": f"[LIVE GEMINI 3.6 LLM]\n\n{answer_text}",
+                    "answer": answer_text,
                     "status": "success",
                     "model": "gemini-3.6-flash",
                     "logs_analyzed": len(recent_50),
                     "force_offline": False,
                 }
         except Exception as e:
-            logger.error(f"Gemini API call exception: {e}")
+            status_code = getattr(e, "code", getattr(e, "status_code", "Unknown"))
+            logger.error(f"Gemini API call failed for model '{GEMINI_MODEL_NAME}' [Status: {status_code}]: {e}")
 
     # Live AI fallback
     fallback_answer = _evaluate_copilot_fallback(question, recent_50)
     return {
-        "answer": f"[LIVE GEMINI 3.6 LLM ENGINE]\n\n{fallback_answer}",
+        "answer": f"[RULE-ASSISTED SOC ENGINE]\n\n{fallback_answer}",
         "status": "success",
-        "model": "gemini-3.6-flash",
+        "model": "rule-assisted-soc-engine",
         "logs_analyzed": len(recent_50),
         "force_offline": False,
     }

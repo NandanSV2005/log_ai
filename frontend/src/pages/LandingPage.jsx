@@ -14,10 +14,7 @@ import { RoiWorkload3D, RoiStatCards } from '../components/roi/RoiWorkload3D';
 import { DissectionConduitStream } from '../components/demo/DissectionConduitStream';
 import { TiltCard3D } from '../components/demo/TiltCard3D';
 import { DissectionScanner } from '../components/demo/DissectionScanner';
-
-const TunnelSection = React.lazy(() =>
-  import('../components/tunnel/TunnelSection').then((m) => ({ default: m.TunnelSection }))
-);
+import { TunnelSection } from '../components/tunnel/TunnelSection';
 
 // =============================================================================
 // ACCURATE VERIFIED TELEMETRY FALLBACK CONSTANTS
