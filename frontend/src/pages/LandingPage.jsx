@@ -631,7 +631,7 @@ export function LandingPage() {
 
   // Stats & Telemetry Data State
   const [stats, setStats] = useState({ total_events_ingested: 48281 });
-  const [recentEvents, setRecentEvents] = useState([
+  const recentEvents = [
     {
       id: 'evt-01',
       timestamp: '2026-09-08 11:42:01',
@@ -668,30 +668,40 @@ export function LandingPage() {
       original_event: 'pf: rule 42/(match) pass in on igb0: 192.168.1.104 -> 10.0.0.1:80',
       raw_event_hash: '4ea94dfb19a3d9dc8c7ec7'
     }
-  ]);
+  ];
 
-  // Fetch real telemetry data from API
+  // Public Telemetry Initializer with exponential backoff & failure breaker (No authenticated API calls)
   useEffect(() => {
     let mounted = true;
-    async function loadLiveData() {
+    let consecutiveFailures = 0;
+    const MAX_FAILURES = 3;
+
+    async function loadPublicTelemetry() {
+      if (consecutiveFailures >= MAX_FAILURES) return;
       try {
-        const [statsRes, eventsRes] = await Promise.all([
-          api.getStats().catch(() => null),
-          api.getRecentEvents(10).catch(() => null)
-        ]);
+        const publicStats = await api.getPublicStats();
         if (!mounted) return;
-        if (statsRes?.total_events_ingested) {
-          setStats(statsRes);
+        if (publicStats && publicStats.total_events_ingested) {
+          setStats(publicStats);
+          consecutiveFailures = 0;
+        } else {
+          consecutiveFailures += 1;
         }
-        if (eventsRes?.events && eventsRes.events.length > 0) {
-          setRecentEvents(eventsRes.events);
-        }
-      } catch (err) {
-        // Fallback state retained on error
+      } catch {
+        consecutiveFailures += 1;
       }
     }
-    loadLiveData();
-    const timer = setInterval(loadLiveData, 3000);
+
+    // Initial non-blocking load on page mount
+    loadPublicTelemetry();
+
+    // Gentle 60s background refresh that pauses when tab is hidden or after 3 consecutive failures
+    const timer = setInterval(() => {
+      if (document.visibilityState === 'visible' && consecutiveFailures < MAX_FAILURES) {
+        loadPublicTelemetry();
+      }
+    }, 60000);
+
     return () => {
       mounted = false;
       clearInterval(timer);

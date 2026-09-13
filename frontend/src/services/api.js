@@ -246,4 +246,11 @@ export const api = {
     });
     return await handleResponse(res);
   },
+
+  async getPublicStats() {
+    const res = await fetch(`${API_BASE_URL}/api/v1/demo/stats`, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return await handleResponse(res);
+  },
 };
