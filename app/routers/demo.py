@@ -1,5 +1,6 @@
 import hashlib
 import time
+import logging
 from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, Request, HTTPException, status
 from pydantic import BaseModel, Field
@@ -8,6 +9,7 @@ from app.parsers.dynamic_parser import DynamicParser
 from app.detection.engine import anomaly_engine
 from app.xai.explainer import xai_explainer
 
+logger = logging.getLogger("log_ai.demo")
 router = APIRouter(prefix="/api/v1/demo", tags=["Public Forensic Demo"])
 
 class DemoAnalyzeRequest(BaseModel):
@@ -133,7 +135,8 @@ async def analyze_demo_log(request: Request, body: DemoAnalyzeRequest):
     except HTTPException:
         raise
     except Exception as e:
+        logger.error("Exception in analyze_demo_log: %s", e, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Failed to parse and analyze log line. Please ensure format is valid text."
+            detail=f"Failed to parse and analyze log line: {str(e)}"
         )
