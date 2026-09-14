@@ -37,7 +37,7 @@ export const DEFAULT_RADAR_BLIPS = [
     pos3d: [-0.4, 0.3, -0.2],
     host: 'pfSense [10.0.0.1]',
     rule: 'GATEWAY SECURE',
-    sev: 'NORMAL',
+    sev: 'SEV 0.2',
     score: 0.2,
     level: 'LOW',
     colorHex: '#34d399'

@@ -752,7 +752,7 @@ export function LandingPage() {
       pos3d: [-0.4, 0.3, -0.2],
       host: 'pfSense [10.0.0.1]',
       rule: 'GATEWAY SECURE',
-      sev: 'NORMAL',
+      sev: 'SEV 0.2',
       score: 0.2,
       level: 'LOW',
       colorHex: '#34d399'
@@ -1330,8 +1330,8 @@ export function LandingPage() {
               {/* Column 1: Raw Inbound Interactive Input */}
               <InView className="xl:col-span-4 h-full">
                 <TiltCard3D disabled={is2D}>
-                  <SpotlightCard spotlightColor="rgba(167, 139, 250, 0.15)" className="h-full min-h-[460px] bg-surface-bright/90 rounded-2xl border border-primary/30 p-5 flex flex-col justify-between gap-3 shadow-xl">
-                  <div className="flex flex-col gap-2 relative z-20">
+                  <SpotlightCard spotlightColor="rgba(167, 139, 250, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-primary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
+                  <div className="flex flex-col gap-3 relative z-20">
                     <div className="flex items-center justify-between pb-3 border-b border-border-muted">
                       <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
                         <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
@@ -1343,7 +1343,7 @@ export function LandingPage() {
                     </div>
 
                     {/* Quick-Pick Presets */}
-                    <div className="flex flex-wrap items-center gap-1.5 pt-1 relative z-20 pointer-events-auto">
+                    <div className="flex flex-wrap items-center gap-1.5 pt-0.5 relative z-20 pointer-events-auto">
                       <span className="font-mono text-[10px] text-text-dim uppercase font-bold mr-1">PRESETS:</span>
                       {DEMO_PRESETS.map((preset) => (
                         <button
@@ -1360,25 +1360,25 @@ export function LandingPage() {
                         </button>
                       ))}
                     </div>
-                  </div>
 
-                  {/* Interactive Textarea with 3D Dissection Scan & Peel Effect */}
-                  <div className="flex flex-col gap-2 relative z-20 pointer-events-auto">
-                    <DissectionScanner
-                      rawLogText={demoInput}
-                      isAnalyzing={demoLoading}
-                      demoResult={demoResult}
-                      revealStep={revealStep}
-                      disabled={is2D}
-                    >
-                      <textarea
-                        value={demoInput}
-                        onChange={handleTextareaChange}
-                        rows={!is2D && (demoLoading || demoResult) ? 2 : 3}
-                        placeholder="Paste a raw firewall string, syslog line, or JSON alert..."
-                        className="w-full bg-surface-dim p-2.5 rounded-xl font-mono text-xs text-text-primary border border-border-muted focus:border-primary focus:outline-none resize-none leading-relaxed shadow-inner relative z-20 pointer-events-auto"
-                      />
-                    </DissectionScanner>
+                    {/* Interactive Textarea with 3D Dissection Scan & Peel Effect */}
+                    <div className="relative z-20 pointer-events-auto mt-0.5">
+                      <DissectionScanner
+                        rawLogText={demoInput}
+                        isAnalyzing={demoLoading}
+                        demoResult={demoResult}
+                        revealStep={revealStep}
+                        disabled={is2D}
+                      >
+                        <textarea
+                          value={demoInput}
+                          onChange={handleTextareaChange}
+                          rows={4}
+                          placeholder="Paste a raw firewall string, syslog line, or JSON alert..."
+                          className="w-full bg-surface-dim p-3 rounded-xl font-mono text-xs text-text-primary border border-border-muted focus:border-primary focus:outline-none resize-none leading-relaxed shadow-inner relative z-20 pointer-events-auto"
+                        />
+                      </DissectionScanner>
+                    </div>
                   </div>
 
                   {/* Submit Button */}
@@ -1386,7 +1386,7 @@ export function LandingPage() {
                     type="button"
                     onClick={handleDemoSubmit}
                     disabled={demoLoading}
-                    className="relative z-20 pointer-events-auto w-full py-2.5 rounded-xl bg-primary text-surface-dim font-mono font-bold text-xs shadow-[0_0_16px_rgba(167,139,250,0.4)] hover:bg-primary-fixed transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="relative z-20 pointer-events-auto w-full py-2.5 rounded-xl bg-primary text-surface-dim font-mono font-bold text-xs shadow-[0_0_16px_rgba(167,139,250,0.4)] hover:bg-primary-fixed transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-1"
                     style={{
                       transform: !is2D ? 'translateZ(12px)' : 'none',
                       transformStyle: !is2D ? 'preserve-3d' : 'flat',
@@ -1416,7 +1416,7 @@ export function LandingPage() {
               {/* Column 2: ULPF Transform Engine Dynamic Output */}
               <InView className="xl:col-span-4 h-full">
                 <TiltCard3D disabled={is2D}>
-                  <SpotlightCard spotlightColor="rgba(123, 208, 255, 0.15)" className="h-full min-h-[460px] bg-surface-bright/90 rounded-2xl border border-secondary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
+                  <SpotlightCard spotlightColor="rgba(123, 208, 255, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-secondary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
                   <div className="flex items-center justify-between pb-3 border-b border-border-muted">
                     <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
                       <span className="w-2 h-2 rounded-full bg-secondary"></span>
@@ -1428,7 +1428,7 @@ export function LandingPage() {
                   </div>
 
                   {demoLoading ? (
-                    <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-secondary h-52 flex flex-col justify-center gap-3 border border-border-muted animate-pulse">
+                    <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-secondary min-h-[175px] flex-1 flex flex-col justify-center gap-3 border border-border-muted animate-pulse">
                       <div className="flex items-center gap-2 text-text-muted text-[11px]">
                         <span className="w-2 h-2 rounded-full bg-secondary animate-ping"></span>
                         <span>PARSING &amp; MAPPING FIELDS...</span>
@@ -1439,19 +1439,19 @@ export function LandingPage() {
                       <div className="h-3 bg-secondary/10 rounded w-2/3"></div>
                     </div>
                   ) : demoError ? (
-                    <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-[var(--color-severity-critical)] h-52 flex flex-col justify-center items-center text-center gap-2 border border-[var(--color-severity-critical-border)]">
+                    <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-[var(--color-severity-critical)] min-h-[175px] flex-1 flex flex-col justify-center items-center text-center gap-2 border border-[var(--color-severity-critical-border)]">
                       <span className="material-symbols-outlined text-2xl">error_outline</span>
                       <p>{demoError}</p>
                       <span className="text-text-dim text-[10px]">Select one of the sample presets or check your input syntax.</span>
                     </div>
                   ) : !demoResult ? (
-                    <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-text-dim h-52 flex flex-col justify-center items-center text-center gap-2 border border-dashed border-border-muted">
+                    <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-text-dim min-h-[175px] flex-1 flex flex-col justify-center items-center text-center gap-2 border border-dashed border-border-muted">
                       <span className="material-symbols-outlined text-3xl opacity-35">hourglass_empty</span>
                       <p className="font-sans text-xs text-text-muted font-medium">Awaiting Analysis</p>
                       <span className="text-[10px] text-text-dim">Click "ANALYZE LOG STREAM" to run extraction.</span>
                     </div>
                   ) : (
-                    <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-secondary leading-relaxed h-52 flex flex-col justify-center gap-1.5 border border-border-muted overflow-y-auto">
+                    <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-secondary leading-relaxed min-h-[175px] flex-1 flex flex-col justify-center gap-1.5 border border-border-muted overflow-y-auto">
                       {revealStep >= 1 && (
                         <span className="text-text-primary font-bold animate-in fade-in duration-150">[EXTRACTED_VECTORS]</span>
                       )}
@@ -1488,7 +1488,7 @@ export function LandingPage() {
               {/* Column 3: Enriched XAI Threat Verdict Dynamic Output */}
               <InView className="xl:col-span-4 h-full">
                 <TiltCard3D disabled={is2D}>
-                  <SpotlightCard spotlightColor="rgba(78, 222, 163, 0.15)" className="h-full min-h-[460px] bg-surface-bright/90 rounded-2xl border border-tertiary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
+                  <SpotlightCard spotlightColor="rgba(78, 222, 163, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-tertiary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
                   <div className="flex items-center justify-between pb-3 border-b border-border-muted">
                     <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
                       <span className="w-2 h-2 rounded-full bg-tertiary"></span>
@@ -1501,7 +1501,7 @@ export function LandingPage() {
                         demoResult?.verdict?.threat_level === 'MEDIUM' ? 'text-amber-400 bg-amber-500/10 border-amber-500/30' :
                         'text-tertiary bg-tertiary/10 border-tertiary/20'
                       }`}>
-                        SEV {demoResult?.verdict?.threat_score} {demoResult?.verdict?.threat_level}
+                        SEV {Number(demoResult?.verdict?.threat_score != null ? demoResult.verdict.threat_score : 0).toFixed(1)} {demoResult?.verdict?.threat_level}
                       </span>
                     ) : (
                       <span className="font-mono text-[10px] text-text-dim px-2 py-0.5 rounded bg-surface border border-border-muted">
@@ -1511,7 +1511,7 @@ export function LandingPage() {
                   </div>
 
                   {demoLoading ? (
-                    <div className="bg-surface-dim p-4 rounded-xl h-52 flex flex-col justify-center gap-3 border border-border-muted animate-pulse">
+                    <div className="bg-surface-dim p-4 rounded-xl min-h-[175px] flex-1 flex flex-col justify-center gap-3 border border-border-muted animate-pulse">
                       <div className="flex items-center gap-2 text-text-muted font-mono text-[11px]">
                         <span className="w-2 h-2 rounded-full bg-tertiary animate-ping"></span>
                         <span>EVALUATING ANOMALY SCORE...</span>
@@ -1521,18 +1521,18 @@ export function LandingPage() {
                       <div className="h-3 bg-tertiary/15 rounded w-4/5"></div>
                     </div>
                   ) : demoError ? (
-                    <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-text-dim h-52 flex items-center justify-center border border-border-muted">
+                    <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-text-dim min-h-[175px] flex-1 flex items-center justify-center border border-border-muted">
                       <span>Analysis unavailable</span>
                     </div>
                   ) : !demoResult ? (
-                    <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-text-dim h-52 flex flex-col justify-center items-center text-center gap-2 border border-dashed border-border-muted">
+                    <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-text-dim min-h-[175px] flex-1 flex flex-col justify-center items-center text-center gap-2 border border-dashed border-border-muted">
                       <span className="material-symbols-outlined text-3xl opacity-35">gpp_maybe</span>
                       <p className="font-sans text-xs text-text-muted font-medium">Awaiting Verdict</p>
                       <span className="text-[10px] text-text-dim">Click "ANALYZE LOG STREAM" to evaluate threat score.</span>
                     </div>
                   ) : (
-                    <div className="bg-surface-dim p-4 rounded-xl flex flex-col gap-2 h-52 justify-between border border-border-muted overflow-y-auto">
-                      <div>
+                    <div className="bg-surface-dim p-3.5 rounded-xl flex flex-col justify-between min-h-[175px] flex-1 gap-2.5 border border-border-muted overflow-y-auto">
+                      <div className="flex flex-col gap-1.5">
                         {revealStep >= 2 && (
                           <div className="flex items-center gap-2 text-primary font-display font-bold text-sm mb-1 animate-in fade-in slide-in-from-bottom-1 duration-150">
                             <span className="material-symbols-outlined text-[18px]">gpp_maybe</span>
@@ -1546,7 +1546,7 @@ export function LandingPage() {
                         )}
                       </div>
                       {revealStep >= 5 && (
-                        <div className="p-2 bg-surface rounded font-mono text-[10px] text-tertiary flex items-center justify-between animate-in fade-in duration-200">
+                        <div className="p-2 bg-surface rounded font-mono text-[10px] text-tertiary flex items-center justify-between border border-border-muted/50 animate-in fade-in duration-200 mt-auto">
                           <span>ACTION: {demoResult?.verdict?.action}</span>
                           <span>✓ HASH VERIFIED</span>
                         </div>

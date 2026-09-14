@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 
 /**
  * DissectionScanner: A specialized 3D scan-and-reveal component for Chapter 05 Column 1.
@@ -6,8 +7,10 @@ import React, { useEffect, useState } from 'react';
  * When 'Analyze Log Stream' is clicked:
  * 1. A horizontal laser scan-beam sweeps down across the raw log text with glowing depth.
  * 2. As it passes, underlying structured fields (IPs, Ports, Actions, Signatures)
- *    visually 'peel apart' and lift up in layered 3D depth (translateZ + rotateX) from the raw text.
- * 3. Respects prefers-reduced-motion and site-wide is2D render mode.
+ *    momentarily 'peel apart' and lift up in layered 3D depth (translateZ + rotateX) from the raw text.
+ * 3. Once the scan completes and fields reveal in Columns 2 & 3, the peeled layer
+ *    smoothly retracts back into the raw log text, avoiding duplicate permanent data cards.
+ * 4. Respects prefers-reduced-motion and site-wide is2D render mode.
  */
 export function DissectionScanner({
   rawLogText,
@@ -58,10 +61,11 @@ export function DissectionScanner({
 
   // Extract structured highlights for the peeled 3D layer
   const extracted = demoResult?.extracted_fields || {};
-  const hasExtracted = Boolean(demoResult && (revealStep >= 1 || disabled));
 
-  // Determine active display mode
-  const show3DPeel = !disabled && (isScanning || hasExtracted);
+  // Momentary 3D dissection peel: visible during scanning and early reveal (steps 1-4),
+  // then smoothly retracts back into the log as results land in Columns 2 & 3.
+  const isPeeling = isScanning || isAnalyzing || (revealStep > 0 && revealStep < 5);
+  const show3DPeel = !disabled && isPeeling;
 
   return (
     <div className="relative w-full" style={{ perspective: disabled ? 'none' : '1000px' }}>
@@ -101,73 +105,77 @@ export function DissectionScanner({
         )}
       </div>
 
-      {/* Layered 3D Peeled Structured Dissection Layer */}
-      {show3DPeel && (
-        <div
-          className={`mt-2 p-2.5 rounded-xl border font-mono text-xs transition-all duration-500 pointer-events-none ${
-            disabled
-              ? 'bg-surface-dim/95 border-border-muted'
-              : 'bg-surface-dim/90 border-primary/40 shadow-xl backdrop-blur-md'
-          }`}
-          style={{
-            transformStyle: disabled ? 'flat' : 'preserve-3d',
-            transform: disabled
-              ? 'none'
-              : hasExtracted
-              ? 'translateZ(14px) rotateX(-1deg) translateY(-2px)'
-              : 'translateZ(8px) rotateX(-2deg) translateY(2px) scale(0.98)',
-            boxShadow: disabled
-              ? 'none'
-              : '0 12px 24px -6px rgba(0,0,0,0.5), 0 0 16px rgba(167, 139, 250, 0.2)',
-          }}
-        >
-          {/* Header of dissected layer */}
-          <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-border-muted/60">
-            <div className="flex items-center gap-1.5 text-[9px] font-bold text-primary uppercase tracking-wider">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
-              <span>FORENSIC DISSECTION LAYER // DECONSTRUCTED</span>
-            </div>
-            <span className="text-[8px] text-text-dim px-1.5 py-0.2 rounded bg-surface border border-border-muted">
-              {isScanning ? 'SCANNING LOG TOKENS...' : 'STRUCTURE PEEL ACTIVE'}
-            </span>
-          </div>
-
-          {/* Peeled Field Vectors Grid */}
-          <div className="grid grid-cols-2 gap-1.5 text-[10px]">
-            {/* Extracted Origin IP */}
-            <div className="p-1.5 rounded-lg bg-surface/80 border border-primary/20 flex flex-col gap-0.5">
-              <span className="text-[8px] font-bold text-text-muted tracking-wider uppercase">SRC_VECTOR</span>
-              <span className="text-primary font-bold truncate">
-                {extracted.source_ip || (isScanning ? '185.220.101.5' : '---')}
+      {/* Layered 3D Peeled Structured Dissection Layer (momentary scan/reveal effect) */}
+      <AnimatePresence>
+        {show3DPeel && (
+          <motion.div
+            key="3d-dissection-peel"
+            initial={{ opacity: 0, y: 6, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 4, scale: 0.97, transition: { duration: 0.3 } }}
+            className={`mt-2 p-2.5 rounded-xl border font-mono text-xs pointer-events-none ${
+              disabled
+                ? 'bg-surface-dim/95 border-border-muted'
+                : 'bg-surface-dim/90 border-primary/40 shadow-xl backdrop-blur-md'
+            }`}
+            style={{
+              transformStyle: disabled ? 'flat' : 'preserve-3d',
+              transform: isScanning
+                ? 'translateZ(8px) rotateX(-2deg) translateY(2px) scale(0.98)'
+                : 'translateZ(14px) rotateX(-1deg) translateY(-2px)',
+              boxShadow: disabled
+                ? 'none'
+                : '0 12px 24px -6px rgba(0,0,0,0.5), 0 0 16px rgba(167, 139, 250, 0.2)',
+            }}
+          >
+            {/* Header of dissected layer */}
+            <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-border-muted/60">
+              <div className="flex items-center gap-1.5 text-[9px] font-bold text-primary uppercase tracking-wider">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
+                <span>FORENSIC DISSECTION LAYER // DECONSTRUCTED</span>
+              </div>
+              <span className="text-[8px] text-text-dim px-1.5 py-0.2 rounded bg-surface border border-border-muted">
+                {isScanning ? 'SCANNING LOG TOKENS...' : 'STRUCTURE PEEL ACTIVE'}
               </span>
             </div>
 
-            {/* Extracted Target IP */}
-            <div className="p-1.5 rounded-lg bg-surface/80 border border-secondary/20 flex flex-col gap-0.5">
-              <span className="text-[8px] font-bold text-text-muted tracking-wider uppercase">DST_VECTOR</span>
-              <span className="text-secondary font-bold truncate">
-                {extracted.destination_ip || (isScanning ? '10.0.4.12' : '---')}
-              </span>
-            </div>
+            {/* Peeled Field Vectors Grid */}
+            <div className="grid grid-cols-2 gap-1.5 text-[10px]">
+              {/* Extracted Origin IP */}
+              <div className="p-1.5 rounded-lg bg-surface/80 border border-primary/20 flex flex-col gap-0.5">
+                <span className="text-[8px] font-bold text-text-muted tracking-wider uppercase">SRC_VECTOR</span>
+                <span className="text-primary font-bold truncate">
+                  {extracted.source_ip || (isScanning ? '185.220.101.5' : '---')}
+                </span>
+              </div>
 
-            {/* Extracted Event Type */}
-            <div className="p-1.5 rounded-lg bg-surface/80 border border-border-muted flex flex-col gap-0.5">
-              <span className="text-[8px] font-bold text-text-muted tracking-wider uppercase">CLASSIFICATION</span>
-              <span className="text-text-primary font-bold truncate">
-                {extracted.event_type || (isScanning ? 'cisco_asa:deny' : '---')}
-              </span>
-            </div>
+              {/* Extracted Target IP */}
+              <div className="p-1.5 rounded-lg bg-surface/80 border border-secondary/20 flex flex-col gap-0.5">
+                <span className="text-[8px] font-bold text-text-muted tracking-wider uppercase">DST_VECTOR</span>
+                <span className="text-secondary font-bold truncate">
+                  {extracted.destination_ip || (isScanning ? '10.0.4.12' : '---')}
+                </span>
+              </div>
 
-            {/* Extracted Hash / Leaf */}
-            <div className="p-1.5 rounded-lg bg-surface/80 border border-tertiary/20 flex flex-col gap-0.5">
-              <span className="text-[8px] font-bold text-text-muted tracking-wider uppercase">SHA-256 SEAL</span>
-              <span className="text-tertiary font-bold truncate" title={extracted.full_sha256}>
-                {extracted.sha256 || (isScanning ? '6cc4c6e212b9...' : '---')}
-              </span>
+              {/* Extracted Event Type */}
+              <div className="p-1.5 rounded-lg bg-surface/80 border border-border-muted flex flex-col gap-0.5">
+                <span className="text-[8px] font-bold text-text-muted tracking-wider uppercase">CLASSIFICATION</span>
+                <span className="text-text-primary font-bold truncate">
+                  {extracted.event_type || (isScanning ? 'cisco_asa:deny' : '---')}
+                </span>
+              </div>
+
+              {/* Extracted Hash / Leaf */}
+              <div className="p-1.5 rounded-lg bg-surface/80 border border-tertiary/20 flex flex-col gap-0.5">
+                <span className="text-[8px] font-bold text-text-muted tracking-wider uppercase">SHA-256 SEAL</span>
+                <span className="text-tertiary font-bold truncate" title={extracted.full_sha256}>
+                  {extracted.sha256 || (isScanning ? '6cc4c6e212b9...' : '---')}
+                </span>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
