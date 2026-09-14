@@ -18,6 +18,12 @@ export function TiltCard3D({
     setCanTilt(!reduced && !noHover);
   }, []);
 
+  // Reset hover and tilt cleanly when 2D/3D mode toggles
+  useEffect(() => {
+    setIsHovered(false);
+    setTilt({ x: 0, y: 0 });
+  }, [disabled]);
+
   const isEnabled = canTilt && !disabled;
 
   const handleMouseMove = (e) => {

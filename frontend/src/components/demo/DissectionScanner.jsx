@@ -67,10 +67,10 @@ export function DissectionScanner({
     <div className="relative w-full" style={{ perspective: disabled ? 'none' : '1000px' }}>
       {/* Base container holding textarea or raw content */}
       <div
-        className="relative transition-transform duration-500 ease-out"
+        className="relative transition-transform duration-500 ease-out z-10"
         style={{
           transformStyle: disabled ? 'flat' : 'preserve-3d',
-          transform: show3DPeel ? 'translateZ(-6px) rotateX(1deg)' : 'none',
+          transform: show3DPeel ? 'translateZ(-4px) rotateX(1deg)' : 'none',
         }}
       >
         {children}
@@ -104,63 +104,63 @@ export function DissectionScanner({
       {/* Layered 3D Peeled Structured Dissection Layer */}
       {show3DPeel && (
         <div
-          className={`mt-2.5 p-3 rounded-xl border font-mono text-xs transition-all duration-500 ${
+          className={`mt-2 p-2.5 rounded-xl border font-mono text-xs transition-all duration-500 pointer-events-none ${
             disabled
               ? 'bg-surface-dim/95 border-border-muted'
-              : 'bg-surface-dim/90 border-primary/40 shadow-2xl backdrop-blur-md'
+              : 'bg-surface-dim/90 border-primary/40 shadow-xl backdrop-blur-md'
           }`}
           style={{
             transformStyle: disabled ? 'flat' : 'preserve-3d',
             transform: disabled
               ? 'none'
               : hasExtracted
-              ? 'translateZ(18px) rotateX(-2deg) translateY(-2px)'
-              : 'translateZ(10px) rotateX(-4deg) translateY(4px) scale(0.98)',
+              ? 'translateZ(14px) rotateX(-1deg) translateY(-2px)'
+              : 'translateZ(8px) rotateX(-2deg) translateY(2px) scale(0.98)',
             boxShadow: disabled
               ? 'none'
-              : '0 16px 32px -8px rgba(0,0,0,0.5), 0 0 20px rgba(167, 139, 250, 0.2)',
+              : '0 12px 24px -6px rgba(0,0,0,0.5), 0 0 16px rgba(167, 139, 250, 0.2)',
           }}
         >
           {/* Header of dissected layer */}
-          <div className="flex items-center justify-between pb-2 mb-2 border-b border-border-muted/60">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold text-primary uppercase tracking-wider">
+          <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-border-muted/60">
+            <div className="flex items-center gap-1.5 text-[9px] font-bold text-primary uppercase tracking-wider">
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
               <span>FORENSIC DISSECTION LAYER // DECONSTRUCTED</span>
             </div>
-            <span className="text-[9px] text-text-dim px-1.5 py-0.2 rounded bg-surface border border-border-muted">
+            <span className="text-[8px] text-text-dim px-1.5 py-0.2 rounded bg-surface border border-border-muted">
               {isScanning ? 'SCANNING LOG TOKENS...' : 'STRUCTURE PEEL ACTIVE'}
             </span>
           </div>
 
           {/* Peeled Field Vectors Grid */}
-          <div className="grid grid-cols-2 gap-2 text-[11px]">
+          <div className="grid grid-cols-2 gap-1.5 text-[10px]">
             {/* Extracted Origin IP */}
-            <div className="p-2 rounded-lg bg-surface/80 border border-primary/20 flex flex-col gap-0.5">
-              <span className="text-[9px] font-bold text-text-muted tracking-wider uppercase">SRC_VECTOR</span>
+            <div className="p-1.5 rounded-lg bg-surface/80 border border-primary/20 flex flex-col gap-0.5">
+              <span className="text-[8px] font-bold text-text-muted tracking-wider uppercase">SRC_VECTOR</span>
               <span className="text-primary font-bold truncate">
                 {extracted.source_ip || (isScanning ? '185.220.101.5' : '---')}
               </span>
             </div>
 
             {/* Extracted Target IP */}
-            <div className="p-2 rounded-lg bg-surface/80 border border-secondary/20 flex flex-col gap-0.5">
-              <span className="text-[9px] font-bold text-text-muted tracking-wider uppercase">DST_VECTOR</span>
+            <div className="p-1.5 rounded-lg bg-surface/80 border border-secondary/20 flex flex-col gap-0.5">
+              <span className="text-[8px] font-bold text-text-muted tracking-wider uppercase">DST_VECTOR</span>
               <span className="text-secondary font-bold truncate">
                 {extracted.destination_ip || (isScanning ? '10.0.4.12' : '---')}
               </span>
             </div>
 
             {/* Extracted Event Type */}
-            <div className="p-2 rounded-lg bg-surface/80 border border-border-muted flex flex-col gap-0.5">
-              <span className="text-[9px] font-bold text-text-muted tracking-wider uppercase">CLASSIFICATION</span>
+            <div className="p-1.5 rounded-lg bg-surface/80 border border-border-muted flex flex-col gap-0.5">
+              <span className="text-[8px] font-bold text-text-muted tracking-wider uppercase">CLASSIFICATION</span>
               <span className="text-text-primary font-bold truncate">
                 {extracted.event_type || (isScanning ? 'cisco_asa:deny' : '---')}
               </span>
             </div>
 
             {/* Extracted Hash / Leaf */}
-            <div className="p-2 rounded-lg bg-surface/80 border border-tertiary/20 flex flex-col gap-0.5">
-              <span className="text-[9px] font-bold text-text-muted tracking-wider uppercase">SHA-256 SEAL</span>
+            <div className="p-1.5 rounded-lg bg-surface/80 border border-tertiary/20 flex flex-col gap-0.5">
+              <span className="text-[8px] font-bold text-text-muted tracking-wider uppercase">SHA-256 SEAL</span>
               <span className="text-tertiary font-bold truncate" title={extracted.full_sha256}>
                 {extracted.sha256 || (isScanning ? '6cc4c6e212b9...' : '---')}
               </span>

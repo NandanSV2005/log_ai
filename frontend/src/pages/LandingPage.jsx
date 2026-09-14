@@ -594,7 +594,10 @@ export function LandingPage() {
   };
 
   const handleDemoSubmit = (e) => {
-    if (e) e.preventDefault();
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (!demoInput || !demoInput.trim()) {
       setDemoError('Please enter or select a raw log line.');
       return;
@@ -1295,7 +1298,7 @@ export function LandingPage() {
         {/* ========================================================================= */}
         <section
           id="demo"
-          className="w-full px-4 md:px-8 xl:px-14 py-20 relative scroll-mt-16 bg-gradient-to-b from-[var(--color-chapter5-from)] via-[var(--color-chapter5-via)] to-[var(--color-chapter5-to)] border-b border-border-muted"
+          className="w-full px-4 md:px-8 xl:px-14 pt-20 pb-32 relative scroll-mt-16 bg-gradient-to-b from-[var(--color-chapter5-from)] via-[var(--color-chapter5-via)] to-[var(--color-chapter5-to)] border-b border-border-muted"
         >
           <div className="max-w-[1600px] mx-auto flex flex-col gap-12 relative z-10">
             <InView className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -1327,8 +1330,8 @@ export function LandingPage() {
               {/* Column 1: Raw Inbound Interactive Input */}
               <InView className="xl:col-span-4 h-full">
                 <TiltCard3D disabled={is2D}>
-                  <SpotlightCard spotlightColor="rgba(167, 139, 250, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-primary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
-                  <div className="flex flex-col gap-2">
+                  <SpotlightCard spotlightColor="rgba(167, 139, 250, 0.15)" className="h-full min-h-[460px] bg-surface-bright/90 rounded-2xl border border-primary/30 p-5 flex flex-col justify-between gap-3 shadow-xl">
+                  <div className="flex flex-col gap-2 relative z-20">
                     <div className="flex items-center justify-between pb-3 border-b border-border-muted">
                       <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
                         <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
@@ -1340,14 +1343,14 @@ export function LandingPage() {
                     </div>
 
                     {/* Quick-Pick Presets */}
-                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    <div className="flex flex-wrap items-center gap-1.5 pt-1 relative z-20 pointer-events-auto">
                       <span className="font-mono text-[10px] text-text-dim uppercase font-bold mr-1">PRESETS:</span>
                       {DEMO_PRESETS.map((preset) => (
                         <button
                           key={preset.id}
                           type="button"
                           onClick={() => handlePresetClick(preset)}
-                          className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-all cursor-pointer ${
+                          className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-all cursor-pointer relative z-20 pointer-events-auto ${
                             selectedPresetId === preset.id
                               ? 'bg-primary text-surface-dim shadow-sm'
                               : 'bg-surface border border-border-muted text-text-muted hover:text-text-primary'
@@ -1360,7 +1363,7 @@ export function LandingPage() {
                   </div>
 
                   {/* Interactive Textarea with 3D Dissection Scan & Peel Effect */}
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2 relative z-20 pointer-events-auto">
                     <DissectionScanner
                       rawLogText={demoInput}
                       isAnalyzing={demoLoading}
@@ -1371,9 +1374,9 @@ export function LandingPage() {
                       <textarea
                         value={demoInput}
                         onChange={handleTextareaChange}
-                        rows={4}
+                        rows={!is2D && (demoLoading || demoResult) ? 2 : 3}
                         placeholder="Paste a raw firewall string, syslog line, or JSON alert..."
-                        className="w-full bg-surface-dim p-3 rounded-xl font-mono text-xs text-text-primary border border-border-muted focus:border-primary focus:outline-none resize-none leading-relaxed shadow-inner"
+                        className="w-full bg-surface-dim p-2.5 rounded-xl font-mono text-xs text-text-primary border border-border-muted focus:border-primary focus:outline-none resize-none leading-relaxed shadow-inner relative z-20 pointer-events-auto"
                       />
                     </DissectionScanner>
                   </div>
@@ -1383,12 +1386,21 @@ export function LandingPage() {
                     type="button"
                     onClick={handleDemoSubmit}
                     disabled={demoLoading}
-                    className="w-full py-2.5 rounded-xl bg-primary text-surface-dim font-mono font-bold text-xs shadow-[0_0_16px_rgba(167,139,250,0.4)] hover:bg-primary-fixed transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="relative z-20 pointer-events-auto w-full py-2.5 rounded-xl bg-primary text-surface-dim font-mono font-bold text-xs shadow-[0_0_16px_rgba(167,139,250,0.4)] hover:bg-primary-fixed transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    style={{
+                      transform: !is2D ? 'translateZ(12px)' : 'none',
+                      transformStyle: !is2D ? 'preserve-3d' : 'flat',
+                    }}
                   >
                     {demoLoading ? (
                       <>
                         <span className="w-3.5 h-3.5 border-2 border-surface-dim border-t-transparent rounded-full animate-spin"></span>
                         <span>PARSING LOG STREAM...</span>
+                      </>
+                    ) : demoResult ? (
+                      <>
+                        <span className="material-symbols-outlined text-[16px]">refresh</span>
+                        <span>RE-ANALYZE STREAM</span>
                       </>
                     ) : (
                       <>
@@ -1404,7 +1416,7 @@ export function LandingPage() {
               {/* Column 2: ULPF Transform Engine Dynamic Output */}
               <InView className="xl:col-span-4 h-full">
                 <TiltCard3D disabled={is2D}>
-                  <SpotlightCard spotlightColor="rgba(123, 208, 255, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-secondary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
+                  <SpotlightCard spotlightColor="rgba(123, 208, 255, 0.15)" className="h-full min-h-[460px] bg-surface-bright/90 rounded-2xl border border-secondary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
                   <div className="flex items-center justify-between pb-3 border-b border-border-muted">
                     <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
                       <span className="w-2 h-2 rounded-full bg-secondary"></span>
@@ -1476,7 +1488,7 @@ export function LandingPage() {
               {/* Column 3: Enriched XAI Threat Verdict Dynamic Output */}
               <InView className="xl:col-span-4 h-full">
                 <TiltCard3D disabled={is2D}>
-                  <SpotlightCard spotlightColor="rgba(78, 222, 163, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-tertiary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
+                  <SpotlightCard spotlightColor="rgba(78, 222, 163, 0.15)" className="h-full min-h-[460px] bg-surface-bright/90 rounded-2xl border border-tertiary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
                   <div className="flex items-center justify-between pb-3 border-b border-border-muted">
                     <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
                       <span className="w-2 h-2 rounded-full bg-tertiary"></span>
