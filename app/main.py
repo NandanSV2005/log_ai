@@ -40,6 +40,7 @@ app = FastAPI(
 app.state.limiter = limiter
 
 def custom_rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
+    logger.warning(f"RateLimitExceeded handler invoked! detail={exc.detail} | client={request.client}")
     response = JSONResponse(
         {
             "detail": f"Rate limit exceeded: {exc.detail}. Too many requests, please slow down and try again later.",

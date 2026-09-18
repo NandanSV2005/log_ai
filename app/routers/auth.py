@@ -1,5 +1,6 @@
 import os
 import datetime
+import logging
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
@@ -7,10 +8,14 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 import bcrypt
 from jose import JWTError, jwt
+from slowapi.util import get_remote_address
 
 from app.config import settings
 from app.database import get_db, User
 from app.limiter import limiter
+
+logger = logging.getLogger("log_ai.auth")
+diagnostic_ip_logs = []
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
@@ -22,6 +27,10 @@ def get_secret_key() -> str:
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 router = APIRouter(prefix="/api/v1/auth", tags=["Authentication"])
+
+@router.get("/diagnostic-logs")
+async def get_diagnostic_logs():
+    return {"logs": diagnostic_ip_logs}
 
 class UserAuthRequest(BaseModel):
     username: str
@@ -111,6 +120,17 @@ async def register(request: Request, user_data: UserAuthRequest, db: Session = D
 @router.post("/login", response_model=TokenResponse)
 @limiter.limit("5/minute")
 async def login(request: Request, user_data: UserAuthRequest, db: Session = Depends(get_db)):
+    detected_ip = get_remote_address(request)
+    logger.info(f"Login attempt from detected IP: {detected_ip}")
+    extra_msg = f"DEBUG HEADERS: client.host={request.client.host if request.client else None} | x-forwarded-for={request.headers.get('x-forwarded-for')} | x-real-ip={request.headers.get('x-real-ip')}"
+    logger.info(extra_msg)
+    diagnostic_ip_logs.append({
+        "detected_ip": detected_ip,
+        "client_host": request.client.host if request.client else None,
+        "x_forwarded_for": request.headers.get("x-forwarded-for"),
+        "x_real_ip": request.headers.get("x-real-ip"),
+    })
+
     username = user_data.username.strip()
     password = user_data.password
 
