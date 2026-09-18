@@ -4,13 +4,14 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from slowapi.errors import RateLimitExceeded
 from slowapi import _rate_limit_exceeded_handler
 
 from app.config import settings
 from app.routers import ingest, dashboard, auth, copilot, demo
 from app.services.queue import queue_manager
+from app.limiter import limiter
 
 logging.basicConfig(
     level=logging.INFO,
@@ -36,8 +37,22 @@ app = FastAPI(
 )
 
 # Register Rate Limiter State & Exception Handler
-app.state.limiter = ingest.limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.state.limiter = limiter
+
+def custom_rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
+    response = JSONResponse(
+        {
+            "detail": f"Rate limit exceeded: {exc.detail}. Too many requests, please slow down and try again later.",
+            "error": f"Rate limit exceeded: {exc.detail}",
+        },
+        status_code=429,
+    )
+    response = request.app.state.limiter._inject_headers(
+        response, request.state.view_rate_limit
+    )
+    return response
+
+app.add_exception_handler(RateLimitExceeded, custom_rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,

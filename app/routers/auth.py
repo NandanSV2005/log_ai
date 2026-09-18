@@ -1,7 +1,7 @@
 import os
 import datetime
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -10,6 +10,7 @@ from jose import JWTError, jwt
 
 from app.config import settings
 from app.database import get_db, User
+from app.limiter import limiter
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
@@ -75,7 +76,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     return user
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
-async def register(user_data: UserAuthRequest, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+async def register(request: Request, user_data: UserAuthRequest, db: Session = Depends(get_db)):
     username = user_data.username.strip()
     password = user_data.password
 
@@ -107,7 +109,8 @@ async def register(user_data: UserAuthRequest, db: Session = Depends(get_db)):
     }
 
 @router.post("/login", response_model=TokenResponse)
-async def login(user_data: UserAuthRequest, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+async def login(request: Request, user_data: UserAuthRequest, db: Session = Depends(get_db)):
     username = user_data.username.strip()
     password = user_data.password
 
