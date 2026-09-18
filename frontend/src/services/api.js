@@ -28,7 +28,7 @@ async function handleResponse(response) {
       try {
         const errorData = JSON.parse(text);
         if (response.status === 429) {
-          errorDetail = errorData.detail || errorData.error || 'Too many attempts. Rate limit exceeded. Please wait a moment before trying again.';
+          errorDetail = errorData.detail || errorData.error || 'Too many attempts. Please wait a minute before trying again.';
         } else if (typeof errorData.detail === 'string') {
           errorDetail = errorData.detail;
         } else if (Array.isArray(errorData.detail)) {
@@ -44,14 +44,14 @@ async function handleResponse(response) {
         }
       } catch (parseErr) {
         if (response.status === 429) {
-          errorDetail = 'Too many attempts. Rate limit exceeded. Please wait a moment before trying again.';
+          errorDetail = 'Too many attempts. Please wait a minute before trying again.';
         } else if (text) {
           errorDetail = text;
         }
       }
     } catch (readErr) {
       errorDetail = response.status === 429
-        ? 'Too many attempts. Rate limit exceeded. Please wait a moment before trying again.'
+        ? 'Too many attempts. Please wait a minute before trying again.'
         : `HTTP ${response.status} (${response.statusText})`;
     }
     throw new Error(typeof errorDetail === 'string' ? errorDetail : `HTTP ${response.status}`);

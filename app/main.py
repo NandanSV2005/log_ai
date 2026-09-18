@@ -40,9 +40,17 @@ app = FastAPI(
 app.state.limiter = limiter
 
 def custom_rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
+    path = request.url.path.lower()
+    if "login" in path:
+        detail_msg = "Too many login attempts. Please wait a minute before trying again."
+    elif "register" in path:
+        detail_msg = "Too many registration attempts. Please wait a minute before trying again."
+    else:
+        detail_msg = "Too many requests. Please wait a moment before trying again."
+
     response = JSONResponse(
         {
-            "detail": f"Rate limit exceeded: {exc.detail}. Too many requests, please slow down and try again later.",
+            "detail": detail_msg,
             "error": f"Rate limit exceeded: {exc.detail}",
         },
         status_code=429,
