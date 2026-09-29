@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
-import { StreamInspectionModal } from '../components/inspection/StreamInspectionModal';
 
 export function DashboardPage({ pollingInterval }) {
   const navigate = useNavigate();
@@ -16,9 +15,6 @@ export function DashboardPage({ pollingInterval }) {
   const [savedReports, setSavedReports] = useState([]);
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [incidentDetailEvents, setIncidentDetailEvents] = useState([]);
-
-  // Inspection Modal State
-  const [inspectingStreamEvent, setInspectingStreamEvent] = useState(null);
   
   // Ingestion State
   const [selectedFile, setSelectedFile] = useState(null);
@@ -475,10 +471,14 @@ export function DashboardPage({ pollingInterval }) {
                           </td>
                           <td className="py-2.5 px-3 text-right whitespace-nowrap">
                             <button
-                              onClick={() => setInspectingStreamEvent(evt)}
-                              className="btn-secondary px-3 py-1.5 rounded text-[10px] font-bold touch-target"
+                              onClick={() => {
+                                const streamId = evt.id || evt.raw_event_hash || evt.source_ip || `stream_${idx}`;
+                                navigate(`/stream/${encodeURIComponent(streamId)}`, { state: { event: evt } });
+                              }}
+                              className="btn-secondary px-3 py-1.5 rounded text-[10px] font-bold touch-target flex items-center gap-1 ml-auto"
                             >
-                              Inspect Stream
+                              <span>Inspect Stream</span>
+                              <span className="material-symbols-outlined text-xs">arrow_forward</span>
                             </button>
                           </td>
                         </tr>
@@ -609,14 +609,6 @@ export function DashboardPage({ pollingInterval }) {
             )}
           </div>
         </div>
-      )}
-
-      {/* Stream Inspection Modal Window */}
-      {inspectingStreamEvent && (
-        <StreamInspectionModal
-          event={inspectingStreamEvent}
-          onClose={() => setInspectingStreamEvent(null)}
-        />
       )}
 
     </div>

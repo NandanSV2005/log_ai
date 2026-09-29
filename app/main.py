@@ -132,8 +132,24 @@ async def get_dashboard_ui():
 async def get_log_explorer_ui():
     return serve_spa_page()
 
+@app.get("/events/{hash}", response_class=FileResponse, tags=["Event Inspection UI"])
+async def get_event_detail_ui(hash: str):
+    return serve_spa_page()
+
+@app.get("/stream/{stream_id}", response_class=FileResponse, tags=["Stream Inspection UI"])
+async def get_stream_detail_ui(stream_id: str):
+    return serve_spa_page()
+
 @app.get("/forensics", response_class=FileResponse, tags=["Forensics UI"])
 async def get_forensics_ui():
+    return serve_spa_page()
+
+@app.get("/forensics/investigation/{incident_id}", response_class=FileResponse, tags=["Forensics UI"])
+async def get_investigation_detail_ui(incident_id: str):
+    return serve_spa_page()
+
+@app.get("/rule-studio", response_class=FileResponse, tags=["Rule Studio UI"])
+async def get_rule_studio_ui():
     return serve_spa_page()
 
 @app.get("/threat-intel", response_class=FileResponse, tags=["Threat Intel UI"])

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
-import { EventInspectionModal } from '../components/inspection/EventInspectionModal';
 
 export function LogExplorerPage() {
   const navigate = useNavigate();
@@ -13,7 +12,6 @@ export function LogExplorerPage() {
     INFO: true,
   });
   const [expandedEventId, setExpandedEventId] = useState(null);
-  const [inspectingElementEvent, setInspectingElementEvent] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 15;
@@ -332,10 +330,14 @@ export function LogExplorerPage() {
                       </td>
                       <td className="py-3.5 px-3 text-text-right whitespace-nowrap">
                         <button
-                          onClick={() => setInspectingElementEvent(evt)}
-                          className="btn-secondary px-3 py-1.5 rounded-lg text-[10px] font-bold touch-target"
+                          onClick={() => {
+                            const hashVal = evt.raw_event_hash || evt.payload_hash || evt.id || `evt_${idx}`;
+                            navigate(`/events/${encodeURIComponent(hashVal)}`, { state: { event: evt } });
+                          }}
+                          className="btn-secondary px-3 py-1.5 rounded-lg text-[10px] font-bold touch-target flex items-center gap-1 ml-auto"
                         >
-                          Inspect Element
+                          <span>Inspect</span>
+                          <span className="material-symbols-outlined text-xs">arrow_forward</span>
                         </button>
                       </td>
                     </tr>
@@ -369,14 +371,6 @@ export function LogExplorerPage() {
           </button>
         </div>
       </div>
-
-      {/* Event Inspection Modal Window */}
-      {inspectingElementEvent && (
-        <EventInspectionModal
-          event={inspectingElementEvent}
-          onClose={() => setInspectingElementEvent(null)}
-        />
-      )}
 
     </div>
   );
