@@ -132,7 +132,7 @@ class IncidentEngine:
         Process a single UnifiedEvent and fold it into an existing active incident or create a new one.
         Updates incident metrics incrementally in O(1) time.
         """
-        source_ip = event.source_ip or "0.0.0.0"
+        source_ip = event.source_ip or "Local Host"
         event_owner = getattr(event, "owner_username", None)
         event_ts_str = _format_timestamp(event.timestamp)
         event_ts_val = _parse_timestamp(event.timestamp)
@@ -170,6 +170,7 @@ class IncidentEngine:
                 if event_hash and event_hash not in existing_incident.event_hashes:
                     existing_incident.event_hashes.append(event_hash)
 
+                event.incident_id = existing_incident.incident_id
                 return existing_incident
 
         # Otherwise create a new Incident
@@ -196,6 +197,7 @@ class IncidentEngine:
 
         self.incidents[incident_id] = new_incident
         self.active_ip_incidents[active_key] = incident_id
+        event.incident_id = incident_id
 
         return new_incident
 

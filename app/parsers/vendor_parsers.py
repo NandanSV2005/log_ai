@@ -44,10 +44,16 @@ class CiscoASAParser(BaseVendorParser):
         # Action determination
         action = "deny" if any(w in msg.lower() for w in ["deny", "denied"]) else "permit"
         
-        # IP extraction
+        # IP and Port extraction
         ips = self.IP_PORT_PATTERN.findall(msg)
         src_ip = ips[0][0] if len(ips) >= 1 else None
+        src_port = int(ips[0][1]) if len(ips) >= 1 and ips[0][1] else None
         dst_ip = ips[1][0] if len(ips) >= 2 else None
+        dst_port = int(ips[1][1]) if len(ips) >= 2 and ips[1][1] else None
+
+        # Protocol extraction
+        raw_lower = raw_line.lower()
+        protocol = "TCP" if "tcp" in raw_lower else "UDP" if "udp" in raw_lower else "ICMP" if "icmp" in raw_lower else "IP"
 
         # ACL Name extraction if present
         acl_match = re.search(r'access-group\s+"([^"]+)"', msg)
@@ -57,6 +63,9 @@ class CiscoASAParser(BaseVendorParser):
             timestamp=datetime.datetime.now(datetime.timezone.utc).isoformat(),
             source_ip=src_ip,
             destination_ip=dst_ip,
+            src_port=src_port,
+            dst_port=dst_port,
+            protocol=protocol,
             event_type=f"cisco_asa:{action}:{acl_name}",
             severity=severity,
             original_event=raw_line,
@@ -76,6 +85,9 @@ class FortinetParser(BaseVendorParser):
 
         src_ip = kv.get("srcip") or kv.get("src")
         dst_ip = kv.get("dstip") or kv.get("dst")
+        src_port = int(kv.get("srcport")) if kv.get("srcport") and kv.get("srcport").isdigit() else None
+        dst_port = int(kv.get("dstport")) if kv.get("dstport") and kv.get("dstport").isdigit() else None
+        proto = kv.get("proto") or kv.get("protocol") or kv.get("service") or ("TCP" if "tcp" in raw_line.lower() else "UDP" if "udp" in raw_line.lower() else None)
         action = kv.get("action") or "traffic"
         policy_id = kv.get("policyid") or kv.get("policy_id") or "0"
 
@@ -97,6 +109,9 @@ class FortinetParser(BaseVendorParser):
             timestamp=timestamp,
             source_ip=src_ip,
             destination_ip=dst_ip,
+            src_port=src_port,
+            dst_port=dst_port,
+            protocol=proto,
             event_type=event_type,
             severity=severity,
             original_event=raw_line,
@@ -122,6 +137,9 @@ class SuricataParser(BaseVendorParser):
             timestamp=data.get("timestamp") or datetime.datetime.now(datetime.timezone.utc).isoformat(),
             source_ip=data.get("src_ip"),
             destination_ip=data.get("dest_ip"),
+            src_port=data.get("src_port"),
+            dst_port=data.get("dest_port"),
+            protocol=data.get("proto"),
             event_type=f"suricata:{signature}",
             severity=severity,
             original_event=raw_line,
@@ -145,6 +163,8 @@ class PfSenseParser(BaseVendorParser):
         protocol = cols[16] if len(cols) > 16 else "ip"
         src_ip = cols[18] if len(cols) > 18 else None
         dst_ip = cols[19] if len(cols) > 19 else None
+        src_port = int(cols[20]) if len(cols) > 20 and cols[20].isdigit() else None
+        dst_port = int(cols[21]) if len(cols) > 21 and cols[21].isdigit() else None
 
         severity = "Warning" if action == "block" else "Informational"
 
@@ -152,6 +172,9 @@ class PfSenseParser(BaseVendorParser):
             timestamp=datetime.datetime.now(datetime.timezone.utc).isoformat(),
             source_ip=src_ip,
             destination_ip=dst_ip,
+            src_port=src_port,
+            dst_port=dst_port,
+            protocol=protocol.upper(),
             event_type=f"pfsense:{action}:{interface}:{protocol}",
             severity=severity,
             original_event=raw_line,
@@ -225,6 +248,9 @@ class CEFVendorParser(BaseVendorParser):
 
         src_ip = kv.get("src") or kv.get("sourceAddress") or kv.get("source_ip")
         dst_ip = kv.get("dst") or kv.get("destinationAddress") or kv.get("destination_ip")
+        src_port = int(kv.get("spt")) if kv.get("spt") and kv.get("spt").isdigit() else None
+        dst_port = int(kv.get("dpt")) if kv.get("dpt") and kv.get("dpt").isdigit() else None
+        proto = kv.get("proto") or kv.get("protocol") or None
         ts = kv.get("rt") or datetime.datetime.now(datetime.timezone.utc).isoformat()
 
         sev_raw = gd.get("severity", "Informational").upper()
@@ -235,6 +261,9 @@ class CEFVendorParser(BaseVendorParser):
             timestamp=ts,
             source_ip=src_ip,
             destination_ip=dst_ip,
+            src_port=src_port,
+            dst_port=dst_port,
+            protocol=proto,
             event_type=gd.get("name") or gd.get("product") or "cef_event",
             severity=severity,
             original_event=raw_line,

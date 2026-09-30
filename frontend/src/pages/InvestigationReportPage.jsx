@@ -109,17 +109,17 @@ export function InvestigationReportPage() {
   const displayIncident = incidentData || {
     incident_id: incidentId,
     status: status,
-    source_ip: selectedEvent?.source_ip || '203.0.113.45',
+    source_ip: selectedEvent?.source_ip || 'Local Host',
     threat_score: selectedEvent?.threat_score || 88.5,
     event_count: events.length || 7,
     mitre_tactics: selectedEvent?.mitre_tactic || 'T1110 (Brute Force)'
   };
 
   const activeEvt = selectedEvent || events[0] || {
-    raw: '%ASA-4-106023: Deny tcp src outside:285.220.100.22/51422 dst inside:10.0.0.10/80 by access-group "outside_acl"',
-    source_ip: displayIncident.source_ip || '203.0.113.45',
-    destination_ip: '10.0.0.10',
-    event_type: 'cisco_asa:deny:outside_acl',
+    raw: 'No raw wire telemetry payload available.',
+    source_ip: displayIncident.source_ip || 'Local Host',
+    destination_ip: 'Local Interface',
+    event_type: 'system_event',
     timestamp: '2026-09-08 11:42:01',
     threat_level: 'HIGH',
     threat_score: 88.5,
@@ -154,14 +154,14 @@ export function InvestigationReportPage() {
     severity_name: activeEvt.threat_level || 'HIGH',
     time: activeEvt.timestamp || new Date().toISOString(),
     src_endpoint: {
-      ip: activeEvt.source_ip || '203.0.113.45',
-      port: activeEvt.src_port || 51422,
-      domain: 'outside.network'
+      ip: activeEvt.source_ip || 'Local Host',
+      port: activeEvt.src_port || (activeEvt.source_ip ? 51422 : null),
+      domain: activeEvt.source_ip ? 'outside.network' : 'local.host'
     },
     dst_endpoint: {
-      ip: activeEvt.destination_ip || '10.0.0.10',
-      port: activeEvt.dst_port || 80,
-      interface: 'inside_acl'
+      ip: activeEvt.destination_ip || (activeEvt.source_ip ? '10.0.0.10' : 'Local Host'),
+      port: activeEvt.dst_port || (activeEvt.source_ip ? 80 : null),
+      interface: activeEvt.source_ip ? 'inside_acl' : 'local_ipc'
     },
     threat_intel: {
       score: activeEvt.threat_score || 88.5,
@@ -430,11 +430,15 @@ export function InvestigationReportPage() {
               <div className="space-y-2 text-xs">
                 <div className="flex justify-between py-1.5 border-b border-border-muted/40">
                   <span className="text-text-dim uppercase">SOURCE SOCKET</span>
-                  <span className="font-bold text-text-primary">{activeEvt.source_ip || '203.0.113.45'}:51422</span>
+                  <span className="font-bold text-text-primary">
+                    {activeEvt.source_ip ? `${activeEvt.source_ip}:${activeEvt.src_port || 51422}` : 'Local Host (Non-Socket)'}
+                  </span>
                 </div>
                 <div className="flex justify-between py-1.5 border-b border-border-muted/40">
                   <span className="text-text-dim uppercase">DESTINATION SOCKET</span>
-                  <span className="font-bold text-text-primary">{activeEvt.destination_ip || '10.0.0.10'}:80</span>
+                  <span className="font-bold text-text-primary">
+                    {activeEvt.destination_ip ? `${activeEvt.destination_ip}:${activeEvt.dst_port || 80}` : 'Local System'}
+                  </span>
                 </div>
                 <div className="flex justify-between py-1.5 border-b border-border-muted/40">
                   <span className="text-text-dim uppercase">PROTOCOL</span>

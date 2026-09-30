@@ -19,6 +19,22 @@ class UnifiedEvent(BaseModel):
         None,
         description="Destination IPv4/IPv6 address",
     )
+    src_port: Optional[int] = Field(
+        None,
+        description="Source transport port number",
+    )
+    dst_port: Optional[int] = Field(
+        None,
+        description="Destination target port number",
+    )
+    protocol: Optional[str] = Field(
+        None,
+        description="Network transport protocol (e.g., TCP, UDP, ICMP)",
+    )
+    incident_id: Optional[str] = Field(
+        None,
+        description="Correlated incident cluster identifier",
+    )
     event_type: str = Field(
         default="unclassified",
         description="Categorized event classification type",

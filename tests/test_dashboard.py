@@ -235,6 +235,34 @@ async def test_update_event_status_not_found(client: AsyncClient, auth_headers: 
     assert res.status_code == 404
     assert "not found" in res.json()["detail"]
 
+@pytest.mark.asyncio
+async def test_get_single_event_success(client: AsyncClient, auth_headers: dict):
+    payload = "<134>1 2026-08-26T12:00:00Z auth-server sshd 5000 - - Single event test 198.51.100.99\n"
+    headers = {"Content-Type": "text/plain", **auth_headers}
+    await client.post("/api/v1/ingest", content=payload.encode("utf-8"), headers=headers)
+
+    for _ in range(20):
+        if list(normalized_storage_manager.storage_dir.glob("normalized_*.jsonl")):
+            break
+        await asyncio.sleep(0.05)
+
+    recent_res = await client.get("/api/v1/dashboard/events/recent?limit=5", headers=auth_headers)
+    events = recent_res.json().get("events", [])
+    assert len(events) > 0
+
+    target_hash = events[0].get("raw_event_hash")
+    get_res = await client.get(f"/api/v1/dashboard/event/{target_hash}", headers=auth_headers)
+    assert get_res.status_code == 200
+    ev = get_res.json()
+    assert ev["raw_event_hash"] == target_hash
+    assert "xai_explanation" in ev
+
+@pytest.mark.asyncio
+async def test_get_single_event_not_found(client: AsyncClient, auth_headers: dict):
+    res = await client.get("/api/v1/dashboard/event/non_existent_hash_88888888", headers=auth_headers)
+    assert res.status_code == 404
+    assert "not found" in res.json()["detail"]
+
 
 @pytest.mark.asyncio
 async def test_simulate_tampering_endpoint(client: AsyncClient, auth_headers: dict):

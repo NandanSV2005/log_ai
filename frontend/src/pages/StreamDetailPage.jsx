@@ -57,9 +57,9 @@ export function StreamDetailPage() {
     event?.original_event ||
     event?.raw ||
     event?.payload ||
-    `%ASA-4-106023: Deny tcp src outside:${event?.source_ip || '203.0.113.45'}/51422 dst inside:${event?.destination_ip || '10.0.0.10'}/80 by access-group "outside_acl"`;
+    'No raw payload available for this stream.';
 
-  const incidentId = event?.incident_id || event?.incidentId || event?.id || 'inc_a81b5b';
+  const incidentId = event?.incident_id || event?.incidentId || event?.id || 'inc_host_system';
 
   const handleCopyRaw = () => {
     navigator.clipboard.writeText(rawLogText);
@@ -225,7 +225,7 @@ export function StreamDetailPage() {
             <span className="text-xs text-text-dim">/ 100 Index</span>
           </div>
           <span className="text-[11px] text-text-muted block truncate">
-            Origin: {event?.source_ip || '203.0.113.45'}
+            Origin: {event?.source_ip || 'Local Host'}
           </span>
         </div>
       </div>
@@ -291,7 +291,7 @@ export function StreamDetailPage() {
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border-muted/60 pb-3">
                 <div className="space-y-0.5">
                   <div className="text-xs font-bold text-text-primary uppercase tracking-wider">
-                    Recent Activity in Stream ({event?.source_ip || '203.0.113.45'})
+                    Recent Activity in Stream ({event?.source_ip || 'Local Host'})
                   </div>
                   <div className="text-[11px] text-text-muted">
                     Telemetry events sequentially correlated across this channel.
@@ -406,13 +406,13 @@ export function StreamDetailPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div className="p-3.5 rounded-xl bg-surface border border-border-muted space-y-1">
                   <span className="text-[10px] text-text-dim uppercase font-bold block">SOURCE IP ADDRESS</span>
-                  <span className="font-bold text-rose-400 text-sm block truncate">{event?.source_ip || '203.0.113.45'}</span>
-                  <span className="text-[10px] text-text-muted block">External Ingress Node</span>
+                  <span className="font-bold text-rose-400 text-sm block truncate">{event?.source_ip || 'Local Host'}</span>
+                  <span className="text-[10px] text-text-muted block">{event?.source_ip ? 'External Ingress Node' : 'Non-Socket Local Host'}</span>
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-surface border border-border-muted space-y-1">
                   <span className="text-[10px] text-text-dim uppercase font-bold block">DESTINATION IP ADDRESS</span>
-                  <span className="font-bold text-text-primary text-sm block truncate">{event?.destination_ip || '10.0.0.10'}</span>
+                  <span className="font-bold text-text-primary text-sm block truncate">{event?.destination_ip || (event?.source_ip ? '10.0.0.10' : 'Local Interface')}</span>
                   <span className="text-[10px] text-text-muted block">Protected DMZ Node</span>
                 </div>
 

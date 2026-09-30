@@ -123,19 +123,44 @@ class DynamicParser:
                     break
 
         # 4. Event Type extraction
+        service_tag = None
+        service_match = re.search(r'\b([a-zA-Z0-9_\-\.]+)(?:\[\d+\])?:\s', raw_line)
+        if service_match:
+            cand = service_match.group(1).lower()
+            if cand in ["sudo", "sshd", "su", "pam", "cron", "systemd", "kernel", "auditd", "login", "ufw"]:
+                service_tag = f"{cand}:exec" if cand in ["sudo", "su"] else f"{cand}:auth" if cand in ["sshd", "pam", "login"] else f"{cand}:event"
+
         event_type = (
             kv.get("event_type")
             or kv.get("event")
+            or service_tag
             or kv.get("service")
             or kv.get("act")
             or kv.get("action")
             or "unstructured_log"
         )
 
+        # 5. Port and protocol extraction if IPs are present
+        src_port = None
+        dst_port = None
+        protocol = None
+        if src_ip or dst_ip:
+            raw_spt = kv.get("src_port") or kv.get("spt") or kv.get("sport")
+            raw_dpt = kv.get("dst_port") or kv.get("dpt") or kv.get("dport")
+            src_port = int(raw_spt) if raw_spt and str(raw_spt).isdigit() else None
+            dst_port = int(raw_dpt) if raw_dpt and str(raw_dpt).isdigit() else None
+            protocol = kv.get("proto") or kv.get("protocol")
+            if not protocol:
+                raw_lower = raw_line.lower()
+                protocol = "TCP" if "tcp" in raw_lower else "UDP" if "udp" in raw_lower else "ICMP" if "icmp" in raw_lower else None
+
         return UnifiedEvent(
             timestamp=timestamp,
             source_ip=src_ip,
             destination_ip=dst_ip,
+            src_port=src_port,
+            dst_port=dst_port,
+            protocol=protocol,
             event_type=event_type,
             severity=severity,
             original_event=raw_line,
@@ -147,4 +172,14 @@ class DynamicParser:
             k, v = match.groups()
             v_clean = v.strip("\"'")
             results[k] = v_clean
+
+        # Also handle semicolon-delimited key=value pairs (e.g., sudo audit logs)
+        if ";" in text:
+            for part in text.split(";"):
+                if "=" in part:
+                    k_part, v_part = part.split("=", 1)
+                    k_clean = k_part.strip().split()[-1] if k_part.strip() else ""
+                    if k_clean and k_clean.replace("_", "").isalnum():
+                        results[k_clean] = v_part.strip().strip("\"'")
+
         return results

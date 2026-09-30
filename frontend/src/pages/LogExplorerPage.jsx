@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import { getOcsfClassInfo } from './EventDetailPage';
 
 export function LogExplorerPage() {
   const navigate = useNavigate();
@@ -294,10 +295,11 @@ export function LogExplorerPage() {
               </thead>
               <tbody className="divide-y divide-border-muted">
                 {paginatedEvents.map((evt, idx) => {
-                  const ocsfClass = evt.event_type && evt.event_type.includes('alert') ? 'Class 2001: Security Finding' : 'Class 4001: Network Activity';
-                  const dstIp = evt.destination_ip || '10.0.0.10';
+                  const ocsfInfo = getOcsfClassInfo(evt);
+                  const ocsfClass = ocsfInfo.className;
+                  const hasIp = Boolean(evt.source_ip || evt.destination_ip);
                   return (
-                    <tr key={evt.raw_event_hash || idx} className="hover:bg-surface-hover transition-colors">
+                    <tr key={`${evt.raw_event_hash || 'evt'}_${idx}`} className="hover:bg-surface-hover transition-colors">
                       <td className="py-3.5 px-3 text-text-muted text-[11px] whitespace-nowrap">
                         {evt.timestamp || '2026-09-08 16:10:43'}
                       </td>
@@ -307,9 +309,18 @@ export function LogExplorerPage() {
                         </span>
                       </td>
                       <td className="py-3.5 px-3 text-text-primary font-bold whitespace-nowrap">
-                        <span className="text-rose-400">{evt.source_ip || '203.0.113.45'}</span>
-                        <span className="text-text-muted px-1.5">&rarr;</span>
-                        <span className="text-text-muted">{dstIp}:80</span>
+                        {hasIp ? (
+                          <>
+                            <span className="text-rose-400">{evt.source_ip || 'Any'}</span>
+                            {evt.src_port && <span className="text-text-muted text-[10px]">:{evt.src_port}</span>}
+                            <span className="text-text-muted px-1.5">&rarr;</span>
+                            <span className="text-text-muted">{evt.destination_ip || 'Local Interface'}{evt.dst_port ? `:${evt.dst_port}` : ''}</span>
+                          </>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded bg-surface border border-border-muted text-[10px] text-emerald-400 font-bold">
+                            Local Host (No Socket)
+                          </span>
+                        )}
                       </td>
                       <td className="py-3.5 px-3 whitespace-nowrap">
                         <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold ${

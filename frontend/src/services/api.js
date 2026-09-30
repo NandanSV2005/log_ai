@@ -110,6 +110,13 @@ export const api = {
     return await handleResponse(res);
   },
 
+  async getEvent(eventId) {
+    const res = await fetch(`${API_BASE_URL}/api/v1/dashboard/event/${encodeURIComponent(eventId)}`, {
+      headers: getAuthHeaders(),
+    });
+    return await handleResponse(res);
+  },
+
   async getIncidents(limit = 50) {
     const res = await fetch(`${API_BASE_URL}/api/v1/dashboard/incidents?limit=${limit}`, {
       headers: getAuthHeaders(),

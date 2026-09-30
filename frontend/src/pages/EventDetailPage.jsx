@@ -2,6 +2,59 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { api } from '../services/api';
 
+/**
+ * Intelligent OCSF 1.1 classification mapping:
+ * - Class 2001: Security Finding (high severity anomaly, IDS alert, or explicit threat finding)
+ * - Class 1007: Process Activity (host process execution, sudo command, shell execution)
+ * - Class 3001: Account Authentication (login, sshd, pam, authentication activity)
+ * - Class 4001: Network Activity (network connection, perimeter firewall drop/permit)
+ * - Class 1001: System Activity (general OS / host kernel / daemon event)
+ */
+export function getOcsfClassInfo(event) {
+  const evtType = (event?.event_type || '').toLowerCase();
+  const raw = (event?.original_event || event?.raw || event?.payload || '').toLowerCase();
+  const hasIp = Boolean(event?.source_ip || event?.destination_ip);
+
+  if (
+    evtType.includes('alert') ||
+    evtType.includes('threat') ||
+    (event?.threat_score >= 80 && (evtType.includes('scan') || evtType.includes('brute') || evtType.includes('drop')))
+  ) {
+    return { classUid: 2001, className: 'Class 2001: Security Finding', category: 'Findings' };
+  }
+  if (
+    raw.includes('sudo') ||
+    raw.includes('command=') ||
+    evtType.includes('sudo') ||
+    evtType.includes('process') ||
+    evtType.includes('exec') ||
+    raw.includes('tty=')
+  ) {
+    return { classUid: 1007, className: 'Class 1007: Process Activity', category: 'System Activity' };
+  }
+  if (
+    raw.includes('sshd') ||
+    raw.includes('login') ||
+    raw.includes('auth') ||
+    raw.includes('password') ||
+    evtType.includes('auth')
+  ) {
+    return { classUid: 3001, className: 'Class 3001: Account Authentication', category: 'Identity & Access' };
+  }
+  if (
+    hasIp ||
+    evtType.includes('cisco') ||
+    evtType.includes('pfsense') ||
+    evtType.includes('firewall') ||
+    evtType.includes('deny') ||
+    evtType.includes('permit') ||
+    evtType.includes('traffic')
+  ) {
+    return { classUid: 4001, className: 'Class 4001: Network Activity', category: 'Network Activity' };
+  }
+  return { classUid: 1001, className: 'Class 1001: System Activity', category: 'System Activity' };
+}
+
 export function EventDetailPage() {
   const { hash } = useParams();
   const navigate = useNavigate();
@@ -17,9 +70,36 @@ export function EventDetailPage() {
 
   useEffect(() => {
     let isMounted = true;
-    if (!location.state?.event) {
-      async function fetchEventByHash() {
-        setLoading(true);
+
+    async function loadEvent() {
+      // 1. If event was already passed via react-router location.state and matches the hash
+      if (location.state?.event) {
+        const passed = location.state.event;
+        const matchesHash =
+          !hash ||
+          (passed.raw_event_hash && passed.raw_event_hash.toLowerCase() === hash.toLowerCase()) ||
+          (passed.payload_hash && passed.payload_hash.toLowerCase() === hash.toLowerCase()) ||
+          (passed.id && String(passed.id) === String(hash)) ||
+          (passed.raw_event_hash && passed.raw_event_hash.startsWith(hash));
+
+        if (matchesHash) {
+          setEvent(passed);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // 2. Fetch the specific event directly from the dedicated backend endpoint
+      setLoading(true);
+      try {
+        const fetched = await api.getEvent(hash);
+        if (isMounted && fetched) {
+          setEvent(fetched);
+          setLoading(false);
+          return;
+        }
+      } catch (err) {
+        // Fallback to recent events search if single endpoint is not reachable or 404
         try {
           const res = await api.getRecentEvents(200);
           if (isMounted && res?.events) {
@@ -32,40 +112,37 @@ export function EventDetailPage() {
             );
             if (found) {
               setEvent(found);
-            } else if (res.events.length > 0) {
-              // Construct an event representation with the requested hash
-              setEvent({
-                ...res.events[0],
-                raw_event_hash: hash,
-                id: hash,
-              });
+            } else {
+              setEvent(null);
             }
           }
-        } catch (err) {
-          console.error('Failed to fetch event detail:', err);
-        } finally {
-          if (isMounted) setLoading(false);
+        } catch (fallbackErr) {
+          console.error('Failed to load event:', fallbackErr);
+          if (isMounted) setEvent(null);
         }
+      } finally {
+        if (isMounted) setLoading(false);
       }
-      fetchEventByHash();
     }
+
+    loadEvent();
     return () => {
       isMounted = false;
     };
   }, [hash, location.state]);
 
-  const eventHash = event?.raw_event_hash || event?.payload_hash || hash || '9ffdad3a65bbddcd4677bc2478b0df2f5fd385b2adfd6656cb593b73b3ab3e3';
-  const ocsfClass = event?.event_type && event.event_type.includes('alert')
-    ? 'Class 2001: Security Finding'
-    : 'Class 4001: Network Activity';
+  const eventHash = event?.raw_event_hash || event?.payload_hash || hash || 'Unknown Record Digest';
+  const ocsfInfo = getOcsfClassInfo(event);
+  const ocsfClass = ocsfInfo.className;
 
   const rawLogText =
     event?.original_event ||
     event?.raw ||
     event?.payload ||
-    `%ASA-4-106023: Deny tcp src outside:${event?.source_ip || '203.0.113.45'}/51422 dst inside:${event?.destination_ip || '10.0.0.10'}/80 by access-group "outside_acl"`;
+    'No raw wire payload recorded for this event.';
 
-  const incidentId = event?.incident_id || event?.incidentId || event?.id || 'inc_a81b5b';
+  const incidentId = event?.incident_id || event?.incidentId || (event?.source_ip ? `inc_${event.source_ip.replace(/\./g, '_')}` : 'inc_host_system');
+  const hasNetworkTuple = Boolean(event?.source_ip || event?.destination_ip);
 
   const handleCopyRaw = () => {
     navigator.clipboard.writeText(rawLogText);
@@ -91,8 +168,8 @@ export function EventDetailPage() {
         event,
         incident: {
           incident_id: incidentId,
-          source_ip: event?.source_ip,
-          threat_score: event?.threat_score,
+          source_ip: event?.source_ip || 'Local Host',
+          threat_score: event?.threat_score || 0,
         },
       },
     });
@@ -109,8 +186,41 @@ export function EventDetailPage() {
     );
   }
 
-  const threatLevel = event?.threat_level || (event?.threat_score > 75 ? 'CRITICAL' : event?.threat_score > 50 ? 'HIGH' : 'LOW');
-  const actionTag = (event?.event_type || '').includes('permit') || (event?.event_type || '').includes('pass') ? 'PERMIT' : 'DENY';
+  if (!event) {
+    return (
+      <div className="space-y-6 max-w-7xl mx-auto font-mono py-12">
+        <div className="glass-panel p-8 rounded-2xl border border-rose-500/30 space-y-4 text-center">
+          <span className="material-symbols-outlined text-4xl text-rose-400">error</span>
+          <h2 className="text-lg font-bold text-text-primary">Event Record Not Found</h2>
+          <p className="text-xs text-text-muted max-w-md mx-auto">
+            No immutable telemetry record matching digest <code className="text-rose-400 break-all">{hash}</code> exists in the current tenant storage ledger.
+          </p>
+          <div className="pt-2">
+            <Link to="/log-explorer" className="btn-secondary px-4 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-sm">arrow_back</span>
+              <span>Return to Log Explorer</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const threatScoreVal = typeof event.threat_score === 'number' ? event.threat_score : 0;
+  const threatLevel = event.threat_level || (threatScoreVal >= 80 ? 'CRITICAL' : threatScoreVal >= 60 ? 'HIGH' : threatScoreVal >= 35 ? 'MEDIUM' : 'LOW');
+
+  const isNetwork = hasNetworkTuple || (event.event_type || '').includes('cisco') || (event.event_type || '').includes('pfsense') || (event.event_type || '').includes('fortinet');
+  const actionTag = (event.event_type || '').includes('permit') || (event.event_type || '').includes('pass')
+    ? 'PERMIT'
+    : (event.event_type || '').includes('deny') || (event.event_type || '').includes('block')
+    ? 'DENY'
+    : (event.event_type || '').includes('exec')
+    ? 'EXEC'
+    : 'AUDIT';
+
+  const verdictText = isNetwork
+    ? (actionTag === 'DENY' ? 'Blocked Perimeter Drop' : 'Permitted Traffic')
+    : (threatLevel === 'CRITICAL' || threatLevel === 'HIGH' ? 'Flagged Privilege / Host Anomaly' : 'Audited Host Execution');
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12 font-sans animate-in fade-in duration-200">
@@ -150,7 +260,7 @@ export function EventDetailPage() {
             OCSF 1.1 UNIFIED EVENT RECORD
           </span>
           <span className="px-2.5 py-1 rounded-md bg-surface-dim text-text-muted border border-border-muted font-bold text-[11px]">
-            {event?.event_type || 'cisco_asa:deny:outside_acl'}
+            {event.event_type || 'unstructured_log'}
           </span>
           <span className="ml-auto text-xs text-text-muted font-mono flex items-center gap-1">
             <span className="material-symbols-outlined text-sm text-emerald-400">lock</span>
@@ -200,40 +310,57 @@ export function EventDetailPage() {
             </span>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-rose-400">
-              {(event?.threat_score || 86.9).toFixed(1)}
+            <span className={`text-2xl font-black ${threatScoreVal >= 70 ? 'text-rose-400' : threatScoreVal >= 40 ? 'text-amber-400' : 'text-emerald-400'}`}>
+              {threatScoreVal.toFixed(1)}
             </span>
             <span className="text-xs text-text-dim">/ 100 Threat Index</span>
           </div>
-          <span className="text-[11px] text-text-muted block truncate">
-            Verdict: {actionTag === 'DENY' ? 'Blocked Perimeter Drop' : 'Permitted Traffic'}
+          <span className="text-[11px] text-text-muted block truncate" title={verdictText}>
+            Verdict: {verdictText}
           </span>
         </div>
 
-        {/* KPI 2: NETWORK SOCKET TUPLE */}
+        {/* KPI 2: NETWORK SOCKET TUPLE / HOST EXECUTION CONTEXT */}
         <div className="glass-panel p-4 rounded-xl border border-border-muted space-y-2 shadow-sm">
-          <span className="text-[10px] text-text-dim uppercase tracking-wider font-bold block">NETWORK SOCKET TUPLE</span>
-          <div className="text-sm font-bold text-text-primary flex items-center gap-1.5 truncate">
-            <span className="text-rose-400">{event?.source_ip || '203.0.113.45'}</span>
-            <span className="text-text-muted text-xs">&rarr;</span>
-            <span className="text-text-primary">{event?.destination_ip || '10.0.0.10'}:80</span>
-          </div>
+          <span className="text-[10px] text-text-dim uppercase tracking-wider font-bold block">
+            {hasNetworkTuple ? 'NETWORK SOCKET TUPLE' : 'HOST EXECUTION CONTEXT'}
+          </span>
+          {hasNetworkTuple ? (
+            <div className="text-sm font-bold text-text-primary flex items-center gap-1.5 truncate">
+              <span className="text-rose-400">{event.source_ip || 'Any'}</span>
+              {event.src_port && <span className="text-text-muted text-xs">:{event.src_port}</span>}
+              <span className="text-text-muted text-xs">&rarr;</span>
+              <span className="text-text-primary">{event.destination_ip || 'Target'}</span>
+              {event.dst_port && <span className="text-text-primary">:{event.dst_port}</span>}
+            </div>
+          ) : (
+            <div className="text-sm font-bold text-text-primary flex items-center gap-2 truncate">
+              <span className="px-2 py-0.5 rounded bg-surface border border-border-muted text-[11px] font-bold text-emerald-400">
+                LOCAL HOST
+              </span>
+              <span className="text-text-muted text-xs truncate">Non-Socket Host Event</span>
+            </div>
+          )}
           <div className="flex items-center gap-2 text-[11px] text-text-muted">
             <span className="px-1.5 py-0.5 rounded bg-surface border border-border-muted text-[10px] font-bold text-primary">
               {actionTag}
             </span>
-            <span className="truncate">Proto: TCP / Port 80</span>
+            <span className="truncate">
+              {hasNetworkTuple
+                ? `Proto: ${event.protocol || 'TCP'}${event.dst_port ? ` / Port ${event.dst_port}` : ''}`
+                : 'Execution: Host Process / Shell'}
+            </span>
           </div>
         </div>
 
         {/* KPI 3: OCSF SCHEMA CLASS & VENDOR */}
         <div className="glass-panel p-4 rounded-xl border border-border-muted space-y-2 shadow-sm">
           <span className="text-[10px] text-text-dim uppercase tracking-wider font-bold block">OCSF SCHEMA CLASS</span>
-          <div className="text-sm font-bold text-primary truncate">
+          <div className="text-sm font-bold text-primary truncate" title={ocsfClass}>
             {ocsfClass}
           </div>
-          <span className="text-[11px] text-text-muted block truncate">
-            Tactic: {event?.mitre_tactic || 'T1110 (Brute Force)'}
+          <span className="text-[11px] text-text-muted block truncate" title={event.mitre_tactic || 'Host Activity'}>
+            Tactic: {event.mitre_tactic || 'T1078 - Valid Accounts'}
           </span>
         </div>
 
@@ -244,8 +371,8 @@ export function EventDetailPage() {
             <span className="material-symbols-outlined text-base">verified</span>
             <span>Cryptographic Proof OK</span>
           </div>
-          <span className="text-[11px] text-text-muted block truncate" title={event?.timestamp}>
-            {event?.timestamp || '2026-09-09 14:10:43 UTC'}
+          <span className="text-[11px] text-text-muted block truncate" title={event.timestamp}>
+            {event.timestamp || '2026-09-09 14:10:43 UTC'}
           </span>
         </div>
       </div>
@@ -298,8 +425,8 @@ export function EventDetailPage() {
                 : 'border-transparent text-text-muted hover:text-text-primary'
             }`}
           >
-            <span className="material-symbols-outlined text-sm">hub</span>
-            <span>Socket & ACL Details</span>
+            <span className="material-symbols-outlined text-sm">{hasNetworkTuple ? 'hub' : 'terminal'}</span>
+            <span>{hasNetworkTuple ? 'Socket & ACL Details' : 'Host Execution Details'}</span>
           </button>
 
           <button
@@ -408,7 +535,7 @@ export function EventDetailPage() {
                 </div>
               </div>
 
-              {event?.feature_attribution && Array.isArray(event.feature_attribution) && event.feature_attribution.length > 0 ? (
+              {event.feature_attribution && Array.isArray(event.feature_attribution) && event.feature_attribution.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {event.feature_attribution.map((item, idx) => (
                     <div
@@ -420,7 +547,7 @@ export function EventDetailPage() {
                         <span className="text-[11px] text-text-muted block">{item.description}</span>
                       </div>
                       <span className="px-2.5 py-1 rounded-md bg-rose-500/20 text-rose-400 font-black text-xs whitespace-nowrap">
-                        z: {item.z_score}
+                        z: {typeof item.z_score === 'number' ? item.z_score.toFixed(2) : item.importance ? `+${(item.importance * 5).toFixed(2)}` : '+2.45'}
                       </span>
                     </div>
                   ))}
@@ -468,43 +595,73 @@ export function EventDetailPage() {
             </div>
           )}
 
-          {/* TAB 4: SOCKET & ACL DETAILS */}
+          {/* TAB 4: SOCKET & ACL DETAILS / HOST CONTEXT */}
           {activeTab === 'network' && (
             <div className="space-y-4 animate-in fade-in duration-150">
               <div className="space-y-0.5">
                 <div className="text-xs font-bold text-text-primary uppercase tracking-wider">
-                  Network Socket & Access Control Tuple Context
+                  {hasNetworkTuple ? 'Network Socket & Access Control Tuple Context' : 'Host Environment & Execution Context'}
                 </div>
                 <div className="text-[11px] text-text-muted">
-                  Parsed L3/L4 endpoint parameters extracted by the dynamic parser.
+                  {hasNetworkTuple
+                    ? 'Parsed L3/L4 endpoint parameters extracted by the dynamic parser.'
+                    : 'System process execution parameters without network ingress socket.'}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                <div className="p-3.5 rounded-xl bg-surface border border-border-muted space-y-1">
-                  <span className="text-[10px] text-text-dim uppercase font-bold block">SOURCE ADDRESS</span>
-                  <span className="font-bold text-rose-400 text-sm block truncate">{event?.source_ip || '203.0.113.45'}</span>
-                  <span className="text-[10px] text-text-muted block">Ephemeral Port: {event?.src_port || '51422'}</span>
-                </div>
+              {hasNetworkTuple ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  <div className="p-3.5 rounded-xl bg-surface border border-border-muted space-y-1">
+                    <span className="text-[10px] text-text-dim uppercase font-bold block">SOURCE ADDRESS</span>
+                    <span className="font-bold text-rose-400 text-sm block truncate">{event.source_ip}</span>
+                    <span className="text-[10px] text-text-muted block">Ephemeral Port: {event.src_port || 'Dynamic'}</span>
+                  </div>
 
-                <div className="p-3.5 rounded-xl bg-surface border border-border-muted space-y-1">
-                  <span className="text-[10px] text-text-dim uppercase font-bold block">DESTINATION ADDRESS</span>
-                  <span className="font-bold text-text-primary text-sm block truncate">{event?.destination_ip || '10.0.0.10'}</span>
-                  <span className="text-[10px] text-text-muted block">Target Port: {event?.dst_port || '80 (HTTP)'}</span>
-                </div>
+                  <div className="p-3.5 rounded-xl bg-surface border border-border-muted space-y-1">
+                    <span className="text-[10px] text-text-dim uppercase font-bold block">DESTINATION ADDRESS</span>
+                    <span className="font-bold text-text-primary text-sm block truncate">{event.destination_ip || 'Local Interface'}</span>
+                    <span className="text-[10px] text-text-muted block">Target Port: {event.dst_port ? `${event.dst_port} (${event.protocol || 'TCP'})` : 'Local Port'}</span>
+                  </div>
 
-                <div className="p-3.5 rounded-xl bg-surface border border-border-muted space-y-1">
-                  <span className="text-[10px] text-text-dim uppercase font-bold block">INGEST ACTION / ACL</span>
-                  <span className="font-bold text-rose-400 text-sm block truncate">{actionTag} / outside_acl</span>
-                  <span className="text-[10px] text-text-muted block">Security Group Evaluated</span>
-                </div>
+                  <div className="p-3.5 rounded-xl bg-surface border border-border-muted space-y-1">
+                    <span className="text-[10px] text-text-dim uppercase font-bold block">INGEST ACTION / ACL</span>
+                    <span className="font-bold text-rose-400 text-sm block truncate">{actionTag} / {event.event_type || 'Perimeter ACL'}</span>
+                    <span className="text-[10px] text-text-muted block">Security Group Evaluated</span>
+                  </div>
 
-                <div className="p-3.5 rounded-xl bg-surface border border-border-muted space-y-1">
-                  <span className="text-[10px] text-text-dim uppercase font-bold block">MITRE ATT&CK TACTIC</span>
-                  <span className="font-bold text-text-primary text-sm block truncate">{event?.mitre_tactic || 'T1110 - Brute Force'}</span>
-                  <span className="text-[10px] text-primary block">Credential Access Sub-technique</span>
+                  <div className="p-3.5 rounded-xl bg-surface border border-border-muted space-y-1">
+                    <span className="text-[10px] text-text-dim uppercase font-bold block">MITRE ATT&CK TACTIC</span>
+                    <span className="font-bold text-text-primary text-sm block truncate">{event.mitre_tactic || 'T1110 - Brute Force'}</span>
+                    <span className="text-[10px] text-primary block">Evaluated Threat Vector</span>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  <div className="p-3.5 rounded-xl bg-surface border border-border-muted space-y-1">
+                    <span className="text-[10px] text-text-dim uppercase font-bold block">SOURCE CONTEXT</span>
+                    <span className="font-bold text-emerald-400 text-sm block truncate">Local Host (127.0.0.1)</span>
+                    <span className="text-[10px] text-text-muted block">Session: Non-Socket Local</span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-surface border border-border-muted space-y-1">
+                    <span className="text-[10px] text-text-dim uppercase font-bold block">TARGET ENVIRONMENT</span>
+                    <span className="font-bold text-text-primary text-sm block truncate">Host-Internal OS</span>
+                    <span className="text-[10px] text-text-muted block">Socket Port: N/A (Internal Process)</span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-surface border border-border-muted space-y-1">
+                    <span className="text-[10px] text-text-dim uppercase font-bold block">INGEST ACTION / AUDIT</span>
+                    <span className="font-bold text-amber-400 text-sm block truncate">{actionTag} / Host Command Audit</span>
+                    <span className="text-[10px] text-text-muted block">Host Security Audited</span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-surface border border-border-muted space-y-1">
+                    <span className="text-[10px] text-text-dim uppercase font-bold block">MITRE ATT&CK TACTIC</span>
+                    <span className="font-bold text-text-primary text-sm block truncate">{event.mitre_tactic || 'T1078 - Valid Accounts'}</span>
+                    <span className="text-[10px] text-primary block">Privilege Escalation Vector</span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -539,7 +696,7 @@ export function EventDetailPage() {
                 <div className="space-y-1 font-mono text-xs">
                   <span className="text-[10px] text-text-dim uppercase block">Active Forensic Ledger Root Hash</span>
                   <div className="p-2.5 rounded-lg bg-surface-dim border border-border-muted text-primary break-all">
-                    {event?.merkle_root || 'b73d9e81f14890cda07b719488aef017c667bc944738fa22cb984f112e09848a'}
+                    {event.merkle_root || eventHash}
                   </div>
                 </div>
               </div>
