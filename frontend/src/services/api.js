@@ -117,6 +117,26 @@ export const api = {
     return await handleResponse(res);
   },
 
+  async testRule(yamlContent) {
+    const res = await fetch(`${API_BASE_URL}/api/v1/rules/test`, {
+      method: 'POST',
+      headers: {
+        ...getAuthHeaders(false),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ yaml_content: yamlContent }),
+    });
+    return await handleResponse(res);
+  },
+
+  async simulateTamper(hash) {
+    const res = await fetch(`${API_BASE_URL}/api/v1/dashboard/audit/simulate-tamper/${encodeURIComponent(hash)}`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+    });
+    return await handleResponse(res);
+  },
+
   async getIncidents(limit = 50) {
     const res = await fetch(`${API_BASE_URL}/api/v1/dashboard/incidents?limit=${limit}`, {
       headers: getAuthHeaders(),

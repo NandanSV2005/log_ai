@@ -404,10 +404,17 @@ export function DashboardPage({ pollingInterval }) {
           </div>
 
           {/* SECTION D: RECENT TELEMETRY TABLE */}
-          <div className="glass-panel rounded-2xl border border-border-muted shadow-xl overflow-hidden space-y-4">
+          <div className="glass-panel rounded-2xl border border-border-muted shadow-xl overflow-hidden space-y-0">
             <div className="p-4 sm:p-5 border-b border-border-muted bg-surface-dim flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
               <div>
-                <h3 className="text-sm font-extrabold text-text-primary uppercase tracking-wider">Perimeter Telemetry Stream</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-extrabold text-text-primary uppercase tracking-wider">Perimeter Telemetry Stream</h3>
+                  {recentEvents.length > 0 && (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/20 text-primary border border-primary/30 font-mono">
+                      {recentEvents.length} events
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-text-muted mt-0.5">Live real-time edge network log ingestion stream across firewall, IDS/IPS, and router interfaces.</p>
               </div>
               <button
@@ -419,26 +426,31 @@ export function DashboardPage({ pollingInterval }) {
               </button>
             </div>
 
-            <div className="p-3 sm:p-5 overflow-x-auto custom-scrollbar-touch">
+            <div className="overflow-x-auto overflow-y-auto max-h-[480px] custom-scrollbar-touch">
               {recentEvents.length > 0 ? (
                 <table className="w-full text-left font-mono text-xs border-collapse min-w-[650px]">
-                  <thead>
-                    <tr className="border-b border-border-muted text-text-muted text-[10px] uppercase">
-                      <th className="py-2.5 px-3">Timestamp</th>
-                      <th className="py-2.5 px-3">Perimeter Device</th>
-                      <th className="py-2.5 px-3">Source IP</th>
-                      <th className="py-2.5 px-3">Ingest Action</th>
-                      <th className="py-2.5 px-3">Severity</th>
-                      <th className="py-2.5 px-3">Threat Score</th>
-                      <th className="py-2.5 px-3 text-right">Action</th>
+                  <thead className="sticky top-0 z-10 bg-surface-dim shadow-sm border-b border-border-muted text-text-muted text-[10px] uppercase">
+                    <tr>
+                      <th className="py-2.5 px-3 bg-surface-dim">Timestamp</th>
+                      <th className="py-2.5 px-3 bg-surface-dim">Perimeter Device</th>
+                      <th className="py-2.5 px-3 bg-surface-dim">Source IP</th>
+                      <th className="py-2.5 px-3 bg-surface-dim">Ingest Action</th>
+                      <th className="py-2.5 px-3 bg-surface-dim">Severity</th>
+                      <th className="py-2.5 px-3 bg-surface-dim">Threat Score</th>
+                      <th className="py-2.5 px-3 text-right bg-surface-dim">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border-muted">
-                    {recentEvents.slice(0, 10).map((evt, idx) => {
+                    {recentEvents.map((evt, idx) => {
                       const deviceVendor = evt.event_type ? evt.event_type.split(':')[0].toUpperCase() : 'CISCO_ASA';
                       const actionTag = (evt.event_type || '').includes('permit') || (evt.event_type || '').includes('pass') ? 'PERMIT' : 'DENY';
+                      const eventId = evt.raw_event_hash || evt.id || evt.payload_hash || `evt_${idx}`;
                       return (
-                        <tr key={`${evt.raw_event_hash || 'evt'}_${idx}`} className="hover:bg-surface-hover transition-colors">
+                        <tr 
+                          key={`${evt.raw_event_hash || 'evt'}_${idx}`} 
+                          onClick={() => navigate(`/events/${encodeURIComponent(eventId)}`, { state: { event: evt } })}
+                          className="hover:bg-surface-hover transition-colors cursor-pointer group"
+                        >
                           <td className="py-2.5 px-3 text-text-muted text-[11px] whitespace-nowrap">
                             {evt.timestamp || '2026-09-08 16:10:43'}
                           </td>
@@ -471,13 +483,13 @@ export function DashboardPage({ pollingInterval }) {
                           </td>
                           <td className="py-2.5 px-3 text-right whitespace-nowrap">
                             <button
-                              onClick={() => {
-                                const streamId = evt.id || evt.raw_event_hash || evt.source_ip || `stream_${idx}`;
-                                navigate(`/stream/${encodeURIComponent(streamId)}`, { state: { event: evt } });
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/events/${encodeURIComponent(eventId)}`, { state: { event: evt } });
                               }}
-                              className="btn-secondary px-3 py-1.5 rounded text-[10px] font-bold touch-target flex items-center gap-1 ml-auto"
+                              className="btn-secondary px-3 py-1.5 rounded text-[10px] font-bold touch-target flex items-center gap-1 ml-auto group-hover:border-primary/50 transition-colors"
                             >
-                              <span>Inspect Stream</span>
+                              <span>Inspect</span>
                               <span className="material-symbols-outlined text-xs">arrow_forward</span>
                             </button>
                           </td>

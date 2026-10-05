@@ -15,12 +15,13 @@ export function RuleStudioPage() {
 severity: "HIGH"
 condition:
   event_type: "cisco_asa"
-  threat_score_gt: 75.0
+  threat_score_gte: 75.0
   mitre_tactic: "T1110"
 action:
   flag_anomaly: true
   quarantine_host: true`);
   const [ruleTestResult, setRuleTestResult] = useState(null);
+  const [isTestingRule, setIsTestingRule] = useState(false);
 
   const handleSimulateTamper = async () => {
     setIsTampering(true);
@@ -58,15 +59,24 @@ action:
     setCalculatedHash(hashHex);
   };
 
-  const handleTestRule = () => {
-    setRuleTestResult({
-      status: 'VALIDATED',
-      rule_name: 'Detect Password Spraying Burst',
-      syntax_valid: true,
-      matched_records_count: 12,
-      compilation_time_ms: 0.84,
-      sample_match_event: 'cisco_asa: Deny tcp src 192.168.1.100 (Score 90.0)',
-    });
+  const handleTestRule = async () => {
+    setIsTestingRule(true);
+    try {
+      const res = await api.testRule(yamlRuleText);
+      setRuleTestResult(res);
+    } catch (err) {
+      setRuleTestResult({
+        status: 'VALIDATION_FAILED',
+        syntax_valid: false,
+        rule_name: 'Error',
+        error: err.message || 'Failed to communicate with rule compiler.',
+        detail: 'Network or server error encountered while testing detection rule.',
+        matched_records_count: 0,
+        compilation_time_ms: 0,
+      });
+    } finally {
+      setIsTestingRule(false);
+    }
   };
 
   return (
@@ -140,20 +150,75 @@ action:
 
             <button
               onClick={handleTestRule}
-              className="btn-primary px-6 py-3 rounded-xl text-xs font-bold w-full touch-target"
+              disabled={isTestingRule}
+              className="btn-primary px-6 py-3 rounded-xl text-xs font-bold w-full touch-target flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Test & Compile Detection Rule
+              {isTestingRule ? (
+                <>
+                  <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+                  <span>Compiling & Evaluating Rule against Store...</span>
+                </>
+              ) : (
+                'Test & Compile Detection Rule'
+              )}
             </button>
 
             {ruleTestResult && (
-              <div className="p-4 rounded-xl bg-surface-dim border border-emerald-500/40 font-mono text-xs space-y-2">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center text-[11px] gap-1">
-                  <span className="text-emerald-400 font-bold">Compilation Result: {ruleTestResult.status}</span>
-                  <span className="text-text-muted">Time: {ruleTestResult.compilation_time_ms} ms</span>
+              ruleTestResult.syntax_valid ? (
+                <div className="p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/40 font-mono text-xs space-y-2.5 animate-in fade-in duration-200">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center text-[11px] gap-2 border-b border-emerald-500/20 pb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                        VALIDATED & COMPILED
+                      </span>
+                      <span className="text-text-primary font-bold">{ruleTestResult.rule_name}</span>
+                    </div>
+                    <span className="text-text-muted text-[10px]">Time: {ruleTestResult.compilation_time_ms} ms</span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs pt-1">
+                    <span className="text-text-muted">Matched Events in Store:</span>
+                    <span className={`font-bold px-2 py-0.5 rounded text-[11px] ${
+                      ruleTestResult.matched_records_count > 0 
+                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' 
+                        : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                    }`}>
+                      {ruleTestResult.matched_records_count} {ruleTestResult.matched_records_count === 1 ? 'event' : 'events'}
+                    </span>
+                  </div>
+
+                  {ruleTestResult.matched_records_count > 0 ? (
+                    <div className="space-y-1 pt-1">
+                      <div className="text-[10px] text-text-dim uppercase font-bold tracking-wider">Sample Matching Event:</div>
+                      <div className="p-2.5 rounded-lg bg-surface-dim/80 border border-border-muted text-[11px] text-text-primary break-all leading-relaxed font-mono">
+                        {ruleTestResult.sample_match_event}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-2.5 rounded-lg bg-surface-dim/80 border border-amber-500/30 text-[11px] text-amber-300/90 italic leading-relaxed">
+                      Zero events in the current store matched this rule's conditions. Modify the threshold (e.g. use threat_score_gte or lower threat_score_gt) or adjust event_type.
+                    </div>
+                  )}
                 </div>
-                <div className="text-text-primary font-bold">Matched Records: {ruleTestResult.matched_records_count} events</div>
-                <div className="text-[11px] text-text-muted break-all">Sample Match: {ruleTestResult.sample_match_event}</div>
-              </div>
+              ) : (
+                <div className="p-4 rounded-xl bg-rose-950/25 border border-rose-500/50 font-mono text-xs space-y-2 animate-in fade-in duration-200">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center text-[11px] gap-2 border-b border-rose-500/25 pb-2">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                      SYNTAX / VALIDATION ERROR
+                    </span>
+                    <span className="text-text-muted text-[10px]">Time: {ruleTestResult.compilation_time_ms} ms</span>
+                  </div>
+
+                  <div className="text-rose-400 font-bold text-xs pt-1 break-words">
+                    {ruleTestResult.error || 'Invalid rule definition'}
+                  </div>
+                  {ruleTestResult.detail && (
+                    <div className="text-[11px] text-text-muted break-words leading-relaxed">
+                      {ruleTestResult.detail}
+                    </div>
+                  )}
+                </div>
+              )
             )}
           </div>
         </div>
