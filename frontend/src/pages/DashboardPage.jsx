@@ -15,6 +15,15 @@ export function DashboardPage({ pollingInterval }) {
   const [savedReports, setSavedReports] = useState([]);
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [incidentDetailEvents, setIncidentDetailEvents] = useState([]);
+
+  // Live Syslog Sources & Receiver State
+  const [sources, setSources] = useState([]);
+  const [receiverStatus, setReceiverStatus] = useState(null);
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [newSourceIp, setNewSourceIp] = useState('');
+  const [newSourceDisplay, setNewSourceDisplay] = useState('');
+  const [sourceFormError, setSourceFormError] = useState('');
+  const [isSubmittingSource, setIsSubmittingSource] = useState(false);
   
   // Ingestion State
   const [selectedFile, setSelectedFile] = useState(null);
@@ -39,16 +48,20 @@ export function DashboardPage({ pollingInterval }) {
 
   const fetchDashboardData = async () => {
     try {
-      const [statsData, incidentsData, eventsData, reportsData] = await Promise.all([
-        api.getStats(),
-        api.getIncidents(10),
-        api.getRecentEvents(50),
-        api.getSavedReports(),
+      const [statsData, incidentsData, eventsData, reportsData, sourcesData, receiverData] = await Promise.all([
+        api.getStats().catch(() => null),
+        api.getIncidents(10).catch(() => null),
+        api.getRecentEvents(50).catch(() => null),
+        api.getSavedReports().catch(() => null),
+        api.getSources().catch(() => []),
+        api.getReceiverStatus().catch(() => null),
       ]);
       if (statsData) setStats(statsData);
       if (incidentsData?.incidents) setIncidents(incidentsData.incidents);
       if (eventsData?.events) setRecentEvents(eventsData.events);
       if (reportsData?.reports) setSavedReports(reportsData.reports);
+      if (Array.isArray(sourcesData)) setSources(sourcesData);
+      if (receiverData) setReceiverStatus(receiverData);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
     }
@@ -130,6 +143,34 @@ export function DashboardPage({ pollingInterval }) {
       fetchDashboardData();
     } catch (err) {
       setReportMessage(`Save Failed: ${err.message}`);
+    }
+  };
+
+  const handleCreateSource = async (e) => {
+    if (e) e.preventDefault();
+    if (!newSourceIp.trim()) return;
+    setIsSubmittingSource(true);
+    setSourceFormError('');
+    try {
+      await api.createSource(newSourceIp.trim(), newSourceDisplay.trim() || `Device-${newSourceIp.trim()}`);
+      setNewSourceIp('');
+      setNewSourceDisplay('');
+      setIsRegisterModalOpen(false);
+      fetchDashboardData();
+    } catch (err) {
+      setSourceFormError(err.message || 'Failed to register source');
+    } finally {
+      setIsSubmittingSource(false);
+    }
+  };
+
+  const handleDeleteSource = async (sourceId) => {
+    if (!window.confirm('Delete this registered perimeter source? Packets from this IP will be dropped by the receiver.')) return;
+    try {
+      await api.deleteSource(sourceId);
+      fetchDashboardData();
+    } catch (err) {
+      alert(`Failed to delete source: ${err.message}`);
     }
   };
 
@@ -398,6 +439,161 @@ export function DashboardPage({ pollingInterval }) {
               ) : (
                 <div className="p-8 text-center text-text-muted font-mono text-xs">
                   No active incident clusters detected. System operating within normal baseline parameters.
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* SECTION: LIVE SOURCES & SYSLOG RECEIVER */}
+          <div className="glass-panel rounded-2xl border border-border-muted shadow-xl overflow-hidden space-y-4">
+            <div className="p-4 sm:p-5 border-b border-border-muted bg-surface-dim flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-primary text-xl">router</span>
+                  <h3 className="text-sm font-extrabold text-text-primary uppercase tracking-wider">Live Perimeter Sources & Syslog Daemon</h3>
+                </div>
+                <p className="text-xs text-text-muted mt-0.5">Continuous ingestion listener &amp; registered edge device telemetry streams.</p>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="px-2.5 py-1 rounded bg-surface border border-border-muted font-mono text-[10px] text-primary font-bold">
+                  TCP:{receiverStatus?.listening_ports?.tcp || 5514} // UDP:{receiverStatus?.listening_ports?.udp || 5514}
+                </div>
+                <button
+                  onClick={() => setIsRegisterModalOpen(!isRegisterModalOpen)}
+                  className="btn-primary px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 touch-target"
+                >
+                  <span className="material-symbols-outlined text-sm">{isRegisterModalOpen ? 'close' : 'add'}</span>
+                  <span>{isRegisterModalOpen ? 'Cancel' : 'Register Source'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Registration Drawer / Form */}
+            {isRegisterModalOpen && (
+              <form onSubmit={handleCreateSource} className="mx-4 sm:mx-5 p-4 rounded-xl bg-surface-dim border border-primary/30 space-y-3 font-mono text-xs animate-in fade-in duration-200">
+                <div className="flex justify-between items-center text-[11px] font-bold text-text-primary border-b border-border-muted pb-2">
+                  <span>Register Allowed Perimeter IP</span>
+                  <button
+                    type="button"
+                    onClick={() => { setNewSourceIp('127.0.0.1'); setNewSourceDisplay('Local Replay Sensor'); }}
+                    className="text-[10px] text-primary hover:underline"
+                  >
+                    + Quick Fill Localhost (127.0.0.1)
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] text-text-muted uppercase mb-1">Source IP Address:</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 192.168.1.10 or 127.0.0.1"
+                      value={newSourceIp}
+                      onChange={(e) => setNewSourceIp(e.target.value)}
+                      className="w-full p-2 rounded-lg bg-surface border border-border-muted text-text-primary focus:outline-none focus:border-primary text-xs"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-text-muted uppercase mb-1">Display Label:</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Branch-Firewall-ASA"
+                      value={newSourceDisplay}
+                      onChange={(e) => setNewSourceDisplay(e.target.value)}
+                      className="w-full p-2 rounded-lg bg-surface border border-border-muted text-text-primary focus:outline-none focus:border-primary text-xs"
+                    />
+                  </div>
+                </div>
+                {sourceFormError && (
+                  <div className="text-rose-400 text-[11px] font-bold">{sourceFormError}</div>
+                )}
+                <div className="flex justify-end gap-2 pt-1">
+                  <button
+                    type="submit"
+                    disabled={isSubmittingSource}
+                    className="btn-primary px-4 py-1.5 rounded-lg text-xs font-bold disabled:opacity-60"
+                  >
+                    {isSubmittingSource ? 'Saving...' : 'Authorize Source IP'}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Receiver Real-Time Metrics Ribbon */}
+            <div className="px-4 sm:px-5 grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
+              <div className="p-3 rounded-xl bg-surface-dim border border-border-muted">
+                <div className="text-[10px] text-text-muted uppercase">Total Received</div>
+                <div className="text-base font-bold text-text-primary mt-0.5">{receiverStatus?.total_received || 0}</div>
+              </div>
+              <div className="p-3 rounded-xl bg-surface-dim border border-border-muted">
+                <div className="text-[10px] text-emerald-400 uppercase">Accepted &amp; Enqueued</div>
+                <div className="text-base font-bold text-emerald-400 mt-0.5">{receiverStatus?.accepted || 0}</div>
+              </div>
+              <div className="p-3 rounded-xl bg-surface-dim border border-border-muted">
+                <div className="text-[10px] text-amber-400 uppercase">Dropped (Unregistered)</div>
+                <div className="text-base font-bold text-amber-400 mt-0.5">{receiverStatus?.dropped_unregistered || 0}</div>
+              </div>
+              <div className="p-3 rounded-xl bg-surface-dim border border-border-muted">
+                <div className="text-[10px] text-rose-400 uppercase">Dropped (Oversize/Queue)</div>
+                <div className="text-base font-bold text-rose-400 mt-0.5">{(receiverStatus?.dropped_queue_full || 0) + (receiverStatus?.dropped_oversize || 0)}</div>
+              </div>
+            </div>
+
+            {/* Registered Sources Table */}
+            <div className="p-4 sm:p-5 pt-0 overflow-x-auto">
+              {sources.length > 0 ? (
+                <table className="w-full text-left font-mono text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-border-muted text-text-muted text-[10px] uppercase">
+                      <th className="py-2.5 px-3">Status</th>
+                      <th className="py-2.5 px-3">Device Label</th>
+                      <th className="py-2.5 px-3">Registered IP</th>
+                      <th className="py-2.5 px-3">Last Packet</th>
+                      <th className="py-2.5 px-3 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border-muted">
+                    {sources.map((src) => {
+                      const lastMsg = receiverStatus?.last_message_time_by_source?.[src.source_ip];
+                      const isLive = lastMsg && (Date.now() - new Date(lastMsg).getTime() < 60000);
+                      return (
+                        <tr key={src.id} className="hover:bg-surface-hover transition-colors">
+                          <td className="py-2.5 px-3">
+                            {isLive ? (
+                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                LIVE
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-surface border border-border-muted text-text-muted">
+                                <span className="w-1.5 h-1.5 rounded-full bg-text-dim"></span>
+                                IDLE
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-3 font-bold text-text-primary">{src.display_name}</td>
+                          <td className="py-2.5 px-3 text-primary">{src.source_ip}</td>
+                          <td className="py-2.5 px-3 text-text-muted text-[11px]">
+                            {lastMsg ? new Date(lastMsg).toLocaleTimeString() : 'No packets yet'}
+                          </td>
+                          <td className="py-2.5 px-3 text-right">
+                            <button
+                              onClick={() => handleDeleteSource(src.id)}
+                              className="text-text-muted hover:text-rose-400 p-1 transition-colors"
+                              title="Delete Source"
+                            >
+                              <span className="material-symbols-outlined text-sm">delete</span>
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="p-6 text-center text-text-muted font-mono text-xs border border-dashed border-border-muted rounded-xl">
+                  No perimeter log sources currently registered. Click &quot;Register Source&quot; to authorize an IP address for live syslog streaming.
                 </div>
               )}
             </div>

@@ -13,6 +13,7 @@ from app.detection.anomaly_engine import anomaly_engine
 from app.detection.correlation import incident_engine
 from app.xai.explainer import xai_explainer
 from app.services.queue import queue_manager, IngestionTask
+from app.services.ingest_service import process_raw_ingestion
 from app.audit.hash_chain import audit_merkle_tree
 from app.routers.auth import get_current_user
 
@@ -90,55 +91,25 @@ async def ingest_logs(
 
     content_type = request.headers.get("content-type", "")
     client_host = request.client.host if request.client else "unknown"
-
-    raw_str = raw_body.decode("utf-8", errors="replace")
-
-    # 2. Detect log format
-    detected_format = detect_log_format(
-        raw_payload=raw_str,
-        content_type=content_type,
-        param_format=format,
-    )
-
-    # 3. Generate unique forensic tracking ID
-    ingestion_id = uuid.uuid4().hex
-    now = datetime.datetime.now(datetime.timezone.utc)
-
-    # 4. Immediately persist raw payload to disk before any parsing (Zero Information Loss)
-    raw_file_path = await raw_storage_manager.write_raw_payload(
-        ingestion_id=ingestion_id,
-        raw_data=raw_body,
-        content_type=content_type,
-        detected_format=detected_format,
-        client_host=client_host,
-    )
-
-    # Get calculated SHA-256 payload hash and Merkle root
-    payload_hash = audit_merkle_tree.hash_payload(raw_body)
-    merkle_root = audit_merkle_tree.get_root_hash()
-
-    # 5. Enqueue for asynchronous background parsing (Instant 202 response)
     username = _get_username(current_user)
 
-    # 6. Dispatch async parsing task to worker queue
-    task = IngestionTask(
-        ingestion_id=ingestion_id,
-        raw_payload=raw_str,
-        detected_format=detected_format,
-        raw_file_path=str(raw_file_path),
+    result = await process_raw_ingestion(
+        raw_payload_bytes=raw_body,
         owner_username=username,
+        client_host=client_host,
+        content_type=content_type,
+        format_override=format,
     )
-    await queue_manager.enqueue_task(task)
 
     return IngestResponse(
-        ingestion_id=ingestion_id,
-        status="accepted",
-        timestamp=now.isoformat(),
-        format_detected=detected_format,
-        bytes_received=len(raw_body),
-        payload_hash=payload_hash,
-        merkle_root=merkle_root,
-        raw_storage_file=raw_file_path.name,
+        ingestion_id=result["ingestion_id"],
+        status=result["status"],
+        timestamp=result["timestamp"],
+        format_detected=result["format_detected"],
+        bytes_received=result["bytes_received"],
+        payload_hash=result["payload_hash"],
+        merkle_root=result["merkle_root"],
+        raw_storage_file=result["raw_storage_file"],
     )
 
 @router.post(

@@ -9,8 +9,9 @@ from slowapi.errors import RateLimitExceeded
 from slowapi import _rate_limit_exceeded_handler
 
 from app.config import settings
-from app.routers import ingest, dashboard, auth, copilot, demo, rules
+from app.routers import ingest, dashboard, auth, copilot, demo, rules, sources
 from app.services.queue import queue_manager
+from app.services.syslog_receiver import syslog_receiver
 from app.limiter import limiter
 
 logging.basicConfig(
@@ -25,7 +26,13 @@ async def lifespan(app: FastAPI):
     settings.validate_secrets_on_startup()
     logger.info("Initializing Log Ingestion Engine background workers...")
     await queue_manager.start_workers(concurrency=settings.WORKER_CONCURRENCY)
+    if settings.SYSLOG_ENABLED:
+        logger.info("Starting live Syslog Receiver service (TCP=%s, UDP=%s)...", settings.SYSLOG_TCP_PORT, settings.SYSLOG_UDP_PORT)
+        await syslog_receiver.start()
     yield
+    if settings.SYSLOG_ENABLED:
+        logger.info("Stopping live Syslog Receiver service...")
+        await syslog_receiver.stop()
     logger.info("Shutting down background workers...")
     await queue_manager.stop_workers()
 
@@ -96,6 +103,7 @@ app.include_router(dashboard.router)
 app.include_router(copilot.router)
 app.include_router(demo.router)
 app.include_router(rules.router)
+app.include_router(sources.router)
 
 frontend_dist = Path(__file__).parent.parent / "frontend" / "dist"
 legacy_static = Path(__file__).parent / "static"
