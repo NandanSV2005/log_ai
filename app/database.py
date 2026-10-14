@@ -40,6 +40,17 @@ class User(Base):
     username = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
 
+
+class LogSource(Base):
+    __tablename__ = "log_sources"
+
+    id = Column(Integer, primary_key=True, index=True)
+    source_ip = Column(String, unique=True, index=True, nullable=False)
+    owner_username = Column(String, index=True, nullable=False)
+    display_name = Column(String, nullable=False)
+    created_at = Column(String, nullable=False)
+
+
 Base.metadata.create_all(bind=engine)
 
 def seed_default_users():

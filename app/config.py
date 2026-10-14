@@ -41,6 +41,14 @@ class Settings(BaseSettings):
     # Gemini LLM Integration
     GEMINI_API_KEY: str = Field(default_factory=lambda: os.getenv("GEMINI_API_KEY", ""))
     GEMINI_MODEL: str = Field(default_factory=lambda: os.getenv("GEMINI_MODEL", "gemini-3.6-flash"))
+
+    # Live Syslog Receiver Settings
+    SYSLOG_ENABLED: bool = Field(default_factory=lambda: os.getenv("SYSLOG_ENABLED", "true").lower() in ("true", "1", "yes"))
+    SYSLOG_HOST: str = Field(default_factory=lambda: os.getenv("SYSLOG_HOST", "0.0.0.0"))
+    SYSLOG_TCP_PORT: int = Field(default_factory=lambda: int(os.getenv("SYSLOG_TCP_PORT", "5514")))
+    SYSLOG_UDP_PORT: int = Field(default_factory=lambda: int(os.getenv("SYSLOG_UDP_PORT", "5514")))
+    SYSLOG_MAX_MSG_BYTES: int = Field(default=8192)  # 8 KB per message
+    SYSLOG_RATE_LIMIT_PER_SEC: int = Field(default=100)  # Per-IP rate cap
     
     model_config = {
         "env_file": ".env",

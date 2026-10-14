@@ -33,6 +33,8 @@ htmlcov/
 
 # Data directories & Storage
 *.db
+*.bak
+data/*.bak
 data/raw/*
 !data/raw/.gitkeep
 data/normalized/*

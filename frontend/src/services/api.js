@@ -290,4 +290,39 @@ export const api = {
     });
     return await handleResponse(res);
   },
+
+  // Live Syslog Source Registry & Receiver APIs
+  async getSources() {
+    const res = await fetch(`${API_BASE_URL}/api/v1/sources`, {
+      headers: getAuthHeaders(),
+    });
+    return await handleResponse(res);
+  },
+
+  async createSource(sourceIp, displayName) {
+    const res = await fetch(`${API_BASE_URL}/api/v1/sources`, {
+      method: 'POST',
+      headers: {
+        ...getAuthHeaders(false),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ source_ip: sourceIp, display_name: displayName }),
+    });
+    return await handleResponse(res);
+  },
+
+  async deleteSource(sourceId) {
+    const res = await fetch(`${API_BASE_URL}/api/v1/sources/${encodeURIComponent(sourceId)}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    return await handleResponse(res);
+  },
+
+  async getReceiverStatus() {
+    const res = await fetch(`${API_BASE_URL}/api/v1/sources/receiver-status`, {
+      headers: getAuthHeaders(),
+    });
+    return await handleResponse(res);
+  },
 };
