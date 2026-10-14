@@ -404,7 +404,19 @@ export function DashboardPage({ pollingInterval }) {
                           {(inc.incident_id || 'INC').substring(0, 8)}
                         </td>
                         <td className="py-3 px-3 font-bold text-text-primary">
-                          {inc.source_ip || 'N/A'}
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span>{inc.source_ip || 'N/A'}</span>
+                            {(inc.is_distributed || inc.distinct_source_count > 1 || inc.incident_type?.toLowerCase().includes('distributed')) && (
+                              <span className="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40 text-[9px] font-bold uppercase">
+                                DISTRIBUTED ({inc.distinct_source_count || inc.distinct_sources?.length || 5})
+                              </span>
+                            )}
+                            {inc.is_scan && (
+                              <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[9px] font-bold uppercase">
+                                SCAN
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="py-3 px-3 text-text-muted">
                           {inc.event_count || 1} events

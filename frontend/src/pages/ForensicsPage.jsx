@@ -138,9 +138,16 @@ export function ForensicsPage() {
                     }`}
                   >
                     <div className="flex justify-between items-center gap-2">
-                      <span className="font-bold text-rose-400 text-xs font-mono tracking-tight shrink-0">
-                        CASE-#{(incident.incident_id || 'INC').substring(0, 8)}
-                      </span>
+                      <div className="flex items-center gap-2 truncate">
+                        <span className="font-bold text-rose-400 text-xs font-mono tracking-tight shrink-0">
+                          CASE-#{(incident.incident_id || 'INC').substring(0, 8)}
+                        </span>
+                        {(incident.is_distributed || incident.distinct_source_count > 1 || incident.incident_type?.toLowerCase().includes('distributed')) && (
+                          <span className="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold text-[9px] uppercase tracking-wider shrink-0">
+                            DISTRIBUTED ({incident.distinct_source_count || incident.distinct_sources?.length || 5})
+                          </span>
+                        )}
+                      </div>
                       <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold text-[10px] uppercase tracking-wider shrink-0">
                         {incident.status || 'Active'}
                       </span>

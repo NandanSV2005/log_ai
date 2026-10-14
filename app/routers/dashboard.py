@@ -473,9 +473,29 @@ async def get_incident_detail(
         ]
     member_events.sort(key=lambda r: str(r.get("timestamp", "")), reverse=True)
 
+    member_events_by_hash = {
+        (e.get("raw_event_hash") or e.get("payload_hash")): e
+        for e in member_events
+        if (e.get("raw_event_hash") or e.get("payload_hash"))
+    }
+    activities_with_events = []
+    for act in incident.activities:
+        act_dict = dict(act)
+        matched_evts = [
+            member_events_by_hash[h]
+            for h in act.get("event_hashes", [])
+            if h in member_events_by_hash
+        ]
+        act_dict["events"] = matched_evts
+        activities_with_events.append(act_dict)
+
+    inc_dict = incident.to_dict()
+    inc_dict["activities"] = activities_with_events
+
     return {
-        "incident": incident.to_dict(),
+        "incident": inc_dict,
         "events": member_events,
+        "activities": activities_with_events,
     }
 
 
