@@ -18,10 +18,11 @@ COPY requirements.txt /code/requirements.txt
 RUN pip install --no-cache-dir -r /code/requirements.txt
 
 COPY app/ /code/app/
+COPY scripts/ /code/scripts/
 COPY --from=frontend-builder /frontend/dist /code/frontend/dist
 
 RUN mkdir -p /code/data/raw /code/data/normalized
 
-EXPOSE 8000
+EXPOSE 8000 5514/tcp 5514/udp
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips=*"]

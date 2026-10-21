@@ -24,6 +24,15 @@ export function DashboardPage({ pollingInterval }) {
   const [newSourceDisplay, setNewSourceDisplay] = useState('');
   const [sourceFormError, setSourceFormError] = useState('');
   const [isSubmittingSource, setIsSubmittingSource] = useState(false);
+
+  // Ingest API Keys State
+  const [apiKeys, setApiKeys] = useState([]);
+  const [isCreateKeyOpen, setIsCreateKeyOpen] = useState(false);
+  const [newKeyName, setNewKeyName] = useState('');
+  const [isSubmittingKey, setIsSubmittingKey] = useState(false);
+  const [keyError, setKeyError] = useState('');
+  const [newlyCreatedKey, setNewlyCreatedKey] = useState(null);
+  const [keyCopied, setKeyCopied] = useState(false);
   
   // Ingestion State
   const [selectedFile, setSelectedFile] = useState(null);
@@ -48,13 +57,14 @@ export function DashboardPage({ pollingInterval }) {
 
   const fetchDashboardData = async () => {
     try {
-      const [statsData, incidentsData, eventsData, reportsData, sourcesData, receiverData] = await Promise.all([
+      const [statsData, incidentsData, eventsData, reportsData, sourcesData, receiverData, apiKeysData] = await Promise.all([
         api.getStats().catch(() => null),
         api.getIncidents(10).catch(() => null),
         api.getRecentEvents(50).catch(() => null),
         api.getSavedReports().catch(() => null),
         api.getSources().catch(() => []),
         api.getReceiverStatus().catch(() => null),
+        api.getApiKeys().catch(() => []),
       ]);
       if (statsData) setStats(statsData);
       if (incidentsData?.incidents) setIncidents(incidentsData.incidents);
@@ -62,6 +72,7 @@ export function DashboardPage({ pollingInterval }) {
       if (reportsData?.reports) setSavedReports(reportsData.reports);
       if (Array.isArray(sourcesData)) setSources(sourcesData);
       if (receiverData) setReceiverStatus(receiverData);
+      if (Array.isArray(apiKeysData)) setApiKeys(apiKeysData);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
     }
@@ -165,13 +176,45 @@ export function DashboardPage({ pollingInterval }) {
   };
 
   const handleDeleteSource = async (sourceId) => {
-    if (!window.confirm('Delete this registered perimeter source? Packets from this IP will be dropped by the receiver.')) return;
     try {
       await api.deleteSource(sourceId);
       fetchDashboardData();
     } catch (err) {
-      alert(`Failed to delete source: ${err.message}`);
+      setSourceFormError(`Failed to delete source: ${err.message}`);
     }
+  };
+
+  const handleCreateApiKey = async (e) => {
+    if (e) e.preventDefault();
+    setIsSubmittingKey(true);
+    setKeyError('');
+    try {
+      const res = await api.createApiKey(newKeyName.trim() || 'Edge Forwarder');
+      setNewlyCreatedKey(res.api_key || res.raw_key);
+      setNewKeyName('');
+      setKeyCopied(false);
+      fetchDashboardData();
+    } catch (err) {
+      setKeyError(err.message || 'Failed to create API key');
+    } finally {
+      setIsSubmittingKey(false);
+    }
+  };
+
+  const handleRevokeApiKey = async (keyId) => {
+    try {
+      await api.revokeApiKey(keyId);
+      fetchDashboardData();
+    } catch (err) {
+      setKeyError(`Failed to revoke key: ${err.message}`);
+    }
+  };
+
+  const handleCopyKey = () => {
+    if (!newlyCreatedKey) return;
+    navigator.clipboard.writeText(newlyCreatedKey);
+    setKeyCopied(true);
+    setTimeout(() => setKeyCopied(false), 2500);
   };
 
   // Compute threat level metrics
@@ -594,6 +637,170 @@ export function DashboardPage({ pollingInterval }) {
               ) : (
                 <div className="p-6 text-center text-text-muted font-mono text-xs border border-dashed border-border-muted rounded-xl">
                   No perimeter log sources currently registered. Click &quot;Register Source&quot; to authorize an IP address for live syslog streaming.
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* SECTION C.2: AGENT INGEST API KEYS */}
+          <div className="glass-panel rounded-2xl border border-border-muted shadow-xl overflow-hidden space-y-4">
+            <div className="p-4 sm:p-5 border-b border-border-muted bg-surface-dim flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-primary text-xl">key</span>
+                  <h3 className="text-sm font-extrabold text-text-primary uppercase tracking-wider">Agent Ingest API Keys</h3>
+                </div>
+                <p className="text-xs text-text-muted mt-0.5">Headless authentication keys for the edge forwarder, device simulator, and programmatic log ingestion.</p>
+              </div>
+
+              <button
+                onClick={() => { setIsCreateKeyOpen(!isCreateKeyOpen); setNewlyCreatedKey(null); }}
+                className="btn-primary px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 touch-target"
+              >
+                <span className="material-symbols-outlined text-sm">{isCreateKeyOpen ? 'close' : 'add'}</span>
+                <span>{isCreateKeyOpen ? 'Cancel' : 'Create API Key'}</span>
+              </button>
+            </div>
+
+            {/* Newly Created Key Alert (Shown ONCE with Copy Button) */}
+            {newlyCreatedKey && (
+              <div className="mx-4 sm:mx-5 p-4 rounded-xl bg-amber-500/10 border border-amber-500/40 space-y-3 font-mono text-xs animate-in fade-in duration-200">
+                <div className="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider">
+                  <span className="material-symbols-outlined text-base">warning</span>
+                  <span>Copy Your Secret Key Now</span>
+                </div>
+                <p className="text-[11px] text-text-muted leading-relaxed">
+                  For your security, this key is only displayed <strong className="text-amber-300">ONCE</strong> and will never be shown again. Store it securely in your environment variables or forwarder config.
+                </p>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-surface p-2.5 rounded-lg border border-border-muted">
+                  <code className="flex-1 font-mono text-xs text-primary font-bold break-all select-all">
+                    {newlyCreatedKey}
+                  </code>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleCopyKey}
+                      className="px-3 py-1.5 rounded-lg bg-primary text-surface-lowest font-bold text-xs flex items-center gap-1 shrink-0 hover:opacity-90 transition-opacity"
+                    >
+                      <span className="material-symbols-outlined text-xs">{keyCopied ? 'check' : 'content_copy'}</span>
+                      <span>{keyCopied ? 'Copied!' : 'Copy Key'}</span>
+                    </button>
+                    <button
+                      onClick={() => setNewlyCreatedKey(null)}
+                      className="px-3 py-1.5 rounded-lg bg-surface-dim border border-border-muted text-text-muted hover:text-text-primary text-xs font-bold shrink-0"
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Key Creation Form */}
+            {isCreateKeyOpen && !newlyCreatedKey && (
+              <form onSubmit={handleCreateApiKey} className="mx-4 sm:mx-5 p-4 rounded-xl bg-surface-dim border border-primary/30 space-y-3 font-mono text-xs animate-in fade-in duration-200">
+                <div className="flex justify-between items-center text-[11px] font-bold text-text-primary border-b border-border-muted pb-2">
+                  <span>Generate New Agent Ingest Key</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setNewKeyName('Edge Syslog Forwarder')}
+                      className="text-[10px] text-primary hover:underline"
+                    >
+                      + Forwarder
+                    </button>
+                    <span className="text-border-muted">|</span>
+                    <button
+                      type="button"
+                      onClick={() => setNewKeyName('Device Simulator')}
+                      className="text-[10px] text-primary hover:underline"
+                    >
+                      + Simulator
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] text-text-muted uppercase mb-1">Key Description / Name:</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Branch-Forwarder-01 or Demo Simulator"
+                    value={newKeyName}
+                    onChange={(e) => setNewKeyName(e.target.value)}
+                    className="w-full p-2 rounded-lg bg-surface border border-border-muted text-text-primary focus:outline-none focus:border-primary text-xs"
+                    required
+                  />
+                </div>
+                {keyError && (
+                  <div className="text-rose-400 text-[11px] font-bold">{keyError}</div>
+                )}
+                <div className="flex justify-end gap-2 pt-1">
+                  <button
+                    type="submit"
+                    disabled={isSubmittingKey}
+                    className="btn-primary px-4 py-1.5 rounded-lg text-xs font-bold disabled:opacity-60"
+                  >
+                    {isSubmittingKey ? 'Generating...' : 'Generate Key'}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Registered API Keys Table */}
+            <div className="p-4 sm:p-5 pt-0 overflow-x-auto">
+              {apiKeys.length > 0 ? (
+                <table className="w-full text-left font-mono text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-border-muted text-text-muted text-[10px] uppercase">
+                      <th className="py-2.5 px-3">Status</th>
+                      <th className="py-2.5 px-3">Key Name</th>
+                      <th className="py-2.5 px-3">Prefix</th>
+                      <th className="py-2.5 px-3">Created</th>
+                      <th className="py-2.5 px-3">Last Used</th>
+                      <th className="py-2.5 px-3 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border-muted">
+                    {apiKeys.map((k) => (
+                      <tr key={k.id} className="hover:bg-surface-hover transition-colors">
+                        <td className="py-2.5 px-3">
+                          {!k.revoked ? (
+                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                              ACTIVE
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-surface border border-border-muted text-text-muted">
+                              REVOKED
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-2.5 px-3 font-bold text-text-primary">{k.name}</td>
+                        <td className="py-2.5 px-3 text-primary">{k.display_prefix}...</td>
+                        <td className="py-2.5 px-3 text-text-muted text-[11px]">
+                          {k.created_at ? new Date(k.created_at).toLocaleDateString() : 'N/A'}
+                        </td>
+                        <td className="py-2.5 px-3 text-text-muted text-[11px]">
+                          {k.last_used_at ? new Date(k.last_used_at).toLocaleTimeString() : 'Never used'}
+                        </td>
+                        <td className="py-2.5 px-3 text-right">
+                          {!k.revoked ? (
+                            <button
+                              onClick={() => handleRevokeApiKey(k.id)}
+                              className="px-2.5 py-1 rounded text-[10px] font-bold text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 transition-colors"
+                              title="Revoke Key"
+                            >
+                              Revoke
+                            </button>
+                          ) : (
+                            <span className="text-[10px] text-text-muted font-bold">Revoked</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="p-6 text-center text-text-muted font-mono text-xs border border-dashed border-border-muted rounded-xl">
+                  No Ingest API keys generated yet. Click &quot;Create API Key&quot; to authorize an external forwarder or simulator.
                 </div>
               )}
             </div>

@@ -2,7 +2,7 @@ import os
 import logging
 import bcrypt
 from pathlib import Path
-from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy import create_engine, Column, Integer, String, Boolean
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 logger = logging.getLogger("log_ai.database")
@@ -49,6 +49,19 @@ class LogSource(Base):
     owner_username = Column(String, index=True, nullable=False)
     display_name = Column(String, nullable=False)
     created_at = Column(String, nullable=False)
+
+
+class ApiKey(Base):
+    __tablename__ = "api_keys"
+
+    id = Column(Integer, primary_key=True, index=True)
+    key_hash = Column(String, unique=True, index=True, nullable=False)
+    display_prefix = Column(String, nullable=False)
+    owner_username = Column(String, index=True, nullable=False)
+    name = Column(String, nullable=False)
+    created_at = Column(String, nullable=False)
+    last_used_at = Column(String, nullable=True)
+    revoked = Column(Boolean, default=False, nullable=False)
 
 
 Base.metadata.create_all(bind=engine)
