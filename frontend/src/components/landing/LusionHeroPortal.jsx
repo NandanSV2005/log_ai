@@ -297,9 +297,10 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
     if (is2D || reducedMotion || isMobile) {
-      gsap.set(headlineEl, { scale: 1, opacity: 1, filter: 'blur(0px)' });
+      gsap.set(headlineEl, { scale: 1, opacity: 1, filter: 'blur(0px)', y: 0 });
       gsap.set(portalEl, {
         clipPath: 'inset(0% 0% 0% 0% round 20px)',
+        scale: 1,
         opacity: 1,
         y: 0,
       });
@@ -309,15 +310,19 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
     }
 
     const ctx = gsap.context(() => {
+      // Never crop the UI card edges: keep 0% inset so 100% of the header, left/right columns, and footer remain visible
       gsap.set(portalEl, {
-        clipPath: 'inset(18% 14% 18% 14% round 24px)',
+        clipPath: 'inset(0% 0% 0% 0% round 24px)',
+        scale: 0.9,
+        y: 8,
+        transformOrigin: 'center top',
       });
 
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionEl,
           start: 'top top',
-          end: '+=155%',
+          end: '+=135%',
           pin: true,
           scrub: 1,
           anticipatePin: 1,
@@ -334,26 +339,26 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
           scale: 0.86,
           opacity: 0,
           filter: 'blur(6px)',
-          y: -36,
+          y: -56,
           ease: 'power2.inOut',
-          duration: 0.52,
+          duration: 0.55,
         },
         0
       );
 
-      tl.fromTo(
+      tl.to(
         portalEl,
         {
-          clipPath: 'inset(18% 14% 18% 14% round 24px)',
-          scale: 0.94,
-        },
-        {
-          clipPath: 'inset(0% 0% 0% 0% round 0px)',
+          clipPath: 'inset(0% 0% 0% 0% round 16px)',
           scale: 1,
+          y: () => {
+            const h = headlineEl.offsetHeight || 220;
+            return -Math.min(h * 0.72, 210);
+          },
           ease: 'power2.inOut',
           duration: 0.88,
         },
-        0.08
+        0.05
       );
     }, sectionEl);
 
@@ -385,7 +390,7 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
     <section
       ref={sectionRef}
       id="pipeline"
-      className="relative w-full min-h-screen bg-gradient-to-b from-[var(--color-chapter1-from)] via-[var(--color-chapter1-via)] to-[var(--color-chapter1-to)] overflow-hidden flex flex-col justify-between pt-20 pb-10 border-b border-border-muted"
+      className="relative w-full min-h-[calc(100vh-4rem)] bg-gradient-to-b from-[var(--color-chapter1-from)] via-[var(--color-chapter1-via)] to-[var(--color-chapter1-to)] overflow-hidden flex flex-col justify-between pt-5 pb-14 border-b border-border-muted"
     >
       {/* Structural 4-Column Grid Spine */}
       <StructuralGridSpine variant={colors.isSage ? 'light' : 'dark'} />
@@ -410,11 +415,11 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
       </div>
 
       {/* Main Hero Container */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-8 flex-1 flex flex-col justify-between gap-6">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-8 flex-1 flex flex-col justify-between gap-5">
         {/* Top Hero Headline Stage (Scales down & blurs out as Portal expands on scroll) */}
         <div
           ref={headlineWrapRef}
-          className="w-full pt-4 md:pt-8 flex flex-col items-center text-center gap-5 will-change-transform"
+          className="w-full pt-2 md:pt-4 flex flex-col items-center text-center gap-3.5 will-change-transform"
         >
           {/* Eyebrow Pill Badge */}
           <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-surface-lowest/90 border border-primary/35 shadow-[0_0_24px_var(--color-border-glow)] backdrop-blur-md">
@@ -430,17 +435,17 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
             text="RAW SERVER LOGS TO EXPLAINED AI VERDICTS IN <10MS"
             accentWords={['EXPLAINED', 'AI', 'VERDICTS', '<10MS']}
             disabled={is2D}
-            className="font-display font-black text-3xl sm:text-5xl lg:text-6xl xl:text-[64px] text-text-primary tracking-tight leading-[1.04] max-w-5xl uppercase"
+            className="font-display font-black text-3xl sm:text-4xl lg:text-5xl xl:text-[56px] text-text-primary tracking-tight leading-[1.05] max-w-5xl uppercase"
           />
 
-          <p className="font-sans text-sm sm:text-base md:text-lg text-text-muted max-w-2xl leading-relaxed">
+          <p className="font-sans text-xs sm:text-sm md:text-base text-text-muted max-w-2xl leading-relaxed">
             Ingest high-velocity Syslog, ASA, FortiGate, Suricata, and Auth streams. Normalize into canonical{' '}
             <span className="font-mono font-bold text-primary">OCSF v1.1</span>, seal with{' '}
             <span className="font-mono font-bold text-secondary">SHA-256 Merkle proofs</span>, and surface explainable MITRE ATT&amp;CK verdicts.
           </p>
 
           {/* Primary & Secondary Stripe-Style Morphing CTAs */}
-          <div className="flex flex-wrap items-center justify-center gap-3.5 pt-1">
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-0.5">
             <StripeCtaButton to="/dashboard" variant="primary" cursorLabel="LAUNCH">
               Launch Live SOC Dashboard
             </StripeCtaButton>
@@ -453,7 +458,7 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
         {/* Expanding Glassmorphic Live log_ai SOC Terminal Portal */}
         <div
           ref={portalFrameRef}
-          className="w-full flex-1 min-h-[370px] md:min-h-[430px] bg-surface-lowest/95 border border-primary/35 shadow-[0_24px_80px_rgba(0,0,0,0.55),0_0_40px_var(--color-border-glow)] backdrop-blur-2xl flex flex-col justify-between overflow-hidden will-change-[clip-path,transform]"
+          className="w-full rounded-3xl bg-surface-lowest/95 border-2 border-primary/40 shadow-[0_24px_80px_rgba(0,0,0,0.55),0_0_40px_var(--color-border-glow)] backdrop-blur-2xl flex flex-col justify-between overflow-hidden will-change-transform"
         >
           {/* Portal Top Window Chrome */}
           <div className="px-4 sm:px-6 py-3 bg-surface-dim/95 border-b border-border-muted flex flex-wrap items-center justify-between gap-3 font-mono text-xs">
@@ -493,17 +498,17 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
           </div>
 
           {/* Portal Center Split: Live Ingest Stream Table + Real-Time AI Neural Verdict Inspector */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 flex-1 divide-y lg:divide-y-0 lg:divide-x divide-border-muted">
+          <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-border-muted">
             {/* Left 7 Columns: Live Streaming Telemetry Rows */}
-            <div className="lg:col-span-7 p-4 sm:p-5 flex flex-col justify-between gap-3 overflow-x-auto">
-              <div className="flex items-center justify-between font-mono text-[11px] text-text-dim pb-1 border-b border-border-muted/60">
-                <span>INBOUND SERVER LOG CONDUIT (UDP/5144 &amp; HTTP/8000)</span>
-                <span className="text-primary font-bold">
+            <div className="lg:col-span-7 p-4 sm:p-5 flex flex-col justify-between gap-3 min-w-0">
+              <div className="flex items-center justify-between gap-2 font-mono text-[11px] text-text-dim pb-1.5 border-b border-border-muted/60">
+                <span className="truncate">INBOUND SERVER LOG CONDUIT (UDP/5144 &amp; HTTP/8000)</span>
+                <span className="text-primary font-bold shrink-0">
                   {totalIngested.toLocaleString()} EVENTS INDEXED
                 </span>
               </div>
 
-              <div className="flex flex-col gap-2 my-auto">
+              <div className="flex flex-col gap-2">
                 {filteredEvents.map((evt) => {
                   const isSelected = evt.id === selectedEvent.id;
                   return (
@@ -569,13 +574,13 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
             </div>
 
             {/* Right 5 Columns: Selected Event OCSF + XAI Inspector */}
-            <div className="lg:col-span-5 p-4 sm:p-5 bg-surface-dim/60 flex flex-col justify-between gap-3 font-mono text-xs">
-              <div className="flex items-center justify-between border-b border-border-muted pb-2">
-                <span className="text-[11px] font-bold text-text-primary uppercase tracking-wider">
+            <div className="lg:col-span-5 p-4 sm:p-5 bg-surface-dim/60 flex flex-col justify-between gap-3 font-mono text-xs min-w-0">
+              <div className="flex items-center justify-between gap-2 border-b border-border-muted pb-2">
+                <span className="text-[11px] font-bold text-text-primary uppercase tracking-wider truncate">
                   INSPECTED PACKET // {selectedEvent.id}
                 </span>
                 <span
-                  className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getLevelBadgeClass(
+                  className={`px-2 py-0.5 rounded text-[10px] font-bold border shrink-0 ${getLevelBadgeClass(
                     selectedEvent.level
                   )}`}
                 >
@@ -583,26 +588,26 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
                 </span>
               </div>
 
-              <div className="p-3 rounded-xl bg-surface-lowest border border-border-muted space-y-2 text-[11px]">
-                <div className="flex justify-between">
-                  <span className="text-text-dim">OCSF_CLASS:</span>
-                  <span className="text-primary font-bold">{selectedEvent.ocsfClass}</span>
+              <div className="p-3.5 rounded-xl bg-surface-lowest border border-border-muted space-y-2.5 text-[11px]">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-text-dim shrink-0">OCSF_CLASS:</span>
+                  <span className="text-primary font-bold text-right truncate">{selectedEvent.ocsfClass}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-text-dim">CLASSIFICATION:</span>
-                  <span className="text-secondary font-bold">{selectedEvent.verdict}</span>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-text-dim shrink-0">CLASSIFICATION:</span>
+                  <span className="text-secondary font-bold text-right truncate">{selectedEvent.verdict}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-text-dim">ENDPOINT_TUPLE:</span>
-                  <span className="text-text-primary font-bold">{selectedEvent.src}</span>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-text-dim shrink-0">ENDPOINT_TUPLE:</span>
+                  <span className="text-text-primary font-bold text-right truncate">{selectedEvent.src}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-text-dim">MERKLE_SEAL:</span>
-                  <span className="text-tertiary font-bold">{selectedEvent.hash}</span>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-text-dim shrink-0">MERKLE_SEAL:</span>
+                  <span className="text-tertiary font-bold text-right truncate">{selectedEvent.hash}</span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between gap-2 pt-1">
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
                 <span className="text-[10px] text-text-dim">
                   SCROLL TO EXPAND PORTAL &amp; PIPELINE &darr;
                 </span>

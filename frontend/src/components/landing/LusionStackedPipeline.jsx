@@ -195,16 +195,57 @@ export function LusionStackedPipeline({ is2D = false }) {
 
   const useStackedPin = !is2D && !isMobileView;
 
+  const handleSelectStage = (targetIdx) => {
+    setActiveStageIdx(targetIdx);
+    const containerEl = cardsContainerRef.current;
+    if (!containerEl) return;
+    const cards = Array.from(containerEl.querySelectorAll('[data-pipeline-card]'));
+    cards.forEach((card, i) => {
+      if (i < targetIdx) {
+        const depth = targetIdx - i;
+        gsap.to(card, {
+          yPercent: -6 * depth,
+          scale: Math.max(0.84, 1 - depth * 0.08),
+          z: -80 * depth,
+          opacity: depth === 1 ? 0.45 : 0.2,
+          filter: `blur(${depth * 3}px)`,
+          duration: 0.55,
+          ease: 'power3.out',
+        });
+      } else if (i === targetIdx) {
+        gsap.to(card, {
+          yPercent: 0,
+          scale: 1,
+          z: 0,
+          opacity: 1,
+          filter: 'blur(0px)',
+          duration: 0.55,
+          ease: 'power3.out',
+        });
+      } else {
+        gsap.to(card, {
+          yPercent: 112,
+          scale: 1,
+          z: 0,
+          opacity: 0,
+          filter: 'blur(0px)',
+          duration: 0.55,
+          ease: 'power3.out',
+        });
+      }
+    });
+  };
+
   return (
     <section
       ref={sectionRef}
       id="sources"
-      className="relative w-full min-h-screen py-16 md:py-20 bg-gradient-to-b from-[var(--color-chapter2-from)] via-[var(--color-chapter2-via)] to-[var(--color-chapter2-to)] border-b border-border-muted overflow-hidden flex flex-col justify-between"
+      className="relative w-full min-h-[calc(100vh-4rem)] pt-10 pb-14 bg-gradient-to-b from-[var(--color-chapter2-from)] via-[var(--color-chapter2-via)] to-[var(--color-chapter2-to)] border-b border-border-muted overflow-hidden flex flex-col justify-between"
     >
       {/* Structural 4-Column Grid Spine */}
       <StructuralGridSpine variant={theme === 'sage' ? 'light' : 'dark'} />
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-8 flex flex-col gap-8 flex-1 justify-between">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-8 flex flex-col gap-5 flex-1 justify-between">
         {/* Stripe-Style Section Header */}
         <StripeSectionHeader
           chapterNum="CHAPTER 02"
@@ -221,7 +262,7 @@ export function LusionStackedPipeline({ is2D = false }) {
 
         {/* Stage Indicator Pills */}
         <div
-          className="flex flex-wrap items-center justify-between gap-3 pt-1"
+          className="flex flex-wrap items-center justify-between gap-3"
           role="tablist"
           aria-label="AI Classification Pipeline Stages"
         >
@@ -234,7 +275,7 @@ export function LusionStackedPipeline({ is2D = false }) {
                   type="button"
                   role="tab"
                   aria-selected={isCurrent}
-                  onClick={() => setActiveStageIdx(idx)}
+                  onClick={() => handleSelectStage(idx)}
                   className={`px-3.5 py-1.5 rounded-full font-mono text-xs font-bold transition-all border cursor-pointer ${
                     isCurrent
                       ? 'bg-primary text-surface-dim border-primary shadow-[0_0_16px_var(--color-border-glow)]'
@@ -256,7 +297,7 @@ export function LusionStackedPipeline({ is2D = false }) {
         {useStackedPin ? (
           <div
             ref={cardsContainerRef}
-            className="relative w-full flex-1 min-h-[430px] max-w-5xl mx-auto my-auto flex items-center justify-center"
+            className="relative w-full flex-1 min-h-[370px] max-w-5xl mx-auto my-auto flex items-center justify-center"
             style={{ perspective: '1400px', transformStyle: 'preserve-3d' }}
           >
             {PIPELINE_STAGES_3D.map((stage, idx) => (
