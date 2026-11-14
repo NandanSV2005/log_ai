@@ -211,7 +211,7 @@ export function StreamDetailPage() {
                   : threatLevel === 'HIGH'
                   ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
                   : threatLevel === 'MEDIUM'
-                  ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                  ? 'bg-[var(--color-severity-medium-bg)] text-[var(--color-severity-medium)] border border-[var(--color-severity-medium-border)]'
                   : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
               }`}
             >
@@ -333,7 +333,7 @@ export function StreamDetailPage() {
                               : evt.threat_level === 'HIGH'
                               ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
                               : evt.threat_level === 'MEDIUM'
-                              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                              ? 'bg-[var(--color-severity-medium-bg)] text-[var(--color-severity-medium)] border border-[var(--color-severity-medium-border)]'
                               : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                           }`}
                         >

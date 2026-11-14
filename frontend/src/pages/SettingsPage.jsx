@@ -63,7 +63,7 @@ export function SettingsPage({ pollingInterval, setPollingInterval, airGapped, s
               {theme === 'dark' && <span className="material-symbols-outlined text-primary">check_circle</span>}
             </div>
             <p className="text-xs text-text-muted">
-              Deep mocha background (`#1C1512`) with pale lavender accents (`#C9B8F0`). Ideal for low-light SOC command centers.
+              Deep mocha background (`#1B130F`) with champagne gold accents (`#E3C98F`). Ideal for low-light SOC command centers.
             </p>
           </div>
 
@@ -77,7 +77,7 @@ export function SettingsPage({ pollingInterval, setPollingInterval, airGapped, s
           >
             <div className="flex items-center justify-between mb-3">
               <span className="font-bold text-sm text-text-primary flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-secondary"></span>
+                <span className="w-3 h-3 rounded-full bg-primary"></span>
                 Powder (Light Mode)
               </span>
               {theme === 'sage' && <span className="material-symbols-outlined text-primary">check_circle</span>}

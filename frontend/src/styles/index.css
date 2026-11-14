@@ -15,6 +15,7 @@
   --color-primary-fixed: var(--color-primary-fixed);
   --color-primary-fixed-dim: var(--color-primary-fixed-dim);
   --color-secondary: var(--color-secondary);
+  --color-secondary-text: var(--color-secondary-text);
   --color-secondary-container: var(--color-secondary-container);
   --color-tertiary: var(--color-tertiary);
   --color-tertiary-container: var(--color-tertiary-container);
@@ -31,70 +32,79 @@
   --color-severity-low: var(--color-severity-low);
   --color-severity-low-bg: var(--color-severity-low-bg);
   --color-severity-low-border: var(--color-severity-low-border);
+  --color-status-info: var(--color-status-info);
+  --color-status-info-bg: var(--color-status-info-bg);
+  --color-status-info-border: var(--color-status-info-border);
 }
 
 :root, :root[data-theme="dark"] {
   color-scheme: dark;
-  --color-bg-dim: #1C1512;
-  --color-bg-surface: #261D19;
-  --color-bg-card: #2F2420;
-  --color-surface-lowest: #140E0C;
-  --color-surface-highest: #3A2D27;
-  --color-surface-dim: #1C1512;
-  --color-surface-bright: #342823;
-  --color-surface-variant: #342823;
-  --color-surface-hover: #3A2D27;
-  --color-text-main: #ECEAE6;
-  --color-text-muted: #B9B2AB;
-  --color-text-dim: #9E958E;
-  --color-primary: #C9B8F0;
-  --color-primary-fixed: #D9CCF6;
-  --color-primary-fixed-dim: #D9CCF6;
-  --color-on-primary-container: #2A1F3D;
-  --color-secondary: #C5C9D0;
-  --color-secondary-container: #383C42;
-  --color-tertiary: #D8C3B0;
-  --color-tertiary-container: #4A3A2E;
-  --color-border: #4A3A33;
-  --color-border-glow: rgba(201, 184, 240, 0.35);
+  --color-bg-dim: #1B130F;
+  --color-bg-surface: #251A15;
+  --color-bg-card: #2E211B;
+  --color-surface-lowest: #130D0A;
+  --color-surface-highest: #3A2A22;
+  --color-surface-dim: #1B130F;
+  --color-surface-bright: #34251E;
+  --color-surface-variant: #34251E;
+  --color-surface-hover: #3A2A22;
+  --color-text-main: #F1E9DD;
+  --color-text-muted: #BFB09F;
+  --color-text-dim: #A39281;
+  --color-primary: #E3C98F;
+  --color-primary-fixed: #EAD6A6;
+  --color-primary-fixed-dim: #EAD6A6;
+  --color-on-primary-container: #2A1D12;
+  --color-secondary: #B85C28;
+  --color-secondary-text: #DC7D43;
+  --color-secondary-container: #452310;
+  --color-on-secondary-container: #F1E9DD;
+  --color-tertiary: #CDB8A0;
+  --color-tertiary-container: #423325;
+  --color-on-tertiary-container: #2A1D12;
+  --color-border: #4D3A2F;
+  --color-border-glow: rgba(227, 201, 143, 0.30);
   --color-severity-critical: #FF4D94;
   --color-severity-critical-bg: rgba(255, 77, 148, 0.18);
   --color-severity-critical-border: rgba(255, 77, 148, 0.45);
-  --color-severity-high: #EF4444;
-  --color-severity-high-bg: rgba(239, 68, 68, 0.15);
-  --color-severity-high-border: rgba(239, 68, 68, 0.4);
-  --color-severity-medium: #F59E0B;
-  --color-severity-medium-bg: rgba(245, 158, 11, 0.15);
-  --color-severity-medium-border: rgba(245, 158, 11, 0.4);
+  --color-severity-high: #F66565;
+  --color-severity-high-bg: rgba(246, 101, 101, 0.16);
+  --color-severity-high-border: rgba(246, 101, 101, 0.42);
+  --color-severity-medium: #FACC15;
+  --color-severity-medium-bg: rgba(250, 204, 21, 0.16);
+  --color-severity-medium-border: rgba(250, 204, 21, 0.40);
   --color-severity-low: #10B981;
   --color-severity-low-bg: rgba(16, 185, 129, 0.15);
-  --color-severity-low-border: rgba(16, 185, 129, 0.4);
+  --color-severity-low-border: rgba(16, 185, 129, 0.40);
+  --color-status-info: #5BA3C7;
+  --color-status-info-bg: rgba(91, 163, 199, 0.15);
+  --color-status-info-border: rgba(91, 163, 199, 0.40);
 
-  --terminal-bg: #18110E;
-  --terminal-header-bg: #221915;
-  --terminal-text-main: #ECEAE6;
-  --terminal-text-muted: #B9B2AB;
-  --terminal-text-dim: #9E958E;
+  --terminal-bg: #160F0C;
+  --terminal-header-bg: #211712;
+  --terminal-text-main: #F1E9DD;
+  --terminal-text-muted: #BFB09F;
+  --terminal-text-dim: #A39281;
 
-  --color-chapter1-from: #221A24;
-  --color-chapter1-via: #1E161E;
-  --color-chapter1-to: #1C1512;
+  --color-chapter1-from: #241B12;
+  --color-chapter1-via: #1F1710;
+  --color-chapter1-to: #1B130F;
 
-  --color-chapter2-from: #1D1B1F;
-  --color-chapter2-via: #1A181B;
-  --color-chapter2-to: #181414;
+  --color-chapter2-from: #261811;
+  --color-chapter2-via: #21150F;
+  --color-chapter2-to: #1B130F;
 
-  --color-chapter3-from: #261C16;
-  --color-chapter3-via: #221914;
-  --color-chapter3-to: #1C1512;
+  --color-chapter3-from: #251C16;
+  --color-chapter3-via: #201813;
+  --color-chapter3-to: #1B130F;
 
-  --color-chapter4-from: #2A1F26;
-  --color-chapter4-via: #251C21;
-  --color-chapter4-to: #1F1716;
+  --color-chapter4-from: #2B1E14;
+  --color-chapter4-via: #261A12;
+  --color-chapter4-to: #1E1510;
 
-  --color-chapter5-from: #1C1512;
-  --color-chapter5-via: #18120F;
-  --color-chapter5-to: #140E0C;
+  --color-chapter5-from: #1B130F;
+  --color-chapter5-via: #17100C;
+  --color-chapter5-to: #130D0A;
 }
 
 :root[data-theme="sage"] {
@@ -120,6 +130,7 @@
 
   /* Secondary: Soft Lavender (WCAG AA adjusted from #7A68A8 to #715F9F for 4.63:1 on #EFEAF6) */
   --color-secondary: #715F9F;
+  --color-secondary-text: #715F9F;
   --color-secondary-container: #EDE8F7;
   --color-on-secondary-container: #2B2A3A;
 
@@ -143,6 +154,9 @@
   --color-severity-low: #157347;
   --color-severity-low-bg: rgba(21, 115, 71, 0.12);
   --color-severity-low-border: rgba(21, 115, 71, 0.35);
+  --color-status-info: #256685;
+  --color-status-info-bg: rgba(37, 102, 133, 0.12);
+  --color-status-info-border: rgba(37, 102, 133, 0.35);
 
   /* Technical Terminal in Powder Mode */
   --terminal-bg: #EFEAF6;
@@ -173,6 +187,11 @@
   --color-chapter5-to: #EFEAF6;
 }
 
+/* Use lightened burnt amber (#DC7D43) when secondary is used as text or small icon on dark backgrounds */
+:root:not([data-theme="sage"]) .text-secondary {
+  color: var(--color-secondary-text);
+}
+
 /* Prevent warm peach (--color-tertiary) from ever rendering as text in Powder mode */
 :root[data-theme="sage"] .text-tertiary {
   color: var(--color-primary);
@@ -184,18 +203,12 @@
   color: var(--color-on-primary-container);
 }
 
-/* Ensure semantic severity & warning text utilities meet WCAG AA (4.5:1+) on light Powder surfaces */
-:root[data-theme="sage"] .text-rose-300,
-:root[data-theme="sage"] .text-rose-400,
-:root[data-theme="sage"] .text-rose-500,
-:root[data-theme="sage"] .text-red-400 {
+/* Ensure semantic severity text utilities meet WCAG AA (4.5:1+) on both dark and light surfaces */
+.text-rose-300,
+.text-rose-400,
+.text-rose-500,
+.text-red-400 {
   color: var(--color-severity-high);
-}
-
-:root[data-theme="sage"] .text-amber-300,
-:root[data-theme="sage"] .text-amber-400,
-:root[data-theme="sage"] .text-amber-500 {
-  color: var(--color-severity-medium);
 }
 
 :root[data-theme="sage"] .text-emerald-300,
@@ -396,21 +409,35 @@ input[type="range"]:focus::-moz-range-thumb {
 }
 
 .btn-primary:hover {
-  filter: brightness(1.1);
+  background-color: var(--color-primary-fixed);
+  border-color: var(--color-primary-fixed);
+  box-shadow: 0 0 12px var(--color-border-glow);
+}
+
+.btn-primary:focus-visible {
+  outline: 2px solid var(--color-primary-fixed);
+  outline-offset: 2px;
   box-shadow: 0 0 12px var(--color-border-glow);
 }
 
 .btn-secondary {
   background-color: transparent;
-  color: var(--color-text-muted);
-  border: 1px solid var(--color-border);
+  color: var(--color-text-main);
+  border: 1px solid var(--color-primary);
   transition: all 0.2s ease;
 }
 
 .btn-secondary:hover {
-  color: var(--color-text-main);
-  border-color: var(--color-primary);
+  color: var(--color-primary-fixed);
+  border-color: var(--color-primary-fixed);
   background-color: var(--color-surface-hover);
+  box-shadow: 0 0 12px var(--color-border-glow);
+}
+
+.btn-secondary:focus-visible {
+  outline: 2px solid var(--color-primary-fixed);
+  outline-offset: 2px;
+  box-shadow: 0 0 12px var(--color-border-glow);
 }
 
 /* AI Copilot Primary Action Button */
@@ -428,7 +455,8 @@ input[type="range"]:focus::-moz-range-thumb {
 }
 
 .btn-copilot:hover {
-  filter: brightness(1.08);
+  background-color: var(--color-primary-fixed);
+  border-color: var(--color-primary-fixed);
   transform: translateY(-1px);
   box-shadow: 0 6px 20px var(--color-border-glow);
 }
@@ -439,7 +467,7 @@ input[type="range"]:focus::-moz-range-thumb {
 }
 
 .btn-copilot:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-primary-fixed);
   outline-offset: 3px;
 }
 

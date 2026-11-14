@@ -28,7 +28,7 @@ export const DEFAULT_RADAR_BLIPS = [
     sev: 'SEV 6.2',
     score: 6.2,
     level: 'MEDIUM',
-    colorHex: '#F59E0B'
+    colorHex: '#FACC15'
   },
   {
     id: 3,
@@ -270,8 +270,8 @@ function FlatRadarFallback({ blips, selectedBlip, onSelectBlip, themeColors }) {
                     blip.level === 'CRITICAL'
                       ? 'bg-[var(--color-severity-critical)]'
                       : blip.level === 'MEDIUM'
-                      ? 'bg-secondary'
-                      : 'bg-tertiary'
+                      ? 'bg-[var(--color-severity-medium)]'
+                      : 'bg-[var(--color-severity-low)]'
                   }`}
                 />
                 <span
@@ -281,8 +281,8 @@ function FlatRadarFallback({ blips, selectedBlip, onSelectBlip, themeColors }) {
                     blip.level === 'CRITICAL'
                       ? 'bg-[var(--color-severity-critical)]'
                       : blip.level === 'MEDIUM'
-                      ? 'bg-secondary'
-                      : 'bg-tertiary'
+                      ? 'bg-[var(--color-severity-medium)]'
+                      : 'bg-[var(--color-severity-low)]'
                   }`}
                 />
               </span>
@@ -350,7 +350,14 @@ export function ThreatRadar3D({
         )}
 
         {/* Selected Target HUD Overlay with Solid High-Contrast Shield (Guaranteed sweep occlusion) */}
-        {activeBlip && (
+        {activeBlip && (() => {
+          const sevColorVar =
+            activeBlip.level === 'CRITICAL'
+              ? 'var(--color-severity-critical)'
+              : activeBlip.level === 'MEDIUM'
+              ? 'var(--color-severity-medium)'
+              : 'var(--color-severity-low)';
+          return (
           <div className="absolute top-4 left-4 z-30 pointer-events-auto max-w-[280px] sm:max-w-xs">
             <div
               className="bg-surface-dim/95 border border-border-muted rounded-xl p-3 sm:p-3.5 shadow-2xl backdrop-blur-xl font-mono text-xs flex flex-col gap-2 transition-all duration-200"
@@ -363,11 +370,11 @@ export function ThreatRadar3D({
                 <div className="flex items-center gap-1.5">
                   <span
                     className="w-2 h-2 rounded-full animate-ping"
-                    style={{ backgroundColor: activeBlip.colorHex }}
+                    style={{ backgroundColor: sevColorVar }}
                   />
                   <span
                     className="font-bold text-[11px] tracking-wider uppercase"
-                    style={{ color: activeBlip.colorHex }}
+                    style={{ color: sevColorVar }}
                   >
                     TARGET // {activeBlip.sev}
                   </span>
@@ -375,9 +382,9 @@ export function ThreatRadar3D({
                 <span
                   className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
                   style={{
-                    color: activeBlip.colorHex,
-                    backgroundColor: `color-mix(in srgb, ${activeBlip.colorHex} 15%, transparent)`,
-                    border: `1px solid color-mix(in srgb, ${activeBlip.colorHex} 30%, transparent)`
+                    color: sevColorVar,
+                    backgroundColor: `color-mix(in srgb, ${sevColorVar} 15%, transparent)`,
+                    border: `1px solid color-mix(in srgb, ${sevColorVar} 30%, transparent)`
                   }}
                 >
                   {activeBlip.level}
@@ -409,7 +416,8 @@ export function ThreatRadar3D({
               </div>
             </div>
           </div>
-        )}
+          );
+        })()}
 
         {/* Radar Metrics Overlay Footer */}
         <div className="absolute bottom-3 left-4 font-mono text-[11px] text-tertiary/90 font-bold bg-surface-dim/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-tertiary/25 flex items-center gap-2 shadow-lg">
@@ -433,8 +441,8 @@ export function ThreatRadar3D({
               onClick={() => onSelectBlip(b)}
               className={`px-3 py-1.5 rounded-lg border font-mono text-[11px] transition-all flex items-center gap-2 cursor-pointer ${
                 isActive
-                  ? 'border-tertiary bg-tertiary/20 text-tertiary font-bold shadow-[0_0_12px_var(--color-border-glow)]'
-                  : 'border-border-muted bg-surface-dim text-text-muted hover:text-text-primary hover:border-tertiary/40'
+                  ? 'border-primary bg-primary/20 text-primary font-bold shadow-[0_0_12px_var(--color-border-glow)]'
+                  : 'border-border-muted bg-surface-dim text-text-muted hover:text-text-primary hover:border-primary/40'
               }`}
             >
               <span

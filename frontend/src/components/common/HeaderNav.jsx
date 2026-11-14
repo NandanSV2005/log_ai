@@ -86,7 +86,7 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
             onClick={() => setAirGapped(!airGapped)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md border font-semibold transition-all touch-target ${
               airGapped
-                ? 'bg-amber-500/15 text-amber-500 border-amber-500/40 shadow-[0_0_10px_rgba(245,158,11,0.2)]'
+                ? 'bg-[var(--color-status-info-bg)] text-[var(--color-status-info)] border-[var(--color-status-info-border)] shadow-[0_0_10px_rgba(91,163,199,0.2)]'
                 : 'bg-surface-container text-text-muted border-border-muted hover:text-text-primary'
             }`}
             title="Toggle Local Air-Gapped Heuristic Engine vs Live Gemini API"
@@ -118,7 +118,7 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
           <button
             onClick={() => setAirGapped(!airGapped)}
             className={`p-2 rounded-md border text-xs font-mono font-semibold flex items-center justify-center touch-target ${
-              airGapped ? 'bg-amber-500/15 text-amber-500 border-amber-500/40' : 'bg-surface-container text-text-muted border-border-muted'
+              airGapped ? 'bg-[var(--color-status-info-bg)] text-[var(--color-status-info)] border-[var(--color-status-info-border)]' : 'bg-surface-container text-text-muted border-border-muted'
             }`}
             aria-label="Toggle Air Gapped Mode"
           >

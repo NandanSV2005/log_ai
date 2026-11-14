@@ -181,7 +181,7 @@ action:
                     <span className={`font-bold px-2 py-0.5 rounded text-[11px] ${
                       ruleTestResult.matched_records_count > 0 
                         ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' 
-                        : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                        : 'bg-[var(--color-status-info-bg)] text-[var(--color-status-info)] border border-[var(--color-status-info-border)]'
                     }`}>
                       {ruleTestResult.matched_records_count} {ruleTestResult.matched_records_count === 1 ? 'event' : 'events'}
                     </span>
@@ -195,7 +195,7 @@ action:
                       </div>
                     </div>
                   ) : (
-                    <div className="p-2.5 rounded-lg bg-surface-dim/80 border border-amber-500/30 text-[11px] text-amber-300/90 italic leading-relaxed">
+                    <div className="p-2.5 rounded-lg bg-surface-dim/80 border border-[var(--color-status-info-border)] text-[11px] text-[var(--color-status-info)] italic leading-relaxed">
                       Zero events in the current store matched this rule's conditions. Modify the threshold (e.g. use threat_score_gte or lower threat_score_gt) or adjust event_type.
                     </div>
                   )}

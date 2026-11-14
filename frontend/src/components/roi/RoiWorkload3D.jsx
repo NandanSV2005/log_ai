@@ -326,7 +326,7 @@ export function RoiWorkload3D({
                     <div
                       className="absolute inset-0 border shadow-lg flex flex-col justify-between p-2 font-mono text-[9px] font-bold"
                       style={{
-                        background: 'linear-gradient(to top, color-mix(in srgb, var(--color-severity-high) 25%, transparent), var(--color-severity-high))',
+                        background: 'linear-gradient(to top, color-mix(in srgb, var(--color-severity-high) 35%, black), color-mix(in srgb, var(--color-severity-high) 85%, black))',
                         borderColor: 'var(--color-severity-high-border)',
                         color: '#ffffff',
                         transform: 'translateZ(16px)',
@@ -426,7 +426,7 @@ export function RoiWorkload3D({
                       style={{
                         background: 'linear-gradient(to top, color-mix(in srgb, var(--color-tertiary) 45%, var(--color-surface-dim)), var(--color-tertiary))',
                         borderColor: 'var(--color-tertiary)',
-                        color: '#1C1512',
+                        color: 'var(--color-on-tertiary-container)',
                         transform: 'translateZ(16px)',
                         backfaceVisibility: 'hidden',
                         boxShadow: '0 0 20px color-mix(in srgb, var(--color-tertiary) 35%, transparent)'
