@@ -6,6 +6,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 const LIVE_CLASSIFIER_SAMPLES = [
   {
     id: 'sim-sqli',
+    category: 'SQLi',
     raw: `192.168.1.104 - POST /api/v1/auth 401 "SELECT * FROM users WHERE '1'='1' --"`,
     ocsfJson: `{ "class": "HTTP Activity [4002]", "src_ip": "192.168.1.104", "attack": "SQL_INJECTION" }`,
     badge: '99.4% SQL_INJECTION | CRITICAL',
@@ -14,22 +15,25 @@ const LIVE_CLASSIFIER_SAMPLES = [
   },
   {
     id: 'sim-ssh',
+    category: 'Critical',
     raw: `sshd[21490]: Failed password for invalid user root from 185.220.101.5 port 52140 ssh2`,
     ocsfJson: `{ "class": "Authentication [3002]", "src_ip": "185.220.101.5", "attack": "SSH_BRUTE_FORCE" }`,
-    badge: '98.7% SSH_BRUTE_FORCE | HIGH',
-    level: 'HIGH',
+    badge: '98.7% SSH_BRUTE_FORCE | CRITICAL',
+    level: 'CRITICAL',
     mitre: 'T1110.001 Password Guessing',
   },
   {
     id: 'sim-c2',
-    raw: `Suricata[3819]: [1:2018959:4] ET C2 Beaconing Jitter 45.33.32.156:443 -> 10.0.0.5:51234`,
-    ocsfJson: `{ "class": "Security Finding [2001]", "src_ip": "45.33.32.156", "attack": "C2_EGRESS_JITTER" }`,
-    badge: '94.2% C2_EGRESS_JITTER | MEDIUM',
-    level: 'MEDIUM',
-    mitre: 'T1071 Application Layer Protocol',
+    category: 'SQLi',
+    raw: `nginx[8841]: 45.33.32.156 - GET /login?id=1%20UNION%20SELECT%20password,2%20FROM%20admins`,
+    ocsfJson: `{ "class": "HTTP Activity [4002]", "src_ip": "45.33.32.156", "attack": "UNION_SQL_INJECTION" }`,
+    badge: '96.8% UNION_SQLI | HIGH',
+    level: 'HIGH',
+    mitre: 'T1190 SQLi Union Extraction',
   },
   {
     id: 'sim-ok',
+    category: 'Normal',
     raw: `10.0.0.14 - GET /api/v1/healthz 200 1.4ms "kube-probe/1.30" TLSv1.3`,
     ocsfJson: `{ "class": "Network Activity [4001]", "src_ip": "10.0.0.14", "attack": "NORMAL_TRAFFIC" }`,
     badge: '98.9% NORMAL_TRAFFIC | INFO',
@@ -45,7 +49,7 @@ const GEO_NODES = [
     ip: '185.220.101.5',
     coords: '50.1109° N, 8.6821° E',
     cx: 215,
-    cy: 82,
+    cy: 78,
     level: 'CRITICAL',
     vector: 'SMB Lateral Probe (Port 445)',
     events: 142,
@@ -55,19 +59,19 @@ const GEO_NODES = [
     city: 'Ashburn, US',
     ip: '45.33.32.156',
     coords: '39.0438° N, 77.4874° W',
-    cx: 112,
+    cx: 108,
     cy: 108,
     level: 'MEDIUM',
-    vector: 'TLS C2 Beacon Anomaly',
+    vector: 'TLS C2 Beacon Jitter',
     events: 64,
   },
   {
     id: 'node-sg',
     city: 'Singapore, SG',
-    ip: '103.27.124.88',
+    ip: '103.253.41.18',
     coords: '1.3521° N, 103.8198° E',
-    cx: 318,
-    cy: 152,
+    cx: 356,
+    cy: 144,
     level: 'HIGH',
     vector: 'SSH Credential Stuffing',
     events: 89,
@@ -75,41 +79,98 @@ const GEO_NODES = [
 ];
 
 const EXPORT_FORMATS = {
-  CSV: `timestamp,ocsf_class,source_ip,destination_ip,threat_level,threat_score,sha256_seal
-2026-11-14T14:22:09Z,Network Activity,185.220.101.5,10.0.4.12,CRITICAL,94.2,c29d18b4fa8001a4e9b9
-2026-11-14T14:22:10Z,HTTP Activity,192.168.1.104,10.0.0.8,HIGH,86.5,3a11d084c912b4fa8001
-2026-11-14T14:22:11Z,Security Finding,45.33.32.156,10.0.0.5,MEDIUM,62.0,7d92e8b012c29d18b4fa`,
-  JSON: `{
-  "endpoint": "GET /api/v1/dashboard/export/csv",
-  "latency_ms": 8.4,
-  "merkle_root_verified": true,
-  "records_exported": 3,
-  "sample": {
-    "source_ip": "185.220.101.5",
-    "threat_level": "CRITICAL",
-    "confidence": 0.994,
-    "mitre_tactic": "T1021.002"
-  }
-}`,
+  CSV: `timestamp,event_id,ocsf_class,src_ip,dst_ip,threat_level,confidence,sha256_seal\n2026-09-08T11:42:01Z,SOC-9941,4001,185.220.101.5,10.0.4.12,CRITICAL,0.994,c29d18b4fa8001a4e9b98a3e7\n2026-09-08T11:42:00Z,SOC-9942,4002,192.168.1.104,10.0.0.8,HIGH,0.988,8f3c49e28ba709320e1d9a41b`,
+  JSON: `{\n  "schema": "OCSF_v1.1.0",\n  "export_latency_ms": 8.4,\n  "merkle_root": "0x9f84c29d18b4fa8001a4e9b98a3e7",\n  "records": [\n    { "id": "SOC-9941", "src": "185.220.101.5", "verdict": "SMB_LATERAL_PROBE", "severity": "CRITICAL" }\n  ]\n}`,
 };
 
+const STREAMED_AUDIT_ROWS = [
+  {
+    id: 'AUDIT-9948',
+    ts: '11:42:04.912Z',
+    summary: 'CSV/OCSF Batch #1,849 -> 142 events sealed & exported (8.2ms)',
+    hash: 'sha256:9f84c29d...98a3e7',
+  },
+  {
+    id: 'AUDIT-9949',
+    ts: '11:42:06.104Z',
+    summary: 'SIEM Webhook Dispatch -> Splunk HEC & Chronicle (6.7ms)',
+    hash: 'sha256:3a71bc09...41e82c',
+  },
+  {
+    id: 'AUDIT-9950',
+    ts: '11:42:08.450Z',
+    summary: 'Merkle Proof Verification -> 0 tampered leaves across 48,281 logs',
+    hash: 'sha256:d4128fe1...77c109',
+  },
+];
+
+/**
+ * Stripe Asymmetrical 12-Column Bento Grid Architecture with Diagonal Section Dividers
+ * and 4 Autonomous Live Micro-UIs inside 3D-Tilting Dual-Spotlight Cards.
+ */
 export function StripeBentoArchitecture({ is2D = false }) {
   const { theme } = useTheme();
-  const [activeLogIndex, setActiveLogIndex] = useState(0);
-  const [isAutoCycling, setIsAutoCycling] = useState(true);
-  const [selectedGeoNode, setSelectedGeoNode] = useState(GEO_NODES[0]);
-  const [noiseFilterPct, setNoiseFilterPct] = useState(94);
-  const [exportTab, setExportTab] = useState('CSV');
-  const [exportCopied, setExportCopied] = useState(false);
 
-  // Self-animating ticker for Card 1 (Live AI Log Stream & Classifier Simulator)
+  // Card 1 State: Live AI Log Stream & Classifier Simulator (1.8s cycle + Tokenizing shimmer + filter pills)
+  const [activeClassifierIdx, setActiveClassifierIdx] = useState(0);
+  const [classifierFilter, setClassifierFilter] = useState('All');
+  const [isTokenizing, setIsTokenizing] = useState(false);
+
+  // Card 2 State: Geo-IP Threat Radar Node Selection & Hover Tooltip
+  const [selectedGeoNode, setSelectedGeoNode] = useState(GEO_NODES[0]);
+
+  // Card 3 State: Interactive Noise Reduction & Confidence Threshold Slider
+  const [noiseFilterPct, setNoiseFilterPct] = useState(94);
+
+  // Card 4 State: SIEM Export Schema Tab, Celebratory Checkmark & Streamed Audit Preview Row
+  const [exportTab, setExportTab] = useState('CSV');
+  const [exportSimulated, setExportSimulated] = useState(false);
+  const [auditRowIdx, setAuditRowIdx] = useState(0);
+
+  const filteredClassifierSamples =
+    classifierFilter === 'All'
+      ? LIVE_CLASSIFIER_SAMPLES
+      : LIVE_CLASSIFIER_SAMPLES.filter((item) => {
+          if (classifierFilter === 'Critical') return item.level === 'CRITICAL';
+          if (classifierFilter === 'SQLi') return item.category === 'SQLi';
+          if (classifierFilter === 'Normal') return item.category === 'Normal';
+          return true;
+        });
+
   useEffect(() => {
-    if (!isAutoCycling || is2D) return undefined;
+    if (is2D) return undefined;
+    let shimmerTimeout = null;
     const timer = setInterval(() => {
-      setActiveLogIndex((prev) => (prev + 1) % LIVE_CLASSIFIER_SAMPLES.length);
-    }, 2800);
-    return () => clearInterval(timer);
-  }, [isAutoCycling, is2D]);
+      setIsTokenizing(true);
+      shimmerTimeout = setTimeout(() => {
+        setActiveClassifierIdx((prev) => (prev + 1) % LIVE_CLASSIFIER_SAMPLES.length);
+        setIsTokenizing(false);
+      }, 360);
+    }, 1800);
+    return () => {
+      clearInterval(timer);
+      if (shimmerTimeout) clearTimeout(shimmerTimeout);
+    };
+  }, [is2D]);
+
+  const currentSample =
+    filteredClassifierSamples[activeClassifierIdx % Math.max(1, filteredClassifierSamples.length)] ||
+    LIVE_CLASSIFIER_SAMPLES[0];
+
+  const rawIngestEventsPerMin = 18400;
+  const triagedIncidents = Math.max(
+    6,
+    Math.round(rawIngestEventsPerMin * ((100 - noiseFilterPct) / 100) * 0.04)
+  );
+
+  const handleSimulateExport = () => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(EXPORT_FORMATS[exportTab]).catch(() => {});
+    }
+    setExportSimulated(true);
+    setAuditRowIdx((prev) => (prev + 1) % STREAMED_AUDIT_ROWS.length);
+    setTimeout(() => setExportSimulated(false), 2400);
+  };
 
   const getBadgeStyle = (level) => {
     if (level === 'CRITICAL') {
@@ -121,33 +182,21 @@ export function StripeBentoArchitecture({ is2D = false }) {
     if (level === 'MEDIUM') {
       return 'bg-[var(--color-severity-medium-bg)] text-[var(--color-severity-medium)] border-[var(--color-severity-medium-border)]';
     }
-    return 'bg-[var(--color-status-info-bg)] text-[var(--color-status-info)] border-[var(--color-status-info-border)]';
+    return 'bg-[var(--color-severity-low-bg)] text-[var(--color-severity-low)] border-[var(--color-severity-low-border)]';
   };
 
-  const rawFloodCount = 12400;
-  const triagedIncidentCount = Math.max(
-    18,
-    Math.round(rawFloodCount * ((100 - noiseFilterPct) / 100) * 0.12)
-  );
-
-  const handleCopyPreview = () => {
-    if (navigator?.clipboard) {
-      navigator.clipboard.writeText(EXPORT_FORMATS[exportTab]).catch(() => {});
-    }
-    setExportCopied(true);
-    setTimeout(() => setExportCopied(false), 1800);
-  };
+  const activeAuditRow = STREAMED_AUDIT_ROWS[auditRowIdx];
 
   return (
     <section
       id="bento-architecture"
-      className="relative w-full py-24 md:py-32 overflow-hidden border-b border-border-muted"
+      className="relative w-full py-24 md:py-28 bg-gradient-to-b from-[var(--color-chapter3-from)] via-[var(--color-chapter3-via)] to-[var(--color-chapter3-to)] border-b border-border-muted overflow-hidden"
     >
-      {/* Stripe Signature Angled Section Background Layer (skewY(-4deg) while keeping content un-skewed) */}
+      {/* Stripe Angled Section Background Layer (skewY -4deg while keeping interior content un-skewed) */}
       <div
-        className="pointer-events-none absolute inset-0 -my-12 bg-gradient-to-b from-[var(--color-chapter3-from)] via-[var(--color-chapter3-via)] to-[var(--color-chapter3-to)] border-y border-primary/25 origin-center"
-        style={{ transform: 'skewY(-4deg)' }}
         aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-12 bottom-12 -z-0 bg-surface-lowest/45 border-y border-primary/20 shadow-[0_0_90px_var(--color-border-glow)]"
+        style={{ transform: 'skewY(-4deg)', transformOrigin: 'center center' }}
       />
 
       {/* Structural 4-Column Vertical Grid Spine */}
@@ -159,98 +208,142 @@ export function StripeBentoArchitecture({ is2D = false }) {
       >
         {/* Stripe-Style Section Header */}
         <StripeSectionHeader
-          chapterNum="CHAPTER 03"
+          chapterNum="CHAPTER 02"
           eyebrow="MODULAR SOC TELEMETRY ARCHITECTURE"
-          title="ASYMMETRICAL BENTO COMMAND MATRIX & LIVE MICRO-UIS"
-          accentWords={['BENTO', 'COMMAND', 'MATRIX', 'MICRO-UIS']}
-          subtitle="Interact directly with our four core SOC engines below: real-time log-to-JSON semantic classification, Geo-IP attack vector mapping, 94% noise suppression, and sub-12ms SIEM audit exports."
+          title="ASYMMETRICAL BENTO COMMAND & LIVE MICRO-ENGINES"
+          accentWords={['BENTO', 'COMMAND', 'MICRO-ENGINES']}
+          subtitle="Explore interactive telemetry micro-UIs engineered with Stripe's modular precision—streaming OCSF log classification, Geo-IP attack radar, noise reduction, and instant SIEM exports."
           disabled={is2D}
           metrics={[
-            { label: 'API ENDPOINT LATENCY', value: '< 12ms' },
-            { label: 'NOISE SUPPRESSION', value: `${noiseFilterPct}.0%` },
+            { label: 'NOISE REDUCTION', value: `${noiseFilterPct}%` },
+            { label: 'EXPORT LATENCY', value: '< 12ms' },
           ]}
         />
 
-        {/* Asymmetrical 12-Column Bento Grid (Span 7 + Span 5, then Span 5 + Span 7) */}
-        <div className="grid grid-cols-12 gap-6 lg:gap-7 items-stretch">
+        {/* Asymmetrical 12-Column Bento Grid (7 + 5 on Row 1, 5 + 7 on Row 2) */}
+        <div className="grid grid-cols-12 gap-6 items-stretch">
           {/* =============================================================== */}
           {/* CARD 1 (Span 7): Live AI Log Stream & Classifier Simulator      */}
           {/* =============================================================== */}
           <div className="col-span-12 lg:col-span-7 flex">
             <SpotlightCard
+              disableTilt={is2D}
               spotlightColor="var(--color-border-glow)"
-              className="w-full p-6 sm:p-7 rounded-3xl bg-surface-lowest/95 border border-primary/35 shadow-2xl flex flex-col justify-between gap-6"
+              className="w-full p-6 sm:p-7 rounded-3xl bg-surface-lowest/95 border border-primary/35 shadow-2xl flex flex-col justify-between gap-5"
             >
-              {/* Card Header (35% narrative) */}
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between font-mono text-xs">
+              {/* Top 35% Copy & Interactive Category Filter Pills */}
+              <div className="flex flex-col gap-2.5">
+                <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-xs">
                   <span className="text-primary font-bold uppercase tracking-wider flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                    <span className="w-2 h-2 rounded-full bg-primary animate-ping" />
                     01 // LIVE AI LOG STREAM &amp; CLASSIFIER SIMULATOR
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => setIsAutoCycling(!isAutoCycling)}
-                    className="px-2.5 py-1 rounded-md bg-surface border border-border-muted text-[10px] font-mono font-bold text-text-muted hover:text-primary hover:border-primary/40 cursor-pointer"
-                  >
-                    {isAutoCycling ? 'PAUSE STREAM' : 'RESUME STREAM'}
-                  </button>
+
+                  {/* Interactive Filter Pills (All, Critical, SQLi, Normal) */}
+                  <div className="flex items-center gap-1">
+                    {['All', 'Critical', 'SQLi', 'Normal'].map((pill) => (
+                      <button
+                        key={pill}
+                        type="button"
+                        data-filter-pill
+                        onClick={() => {
+                          setClassifierFilter(pill);
+                          setActiveClassifierIdx(0);
+                        }}
+                        className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold border transition-all cursor-pointer ${
+                          classifierFilter === pill
+                            ? 'bg-primary text-surface-dim border-primary shadow-[0_0_10px_var(--color-border-glow)]'
+                            : 'bg-surface border-border-muted text-text-muted hover:text-text-primary'
+                        }`}
+                      >
+                        {pill}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <h3 className="font-display font-black text-xl sm:text-2xl text-text-primary tracking-tight">
-                  Unstructured Server Logs &rarr; Structured OCSF JSON Badges
+                  Unstructured Syslog to Classified OCSF JSON
                 </h3>
                 <p className="font-sans text-xs sm:text-sm text-text-muted leading-relaxed">
-                  Click any inbound log frame to inspect how raw Nginx, SSH, and Suricata strings dynamically morph into confidence-scored MITRE ATT&amp;CK verdicts.
+                  Watch raw server log lines stream every 1.8s through a live tokenizing pass before morphing into structured OCSF v1.1 records.
                 </p>
               </div>
 
-              {/* Interactive Micro-UI (65% of card) */}
+              {/* Bottom 65% Interactive Self-Animating Micro-UI */}
               <div className="p-4 sm:p-5 rounded-2xl bg-surface-dim border border-border-muted flex flex-col justify-between gap-3.5 font-mono text-xs flex-1">
-                <div className="flex items-center justify-between text-[10px] text-text-dim pb-2 border-b border-border-muted/70">
-                  <span>LIVE_INGEST_STREAM // /api/v1/ingest</span>
-                  <span className="text-primary font-bold">OCSF v1.1 PARSER ACTIVE</span>
+                {/* Selector Tabs for the 4 Live Samples */}
+                <div className="flex flex-wrap items-center justify-between gap-1.5 pb-2.5 border-b border-border-muted">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {filteredClassifierSamples.map((sample, idx) => {
+                      const isActive = sample.id === currentSample.id;
+                      return (
+                        <button
+                          key={sample.id}
+                          type="button"
+                          data-filter-pill
+                          onClick={() => {
+                            setIsTokenizing(true);
+                            setTimeout(() => {
+                              setActiveClassifierIdx(idx);
+                              setIsTokenizing(false);
+                            }, 220);
+                          }}
+                          className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all cursor-pointer ${
+                            isActive
+                              ? 'bg-primary text-surface-dim border-primary'
+                              : 'bg-surface border-border-muted text-text-muted hover:text-text-primary'
+                          }`}
+                        >
+                          STREAM 0{idx + 1}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <span
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-all ${
+                      isTokenizing
+                        ? 'bg-secondary/20 text-secondary border-secondary/40 animate-pulse'
+                        : 'bg-[var(--color-status-info-bg)] text-[var(--color-status-info)] border-[var(--color-status-info-border)]'
+                    }`}
+                  >
+                    {isTokenizing ? '⚡ TOKENIZING STREAM...' : '● CLASSIFIED IN 1.8ms'}
+                  </span>
                 </div>
 
-                {/* Streaming Log Lines Selector */}
-                <div className="flex flex-col gap-2">
-                  {LIVE_CLASSIFIER_SAMPLES.map((item, idx) => {
-                    const isCurrent = idx === activeLogIndex;
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => {
-                          setActiveLogIndex(idx);
-                          setIsAutoCycling(false);
-                        }}
-                        className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer flex flex-col gap-2 ${
-                          isCurrent
-                            ? 'bg-surface-lowest border-primary shadow-[0_0_20px_var(--color-border-glow)]'
-                            : 'bg-surface/60 border-border-muted/70 opacity-75 hover:opacity-100 hover:border-primary/40'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <code className="text-[11px] text-text-primary truncate font-mono">
-                            {item.raw}
-                          </code>
-                          <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-bold border shrink-0 ${getBadgeStyle(
-                              item.level
-                            )}`}
-                          >
-                            {item.badge}
-                          </span>
-                        </div>
+                {/* Raw Unstructured Input Line */}
+                <div className="p-3 rounded-xl bg-surface-lowest border border-border-muted space-y-1">
+                  <div className="flex items-center justify-between text-[10px] text-text-dim">
+                    <span>RAW_SERVER_STREAM // INBOUND</span>
+                    <span className="text-secondary font-bold">UTF-8 SYSLOG</span>
+                  </div>
+                  <p className="text-[11px] text-text-primary break-all leading-relaxed">
+                    {currentSample.raw}
+                  </p>
+                </div>
 
-                        {isCurrent && (
-                          <div className="pt-2 border-t border-border-muted/60 flex flex-wrap items-center justify-between gap-2 text-[10px] text-secondary">
-                            <code className="text-primary truncate">{item.ocsfJson}</code>
-                            <span className="text-tertiary font-bold">{item.mitre}</span>
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
+                {/* Morphing Arrow & Classified Output */}
+                <div
+                  className={`p-3 rounded-xl bg-surface-lowest border transition-all duration-200 space-y-2 ${
+                    isTokenizing
+                      ? 'border-secondary/50 opacity-75 blur-[0.5px]'
+                      : 'border-primary/35 opacity-100 blur-0'
+                  }`}
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-[10px] text-primary font-bold">
+                      {isTokenizing ? 'PARSING OCSF TOKENS...' : `OCSF_NORMALIZED // ${currentSample.mitre}`}
+                    </span>
+                    <span
+                      className={`px-2.5 py-0.5 rounded text-[10px] font-bold border ${getBadgeStyle(
+                        currentSample.level
+                      )}`}
+                    >
+                      {isTokenizing ? 'EVALUATING...' : currentSample.badge}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-primary break-all">
+                    {currentSample.ocsfJson}
+                  </p>
                 </div>
               </div>
             </SpotlightCard>
@@ -261,134 +354,84 @@ export function StripeBentoArchitecture({ is2D = false }) {
           {/* =============================================================== */}
           <div className="col-span-12 lg:col-span-5 flex">
             <SpotlightCard
+              disableTilt={is2D}
               spotlightColor="color-mix(in srgb, var(--color-secondary) 22%, transparent)"
-              className="w-full p-6 sm:p-7 rounded-3xl bg-surface-lowest/95 border border-secondary/35 shadow-2xl flex flex-col justify-between gap-6"
+              className="w-full p-6 sm:p-7 rounded-3xl bg-surface-lowest/95 border border-secondary/35 shadow-2xl flex flex-col justify-between gap-5"
             >
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between font-mono text-xs">
                   <span className="text-secondary font-bold uppercase tracking-wider flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-secondary animate-ping" />
-                    02 // GEO-IP THREAT RADAR &amp; NODE MAP
+                    <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+                    02 // GEO-IP THREAT RADAR
                   </span>
-                  <span className="px-2 py-0.5 rounded bg-surface border border-border-muted text-[10px] font-mono text-primary font-bold">
-                    3 ACTIVE ARCS
-                  </span>
+                  <span className="text-[10px] text-text-dim">3 LIVE VECTORS</span>
                 </div>
                 <h3 className="font-display font-black text-xl sm:text-2xl text-text-primary tracking-tight">
-                  Sub-Millisecond Geo-IP Vector Telemetry
+                  Global Attack Arcs &amp; IP Telemetry
                 </h3>
                 <p className="font-sans text-xs sm:text-sm text-text-muted leading-relaxed">
-                  Select an origin node on the vector radar to inspect live attacker ASN coordinates and bezier ingress trajectories.
+                  Hover or select any origin node to inspect live Geo-IP coordinates and quadratic bezier attack trajectories.
                 </p>
               </div>
 
-              {/* Interactive Vector Globe / Bezier Attack Arcs Micro-UI (65% of card) */}
+              {/* Interactive Vector Radar Map Micro-UI (65% of card) */}
               <div className="p-4 rounded-2xl bg-surface-dim border border-border-muted flex flex-col justify-between gap-3 flex-1 font-mono text-xs">
-                <div className="relative w-full h-48 rounded-xl bg-surface-lowest border border-border-muted/70 overflow-hidden flex items-center justify-center">
+                <div className="relative w-full h-44 rounded-xl bg-surface-lowest border border-border-muted overflow-hidden">
                   <svg
-                    viewBox="0 0 420 210"
+                    viewBox="0 0 440 200"
                     className="w-full h-full"
-                    aria-label="Interactive Geo-IP Threat Vector Map"
+                    aria-label="Interactive Geo-IP Threat Radar Map"
                   >
-                    {/* Subtle Latitude / Longitude Grid Lines */}
-                    {[42, 84, 126, 168].map((y) => (
-                      <line
-                        key={`lat-${y}`}
-                        x1="0"
-                        y1={y}
-                        x2="420"
-                        y2={y}
-                        stroke="var(--color-border)"
-                        strokeDasharray="3 5"
-                        strokeWidth="1"
-                        opacity="0.45"
-                      />
-                    ))}
-                    {[70, 140, 210, 280, 350].map((x) => (
-                      <line
-                        key={`lon-${x}`}
-                        x1={x}
-                        y1="0"
-                        x2={x}
-                        y2="210"
-                        stroke="var(--color-border)"
-                        strokeDasharray="3 5"
-                        strokeWidth="1"
-                        opacity="0.45"
-                      />
-                    ))}
+                    {/* Subtle Lat/Long Grid */}
+                    <g stroke="var(--color-border)" strokeWidth="0.6" strokeDasharray="3 3" opacity="0.55">
+                      <line x1="0" y1="50" x2="440" y2="50" />
+                      <line x1="0" y1="100" x2="440" y2="100" />
+                      <line x1="0" y1="150" x2="440" y2="150" />
+                      <line x1="110" y1="0" x2="110" y2="200" />
+                      <line x1="220" y1="0" x2="220" y2="200" />
+                      <line x1="330" y1="0" x2="330" y2="200" />
+                    </g>
 
-                    {/* SOC Core Destination Hub (Center-Right) */}
-                    <circle
-                      cx="265"
-                      cy="125"
-                      r="14"
-                      fill="none"
-                      stroke="var(--color-primary)"
-                      strokeWidth="1.5"
-                      opacity="0.45"
-                    />
-                    <circle cx="265" cy="125" r="5" fill="var(--color-primary)" />
-                    <text
-                      x="265"
-                      y="148"
-                      textAnchor="middle"
-                      fill="var(--color-primary)"
-                      fontSize="9"
-                      fontFamily="monospace"
-                      fontWeight="bold"
-                    >
-                      SOC CORE [10.0.4.12]
-                    </text>
-
-                    {/* Animated Bezier Attack Arcs from Threat Origins to SOC Core */}
+                    {/* Animated Quadratic Bezier Attack Arcs converging on SOC Hub (290, 118) */}
                     {GEO_NODES.map((node) => {
-                      const isSelected = selectedGeoNode.id === node.id;
-                      const strokeCol =
-                        node.level === 'CRITICAL'
-                          ? 'var(--color-severity-critical)'
-                          : node.level === 'HIGH'
-                          ? 'var(--color-severity-high)'
-                          : 'var(--color-severity-medium)';
-                      const midX = (node.cx + 265) / 2;
-                      const midY = Math.min(node.cy, 125) - 42;
-                      const pathD = `M ${node.cx} ${node.cy} Q ${midX} ${midY} 265 125`;
-
+                      const isSel = node.id === selectedGeoNode.id;
+                      const midX = (node.cx + 290) / 2;
+                      const midY = Math.min(node.cy, 118) - 44;
                       return (
-                        <g
-                          key={node.id}
-                          onClick={() => setSelectedGeoNode(node)}
-                          className="cursor-pointer"
-                        >
+                        <g key={node.id}>
+                          {/* Base subtle arc */}
                           <path
-                            d={pathD}
+                            d={`M ${node.cx} ${node.cy} Q ${midX} ${midY} 290 118`}
                             fill="none"
-                            stroke={strokeCol}
-                            strokeWidth={isSelected ? '2.5' : '1.5'}
-                            strokeDasharray="6 4"
-                            className="animate-dash-flow"
-                            opacity={isSelected ? '1' : '0.55'}
+                            stroke="var(--color-border)"
+                            strokeWidth="1"
+                            opacity="0.5"
+                          />
+                          {/* Animated glowing dash arc */}
+                          <path
+                            d={`M ${node.cx} ${node.cy} Q ${midX} ${midY} 290 118`}
+                            fill="none"
+                            stroke={isSel ? 'var(--color-primary)' : 'var(--color-secondary)'}
+                            strokeWidth={isSel ? '2.4' : '1.5'}
+                            strokeDasharray="6 5"
+                            className="animate-flow-dash"
+                            opacity={isSel ? '1' : '0.6'}
                           />
                           <circle
                             cx={node.cx}
                             cy={node.cy}
-                            r={isSelected ? '11' : '7'}
-                            fill={strokeCol}
-                            opacity="0.22"
-                          />
-                          <circle
-                            cx={node.cx}
-                            cy={node.cy}
-                            r={isSelected ? '5.5' : '4'}
-                            fill={strokeCol}
+                            r={isSel ? '8' : '5.5'}
+                            fill={isSel ? 'var(--color-primary)' : 'var(--color-secondary)'}
+                            className="cursor-pointer transition-all"
+                            onMouseEnter={() => setSelectedGeoNode(node)}
+                            onClick={() => setSelectedGeoNode(node)}
                           />
                           <text
                             x={node.cx}
-                            y={node.cy - 10}
+                            y={node.cy - 11}
                             textAnchor="middle"
                             fill="var(--color-text-main)"
                             fontSize="9"
-                            fontFamily="monospace"
                             fontWeight="bold"
                           >
                             {node.city}
@@ -396,53 +439,70 @@ export function StripeBentoArchitecture({ is2D = false }) {
                         </g>
                       );
                     })}
+
+                    {/* Destination SOC Core Node */}
+                    <circle
+                      cx="290"
+                      cy="118"
+                      r="9"
+                      fill="var(--color-tertiary)"
+                      opacity="0.25"
+                    />
+                    <circle
+                      cx="290"
+                      cy="118"
+                      r="4.5"
+                      fill="var(--color-primary)"
+                    />
+                    <text
+                      x="290"
+                      y="136"
+                      textAnchor="middle"
+                      fill="var(--color-primary)"
+                      fontSize="8.5"
+                      fontWeight="bold"
+                    >
+                      LOG_AI SOC CORE
+                    </text>
                   </svg>
                 </div>
 
-                {/* Selected Origin Node Telemetry Tooltip Strip */}
-                <div className="p-3 rounded-xl bg-surface-lowest border border-border-muted flex flex-col gap-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-primary">
-                      {selectedGeoNode.city} ({selectedGeoNode.ip})
-                    </span>
-                    <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getBadgeStyle(
-                        selectedGeoNode.level
-                      )}`}
+                {/* Node Selector Pills */}
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {GEO_NODES.map((node) => (
+                    <button
+                      key={node.id}
+                      type="button"
+                      data-filter-pill
+                      onMouseEnter={() => setSelectedGeoNode(node)}
+                      onClick={() => setSelectedGeoNode(node)}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all cursor-pointer ${
+                        selectedGeoNode.id === node.id
+                          ? 'bg-primary text-surface-dim border-primary'
+                          : 'bg-surface border-border-muted text-text-muted hover:text-text-primary'
+                      }`}
                     >
-                      {selectedGeoNode.level} // {selectedGeoNode.events} EVTS
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-[10px] text-text-muted">
-                    <span>{selectedGeoNode.vector}</span>
-                    <span className="text-text-dim">{selectedGeoNode.coords}</span>
-                  </div>
+                      {node.ip}
+                    </button>
+                  ))}
                 </div>
 
-                {/* Node Quick-Selector Pills */}
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex flex-wrap gap-1.5">
-                    {GEO_NODES.map((n) => (
-                      <button
-                        key={n.id}
-                        type="button"
-                        onClick={() => setSelectedGeoNode(n)}
-                        className={`px-2.5 py-1 rounded-md text-[10px] font-bold border transition-all cursor-pointer ${
-                          selectedGeoNode.id === n.id
-                            ? 'bg-primary text-surface-dim border-primary'
-                            : 'bg-surface border-border-muted text-text-muted hover:text-text-primary'
-                        }`}
-                      >
-                        {n.city.split(',')[0]}
-                      </button>
-                    ))}
+                {/* Selected Geo-IP Telemetry Details */}
+                <div className="p-2.5 rounded-xl bg-surface-lowest border border-border-muted flex items-center justify-between gap-2 text-[11px]">
+                  <div className="min-w-0">
+                    <div className="font-bold text-text-primary truncate">
+                      {selectedGeoNode.city} // {selectedGeoNode.coords}
+                    </div>
+                    <div className="text-[10px] text-secondary truncate">
+                      {selectedGeoNode.vector} ({selectedGeoNode.events} events)
+                    </div>
                   </div>
                   <StripeCtaButton
                     to="/threat-intel"
                     variant="secondary"
-                    className="!px-3 !py-1 !text-[10px]"
+                    className="!px-3 !py-1.5 !text-[10px] shrink-0"
                   >
-                    Full Map
+                    Threat Map
                   </StripeCtaButton>
                 </div>
               </div>
@@ -454,70 +514,76 @@ export function StripeBentoArchitecture({ is2D = false }) {
           {/* =============================================================== */}
           <div className="col-span-12 lg:col-span-5 flex">
             <SpotlightCard
-              spotlightColor="color-mix(in srgb, var(--color-tertiary) 20%, transparent)"
-              className="w-full p-6 sm:p-7 rounded-3xl bg-surface-lowest/95 border border-tertiary/35 shadow-2xl flex flex-col justify-between gap-6"
+              disableTilt={is2D}
+              spotlightColor="color-mix(in srgb, var(--color-tertiary) 22%, transparent)"
+              className="w-full p-6 sm:p-7 rounded-3xl bg-surface-lowest/95 border border-tertiary/35 shadow-2xl flex flex-col justify-between gap-5"
             >
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between font-mono text-xs">
-                  <span className="text-tertiary font-bold uppercase tracking-wider flex items-center gap-2">
+                  <span className="text-primary font-bold uppercase tracking-wider flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-tertiary animate-pulse" />
-                    03 // ZERO-LATENCY NOISE REDUCTION &amp; TRIAGE
+                    03 // NOISE-TO-SIGNAL COMPRESSION
                   </span>
-                  <span className="px-2 py-0.5 rounded bg-primary/15 border border-primary/30 text-primary font-bold text-[10px]">
-                    -{noiseFilterPct}% FLOOD
+                  <span className="text-[10px] font-bold text-primary">
+                    -{noiseFilterPct}% ALERT FATIGUE
                   </span>
                 </div>
                 <h3 className="font-display font-black text-xl sm:text-2xl text-text-primary tracking-tight">
-                  Suppress Chaotic Log Floods into Actionable Clusters
+                  Zero-Latency Severity Triage
                 </h3>
                 <p className="font-sans text-xs sm:text-sm text-text-muted leading-relaxed">
-                  Drag the Isolation Forest suppression threshold slider to filter repetitive keepalives down into high-severity incident clusters.
+                  Drag the AI confidence threshold slider to filter chaotic log floods into correlated incident clusters.
                 </p>
               </div>
 
-              {/* Interactive Noise Suppression Slider & Sparkline Micro-UI (65% of card) */}
+              {/* Interactive Noise Filter Micro-UI (65% of card) */}
               <div className="p-4 sm:p-5 rounded-2xl bg-surface-dim border border-border-muted flex flex-col justify-between gap-4 flex-1 font-mono text-xs">
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
                     <label
                       htmlFor="bento-noise-slider"
-                      className="text-[11px] font-bold text-text-muted uppercase"
+                      className="text-[11px] font-bold text-text-primary"
                     >
-                      ISOLATION FOREST SUPPRESSION THRESHOLD
+                      AI DEDUPLICATION THRESHOLD
                     </label>
-                    <span className="text-base font-extrabold text-primary">
-                      {noiseFilterPct}% Filtered
+                    <span className="text-lg font-extrabold text-primary">
+                      {noiseFilterPct}% FILTERED
                     </span>
                   </div>
                   <input
                     id="bento-noise-slider"
                     type="range"
-                    min="60"
-                    max="98"
+                    min="70"
+                    max="99"
                     step="1"
                     value={noiseFilterPct}
-                    onChange={(e) => setNoiseFilterPct(Number(e.target.value))}
-                    className="w-full h-2 bg-surface-lowest border border-primary/35 rounded-lg appearance-none cursor-pointer accent-primary"
+                    onChange={(e) => setNoiseFilterPct(parseInt(e.target.value, 10))}
+                    className="w-full cursor-pointer"
                   />
+                  <div className="flex justify-between text-[10px] text-text-dim">
+                    <span>70% (Verbose)</span>
+                    <span>94% (Recommended SOC)</span>
+                    <span>99% (Critical Only)</span>
+                  </div>
                 </div>
 
-                {/* Before vs After Sparkline Bars */}
+                {/* Before vs After Compression Comparison */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 rounded-xl bg-surface-lowest border border-border-muted flex flex-col gap-1">
-                    <span className="text-[10px] text-text-dim uppercase">RAW LOG FLOOD</span>
-                    <span className="text-lg font-extrabold text-text-primary">
-                      {rawFloodCount.toLocaleString()} / min
+                  <div className="p-3 rounded-xl bg-surface-lowest border border-border-muted">
+                    <span className="text-[10px] text-text-dim block">RAW LOG FLOOD</span>
+                    <span className="text-base font-extrabold text-text-primary">
+                      {rawIngestEventsPerMin.toLocaleString()}/min
                     </span>
-                    <span className="text-[10px] text-text-muted">Unfiltered Syslog/Auth</span>
+                    <span className="text-[10px] text-secondary block">Unfiltered Syslog</span>
                   </div>
-                  <div className="p-3 rounded-xl bg-surface-lowest border border-primary/40 flex flex-col gap-1">
-                    <span className="text-[10px] text-primary uppercase font-bold">
-                      TRIAGED INCIDENTS
+                  <div className="p-3 rounded-xl bg-surface-lowest border border-primary/40 shadow-[0_0_16px_var(--color-border-glow)]">
+                    <span className="text-[10px] text-primary font-bold block">
+                      ACTIONABLE INCIDENTS
                     </span>
-                    <span className="text-lg font-extrabold text-primary">
-                      {triagedIncidentCount} Clusters
+                    <span className="text-base font-extrabold text-primary">
+                      {triagedIncidents} Clusters
                     </span>
-                    <span className="text-[10px] text-tertiary font-bold">
+                    <span className="text-[10px] text-tertiary font-bold block">
                       High-Priority Only
                     </span>
                   </div>
@@ -537,7 +603,7 @@ export function StripeBentoArchitecture({ is2D = false }) {
                       >
                         <div
                           className="w-full rounded-t bg-primary transition-all duration-200"
-                          style={{ height: `${ Math.min(100, filteredH)}%` }}
+                          style={{ height: `${Math.min(100, filteredH)}%` }}
                           title={`Triaged Cluster Density: ${filteredH}%`}
                         />
                       </div>
@@ -553,8 +619,9 @@ export function StripeBentoArchitecture({ is2D = false }) {
           {/* =============================================================== */}
           <div className="col-span-12 lg:col-span-7 flex">
             <SpotlightCard
+              disableTilt={is2D}
               spotlightColor="var(--color-border-glow)"
-              className="w-full p-6 sm:p-7 rounded-3xl bg-surface-lowest/95 border border-primary/35 shadow-2xl flex flex-col justify-between gap-6"
+              className="w-full p-6 sm:p-7 rounded-3xl bg-surface-lowest/95 border border-primary/35 shadow-2xl flex flex-col justify-between gap-5"
             >
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between font-mono text-xs">
@@ -570,7 +637,7 @@ export function StripeBentoArchitecture({ is2D = false }) {
                   Cryptographically Sealed CSV &amp; OCSF JSON Compliance Exports
                 </h3>
                 <p className="font-sans text-xs sm:text-sm text-text-muted leading-relaxed">
-                  Preview live FastAPI export schemas below or trigger a one-click compliance export directly from the SOC Command Center.
+                  Simulate a one-click compliance export below or open the Forensic Ledger for full Merkle-verified audit trails.
                 </p>
               </div>
 
@@ -582,6 +649,7 @@ export function StripeBentoArchitecture({ is2D = false }) {
                       <button
                         key={fmt}
                         type="button"
+                        data-filter-pill
                         onClick={() => setExportTab(fmt)}
                         className={`px-3 py-1 rounded-md text-[10px] font-bold border transition-all cursor-pointer ${
                           exportTab === fmt
@@ -597,10 +665,15 @@ export function StripeBentoArchitecture({ is2D = false }) {
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={handleCopyPreview}
-                      className="btn-secondary px-3 py-1 rounded-md text-[10px] font-bold cursor-pointer"
+                      data-magnetic
+                      onClick={handleSimulateExport}
+                      className={`px-3.5 py-1 rounded-md text-[10px] font-bold cursor-pointer border transition-all ${
+                        exportSimulated
+                          ? 'bg-primary text-surface-dim border-primary shadow-[0_0_14px_var(--color-border-glow)]'
+                          : 'btn-secondary'
+                      }`}
                     >
-                      {exportCopied ? 'COPIED SCHEMA ✓' : 'COPY PAYLOAD'}
+                      {exportSimulated ? '✓ AUDIT ROW STREAMED & COPIED' : 'SIMULATE AUDIT EXPORT'}
                     </button>
                   </div>
                 </div>
@@ -609,11 +682,33 @@ export function StripeBentoArchitecture({ is2D = false }) {
                   {EXPORT_FORMATS[exportTab]}
                 </pre>
 
+                {/* Live Sliding Preview Row of Structured log_ai Audit Telemetry */}
+                <div
+                  key={activeAuditRow.id}
+                  className="p-2.5 rounded-xl bg-surface-lowest border border-primary/35 flex flex-wrap items-center justify-between gap-2 text-[10px] animate-in fade-in slide-in-from-bottom-1 duration-200"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="px-2 py-0.5 rounded bg-primary/15 text-primary font-bold shrink-0">
+                      ✓ {activeAuditRow.id}
+                    </span>
+                    <span className="text-text-primary font-bold truncate">
+                      {activeAuditRow.summary}
+                    </span>
+                  </div>
+                  <span className="text-tertiary font-bold shrink-0">
+                    {activeAuditRow.hash}
+                  </span>
+                </div>
+
                 <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
                   <div className="flex items-center gap-3 text-[10px] text-text-muted">
-                    <span>ENDPOINT: <strong className="text-primary">/api/v1/dashboard/export/csv</strong></span>
+                    <span>
+                      ENDPOINT: <strong className="text-primary">/api/v1/dashboard/export/csv</strong>
+                    </span>
                     <span>•</span>
-                    <span>PROOF: <strong className="text-tertiary">SHA-256 MERKLE TREE</strong></span>
+                    <span>
+                      PROOF: <strong className="text-tertiary">SHA-256 MERKLE TREE</strong>
+                    </span>
                   </div>
 
                   <StripeCtaButton

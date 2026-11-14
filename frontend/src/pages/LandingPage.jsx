@@ -12,6 +12,7 @@ import { DissectionConduitStream } from '../components/demo/DissectionConduitStr
 import { TiltCard3D } from '../components/demo/TiltCard3D';
 import { DissectionScanner } from '../components/demo/DissectionScanner';
 import {
+  lusionMotionState,
   useLusionScrollEngine,
   MagneticCursor,
   StructuralGridSpine,
@@ -384,16 +385,17 @@ export function LandingPage() {
   const scrollToSection = (id) => {
     setIsMobileNavOpen(false);
     setActiveChapter(id);
-    if (id === 'pipeline') {
-      const el = document.getElementById('pipeline-tunnel') || document.getElementById('pipeline');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        return;
-      }
-    }
-    const element = document.getElementById(id);
+    const targetId = id === 'pipeline' ? 'pipeline' : id;
+    const element = document.getElementById(targetId);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (lusionMotionState.lenis) {
+        lusionMotionState.lenis.scrollTo(element, {
+          offset: id === 'pipeline' ? 0 : -64,
+          duration: 1.15,
+        });
+      } else {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
   };
 
@@ -629,7 +631,7 @@ export function LandingPage() {
         })}
       </aside>
 
-      <main className="w-full pt-16 pb-12 flex flex-col">
+      <main className="w-full pb-12">
         
         {/* ========================================================================= */}
         {/* CHAPTER 01 // LUSION PINNED HERO-TO-SOC PORTAL TRANSITION                 */}

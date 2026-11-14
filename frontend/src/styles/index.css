@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* Tailwind CSS v4 Design Token Registry */
 @theme {
   --color-bg-dim: var(--color-bg-dim);
   --color-bg-surface: var(--color-bg-surface);
@@ -242,9 +243,18 @@
   animation: sweep-radar 5s linear infinite;
 }
 
-html {
-  scroll-behavior: smooth;
-  overflow-y: auto;
+html,
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
 }
 
 body {
@@ -254,6 +264,7 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
   width: 100%;
   margin: 0;
+  overflow-x: clip;
 }
 
 /* Base scrollbar rules for Firefox & standard browsers */

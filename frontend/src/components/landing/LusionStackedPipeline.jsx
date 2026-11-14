@@ -2,7 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SpotlightCard } from '../motion-primitives';
-import { StripeCtaButton, StripeSectionHeader, StructuralGridSpine } from './LusionMotionEngine';
+import {
+  lusionMotionState,
+  StripeCtaButton,
+  StripeSectionHeader,
+  StructuralGridSpine,
+} from './LusionMotionEngine';
 import { useTheme } from '../../contexts/ThemeContext';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -11,7 +16,8 @@ export const PIPELINE_STAGES_3D = [
   {
     id: 'stage-01',
     num: '01',
-    badge: 'STAGE 01 // HIGH-THROUGHPUT LOG INGESTION',
+    pillLabel: 'STAGE 01 // INGESTION',
+    badge: '01 / HIGH-THROUGHPUT LOG INGESTION',
     title: 'High-Throughput Log Ingestion',
     subtitle: 'Syslog, Nginx, Apache, Auth & Cloud Server Streams',
     desc: 'Collects unstructured UDP/5144 syslog packets, Cisco ASA, FortiGate, Suricata EVE-JSON, pfSense, and headless forwarder batches into a zero-drop async ring buffer.',
@@ -25,7 +31,8 @@ export const PIPELINE_STAGES_3D = [
   {
     id: 'stage-02',
     num: '02',
-    badge: 'STAGE 02 // AI/ML TOKENIZATION & SEMANTIC PARSING',
+    pillLabel: 'STAGE 02 // TOKENIZATION',
+    badge: '02 / AI/ML TOKENIZATION & SEMANTIC PARSING',
     title: 'AI/ML Tokenization & Semantic Parsing',
     subtitle: 'Regex-Free Unstructured Log Structuring into OCSF v1.1',
     desc: 'Extracts network socket tuples, process trees, HTTP methods, and auth principals without brittle vendor regexes, normalizing every record into canonical Open Cybersecurity Schema (OCSF v1.1).',
@@ -39,7 +46,8 @@ export const PIPELINE_STAGES_3D = [
   {
     id: 'stage-03',
     num: '03',
-    badge: 'STAGE 03 // REAL-TIME THREAT & ANOMALY CLASSIFICATION',
+    pillLabel: 'STAGE 03 // CLASSIFICATION',
+    badge: '03 / REAL-TIME THREAT CLASSIFICATION',
     title: 'Real-Time Threat & Anomaly Classification',
     subtitle: 'Brute-Force, SQLi, DDoS, Privilege Escalation & Anomaly Scoring',
     desc: 'Evaluates every normalized event through a dual-stage Isolation Forest anomaly detector and explainable MITRE ATT&CK classifier—distinguishing benign traffic from critical intrusions.',
@@ -53,23 +61,37 @@ export const PIPELINE_STAGES_3D = [
   {
     id: 'stage-04',
     num: '04',
-    badge: 'STAGE 04 // AUTOMATED TRIAGE, GEO-IP MAPPING & CSV AUDIT EXPORT',
+    pillLabel: 'STAGE 04 // AUTOMATED TRIAGE',
+    badge: '04 / AUTOMATED TRIAGE & CSV EXPORT',
     title: 'Automated Triage, Geo-IP Mapping & CSV Audit Export',
     subtitle: 'Sub-Second Incident Correlation, Leaflet Vector Maps & Compliance Exports',
     desc: 'Correlates multi-hop attack chains, resolves attacker Geo-IP coordinates onto live vector maps, and generates cryptographically verified CSV/JSON audit reports with one click.',
     metricLabel: 'NOISE REDUCTION',
-    metricValue: '94.0% FILTERED',
-    sources: ['Live Geo-IP Map', 'Forensic Timeline', 'One-Click CSV Export', 'AI SOC Copilot'],
-    codeSample: `EXPORT_READY: threat_report_2026-11-14.csv (SHA-256 Verified)\nGEO_ORIGIN: 185.220.101.5 -> Frankfurt, DE [50.1109, 8.6821]\nINCIDENT_STATUS: CORRELATED_CHAIN #INC-4092 [READY FOR AUDIT]`,
-    route: '/threat-intel',
-    ctaLabel: 'Launch Threat Intel Map',
+    metricValue: '94.2% FILTERED',
+    sources: ['Geo-IP Threat Radar', 'One-Click CSV Export', 'JSON SIEM Webhook', 'Forensic Audit Trail'],
+    codeSample: `EXPORT_STATUS: READY [SHA-256 MERKLE VERIFIED]\nGEO_ORIGIN: 185.220.101.5 (Frankfurt, DE -> 50.1109N, 8.6821E)\nINCIDENT_CLUSTER: #INC-2049 [142 Correlated Events -> 1 Actionable Alert]`,
+    route: '/forensics',
+    ctaLabel: 'Export Forensic Ledger',
   },
 ];
 
+/**
+ * Lusion Pinned 3D Stacked Scroll Cards (The 4-Stage AI Classification Pipeline)
+ * - Pins the entire section (start: "top top", end: "+=320%", pin: true, scrub: 1)
+ * - 0% – 33% Scroll (Stage 01 -> Stage 02): Card 02 slides up from yPercent: 115, rotateX: -8deg, opacity: 0
+ *   while Card 01 recedes into 3D Z-space (scale: 0.92, y: -28, z: -80, opacity: 0.4, filter: blur(3px))
+ * - 33% – 66% Scroll (Stage 02 -> Stage 03): Card 03 slides up into focus over Card 02 while Card 02
+ *   scales to 0.92, y: -28, opacity: 0.4 and Card 01 scales further back to 0.85, y: -52, opacity: 0.18
+ * - 66% – 100% Scroll (Stage 03 -> Stage 04): Card 04 slides up into focus over Card 03 while previous cards recede
+ * - Synced Progress UI + Clicking any stage pill smoothly scrolls (lenis.scrollTo) to that exact scrub offset
+ */
 export function LusionStackedPipeline({ is2D = false }) {
   const { theme } = useTheme();
   const sectionRef = useRef(null);
   const cardsContainerRef = useRef(null);
+  const progressBarFillRef = useRef(null);
+  const scrollTriggerRef = useRef(null);
+
   const [activeStageIdx, setActiveStageIdx] = useState(0);
   const [isMobileView, setIsMobileView] = useState(false);
 
@@ -92,111 +114,227 @@ export function LusionStackedPipeline({ is2D = false }) {
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     if (is2D || reducedMotion || isMobileView) {
+      scrollTriggerRef.current = null;
       return undefined;
     }
 
     const cards = Array.from(containerEl.querySelectorAll('[data-pipeline-card]'));
-    if (cards.length < 2) return undefined;
+    if (cards.length < 4) return undefined;
 
     const ctx = gsap.context(() => {
-      // Initial positions: Card 0 in focus, Cards 1..3 waiting below
+      // Initial 3D positions: Card 0 in focus, Cards 1..3 waiting below with rotateX: -8deg
       cards.forEach((card, i) => {
+        gsap.set(card, { transformOrigin: 'center top' });
         if (i === 0) {
           gsap.set(card, {
             yPercent: 0,
-            scale: 1,
+            y: 0,
             z: 0,
+            rotateX: 0,
+            scale: 1,
             opacity: 1,
             filter: 'blur(0px)',
           });
         } else {
           gsap.set(card, {
-            yPercent: 112,
-            scale: 1,
+            yPercent: 115,
+            y: 0,
             z: 0,
+            rotateX: -8,
+            scale: 1,
             opacity: 0,
             filter: 'blur(0px)',
           });
         }
       });
 
+      if (progressBarFillRef.current) {
+        gsap.set(progressBarFillRef.current, { scaleX: 0.25 });
+      }
+
       const tl = gsap.timeline({
         scrollTrigger: {
+          id: 'stacked-pipeline-pin',
           trigger: sectionEl,
           start: 'top top',
-          end: '+=280%',
+          end: '+=320%',
           pin: true,
-          scrub: 1.2,
+          pinSpacing: true,
+          scrub: 1,
           anticipatePin: 1,
+          refreshPriority: 1,
           onUpdate: (self) => {
-            const idx = Math.min(
-              cards.length - 1,
-              Math.floor(self.progress * cards.length + 0.15)
-            );
-            setActiveStageIdx(idx);
+            const p = self.progress;
+            const nextIdx = p < 0.22 ? 0 : p < 0.55 ? 1 : p < 0.85 ? 2 : 3;
+            setActiveStageIdx((prev) => (prev === nextIdx ? prev : nextIdx));
+            if (progressBarFillRef.current) {
+              const fillRatio = 0.25 + p * 0.75;
+              progressBarFillRef.current.style.transform = `scaleX(${fillRatio.toFixed(4)})`;
+            }
           },
         },
       });
 
-      for (let i = 1; i < cards.length; i++) {
-        const stepStart = (i - 1) * 1.0;
+      scrollTriggerRef.current = tl.scrollTrigger;
 
-        // Previous card scales down (0.92), recedes in Z-space, dims (0.45), and blurs (4px)
-        tl.to(
-          cards[i - 1],
+      // =====================================================================
+      // STEP 1 (0% – 33% Scroll): Stage 01 -> Stage 02
+      // =====================================================================
+      tl.to(
+        cards[0],
+        {
+          scale: 0.92,
+          y: -28,
+          z: -80,
+          opacity: 0.4,
+          filter: 'blur(3px)',
+          duration: 1,
+          ease: 'power2.inOut',
+        },
+        0
+      ).to(
+        cards[1],
+        {
+          yPercent: 0,
+          rotateX: 0,
+          scale: 1,
+          y: 0,
+          z: 0,
+          opacity: 1,
+          filter: 'blur(0px)',
+          duration: 1,
+          ease: 'power3.out',
+        },
+        0
+      );
+
+      // =====================================================================
+      // STEP 2 (33% – 66% Scroll): Stage 02 -> Stage 03
+      // =====================================================================
+      tl.to(
+        cards[0],
+        {
+          scale: 0.85,
+          y: -52,
+          z: -150,
+          opacity: 0.18,
+          filter: 'blur(5px)',
+          duration: 1,
+          ease: 'power2.inOut',
+        },
+        1
+      )
+        .to(
+          cards[1],
           {
             scale: 0.92,
-            yPercent: -6 * i,
-            z: -90,
-            opacity: 0.45,
-            filter: 'blur(4px)',
-            duration: 0.85,
+            y: -28,
+            z: -80,
+            opacity: 0.4,
+            filter: 'blur(3px)',
+            duration: 1,
             ease: 'power2.inOut',
           },
-          stepStart
-        );
-
-        // Even older cards recede further
-        if (i >= 2) {
-          tl.to(
-            cards[i - 2],
-            {
-              scale: 0.86,
-              yPercent: -12,
-              z: -160,
-              opacity: 0.2,
-              filter: 'blur(6px)',
-              duration: 0.85,
-              ease: 'power2.inOut',
-            },
-            stepStart
-          );
-        }
-
-        // Current card slides up into sharp 3D focus
-        tl.to(
-          cards[i],
+          1
+        )
+        .to(
+          cards[2],
           {
             yPercent: 0,
+            rotateX: 0,
             scale: 1,
+            y: 0,
             z: 0,
             opacity: 1,
             filter: 'blur(0px)',
-            duration: 0.85,
+            duration: 1,
             ease: 'power3.out',
           },
-          stepStart
+          1
         );
-      }
+
+      // =====================================================================
+      // STEP 3 (66% – 100% Scroll): Stage 03 -> Stage 04
+      // =====================================================================
+      tl.to(
+        cards[0],
+        {
+          scale: 0.78,
+          y: -74,
+          z: -210,
+          opacity: 0.08,
+          filter: 'blur(7px)',
+          duration: 1,
+          ease: 'power2.inOut',
+        },
+        2
+      )
+        .to(
+          cards[1],
+          {
+            scale: 0.85,
+            y: -52,
+            z: -150,
+            opacity: 0.18,
+            filter: 'blur(5px)',
+            duration: 1,
+            ease: 'power2.inOut',
+          },
+          2
+        )
+        .to(
+          cards[2],
+          {
+            scale: 0.92,
+            y: -28,
+            z: -80,
+            opacity: 0.4,
+            filter: 'blur(3px)',
+            duration: 1,
+            ease: 'power2.inOut',
+          },
+          2
+        )
+        .to(
+          cards[3],
+          {
+            yPercent: 0,
+            rotateX: 0,
+            scale: 1,
+            y: 0,
+            z: 0,
+            opacity: 1,
+            filter: 'blur(0px)',
+            duration: 1,
+            ease: 'power3.out',
+          },
+          2
+        );
     }, sectionEl);
 
-    return () => ctx.revert();
+    return () => {
+      scrollTriggerRef.current = null;
+      ctx.revert();
+    };
   }, [is2D, isMobileView]);
 
   const useStackedPin = !is2D && !isMobileView;
 
   const handleSelectStage = (targetIdx) => {
     setActiveStageIdx(targetIdx);
+    const st = scrollTriggerRef.current;
+
+    if (st && useStackedPin) {
+      const targetProgress = targetIdx / Math.max(1, PIPELINE_STAGES_3D.length - 1);
+      const targetScrollY = st.start + (st.end - st.start) * targetProgress;
+      if (lusionMotionState.lenis) {
+        lusionMotionState.lenis.scrollTo(targetScrollY, { duration: 1.0 });
+      } else {
+        window.scrollTo({ top: targetScrollY, behavior: 'smooth' });
+      }
+      return;
+    }
+
     const containerEl = cardsContainerRef.current;
     if (!containerEl) return;
     const cards = Array.from(containerEl.querySelectorAll('[data-pipeline-card]'));
@@ -204,10 +342,12 @@ export function LusionStackedPipeline({ is2D = false }) {
       if (i < targetIdx) {
         const depth = targetIdx - i;
         gsap.to(card, {
-          yPercent: -6 * depth,
-          scale: Math.max(0.84, 1 - depth * 0.08),
+          yPercent: 0,
+          y: -28 * depth,
+          scale: depth === 1 ? 0.92 : 0.85,
           z: -80 * depth,
-          opacity: depth === 1 ? 0.45 : 0.2,
+          rotateX: 0,
+          opacity: depth === 1 ? 0.4 : 0.18,
           filter: `blur(${depth * 3}px)`,
           duration: 0.55,
           ease: 'power3.out',
@@ -215,8 +355,10 @@ export function LusionStackedPipeline({ is2D = false }) {
       } else if (i === targetIdx) {
         gsap.to(card, {
           yPercent: 0,
+          y: 0,
           scale: 1,
           z: 0,
+          rotateX: 0,
           opacity: 1,
           filter: 'blur(0px)',
           duration: 0.55,
@@ -224,9 +366,11 @@ export function LusionStackedPipeline({ is2D = false }) {
         });
       } else {
         gsap.to(card, {
-          yPercent: 112,
+          yPercent: 115,
+          y: 0,
           scale: 1,
           z: 0,
+          rotateX: -8,
           opacity: 0,
           filter: 'blur(0px)',
           duration: 0.55,
@@ -240,15 +384,15 @@ export function LusionStackedPipeline({ is2D = false }) {
     <section
       ref={sectionRef}
       id="sources"
-      className="relative w-full min-h-[calc(100vh-4rem)] pt-10 pb-14 bg-gradient-to-b from-[var(--color-chapter2-from)] via-[var(--color-chapter2-via)] to-[var(--color-chapter2-to)] border-b border-border-muted overflow-hidden flex flex-col justify-between"
+      className="relative w-full min-h-screen pt-20 pb-14 bg-gradient-to-b from-[var(--color-chapter2-from)] via-[var(--color-chapter2-via)] to-[var(--color-chapter2-to)] border-b border-border-muted overflow-hidden flex flex-col justify-between"
     >
       {/* Structural 4-Column Grid Spine */}
       <StructuralGridSpine variant={theme === 'sage' ? 'light' : 'dark'} />
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-8 flex flex-col gap-5 flex-1 justify-between">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-8 flex flex-col gap-4 flex-1 justify-between">
         {/* Stripe-Style Section Header */}
         <StripeSectionHeader
-          chapterNum="CHAPTER 02"
+          chapterNum="CHAPTER 01"
           eyebrow="4-STAGE AI CLASSIFICATION PIPELINE"
           title="PINNED 3D TELEMETRY STRUCTURING & ANOMALY ENGINE"
           accentWords={['3D', 'TELEMETRY', 'ANOMALY', 'ENGINE']}
@@ -260,61 +404,80 @@ export function LusionStackedPipeline({ is2D = false }) {
           ]}
         />
 
-        {/* Stage Indicator Pills */}
-        <div
-          className="flex flex-wrap items-center justify-between gap-3"
-          role="tablist"
-          aria-label="AI Classification Pipeline Stages"
-        >
-          <div className="flex flex-wrap items-center gap-2">
-            {PIPELINE_STAGES_3D.map((st, idx) => {
-              const isCurrent = idx === activeStageIdx;
-              return (
-                <button
-                  key={st.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={isCurrent}
-                  onClick={() => handleSelectStage(idx)}
-                  className={`px-3.5 py-1.5 rounded-full font-mono text-xs font-bold transition-all border cursor-pointer ${
-                    isCurrent
-                      ? 'bg-primary text-surface-dim border-primary shadow-[0_0_16px_var(--color-border-glow)]'
-                      : 'bg-surface-lowest/80 border-border-muted text-text-muted hover:text-text-primary hover:border-primary/40'
-                  }`}
-                >
-                  STAGE {st.num} // {st.title.split(' ')[0].toUpperCase()}
-                </button>
-              );
-            })}
+        {/* Synced Progress UI: Stage Indicator Pills + Active Counter + Scrub Progress Bar */}
+        <div className="flex flex-col gap-2.5">
+          <div
+            className="flex flex-wrap items-center justify-between gap-3"
+            role="tablist"
+            aria-label="AI Classification Pipeline Stages"
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              {PIPELINE_STAGES_3D.map((st, idx) => {
+                const isCurrent = idx === activeStageIdx;
+                return (
+                  <button
+                    key={st.id}
+                    type="button"
+                    role="tab"
+                    data-magnetic
+                    aria-selected={isCurrent}
+                    onClick={() => handleSelectStage(idx)}
+                    className={`px-3.5 py-1.5 rounded-full font-mono text-xs font-bold transition-all border cursor-pointer ${
+                      isCurrent
+                        ? 'bg-primary text-surface-dim border-primary shadow-[0_0_16px_var(--color-border-glow)]'
+                        : 'bg-surface-lowest/80 border-border-muted text-text-muted hover:text-text-primary hover:border-primary/40'
+                    }`}
+                  >
+                    {st.pillLabel}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center gap-3 font-mono text-xs">
+              <span className="text-text-dim hidden sm:inline">
+                SCROLL TO SCRUB 3D STACK &darr;
+              </span>
+              <span className="px-3 py-1 rounded-full bg-surface-lowest border border-primary/35 text-text-muted">
+                ACTIVE STAGE: <strong className="text-primary">0{activeStageIdx + 1} / 04</strong>
+              </span>
+            </div>
           </div>
 
-          <span className="font-mono text-xs text-text-dim hidden sm:inline">
-            ACTIVE STAGE: <strong className="text-primary">0{activeStageIdx + 1} / 04</strong>
-          </span>
+          {/* Sleek Scrub Progress Bar */}
+          <div className="w-full h-1.5 rounded-full bg-surface-lowest border border-border-muted overflow-hidden">
+            <div
+              ref={progressBarFillRef}
+              className="h-full w-full origin-left bg-gradient-to-r from-primary via-secondary to-tertiary transition-transform duration-150"
+              style={{
+                transform: `scaleX(${((activeStageIdx + 1) / PIPELINE_STAGES_3D.length).toFixed(2)})`,
+              }}
+            />
+          </div>
         </div>
 
-        {/* 3D Stacked Scroll Cards Stage (Pinned on desktop 3D, stacked grid on mobile/2D) */}
+        {/* 3D Stacked Scroll Cards Stage (perspective: 1200px, pinned on desktop 3D) */}
         {useStackedPin ? (
           <div
             ref={cardsContainerRef}
-            className="relative w-full flex-1 min-h-[370px] max-w-5xl mx-auto my-auto flex items-center justify-center"
-            style={{ perspective: '1400px', transformStyle: 'preserve-3d' }}
+            className="relative w-full flex-1 min-h-[380px] max-w-5xl mx-auto my-auto flex items-center justify-center pt-6"
+            style={{ perspective: '1200px', transformStyle: 'preserve-3d' }}
           >
             {PIPELINE_STAGES_3D.map((stage, idx) => (
               <div
                 key={stage.id}
                 data-pipeline-card
-                style={{ zIndex: idx + 10 }}
+                style={{ zIndex: idx + 10, transformStyle: 'preserve-3d' }}
                 className="absolute inset-x-0 w-full will-change-[transform,opacity,filter]"
               >
                 <SpotlightCard
                   spotlightColor="var(--color-border-glow)"
-                  className="w-full p-6 sm:p-8 lg:p-10 rounded-3xl bg-surface-lowest/95 border-2 border-primary/40 shadow-[0_28px_70px_rgba(0,0,0,0.55),0_0_32px_var(--color-border-glow)] backdrop-blur-2xl"
+                  className="w-full p-6 sm:p-8 rounded-3xl bg-surface-lowest/95 border-2 border-primary/40 shadow-[0_28px_70px_rgba(0,0,0,0.55),0_0_32px_var(--color-border-glow)] backdrop-blur-2xl"
                 >
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
                     {/* Left 7 Columns: Stage Narrative & Source Chips */}
-                    <div className="lg:col-span-7 flex flex-col gap-4">
-                      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-border-muted font-mono text-xs">
+                    <div className="lg:col-span-7 flex flex-col gap-3.5">
+                      <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-border-muted font-mono text-xs">
                         <div className="flex items-center gap-2 text-primary font-bold">
                           <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
                           <span>{stage.badge}</span>
@@ -337,7 +500,7 @@ export function LusionStackedPipeline({ is2D = false }) {
                         {stage.desc}
                       </p>
 
-                      <div className="flex flex-wrap items-center gap-2 pt-1">
+                      <div className="flex flex-wrap items-center gap-2 pt-0.5">
                         {stage.sources.map((chip) => (
                           <span
                             key={chip}
@@ -348,7 +511,7 @@ export function LusionStackedPipeline({ is2D = false }) {
                         ))}
                       </div>
 
-                      <div className="pt-2">
+                      <div className="pt-1">
                         <StripeCtaButton
                           to={stage.route}
                           variant="secondary"

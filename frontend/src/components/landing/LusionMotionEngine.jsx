@@ -7,9 +7,21 @@ import Lenis from 'lenis';
 gsap.registerPlugin(ScrollTrigger);
 
 /**
+ * Shared live motion state readable by WebGL shaders (scroll-velocity warp)
+ * and interactive stage pills (lenis.scrollTo).
+ */
+export const lusionMotionState = {
+  velocity: 0,
+  lenis: null,
+};
+
+/**
  * Global Lenis + GSAP ScrollTrigger Synchronizer & Velocity Skew Controller.
- * Applies Lusion-style inertial momentum scrolling (lerp: 0.075, duration: 1.2)
- * and velocity-proportional skewY (-2.5deg to 2.5deg) to [data-velocity-skew] blocks.
+ * - Initializes Lenis (lerp: 0.075, duration: 1.2, smoothWheel: true)
+ * - Syncs with ScrollTrigger.update and gsap.ticker (lagSmoothing(0))
+ * - Calls ScrollTrigger.refresh() after layout and font load
+ * - Applies velocity-proportional skewY (-3.5deg to 3.5deg) and scaleY (up to 1.04)
+ *   to [data-velocity-skew] blocks via gsap.quickTo (duration: 0.25, ease: "power3.out")
  */
 export function useLusionScrollEngine(disabled = false) {
   const lenisRef = useRef(null);
@@ -20,6 +32,8 @@ export function useLusionScrollEngine(disabled = false) {
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     if (disabled || reducedMotion) {
+      lusionMotionState.velocity = 0;
+      lusionMotionState.lenis = null;
       ScrollTrigger.refresh();
       return undefined;
     }
@@ -32,54 +46,84 @@ export function useLusionScrollEngine(disabled = false) {
       touchMultiplier: 1.5,
     });
     lenisRef.current = lenis;
+    lusionMotionState.lenis = lenis;
 
-    let currentSkew = 0;
-    let targetSkew = 0;
-    let resetTimer = null;
+    // Cache gsap.quickTo setters per [data-velocity-skew] element
+    const quickToMap = new WeakMap();
+    const getQuickSetters = (el) => {
+      let setters = quickToMap.get(el);
+      if (!setters) {
+        gsap.set(el, { transformOrigin: 'center center' });
+        setters = {
+          skewY: gsap.quickTo(el, 'skewY', { duration: 0.25, ease: 'power3.out' }),
+          scaleY: gsap.quickTo(el, 'scaleY', { duration: 0.25, ease: 'power3.out' }),
+        };
+        quickToMap.set(el, setters);
+      }
+      return setters;
+    };
 
     const getSkewTargets = () =>
       Array.from(document.querySelectorAll('[data-velocity-skew]'));
 
+    let resetTimer = null;
+
+    const applySkewAndStretch = (skewDeg, stretchY) => {
+      const targets = getSkewTargets();
+      for (let i = 0; i < targets.length; i++) {
+        const setters = getQuickSetters(targets[i]);
+        setters.skewY(skewDeg);
+        setters.scaleY(stretchY);
+      }
+    };
+
     const onLenisScroll = (e) => {
       ScrollTrigger.update();
       const velocity = e?.velocity || 0;
-      targetSkew = Math.max(-2.5, Math.min(2.5, velocity * 0.085));
+      lusionMotionState.velocity = velocity;
+
+      const clampedSkew = Math.max(-3.5, Math.min(3.5, velocity * 0.11));
+      const stretchY = 1 + Math.min(Math.abs(velocity) * 0.0015, 0.04);
+      applySkewAndStretch(clampedSkew, stretchY);
 
       if (resetTimer) clearTimeout(resetTimer);
       resetTimer = setTimeout(() => {
-        targetSkew = 0;
-      }, 90);
+        lusionMotionState.velocity = 0;
+        applySkewAndStretch(0, 1);
+      }, 95);
     };
 
     lenis.on('scroll', onLenisScroll);
 
     const tickerCallback = (time) => {
       lenis.raf(time * 1000);
-      currentSkew += (targetSkew - currentSkew) * 0.14;
-      if (Math.abs(currentSkew) < 0.005 && targetSkew === 0) {
-        currentSkew = 0;
-      }
-      const scaleY = 1 + Math.min(0.018, Math.abs(currentSkew) * 0.004);
-      const targets = getSkewTargets();
-      for (let i = 0; i < targets.length; i++) {
-        targets[i].style.transform =
-          currentSkew === 0
-            ? 'translate3d(0,0,0) skewY(0deg) scaleY(1)'
-            : `translate3d(0,0,0) skewY(${currentSkew.toFixed(3)}deg) scaleY(${scaleY.toFixed(4)})`;
-      }
     };
 
     gsap.ticker.add(tickerCallback);
     gsap.ticker.lagSmoothing(0);
 
+    // Refresh ScrollTrigger after initial layout and after web fonts finish loading
+    const refreshTimeout = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 180);
+
+    if (typeof document !== 'undefined' && document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => {
+        ScrollTrigger.refresh();
+      });
+    }
+
     return () => {
       if (resetTimer) clearTimeout(resetTimer);
+      clearTimeout(refreshTimeout);
       gsap.ticker.remove(tickerCallback);
       lenis.destroy();
       lenisRef.current = null;
+      lusionMotionState.lenis = null;
+      lusionMotionState.velocity = 0;
       const targets = getSkewTargets();
       targets.forEach((el) => {
-        el.style.transform = '';
+        gsap.set(el, { clearProps: 'transform' });
       });
     };
   }, [disabled]);
@@ -89,7 +133,8 @@ export function useLusionScrollEngine(disabled = false) {
 
 /**
  * Dual-Layer Magnetic Cursor (Smooth trailing outer ring lerp: 0.15 + instant inner dot).
- * Magnetically snaps to interactive buttons, log filter pills, and Bento cards on hover.
+ * Magnetically snaps to primary CTAs, stage pills, and filter buttons, shifting the target
+ * by (clientX - centerX) * 0.28 and snapping back with elastic.out(1, 0.4) on mouseleave.
  */
 export function MagneticCursor({ disabled = false }) {
   const outerRef = useRef(null);
@@ -113,6 +158,17 @@ export function MagneticCursor({ disabled = false }) {
     let activeMagneticEl = null;
     let rafId = null;
 
+    const releaseMagneticTarget = (el) => {
+      if (!el) return;
+      gsap.to(el, {
+        x: 0,
+        y: 0,
+        duration: 0.65,
+        ease: 'elastic.out(1, 0.4)',
+        overwrite: 'auto',
+      });
+    };
+
     const handleMouseMove = (e) => {
       pos.x = e.clientX;
       pos.y = e.clientY;
@@ -122,24 +178,42 @@ export function MagneticCursor({ disabled = false }) {
       }
 
       const target = e.target?.closest?.(
-        '[data-magnetic], button, a, [role="tab"], input[type="range"]'
+        '[data-magnetic], [role="tab"], [data-filter-pill], button, a, input[type="range"]'
       );
 
       if (target) {
         setIsHoveringInteractive(true);
         setHoverLabel(target.getAttribute('data-cursor-label') || '');
-        if (target.hasAttribute('data-magnetic')) {
+
+        const isMagneticTarget =
+          target.hasAttribute('data-magnetic') ||
+          target.getAttribute('role') === 'tab' ||
+          target.hasAttribute('data-filter-pill');
+
+        if (isMagneticTarget) {
+          if (activeMagneticEl && activeMagneticEl !== target) {
+            releaseMagneticTarget(activeMagneticEl);
+          }
           activeMagneticEl = target;
           const rect = target.getBoundingClientRect();
           const cx = rect.left + rect.width / 2;
           const cy = rect.top + rect.height / 2;
-          const dx = (e.clientX - cx) * 0.22;
-          const dy = (e.clientY - cy) * 0.22;
-          target.style.transform = `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0)`;
+          const dx = (e.clientX - cx) * 0.28;
+          const dy = (e.clientY - cy) * 0.28;
+          gsap.to(target, {
+            x: dx,
+            y: dy,
+            duration: 0.2,
+            ease: 'power2.out',
+            overwrite: 'auto',
+          });
+        } else if (activeMagneticEl) {
+          releaseMagneticTarget(activeMagneticEl);
+          activeMagneticEl = null;
         }
       } else {
         if (activeMagneticEl) {
-          activeMagneticEl.style.transform = '';
+          releaseMagneticTarget(activeMagneticEl);
           activeMagneticEl = null;
         }
         setIsHoveringInteractive(false);
@@ -147,9 +221,9 @@ export function MagneticCursor({ disabled = false }) {
       }
     };
 
-    const handleMouseOut = () => {
-      if (activeMagneticEl) {
-        activeMagneticEl.style.transform = '';
+    const handleMouseOut = (e) => {
+      if (!e.relatedTarget && activeMagneticEl) {
+        releaseMagneticTarget(activeMagneticEl);
         activeMagneticEl = null;
       }
     };
@@ -173,7 +247,7 @@ export function MagneticCursor({ disabled = false }) {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseout', handleMouseOut);
       if (rafId) cancelAnimationFrame(rafId);
-      if (activeMagneticEl) activeMagneticEl.style.transform = '';
+      if (activeMagneticEl) releaseMagneticTarget(activeMagneticEl);
     };
   }, [disabled, isHoveringInteractive]);
 
@@ -208,7 +282,8 @@ export function MagneticCursor({ disabled = false }) {
 /**
  * Masked Choreographed Typography Reveals (Lusion Signature)
  * Splits text into words wrapped in <span class="overflow-hidden inline-block">
- * and animates inner spans from yPercent: 115, rotateZ: 3deg, opacity: 0 -> 0 with power4.out.
+ * and animates inner spans from yPercent: 115, rotateZ: 3deg, opacity: 0 -> 0
+ * with power4.out (duration: 1.0, stagger: 0.05) at top 85% viewport entry.
  */
 export function MaskedRevealText({
   text,
@@ -249,14 +324,14 @@ export function MaskedRevealText({
           yPercent: 0,
           rotateZ: 0,
           opacity: 1,
-          duration: 1.1,
+          duration: 1.0,
           stagger: 0.05,
           delay,
           ease: 'power4.out',
           scrollTrigger: {
             trigger: el,
             start: 'top 85%',
-            toggleActions: 'play none none none',
+            toggleActions: 'play none none reverse',
           },
         }
       );
@@ -271,8 +346,10 @@ export function MaskedRevealText({
   return (
     <Tag ref={containerRef} className={className} aria-label={text}>
       {tokens.map((word, idx) => {
-        const clean = word.replace(/[^a-zA-Z0-9/-]/g, '').toLowerCase();
-        const isAccent = normalizedAccents.includes(clean) || normalizedAccents.includes(word.toLowerCase());
+        const clean = word.replace(/[^a-zA-Z0-9/<>-]/g, '').toLowerCase();
+        const isAccent =
+          normalizedAccents.includes(clean) ||
+          normalizedAccents.includes(word.toLowerCase());
         return (
           <span
             key={`${word}-${idx}`}
@@ -325,6 +402,7 @@ export function StructuralGridSpine({ variant = 'dark' }) {
  */
 export function StripeSectionHeader({
   eyebrow,
+  chapter,
   chapterNum,
   title,
   accentWords = [],
@@ -332,15 +410,17 @@ export function StripeSectionHeader({
   metrics = [],
   disabled = false,
 }) {
+  const resolvedChapter = chapterNum || chapter;
+
   return (
     <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-end justify-between gap-6 relative z-10">
       <div className="flex flex-col gap-3.5 max-w-3xl">
         <div className="inline-flex items-center gap-2.5 self-start px-3.5 py-1.5 rounded-full bg-surface-bright/90 border border-primary/30 shadow-[0_0_20px_var(--color-border-glow)]">
           <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-          {chapterNum && (
+          {resolvedChapter && (
             <>
               <span className="font-mono text-xs font-bold uppercase tracking-widest text-primary">
-                {chapterNum}
+                {resolvedChapter}
               </span>
               <span className="font-mono text-xs text-text-dim">//</span>
             </>
