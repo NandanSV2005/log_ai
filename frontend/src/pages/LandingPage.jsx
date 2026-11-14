@@ -1,374 +1,33 @@
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useRenderMode } from '../contexts/RenderModeContext';
 import { StitchBrandMark } from '../components/common/StitchBrandMark';
 import { api } from '../services/api';
-import { TextEffect, InView, AnimatedGroup, SpotlightCard, BorderGlow } from '../components/motion-primitives';
-import { PipelineHero2DFallback } from '../components/tunnel/PipelineHero2DFallback';
-import { SourceCardStack } from '../components/sources/SourceCardStack';
+import { InView, SpotlightCard } from '../components/motion-primitives';
 import { ThreatRadar3D } from '../components/radar/ThreatRadar3D';
 import { CryptoChain3D } from '../components/radar/CryptoChain3D';
 import { RoiWorkload3D, RoiStatCards } from '../components/roi/RoiWorkload3D';
 import { DissectionConduitStream } from '../components/demo/DissectionConduitStream';
 import { TiltCard3D } from '../components/demo/TiltCard3D';
 import { DissectionScanner } from '../components/demo/DissectionScanner';
-import { TunnelSection } from '../components/tunnel/TunnelSection';
+import {
+  useLusionScrollEngine,
+  MagneticCursor,
+  StructuralGridSpine,
+  StripeSectionHeader,
+  StripeCtaButton,
+} from '../components/landing/LusionMotionEngine';
+import { LusionHeroPortal } from '../components/landing/LusionHeroPortal';
+import { LusionStackedPipeline } from '../components/landing/LusionStackedPipeline';
+import { StripeBentoArchitecture } from '../components/landing/StripeBentoArchitecture';
 
 // =============================================================================
 // ACCURATE VERIFIED TELEMETRY FALLBACK CONSTANTS
 // =============================================================================
 const FALLBACK_PIPELINE_LATENCY = '<10ms';     // Typical local API & parse dwell time
-const FALLBACK_MERKLE_PROOF_TYPE = 'SHA-256';  // In-memory SHA-256 hash tree
-const FALLBACK_SOC_LATENCY = '<50ms';         // Detection engine execution latency
 const FALLBACK_ANOMALY_THRESHOLD = '0.80';     // Isolation Forest default decision boundary
 const FALLBACK_LEDGER_BLOCK = '#1,849';        // Verified log block index
-
-// =============================================================================
-// CHAPTER 01 CARD DEFINITIONS (PLAIN-LANGUAGE DESCRIPTIONS)
-// =============================================================================
-const PIPELINE_CARDS = [
-  {
-    id: 'pipe-1',
-    themeColor: 'primary',
-    icon: 'input',
-    title: 'Raw Ingestion Engine',
-    desc: 'Receives raw activity streams from servers, firewalls, and network endpoints.',
-    badge: 'STAGE 01 // ASYNC INGEST',
-    footer: 'CAPACITY: HIGH-THROUGHPUT BUFFER'
-  },
-  {
-    id: 'pipe-2',
-    themeColor: 'secondary',
-    icon: 'code_blocks',
-    title: 'Lexical Parser',
-    desc: 'Reads messy log text and breaks it into clear fields like timestamps, IP addresses, and actions.',
-    badge: 'STAGE 02 // LEXICAL PARSER',
-    footer: 'FORMAT: REGEX & KV EXTRACTION'
-  },
-  {
-    id: 'pipe-3',
-    themeColor: 'tertiary',
-    icon: 'schema',
-    title: 'Schema Normalization',
-    desc: 'Translates logs from different tools into one shared schema format (OCSF v1.1).',
-    badge: 'STAGE 03 // OCSF NORM',
-    footer: 'SCHEMA: OCSF CLASS MAPPING'
-  },
-  {
-    id: 'pipe-4',
-    themeColor: 'primary',
-    icon: 'enhanced_encryption',
-    title: 'SHA-256 Hashing',
-    desc: 'Calculates a unique SHA-256 digital fingerprint for every log so records cannot be altered.',
-    badge: 'STAGE 04 // CRYPTO LEDGER',
-    footer: 'SECURITY: SHA-256 HASH LINKED'
-  },
-  {
-    id: 'pipe-5',
-    themeColor: 'secondary',
-    icon: 'troubleshoot',
-    title: 'ML Anomaly Core',
-    desc: 'Uses Machine Learning to spot suspicious behavior and rate how unusual an event is.',
-    badge: 'STAGE 05 // ANOMALY DETECTOR',
-    footer: 'ENGINE: NUMPY ISOLATION FOREST'
-  },
-  {
-    id: 'pipe-6',
-    themeColor: 'tertiary',
-    icon: 'psychology',
-    title: 'XAI Verdict Output',
-    desc: 'Explains in plain English why an alert triggered and maps it to MITRE ATT&CK guidelines.',
-    badge: 'STAGE 06 // EXPLAINABLE VERDICT',
-    footer: 'OUTPUT: MITRE ATT&CK ANNOTATED'
-  }
-];
-
-// =============================================================================
-// CHAPTER 02 LOG SOURCE CARDS (PARALLEL CONDUIT INPUTS)
-// =============================================================================
-const SOURCE_CARDS = [
-  {
-    id: 'src-1',
-    themeColor: 'secondary',
-    icon: 'router',
-    title: 'Cisco ASA / Firepower',
-    desc: 'Reads firewall blocks, address translations, and VPN sign-in attempts.',
-    badge: 'SOURCE // CISCO ASA',
-    footer: 'SYS_LOG: ASA-4-106023 PARSER'
-  },
-  {
-    id: 'src-2',
-    themeColor: 'secondary',
-    icon: 'security',
-    title: 'Fortinet FortiGate',
-    desc: 'Reads web security rules, malware alerts, and network traffic headers.',
-    badge: 'SOURCE // FORTINET',
-    footer: 'FORMAT: CEF & KV PAIRS'
-  },
-  {
-    id: 'src-3',
-    themeColor: 'secondary',
-    icon: 'troubleshoot',
-    title: 'Suricata EVE-JSON',
-    desc: 'Reads network intrusion alerts, web domain lookups, and secure connection details.',
-    badge: 'SOURCE // SURICATA',
-    footer: 'DATA: STRUCTURED EVE-JSON'
-  },
-  {
-    id: 'src-4',
-    themeColor: 'secondary',
-    icon: 'filter_alt',
-    title: 'pfSense / FreeBSD PF',
-    desc: 'Reads router packet filtering rules, network interfaces, and connection flags.',
-    badge: 'SOURCE // PFSENSE',
-    footer: 'HEADER: PACKET FILTER CSV'
-  },
-  {
-    id: 'src-5',
-    themeColor: 'secondary',
-    icon: 'desktop_windows',
-    title: 'Windows Security / Sysmon',
-    desc: 'Reads user login attempts (Event ID 4624/4625), process launches, and privilege changes.',
-    badge: 'SOURCE // WINDOWS',
-    footer: 'EVENT_ID: 4624 / 4625 / SYSMON'
-  },
-  {
-    id: 'src-6',
-    themeColor: 'secondary',
-    icon: 'terminal',
-    title: 'Linux Auditd',
-    desc: 'Tracks system calls, user account switches, and sensitive file access.',
-    badge: 'SOURCE // AUDITD',
-    footer: 'TRACE: SYSCALL AUDIT LOG'
-  }
-];
-
-// =============================================================================
-// REUSABLE INTERACTIVE EXPAND/COLLAPSE CARD COMPONENT (CHAPTER 01)
-// Enhanced with Motion Primitives SpotlightCard & Smooth Framer Motion Animations
-// =============================================================================
-function InteractiveCard({ card, activeCardId, setActiveCardId }) {
-  const isExpanded = activeCardId === card.id;
-
-  const colorStyles = {
-    primary: {
-      border: 'border-primary/30 hover:border-primary',
-      activeBorder: 'border-primary shadow-[0_0_18px_var(--color-border-glow)]',
-      badgeBg: 'bg-primary/10 border-primary/30 text-primary',
-      iconBg: 'bg-primary/15 text-primary',
-      footerText: 'text-primary',
-      chevron: 'text-primary',
-      spotlight: 'var(--color-border-glow)'
-    },
-    secondary: {
-      border: 'border-secondary/30 hover:border-secondary',
-      activeBorder: 'border-secondary shadow-[0_0_18px_var(--color-border-glow)]',
-      badgeBg: 'bg-secondary/10 border-secondary/30 text-secondary',
-      iconBg: 'bg-secondary/15 text-secondary',
-      footerText: 'text-secondary',
-      chevron: 'text-secondary',
-      spotlight: 'color-mix(in srgb, var(--color-secondary) 18%, transparent)'
-    },
-    tertiary: {
-      border: 'border-tertiary/30 hover:border-tertiary',
-      activeBorder: 'border-tertiary shadow-[0_0_18px_var(--color-border-glow)]',
-      badgeBg: 'bg-tertiary/10 border-tertiary/30 text-tertiary',
-      iconBg: 'bg-tertiary/15 text-tertiary',
-      footerText: 'text-tertiary',
-      chevron: 'text-tertiary',
-      spotlight: 'color-mix(in srgb, var(--color-tertiary) 18%, transparent)'
-    }
-  };
-
-  const style = colorStyles[card.themeColor || 'primary'];
-
-  return (
-    <SpotlightCard
-      spotlightColor={style.spotlight}
-      onMouseEnter={() => setActiveCardId(card.id)}
-      onMouseLeave={() => setActiveCardId(null)}
-      onClick={() => setActiveCardId(prev => prev === card.id ? null : card.id)}
-      className={`p-5 rounded-xl bg-surface/90 border transition-all duration-300 cursor-pointer flex flex-col justify-between group ${
-        isExpanded ? style.activeBorder : style.border
-      }`}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105 ${style.iconBg}`}>
-            <span className="material-symbols-outlined text-[22px]">{card.icon}</span>
-          </div>
-          <h3 className="font-display font-bold text-base text-text-primary leading-tight">{card.title}</h3>
-        </div>
-        <span className={`material-symbols-outlined text-sm transition-transform duration-300 text-text-dim ${isExpanded ? `rotate-180 ${style.chevron}` : 'group-hover:text-text-primary'}`}>
-          expand_more
-        </span>
-      </div>
-
-      <p className="font-sans text-xs text-text-muted leading-relaxed mt-3">
-        {card.desc}
-      </p>
-
-      <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out motion-reduce:transition-none ${
-          isExpanded ? 'max-h-36 opacity-100 mt-3 pt-3 border-t border-border-muted' : 'max-h-0 opacity-0 mt-0 pt-0 border-t-0'
-        }`}
-      >
-        <div className="flex flex-col gap-2 font-mono text-[10px]">
-          <div>
-            <span className={`inline-block px-2.5 py-0.5 rounded border font-bold uppercase tracking-wider ${style.badgeBg}`}>
-              {card.badge}
-            </span>
-          </div>
-          <div className="flex items-center justify-between text-text-dim pt-1 border-t border-border-muted/50">
-            <span className={`font-bold ${style.footerText}`}>{card.footer}</span>
-          </div>
-        </div>
-      </div>
-    </SpotlightCard>
-  );
-}
-
-// =============================================================================
-// CHAPTER 02 ZIG-ZAG CONNECTED LOG SOURCE STREAM COMPONENT
-// Enhanced with Motion Primitives SpotlightCard & Viewport Intersections
-// =============================================================================
-function ZigZagSourceStream({ cards }) {
-  const [visitedCards, setVisitedCards] = useState(new Set());
-  const [reducedMotion, setReducedMotion] = useState(false);
-
-  useEffect(() => {
-    // Respect prefers-reduced-motion OS setting
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (mediaQuery.matches) {
-      setReducedMotion(true);
-      setVisitedCards(new Set(cards.map(c => c.id)));
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const cardId = entry.target.getAttribute('data-card-id');
-            if (cardId) {
-              setVisitedCards((prev) => new Set([...prev, cardId]));
-            }
-          }
-        });
-      },
-      { threshold: 0.25, rootMargin: '0px 0px -5% 0px' }
-    );
-
-    cards.forEach((card) => {
-      const el = document.getElementById(`source-card-${card.id}`);
-      if (el) observer.observe(el);
-    });
-
-    return () => observer.disconnect();
-  }, [cards]);
-
-  return (
-    <div className="relative w-full max-w-5xl mx-auto flex flex-col gap-5 md:gap-7 py-2">
-      {/* Background SVG Elbow Connector Path (Desktop) */}
-      <svg
-        className="absolute inset-0 w-full h-full pointer-events-none hidden md:block"
-        fill="none"
-        preserveAspectRatio="none"
-        viewBox="0 0 1000 1200"
-      >
-        <path
-          d="M 230 100 L 230 180 L 770 180 L 770 300 L 230 300 L 230 480 L 770 480 L 770 660 L 230 660 L 230 840 L 770 840 L 770 1020 L 500 1020 L 500 1120"
-          stroke="currentColor"
-          className="text-secondary/15"
-          strokeWidth="3"
-          strokeDasharray="6 6"
-        />
-        <path
-          d="M 230 100 L 230 180 L 770 180 L 770 300 L 230 300 L 230 480 L 770 480 L 770 660 L 230 660 L 230 840 L 770 840 L 770 1020 L 500 1020 L 500 1120"
-          stroke="var(--color-secondary)"
-          strokeWidth="2.5"
-          className={`transition-all duration-700 ${reducedMotion ? 'opacity-100' : visitedCards.size > 0 ? 'opacity-90' : 'opacity-20'}`}
-          style={{
-            strokeDasharray: '2500',
-            strokeDashoffset: reducedMotion ? '0' : Math.max(0, 2500 - (visitedCards.size * 410))
-          }}
-        />
-      </svg>
-
-      {cards.map((card, idx) => {
-        const isEven = idx % 2 === 0; // Even = Left, Odd = Right
-        const isVisited = reducedMotion || visitedCards.has(card.id);
-
-        return (
-          <div
-            key={card.id}
-            id={`source-card-${card.id}`}
-            data-card-id={card.id}
-            className={`relative w-full flex ${isEven ? 'md:justify-start' : 'md:justify-end'} justify-center`}
-          >
-            {/* Card Shell with Spotlight Hover Primitive */}
-            <SpotlightCard
-              spotlightColor="color-mix(in srgb, var(--color-secondary) 18%, transparent)"
-              className={`w-full md:w-[46%] p-5 rounded-2xl bg-surface/90 border transition-all duration-500 shadow-xl backdrop-blur-md group ${
-                isVisited
-                  ? 'border-secondary shadow-[0_0_20px_var(--color-border-glow)]'
-                  : 'border-border-muted hover:border-secondary/50'
-              }`}
-            >
-              {/* Card Header: Source Tag + Checkmark Connected Status */}
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-border-muted font-mono text-[11px]">
-                <div className="flex items-center gap-2 text-secondary font-bold">
-                  <span className={`w-2 h-2 rounded-full ${isVisited ? 'bg-secondary animate-pulse' : 'bg-text-dim'}`}></span>
-                  <span>{card.badge}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  {isVisited ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary/15 border border-tertiary/30 text-tertiary font-bold text-[10px] animate-in fade-in duration-300">
-                      <span className="material-symbols-outlined text-[13px]">check_circle</span>
-                      <span>Connected</span>
-                    </span>
-                  ) : (
-                    <span className="text-text-dim text-[10px]">Awaiting Stream</span>
-                  )}
-                </div>
-              </div>
-
-              {/* Body */}
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-secondary/15 flex items-center justify-center text-secondary shrink-0 group-hover:scale-105 transition-transform">
-                  <span className="material-symbols-outlined text-[22px]">{card.icon}</span>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <h3 className="font-display font-bold text-base text-text-primary leading-tight">{card.title}</h3>
-                  <p className="font-sans text-xs text-text-muted leading-relaxed font-normal">{card.desc}</p>
-                </div>
-              </div>
-
-              {/* Technical Evidence Tag Footer */}
-              <div className="mt-3 pt-2.5 border-t border-border-muted/50 flex items-center justify-between font-mono text-[10px] text-text-dim">
-                <span className="text-secondary font-bold">{card.footer}</span>
-                <span>OCSF COMPLIANT</span>
-              </div>
-            </SpotlightCard>
-          </div>
-        );
-      })}
-
-      {/* Converging Single Schema Closing Node */}
-      <div className="w-full flex justify-center mt-3 relative z-10">
-        <BorderGlow glowColor="var(--color-secondary)" borderRadius="1rem">
-          <div className="p-3.5 md:p-4 bg-surface-bright border-2 border-secondary shadow-[0_0_24px_var(--color-border-glow)] flex items-center gap-3 font-mono text-xs text-secondary font-bold">
-            <span className="material-symbols-outlined text-[22px] animate-pulse">schema</span>
-            <span>&rarr; ONE UNIFIED OCSF SCHEMA CONDUIT</span>
-            <span className="w-2 h-2 rounded-full bg-tertiary animate-ping ml-1"></span>
-          </div>
-        </BorderGlow>
-      </div>
-    </div>
-  );
-}
 
 // =============================================================================
 // CHAPTER REGISTRY & NAVIGATION TARGET DEFINITION
@@ -376,7 +35,7 @@ function ZigZagSourceStream({ cards }) {
 const CHAPTERS = [
   {
     id: 'pipeline',
-    targets: ['pipeline-tunnel', 'pipeline'],
+    targets: ['pipeline'],
     navLabel: '01 // Pipeline',
     mobileLabel: '01 // Pipeline Architecture',
     railLabel: 'PIPE',
@@ -400,7 +59,7 @@ const CHAPTERS = [
   },
   {
     id: 'topology',
-    targets: ['topology'],
+    targets: ['bento-architecture', 'topology'],
     navLabel: '03 // Topology',
     mobileLabel: '03 // Network Topology Radar',
     railLabel: 'TOPO',
@@ -438,9 +97,12 @@ const CHAPTERS = [
 
 export function LandingPage() {
   const { theme, setTheme } = useTheme();
-  const { renderMode, is3D, is2D, setRenderMode, toggleRenderMode } = useRenderMode();
+  const { renderMode, is3D, is2D, setRenderMode } = useRenderMode();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [activeChapter, setActiveChapter] = useState('pipeline');
+
+  // Initialize Lusion Smooth Scroll (Lenis) + GSAP ScrollTrigger & Velocity Skew
+  useLusionScrollEngine(is2D);
 
   // Dynamic Viewport Scroll Tracker for Active Chapter Highlighting
   useEffect(() => {
@@ -518,9 +180,6 @@ export function LandingPage() {
       window.removeEventListener('resize', handleScroll);
     };
   }, [renderMode]);
-
-  // Active Expand/Collapse Card States
-  const [activePipeCard, setActivePipeCard] = useState(null);
 
   // Interactive Forensic Dissection Demo State (Chapter 05)
   const DEMO_PRESETS = [
@@ -634,44 +293,6 @@ export function LandingPage() {
 
   // Stats & Telemetry Data State
   const [stats, setStats] = useState({ total_events_ingested: 48281 });
-  const recentEvents = [
-    {
-      id: 'evt-01',
-      timestamp: '2026-09-08 11:42:01',
-      event_type: 'cisco_asa:deny:outside_acl',
-      action: 'BLOCKED',
-      source_ip: '185.220.101.5',
-      destination_ip: '10.0.4.12',
-      threat_level: 'CRITICAL',
-      threat_score: 9.4,
-      original_event: '%ASA-4-106023: Deny udp src outside:185.220.101.5/54312 dst inside:10.0.4.12/445 by access-group "OUTSIDE_IN" [0x7f4c9a81, 0x0]',
-      raw_event_hash: 'c29d18b4fa8001a4e9b98a3e7'
-    },
-    {
-      id: 'evt-02',
-      timestamp: '2026-09-08 11:41:58',
-      event_type: 'fortinet:utm:virus',
-      action: 'BLOCKED',
-      source_ip: '10.0.4.12',
-      destination_ip: '172.16.0.4',
-      threat_level: 'HIGH',
-      threat_score: 8.2,
-      original_event: 'CEF:0|Fortinet|FortiGate|v7.2|traffic:denied|src=10.0.4.12 dst=172.16.0.4',
-      raw_event_hash: '8f3c49e28ba709320e1d9a'
-    },
-    {
-      id: 'evt-03',
-      timestamp: '2026-09-08 11:41:52',
-      event_type: 'suricata:alert:tls',
-      action: 'PASS',
-      source_ip: '192.168.1.104',
-      destination_ip: '10.0.0.1',
-      threat_level: 'LOW',
-      threat_score: 1.2,
-      original_event: 'pf: rule 42/(match) pass in on igb0: 192.168.1.104 -> 10.0.0.1:80',
-      raw_event_hash: '4ea94dfb19a3d9dc8c7ec7'
-    }
-  ];
 
   // Public Telemetry Initializer with exponential backoff & failure breaker (No authenticated API calls)
   useEffect(() => {
@@ -778,7 +399,9 @@ export function LandingPage() {
 
   return (
     <div className="min-h-screen bg-surface-dim font-sans text-text-primary antialiased selection:bg-primary/30 selection:text-text-primary">
-      
+      {/* Lusion Dual-Layer Magnetic Cursor (Desktop 3D mode) */}
+      <MagneticCursor disabled={is2D} />
+
       {/* ========================================================================= */}
       {/* 1. FIXED NAVIGATION HEADER                                                */}
       {/* ========================================================================= */}
@@ -892,13 +515,15 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* Primary CTA: Open SOC Console - strictly prioritized with flex-shrink-0 */}
-            <Link
+            {/* Primary CTA: Stripe-Style Morphing CTA Button */}
+            <StripeCtaButton
               to="/dashboard"
-              className="px-3.5 2xl:px-4 py-2 rounded-lg bg-primary text-surface-dim font-sans font-bold text-xs 2xl:text-sm shadow-[0_0_18px_var(--color-border-glow)] hover:bg-primary-fixed transition-all whitespace-nowrap flex-shrink-0"
+              variant="primary"
+              className="!px-3.5 2xl:!px-4 !py-2 !text-xs 2xl:!text-sm flex-shrink-0"
+              cursorLabel="CONSOLE"
             >
               Open SOC Console
-            </Link>
+            </StripeCtaButton>
 
             {/* Mobile Menu Toggle Button */}
             <button
@@ -1007,105 +632,49 @@ export function LandingPage() {
       <main className="w-full pt-16 pb-12 flex flex-col">
         
         {/* ========================================================================= */}
-        {/* HERO + CHAPTER 01: 3D PIPELINE TUNNEL VS 2D STATIC FALLBACK               */}
+        {/* CHAPTER 01 // LUSION PINNED HERO-TO-SOC PORTAL TRANSITION                 */}
         {/* ========================================================================= */}
-        {is3D ? (
-          <Suspense
-            fallback={
-              <div className="w-full h-screen bg-surface-dim flex flex-col items-center justify-center font-mono text-xs text-text-muted gap-3">
-                <span className="w-3 h-3 rounded-full bg-primary animate-ping"></span>
-                <span className="text-primary font-bold">INITIALIZING ULPF 3D TUNNEL EXPERIENCE...</span>
-              </div>
-            }
-          >
-            <TunnelSection
-              stats={stats}
-              fallback2D={
-                <PipelineHero2DFallback
-                  stats={stats}
-                  recentEvents={recentEvents}
-                  pipelineLatency={FALLBACK_PIPELINE_LATENCY}
-                  merkleProofType={FALLBACK_MERKLE_PROOF_TYPE}
-                  pipelineCards={PIPELINE_CARDS}
-                  activePipeCard={activePipeCard}
-                  setActivePipeCard={setActivePipeCard}
-                  scrollToSection={scrollToSection}
-                  InteractiveCardComponent={InteractiveCard}
-                />
-              }
-            />
-          </Suspense>
-        ) : (
-          <PipelineHero2DFallback
-            stats={stats}
-            recentEvents={recentEvents}
-            pipelineLatency={FALLBACK_PIPELINE_LATENCY}
-            merkleProofType={FALLBACK_MERKLE_PROOF_TYPE}
-            pipelineCards={PIPELINE_CARDS}
-            activePipeCard={activePipeCard}
-            setActivePipeCard={setActivePipeCard}
-            scrollToSection={scrollToSection}
-            InteractiveCardComponent={InteractiveCard}
-          />
-        )}
+        <LusionHeroPortal
+          is2D={is2D}
+          totalIngested={stats.total_events_ingested || 48281}
+        />
 
         {/* ========================================================================= */}
-        {/* CHAPTER 02 // LOG SOURCES (PINNED 3D CARD STACK VS 2D ZIG-ZAG STREAM)     */}
+        {/* CHAPTER 02 // LUSION PINNED 3D STACKED PIPELINE CARDS                     */}
         {/* ========================================================================= */}
-        <section
-          id="sources"
-          className="w-full relative scroll-mt-16 bg-gradient-to-b from-[var(--color-chapter2-from)] via-[var(--color-chapter2-via)] to-[var(--color-chapter2-to)] border-b border-secondary/20"
-        >
-          <div className="absolute top-16 right-1/4 w-[750px] h-[500px] bg-secondary/10 rounded-full blur-[150px] pointer-events-none"></div>
-          {is3D ? (
-            <SourceCardStack cards={SOURCE_CARDS} />
-          ) : (
-            <div className="max-w-[1600px] mx-auto px-4 md:px-8 xl:px-14 py-20 relative z-10 flex flex-col gap-10">
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-secondary uppercase tracking-widest">CHAPTER 02</span>
-                    <span className="text-text-dim font-mono">//</span>
-                    <span className="font-mono text-xs text-text-dim font-semibold tracking-wider">SOURCE_INGEST_MATRIX</span>
-                  </div>
-                  <h2 className="font-display font-black text-3xl md:text-4xl text-text-primary uppercase tracking-tight">
-                    Multi-Vendor Log Sources
-                  </h2>
-                </div>
-                <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
-                  Standardized ingestion streams across enterprise perimeter appliances, operating systems, and host intrusion sensors.
-                </p>
-              </div>
-              <ZigZagSourceStream cards={SOURCE_CARDS} />
-            </div>
-          )}
-        </section>
+        <LusionStackedPipeline is2D={is2D} />
 
         {/* ========================================================================= */}
-        {/* CHAPTER 03 // RADAR TOPOLOGY & CRYPTO PROOF                               */}
+        {/* CHAPTER 03A // STRIPE ASYMMETRICAL 12-COLUMN BENTO ARCHITECTURE           */}
+        {/* ========================================================================= */}
+        <StripeBentoArchitecture is2D={is2D} />
+
+        {/* ========================================================================= */}
+        {/* CHAPTER 03B // 3D RADAR TOPOLOGY & CRYPTOGRAPHIC MERKLE PROOF             */}
         {/* ========================================================================= */}
         <section
           id="topology"
-          className="w-full px-4 md:px-8 xl:px-14 py-20 relative scroll-mt-16 bg-gradient-to-b from-[var(--color-chapter3-from)] via-[var(--color-chapter3-via)] to-[var(--color-chapter3-to)] border-b border-tertiary/20"
+          className="w-full px-4 md:px-8 xl:px-14 py-20 relative scroll-mt-16 bg-gradient-to-b from-[var(--color-chapter3-from)] via-[var(--color-chapter3-via)] to-[var(--color-chapter3-to)] border-b border-tertiary/20 overflow-hidden"
         >
+          <StructuralGridSpine />
           <div className="absolute top-10 left-1/4 w-[850px] h-[550px] bg-tertiary/10 rounded-full blur-[170px] pointer-events-none"></div>
           
-          <div className="max-w-[1600px] mx-auto flex flex-col gap-10 relative z-10">
-            <InView className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-tertiary uppercase tracking-widest">CHAPTER 03</span>
-                  <span className="text-text-dim font-mono">//</span>
-                  <span className="font-mono text-xs text-text-dim font-semibold tracking-wider">TOPOLOGICAL_SURFACE</span>
-                </div>
-                <h2 className="font-display font-black text-3xl md:text-4xl text-text-primary uppercase tracking-tight">
-                  Network Threat Radar &amp; Cryptographic Proof
-                </h2>
-              </div>
-              <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
-                See suspicious network activity on a live radar map while verifying log integrity with SHA-256 hashes.
-              </p>
-            </InView>
+          <div
+            data-velocity-skew
+            className="max-w-7xl mx-auto flex flex-col gap-10 relative z-10 will-change-transform"
+          >
+            <StripeSectionHeader
+              chapter="CHAPTER 03 // TOPOLOGICAL_SURFACE"
+              eyebrow="3D SPATIAL RADAR & MERKLE INTEGRITY"
+              title="Network Threat Radar & Cryptographic Proof"
+              accentWords={['Threat', 'Radar', 'Cryptographic']}
+              subtitle="Inspect suspicious network activity on a live 3D spatial radar sweep while verifying log immutability with SHA-256 Merkle hash chains."
+              disabled={is2D}
+              metrics={[
+                { label: 'ACTIVE TARGETS', value: '3 NODES' },
+                { label: 'MERKLE BLOCK', value: FALLBACK_LEDGER_BLOCK },
+              ]}
+            />
 
             {/* Asymmetric Layout: Dominant Radar + Cryptographic Proof Companion */}
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
@@ -1172,26 +741,33 @@ export function LandingPage() {
         {/* ========================================================================= */}
         <section
           id="roi-engine"
-          className="w-full px-4 md:px-8 xl:px-14 py-20 relative scroll-mt-16 bg-gradient-to-b from-[var(--color-chapter4-from)] via-[var(--color-chapter4-via)] to-[var(--color-chapter4-to)] border-b border-tertiary/30"
+          className="w-full px-4 md:px-8 xl:px-14 py-24 relative scroll-mt-16 bg-gradient-to-b from-[var(--color-chapter4-from)] via-[var(--color-chapter4-via)] to-[var(--color-chapter4-to)] border-b border-tertiary/30 overflow-hidden"
         >
+          {/* Stripe Angled Section Background Layer */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-10 bottom-10 -z-0 bg-surface-lowest/35 border-y border-primary/20"
+            style={{ transform: 'skewY(-3deg)', transformOrigin: 'center center' }}
+          />
+          <StructuralGridSpine />
           <div className="absolute top-10 left-1/3 w-[850px] h-[500px] bg-tertiary/15 rounded-full blur-[160px] pointer-events-none"></div>
           
-          <div className="max-w-[1600px] mx-auto flex flex-col gap-12 relative z-10">
-            <InView className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-tertiary uppercase tracking-widest">CHAPTER 04</span>
-                  <span className="text-text-dim font-mono">//</span>
-                  <span className="font-mono text-xs text-text-dim font-semibold tracking-wider">CAPITAL_EFFICIENCY</span>
-                </div>
-                <h2 className="font-display font-black text-3xl md:text-4xl text-text-primary uppercase tracking-tight">
-                  ROI &amp; Noise Reduction Estimator
-                </h2>
-              </div>
-              <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
-                Estimate how much money and time you save by cleaning logs before sending them to expensive storage.
-              </p>
-            </InView>
+          <div
+            data-velocity-skew
+            className="max-w-7xl mx-auto flex flex-col gap-12 relative z-10 will-change-transform"
+          >
+            <StripeSectionHeader
+              chapter="CHAPTER 04 // CAPITAL_EFFICIENCY"
+              eyebrow="SIEM COST & WORKLOAD REDUCTION"
+              title="ROI & Noise Reduction Estimator"
+              accentWords={['ROI', 'Noise', 'Reduction']}
+              subtitle="Estimate how much SIEM storage budget and analyst triage time you reclaim by pre-filtering and normalizing logs with log_ai."
+              disabled={is2D}
+              metrics={[
+                { label: 'EST. MONTHLY SAVINGS', value: `$${calculatedSavings.toLocaleString()}` },
+                { label: 'ANALYST HOURS SAVED', value: `${calculatedHours} hrs/mo` },
+              ]}
+            />
 
             {/* Interactive Calculator Workspace */}
             <div className="flex flex-col gap-6">
@@ -1298,24 +874,25 @@ export function LandingPage() {
         {/* ========================================================================= */}
         <section
           id="demo"
-          className="w-full px-4 md:px-8 xl:px-14 pt-20 pb-32 relative scroll-mt-16 bg-gradient-to-b from-[var(--color-chapter5-from)] via-[var(--color-chapter5-via)] to-[var(--color-chapter5-to)] border-b border-border-muted"
+          className="w-full px-4 md:px-8 xl:px-14 pt-24 pb-32 relative scroll-mt-16 bg-gradient-to-b from-[var(--color-chapter5-from)] via-[var(--color-chapter5-via)] to-[var(--color-chapter5-to)] border-b border-border-muted overflow-hidden"
         >
-          <div className="max-w-[1600px] mx-auto flex flex-col gap-12 relative z-10">
-            <InView className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-primary uppercase tracking-widest">CHAPTER 05</span>
-                  <span className="text-text-dim font-mono">//</span>
-                  <span className="font-mono text-xs text-text-dim font-semibold tracking-wider">INTERACTIVE_DISSECTION</span>
-                </div>
-                <h2 className="font-display font-black text-3xl md:text-4xl text-text-primary uppercase tracking-tight">
-                  Forensic Dissection: Raw Log to Explained Verdict
-                </h2>
-              </div>
-              <p className="font-sans text-sm md:text-base text-text-muted max-w-md leading-relaxed font-normal">
-                Test how a raw firewall log is parsed, converted to OCSF schema, hashed, and explained by AI.
-              </p>
-            </InView>
+          <StructuralGridSpine />
+          <div
+            data-velocity-skew
+            className="max-w-7xl mx-auto flex flex-col gap-12 relative z-10 will-change-transform"
+          >
+            <StripeSectionHeader
+              chapter="CHAPTER 05 // INTERACTIVE_DISSECTION"
+              eyebrow="STATELESS FASTAPI FORENSIC SANDBOX"
+              title="Forensic Dissection: Raw Log to Explained Verdict"
+              accentWords={['Forensic', 'Dissection:', 'Explained', 'Verdict']}
+              subtitle="Test how a raw firewall log is parsed, normalized to OCSF v1.1 schema, cryptographically hashed, and explained by our AI engine."
+              disabled={is2D}
+              metrics={[
+                { label: 'SANDBOX ENDPOINT', value: 'POST /demo/analyze' },
+                { label: 'DWELL LATENCY', value: FALLBACK_PIPELINE_LATENCY },
+              ]}
+            />
 
             {/* Animated 3D Data Conduit Stream Between Columns */}
             <DissectionConduitStream
@@ -1497,7 +1074,7 @@ export function LandingPage() {
                     {demoResult && revealStep >= 1 ? (
                       <span className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded border animate-in fade-in duration-200 ${
                         demoResult?.verdict?.threat_level === 'CRITICAL' ? 'text-[var(--color-severity-critical)] bg-[var(--color-severity-critical-bg)] border-[var(--color-severity-critical-border)]' :
-                        demoResult?.verdict?.threat_level === 'HIGH' ? 'text-rose-400 bg-rose-500/10 border-rose-500/30' :
+                        demoResult?.verdict?.threat_level === 'HIGH' ? 'text-[var(--color-severity-high)] bg-[var(--color-severity-high-bg)] border-[var(--color-severity-high-border)]' :
                         demoResult?.verdict?.threat_level === 'MEDIUM' ? 'text-[var(--color-severity-medium)] bg-[var(--color-severity-medium-bg)] border-[var(--color-severity-medium-border)]' :
                         'text-[var(--color-severity-low)] bg-[var(--color-severity-low-bg)] border-[var(--color-severity-low-border)]'
                       }`}>
@@ -1562,6 +1139,29 @@ export function LandingPage() {
                 </TiltCard3D>
               </InView>
 
+            </div>
+
+            {/* Closing Stripe-Style Workspace Launch Bar */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-surface-lowest/95 border border-primary/35 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex flex-col gap-1.5 text-center md:text-left">
+                <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-primary">
+                  READY FOR FULL TELEMETRY INGESTION?
+                </span>
+                <h3 className="font-display font-black text-xl sm:text-2xl text-text-primary tracking-tight">
+                  Enter the Live log_ai Cyber SOC Command Center
+                </h3>
+                <p className="font-sans text-xs sm:text-sm text-text-muted">
+                  Upload custom server logs, inspect Leaflet Geo-IP threat maps, author detection rules, and export cryptographic CSV/JSON audit trails.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-3 shrink-0">
+                <StripeCtaButton to="/dashboard" variant="primary" cursorLabel="LAUNCH">
+                  Launch Live SOC Dashboard
+                </StripeCtaButton>
+                <StripeCtaButton to="/log-explorer" variant="secondary" cursorLabel="EXPLORE">
+                  Open Log Explorer
+                </StripeCtaButton>
+              </div>
             </div>
           </div>
         </section>
