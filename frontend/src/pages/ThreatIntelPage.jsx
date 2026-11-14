@@ -206,11 +206,11 @@ export function ThreatIntelPage() {
         pulseBg = 'bg-rose-500';
         markerBg = 'bg-rose-500';
       } else if (level === 'MEDIUM') {
-        pulseBg = 'bg-amber-400';
-        markerBg = 'bg-amber-500';
+        pulseBg = 'bg-[var(--color-severity-medium)]';
+        markerBg = 'bg-[var(--color-severity-medium)]';
       } else if (level === 'INFO') {
-        pulseBg = 'bg-secondary';
-        markerBg = 'bg-secondary';
+        pulseBg = 'bg-[var(--color-status-info)]';
+        markerBg = 'bg-[var(--color-status-info)]';
       }
 
       const isSelected = selectedCluster?.key === cluster.key;
@@ -311,7 +311,7 @@ export function ThreatIntelPage() {
             </span>
             {unmappedCount > 0 && (
               <span className="text-text-dim border-l border-border-muted pl-2 sm:pl-3">
-                Unmapped: <strong className="text-amber-400">{unmappedCount}</strong>
+                Unmapped: <strong className="text-[var(--color-status-info)]">{unmappedCount}</strong>
               </span>
             )}
             <button
@@ -340,7 +340,7 @@ export function ThreatIntelPage() {
               <span className="text-text-primary">HIGH</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+              <span className="w-2 h-2 rounded-full bg-[var(--color-severity-medium)]"></span>
               <span className="text-text-primary">MEDIUM</span>
             </div>
             <div className="flex items-center gap-1.5">
@@ -390,12 +390,12 @@ export function ThreatIntelPage() {
 
             <div>
               <div className="flex justify-between text-[11px] mb-1">
-                <span className="text-amber-400 font-bold">MEDIUM SEVERITY</span>
+                <span className="text-[var(--color-severity-medium)] font-bold">MEDIUM SEVERITY</span>
                 <span className="text-text-primary font-bold">{medCount} Nodes</span>
               </div>
               <div className="h-2.5 w-full bg-surface-dim rounded-full overflow-hidden border border-border-muted">
                 <div
-                  className="h-full bg-amber-400 rounded-full transition-all duration-300"
+                  className="h-full bg-[var(--color-severity-medium)] rounded-full transition-all duration-300"
                   style={{ width: `${clusters.length ? (medCount / clusters.length) * 100 : 0}%` }}
                 ></div>
               </div>
@@ -454,7 +454,7 @@ export function ThreatIntelPage() {
                 </div>
                 <div className="p-2.5 rounded-xl bg-surface-dim border border-border-muted">
                   <div className="text-text-dim text-[9px] uppercase">MAX SEVERITY</div>
-                  <div className={`font-bold mt-0.5 ${selectedCluster.maxThreatLevel === 'CRITICAL' ? 'text-[var(--color-severity-critical)]' : selectedCluster.maxThreatLevel === 'HIGH' ? 'text-rose-400' : 'text-amber-400'}`}>
+                  <div className={`font-bold mt-0.5 ${selectedCluster.maxThreatLevel === 'CRITICAL' ? 'text-[var(--color-severity-critical)]' : selectedCluster.maxThreatLevel === 'HIGH' ? 'text-rose-400' : selectedCluster.maxThreatLevel === 'MEDIUM' ? 'text-[var(--color-severity-medium)]' : 'text-emerald-400'}`}>
                     {selectedCluster.maxThreatLevel} ({selectedCluster.maxThreatScore.toFixed(1)})
                   </div>
                 </div>
@@ -471,7 +471,7 @@ export function ThreatIntelPage() {
                     </div>
                     <p className="text-text-muted font-sans text-xs">{evt.xai_explanation || evt.original_event}</p>
                     {evt.mitre_tactic && (
-                      <span className="inline-block px-2 py-0.5 rounded bg-surface border border-border-muted text-[9px] text-amber-400 font-bold">
+                      <span className="inline-block px-2 py-0.5 rounded bg-surface border border-border-muted text-[9px] text-[var(--color-status-info)] font-bold">
                         {evt.mitre_tactic}
                       </span>
                     )}

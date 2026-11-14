@@ -3,23 +3,25 @@ import * as THREE from 'three';
 import { useTheme } from '../../contexts/ThemeContext';
 
 const DEFAULT_MOCHA = {
-  primary: '#C9B8F0',
-  secondary: '#C5C9D0',
-  tertiary: '#D8C3B0',
-  surfaceLowest: '#140E0C',
-  surfaceDim: '#1C1512',
-  textMain: '#ECEAE6',
-  tunnelHull: '#18110E',
-  tunnelWire: '#C9B8F0',
-  borderGlow: '#C9B8F0',
+  primary: '#E3C98F',
+  secondary: '#B85C28',
+  secondaryText: '#DC7D43',
+  tertiary: '#CDB8A0',
+  surfaceLowest: '#130D0A',
+  surfaceDim: '#1B130F',
+  textMain: '#F1E9DD',
+  tunnelHull: '#160F0C',
+  tunnelWire: '#E3C98F',
+  borderGlow: '#E3C98F',
   critical: '#FF4D94',
-  ambient: '#3A2D27',
-  fog: '#140E0C'
+  ambient: '#3A2A22',
+  fog: '#130D0A'
 };
 
 const DEFAULT_POWDER = {
   primary: '#376D8C',
   secondary: '#715F9F',
+  secondaryText: '#715F9F',
   tertiary: '#F4A988',
   surfaceLowest: '#FFFFFF',
   surfaceDim: '#EFEAF6',
@@ -54,6 +56,7 @@ export function useThreeThemeColors() {
 
     const primaryHex = readCssColor('--color-primary', fallback.primary);
     const secondaryHex = readCssColor('--color-secondary', fallback.secondary);
+    const secondaryTextHex = readCssColor('--color-secondary-text', fallback.secondaryText);
     const tertiaryHex = readCssColor('--color-tertiary', fallback.tertiary);
     const surfaceLowestHex = readCssColor('--color-surface-lowest', fallback.surfaceLowest);
     const surfaceDimHex = readCssColor('--color-surface-dim', fallback.surfaceDim);
@@ -65,6 +68,7 @@ export function useThreeThemeColors() {
       theme: currentTheme,
       primaryStr: primaryHex,
       secondaryStr: secondaryHex,
+      secondaryTextStr: secondaryTextHex,
       tertiaryStr: tertiaryHex,
       surfaceLowestStr: surfaceLowestHex,
       surfaceDimStr: surfaceDimHex,

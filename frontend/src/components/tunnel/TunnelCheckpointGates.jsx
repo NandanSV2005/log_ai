@@ -66,7 +66,11 @@ export function TunnelCheckpointGates({ colors, progress }) {
         const stageColor = colors[cp.colorKey] || colors.primary;
         const stageColorStr = colors[`${cp.colorKey}Str`] || colors.primaryStr;
         const stageTextColorStr =
-          colors.isSage && cp.colorKey === 'tertiary' ? colors.primaryStr : stageColorStr;
+          colors.isSage && cp.colorKey === 'tertiary'
+            ? colors.primaryStr
+            : !colors.isSage && cp.colorKey === 'secondary'
+            ? colors.secondaryTextStr
+            : stageColorStr;
 
         // Is this gate currently active or passed?
         const diff = Math.abs(progress - cp.targetProgress);

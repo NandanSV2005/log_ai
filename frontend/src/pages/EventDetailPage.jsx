@@ -302,7 +302,7 @@ export function EventDetailPage() {
                   : threatLevel === 'HIGH'
                   ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
                   : threatLevel === 'MEDIUM'
-                  ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                  ? 'bg-[var(--color-severity-medium-bg)] text-[var(--color-severity-medium)] border border-[var(--color-severity-medium-border)]'
                   : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
               }`}
             >
@@ -310,7 +310,7 @@ export function EventDetailPage() {
             </span>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={`text-2xl font-black ${threatScoreVal >= 70 ? 'text-rose-400' : threatScoreVal >= 40 ? 'text-amber-400' : 'text-emerald-400'}`}>
+            <span className={`text-2xl font-black ${threatScoreVal >= 70 ? 'text-rose-400' : threatScoreVal >= 40 ? 'text-[var(--color-severity-medium)]' : 'text-emerald-400'}`}>
               {threatScoreVal.toFixed(1)}
             </span>
             <span className="text-xs text-text-dim">/ 100 Threat Index</span>
@@ -577,7 +577,7 @@ export function EventDetailPage() {
                       <span className="font-bold text-text-primary block">target_port_entropy</span>
                       <span className="text-[11px] text-text-muted block">Concentration of ingress targets on port 80/22</span>
                     </div>
-                    <span className="px-2.5 py-1 rounded bg-amber-500/20 text-amber-400 font-bold text-xs">
+                    <span className="px-2.5 py-1 rounded bg-[var(--color-severity-medium-bg)] text-[var(--color-severity-medium)] border border-[var(--color-severity-medium-border)] font-bold text-xs">
                       z: +2.11
                     </span>
                   </div>
@@ -651,7 +651,7 @@ export function EventDetailPage() {
 
                   <div className="p-3.5 rounded-xl bg-surface border border-border-muted space-y-1">
                     <span className="text-[10px] text-text-dim uppercase font-bold block">INGEST ACTION / AUDIT</span>
-                    <span className="font-bold text-amber-400 text-sm block truncate">{actionTag} / Host Command Audit</span>
+                    <span className="font-bold text-[var(--color-status-info)] text-sm block truncate">{actionTag} / Host Command Audit</span>
                     <span className="text-[10px] text-text-muted block">Host Security Audited</span>
                   </div>
 

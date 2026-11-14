@@ -163,7 +163,7 @@ export function LogExplorerPage() {
             <button
               onClick={() => handleSeverityToggle('WARN')}
               className={`flex-1 p-3 rounded-xl border flex justify-between items-center transition-all ${
-                selectedSeverities.WARN ? 'bg-amber-500/15 border-amber-500 text-amber-400 font-bold' : 'bg-surface-dim border-border-muted text-text-muted opacity-50'
+                selectedSeverities.WARN ? 'bg-[var(--color-severity-medium-bg)] border-[var(--color-severity-medium)] text-[var(--color-severity-medium)] font-bold' : 'bg-surface-dim border-border-muted text-text-muted opacity-50'
               }`}
             >
               <span>WARNING</span>
@@ -245,7 +245,7 @@ export function LogExplorerPage() {
                   <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                     evt.threat_level === 'CRITICAL' ? 'bg-[var(--color-severity-critical-bg)] text-[var(--color-severity-critical)] border border-[var(--color-severity-critical-border)]' :
                     evt.threat_level === 'HIGH' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
-                    evt.threat_level === 'MEDIUM' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                    evt.threat_level === 'MEDIUM' ? 'bg-[var(--color-severity-medium-bg)] text-[var(--color-severity-medium)] border border-[var(--color-severity-medium-border)]' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                   }`}>
                     {evt.threat_level || 'LOW'}
                   </span>
@@ -326,7 +326,7 @@ export function LogExplorerPage() {
                         <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold ${
                           evt.threat_level === 'CRITICAL' ? 'bg-[var(--color-severity-critical-bg)] text-[var(--color-severity-critical)] border border-[var(--color-severity-critical-border)]' :
                           evt.threat_level === 'HIGH' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
-                          evt.threat_level === 'MEDIUM' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                          evt.threat_level === 'MEDIUM' ? 'bg-[var(--color-severity-medium-bg)] text-[var(--color-severity-medium)] border border-[var(--color-severity-medium-border)]' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                         }`}>
                           {evt.threat_level || 'LOW'}
                         </span>

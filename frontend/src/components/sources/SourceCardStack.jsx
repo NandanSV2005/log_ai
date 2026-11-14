@@ -126,7 +126,7 @@ export function SourceCardStack({ cards = [] }) {
               onClick={() => handleJumpToCard(idx)}
               className={`px-3 py-1.5 rounded-lg font-mono text-xs whitespace-nowrap transition-all border ${
                 idx === activeIndex
-                  ? 'bg-secondary/20 border-secondary text-secondary font-bold shadow-md'
+                  ? 'bg-primary/20 border-primary text-primary font-bold shadow-md'
                   : 'bg-surface border-border-muted text-text-muted'
               }`}
             >
@@ -272,7 +272,7 @@ export function SourceCardStack({ cards = [] }) {
                 tabIndex={0}
                 onFocus={() => handleCardFocus(idx)}
                 aria-current={isCurrent ? 'true' : 'false'}
-                className="absolute w-full max-w-xl cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-2xl"
+                className="absolute w-full max-w-xl cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-2xl"
                 style={{
                   transform: `translate3d(0px, ${translateY}px, ${translateZ}px) scale(${scale}) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
                   opacity: isVisible ? opacity : 0,
@@ -351,7 +351,7 @@ export function SourceCardStack({ cards = [] }) {
                   onClick={() => handleJumpToCard(idx)}
                   className={`px-3 py-1 rounded-full font-mono text-[11px] font-bold transition-all ${
                     isSelected
-                      ? 'bg-secondary text-surface-dim shadow-[0_0_14px_var(--color-border-glow)] scale-105'
+                      ? 'bg-primary text-surface-dim shadow-[0_0_14px_var(--color-border-glow)] scale-105'
                       : 'text-text-dim hover:text-text-primary hover:bg-surface-hover'
                   }`}
                   role="tab"

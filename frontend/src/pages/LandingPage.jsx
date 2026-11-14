@@ -743,7 +743,7 @@ export function LandingPage() {
       sev: 'SEV 6.2',
       score: 6.2,
       level: 'MEDIUM',
-      colorHex: '#F59E0B'
+      colorHex: '#FACC15'
     },
     {
       id: 3,
@@ -1228,7 +1228,7 @@ export function LandingPage() {
                         step="50"
                         value={roiVolume}
                         onChange={(e) => setRoiVolume(parseInt(e.target.value, 10))}
-                        className="w-full h-2.5 bg-surface-dim border border-tertiary/30 rounded-lg appearance-none cursor-pointer accent-tertiary"
+                        className="w-full h-2.5 bg-surface-dim border border-primary/30 rounded-lg appearance-none cursor-pointer accent-primary"
                       />
                       <div className="flex justify-between font-mono text-[10px] text-text-dim">
                         <span>100 GB</span>
@@ -1498,8 +1498,8 @@ export function LandingPage() {
                       <span className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded border animate-in fade-in duration-200 ${
                         demoResult?.verdict?.threat_level === 'CRITICAL' ? 'text-[var(--color-severity-critical)] bg-[var(--color-severity-critical-bg)] border-[var(--color-severity-critical-border)]' :
                         demoResult?.verdict?.threat_level === 'HIGH' ? 'text-rose-400 bg-rose-500/10 border-rose-500/30' :
-                        demoResult?.verdict?.threat_level === 'MEDIUM' ? 'text-amber-400 bg-amber-500/10 border-amber-500/30' :
-                        'text-tertiary bg-tertiary/10 border-tertiary/20'
+                        demoResult?.verdict?.threat_level === 'MEDIUM' ? 'text-[var(--color-severity-medium)] bg-[var(--color-severity-medium-bg)] border-[var(--color-severity-medium-border)]' :
+                        'text-[var(--color-severity-low)] bg-[var(--color-severity-low-bg)] border-[var(--color-severity-low-border)]'
                       }`}>
                         SEV {Number(demoResult?.verdict?.threat_score != null ? demoResult.verdict.threat_score : 0).toFixed(1)} {demoResult?.verdict?.threat_level}
                       </span>

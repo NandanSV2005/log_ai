@@ -1,19 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
-  <rect width="64" height="64" rx="16" fill="#1C1512"/>
-  <rect width="62" height="62" x="1" y="1" rx="15" stroke="#4A3A33" stroke-width="2"/>
+  <rect width="64" height="64" rx="16" fill="#1B130F"/>
+  <rect width="62" height="62" x="1" y="1" rx="15" stroke="#4D3A2F" stroke-width="2"/>
   
   <path d="M46 15H24C19.0294 15 15 19.0294 15 24C15 28.9706 19.0294 33 24 33H40C44.9706 33 49 37.0294 49 42C49 46.9706 44.9706 51 40 51H18" stroke="url(#stitch_grad)" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
   
-  <path d="M18 21H40C44.9706 21 49 25.0294 49 30" stroke="#C9B8F0" stroke-width="3.5" stroke-linecap="round" opacity="0.6"/>
-  <path d="M46 43H24C19.0294 43 15 38.9706 15 34" stroke="#C9B8F0" stroke-width="3.5" stroke-linecap="round" opacity="0.6"/>
+  <path d="M18 21H40C44.9706 21 49 25.0294 49 30" stroke="#E3C98F" stroke-width="3.5" stroke-linecap="round" opacity="0.6"/>
+  <path d="M46 43H24C19.0294 43 15 38.9706 15 34" stroke="#E3C98F" stroke-width="3.5" stroke-linecap="round" opacity="0.6"/>
   
-  <circle cx="46" cy="15" r="4" fill="#C9B8F0"/>
-  <circle cx="18" cy="51" r="4" fill="#C5C9D0"/>
+  <circle cx="46" cy="15" r="4" fill="#E3C98F"/>
+  <circle cx="18" cy="51" r="4" fill="#B85C28"/>
 
   <defs>
     <linearGradient id="stitch_grad" x1="15" y1="15" x2="49" y2="51" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#C9B8F0"/>
-      <stop offset="1" stop-color="#C5C9D0"/>
+      <stop stop-color="#E3C98F"/>
+      <stop offset="1" stop-color="#B85C28"/>
     </linearGradient>
   </defs>
 </svg>

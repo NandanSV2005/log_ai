@@ -352,11 +352,11 @@ export function DashboardPage({ pollingInterval }) {
 
                   <div>
                     <div className="flex justify-between text-[11px] mb-1">
-                      <span className="text-amber-400 font-bold">MEDIUM SEVERITY</span>
+                      <span className="text-[var(--color-severity-medium)] font-bold">MEDIUM SEVERITY</span>
                       <span className="text-text-primary font-bold">{medThreats}</span>
                     </div>
                     <div className="h-2 w-full bg-surface rounded-full overflow-hidden">
-                      <div className="h-full bg-amber-500 rounded-full" style={{ width: `${totalIngested ? (medThreats / totalIngested) * 100 : 0}%` }}></div>
+                      <div className="h-full bg-[var(--color-severity-medium)] rounded-full" style={{ width: `${totalIngested ? (medThreats / totalIngested) * 100 : 0}%` }}></div>
                     </div>
                   </div>
 
@@ -574,8 +574,8 @@ export function DashboardPage({ pollingInterval }) {
                 <div className="text-base font-bold text-emerald-400 mt-0.5">{receiverStatus?.accepted || 0}</div>
               </div>
               <div className="p-3 rounded-xl bg-surface-dim border border-border-muted">
-                <div className="text-[10px] text-amber-400 uppercase">Dropped (Unregistered)</div>
-                <div className="text-base font-bold text-amber-400 mt-0.5">{receiverStatus?.dropped_unregistered || 0}</div>
+                <div className="text-[10px] text-[var(--color-severity-medium)] uppercase">Dropped (Unregistered)</div>
+                <div className="text-base font-bold text-[var(--color-severity-medium)] mt-0.5">{receiverStatus?.dropped_unregistered || 0}</div>
               </div>
               <div className="p-3 rounded-xl bg-surface-dim border border-border-muted">
                 <div className="text-[10px] text-rose-400 uppercase">Dropped (Oversize/Queue)</div>
@@ -664,13 +664,13 @@ export function DashboardPage({ pollingInterval }) {
 
             {/* Newly Created Key Alert (Shown ONCE with Copy Button) */}
             {newlyCreatedKey && (
-              <div className="mx-4 sm:mx-5 p-4 rounded-xl bg-amber-500/10 border border-amber-500/40 space-y-3 font-mono text-xs animate-in fade-in duration-200">
-                <div className="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider">
-                  <span className="material-symbols-outlined text-base">warning</span>
+              <div className="mx-4 sm:mx-5 p-4 rounded-xl bg-[var(--color-status-info-bg)] border border-[var(--color-status-info-border)] space-y-3 font-mono text-xs animate-in fade-in duration-200">
+                <div className="flex items-center gap-2 text-[var(--color-status-info)] font-bold text-xs uppercase tracking-wider">
+                  <span className="material-symbols-outlined text-base">info</span>
                   <span>Copy Your Secret Key Now</span>
                 </div>
                 <p className="text-[11px] text-text-muted leading-relaxed">
-                  For your security, this key is only displayed <strong className="text-amber-300">ONCE</strong> and will never be shown again. Store it securely in your environment variables or forwarder config.
+                  For your security, this key is only displayed <strong className="text-[var(--color-status-info)]">ONCE</strong> and will never be shown again. Store it securely in your environment variables or forwarder config.
                 </p>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-surface p-2.5 rounded-lg border border-border-muted">
                   <code className="flex-1 font-mono text-xs text-primary font-bold break-all select-all">
@@ -679,7 +679,7 @@ export function DashboardPage({ pollingInterval }) {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={handleCopyKey}
-                      className="px-3 py-1.5 rounded-lg bg-primary text-surface-lowest font-bold text-xs flex items-center gap-1 shrink-0 hover:opacity-90 transition-opacity"
+                      className="btn-primary px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 shrink-0"
                     >
                       <span className="material-symbols-outlined text-xs">{keyCopied ? 'check' : 'content_copy'}</span>
                       <span>{keyCopied ? 'Copied!' : 'Copy Key'}</span>
@@ -864,7 +864,7 @@ export function DashboardPage({ pollingInterval }) {
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                               evt.threat_level === 'CRITICAL' ? 'bg-[var(--color-severity-critical-bg)] text-[var(--color-severity-critical)] border border-[var(--color-severity-critical-border)]' :
                               evt.threat_level === 'HIGH' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
-                              evt.threat_level === 'MEDIUM' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                              evt.threat_level === 'MEDIUM' ? 'bg-[var(--color-severity-medium-bg)] text-[var(--color-severity-medium)] border border-[var(--color-severity-medium-border)]' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                             }`}>
                               {evt.threat_level || 'LOW'}
                             </span>
