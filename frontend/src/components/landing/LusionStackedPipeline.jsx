@@ -133,7 +133,6 @@ export function LusionStackedPipeline({ is2D = false }) {
             rotateX: 0,
             scale: 1,
             opacity: 1,
-            filter: 'blur(0px)',
           });
         } else {
           gsap.set(card, {
@@ -143,7 +142,6 @@ export function LusionStackedPipeline({ is2D = false }) {
             rotateX: -8,
             scale: 1,
             opacity: 0,
-            filter: 'blur(0px)',
           });
         }
       });
@@ -186,8 +184,7 @@ export function LusionStackedPipeline({ is2D = false }) {
           scale: 0.92,
           y: -36,
           z: -80,
-          opacity: 0.15,
-          filter: 'blur(6px)',
+          opacity: 0.22,
           duration: 0.72,
           ease: 'power3.out',
         },
@@ -201,7 +198,6 @@ export function LusionStackedPipeline({ is2D = false }) {
           y: 0,
           z: 0,
           opacity: 1,
-          filter: 'blur(0px)',
           duration: 1,
           ease: 'power3.out',
         },
@@ -217,8 +213,7 @@ export function LusionStackedPipeline({ is2D = false }) {
           scale: 0.85,
           y: -64,
           z: -150,
-          opacity: 0.05,
-          filter: 'blur(10px)',
+          opacity: 0.06,
           duration: 0.72,
           ease: 'power3.out',
         },
@@ -230,8 +225,7 @@ export function LusionStackedPipeline({ is2D = false }) {
             scale: 0.92,
             y: -36,
             z: -80,
-            opacity: 0.15,
-            filter: 'blur(6px)',
+            opacity: 0.22,
             duration: 0.72,
             ease: 'power3.out',
           },
@@ -246,7 +240,6 @@ export function LusionStackedPipeline({ is2D = false }) {
             y: 0,
             z: 0,
             opacity: 1,
-            filter: 'blur(0px)',
             duration: 1,
             ease: 'power3.out',
           },
@@ -263,7 +256,6 @@ export function LusionStackedPipeline({ is2D = false }) {
           y: -88,
           z: -210,
           opacity: 0.02,
-          filter: 'blur(12px)',
           duration: 0.72,
           ease: 'power3.out',
         },
@@ -275,8 +267,7 @@ export function LusionStackedPipeline({ is2D = false }) {
             scale: 0.85,
             y: -64,
             z: -150,
-            opacity: 0.05,
-            filter: 'blur(10px)',
+            opacity: 0.06,
             duration: 0.72,
             ease: 'power3.out',
           },
@@ -288,8 +279,7 @@ export function LusionStackedPipeline({ is2D = false }) {
             scale: 0.92,
             y: -36,
             z: -80,
-            opacity: 0.15,
-            filter: 'blur(6px)',
+            opacity: 0.22,
             duration: 0.72,
             ease: 'power3.out',
           },
@@ -304,7 +294,6 @@ export function LusionStackedPipeline({ is2D = false }) {
             y: 0,
             z: 0,
             opacity: 1,
-            filter: 'blur(0px)',
             duration: 1,
             ease: 'power3.out',
           },
@@ -347,8 +336,7 @@ export function LusionStackedPipeline({ is2D = false }) {
           scale: depth === 1 ? 0.92 : 0.85,
           z: -80 * depth,
           rotateX: 0,
-          opacity: depth === 1 ? 0.15 : 0.05,
-          filter: `blur(${depth * 6}px)`,
+          opacity: depth === 1 ? 0.22 : 0.06,
           duration: 0.55,
           ease: 'power3.out',
         });
@@ -360,7 +348,6 @@ export function LusionStackedPipeline({ is2D = false }) {
           z: 0,
           rotateX: 0,
           opacity: 1,
-          filter: 'blur(0px)',
           duration: 0.55,
           ease: 'power3.out',
         });
@@ -372,7 +359,6 @@ export function LusionStackedPipeline({ is2D = false }) {
           z: 0,
           rotateX: -8,
           opacity: 0,
-          filter: 'blur(0px)',
           duration: 0.55,
           ease: 'power3.out',
         });
@@ -468,7 +454,7 @@ export function LusionStackedPipeline({ is2D = false }) {
                 key={stage.id}
                 data-pipeline-card
                 style={{ zIndex: idx + 10, transformStyle: 'preserve-3d' }}
-                className="absolute inset-x-0 w-full will-change-[transform,opacity,filter]"
+                className="absolute inset-x-0 w-full will-change-[transform,opacity]"
               >
                 <SpotlightCard
                   spotlightColor="var(--color-border-glow)"

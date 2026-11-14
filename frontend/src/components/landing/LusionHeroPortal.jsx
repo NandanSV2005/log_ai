@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
+import { AnimatePresence, motion } from 'motion/react';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -334,12 +335,25 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
   const progressRef = useRef(0);
 
   const [hasWebGL, setHasWebGL] = useState(false);
+  const [isHeroInView, setIsHeroInView] = useState(true);
   const [activeFilter, setActiveFilter] = useState('ALL');
   const [selectedRowId, setSelectedRowId] = useState('SOC-9941');
   const [portalProgressPct, setPortalProgressPct] = useState(0);
 
   useEffect(() => {
     setHasWebGL(checkWebGLSupport());
+  }, []);
+
+  // Pause 3D WebGL render loop when hero section is scrolled offscreen
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsHeroInView(entry.isIntersecting),
+      { threshold: 0.02 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -444,20 +458,16 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
         0
       );
 
-      // Simultaneously animate LIVE SOC TELEMETRY PORTAL upward (y: "-28vh") and scale up (scale: 1.08, width: "94vw") to center stage
+      // Simultaneously animate LIVE SOC TELEMETRY PORTAL upward (y: "-18vh") and scale up (scale: 1.03) centered
       tl.fromTo(
         portalEl,
         {
-          scale: 0.92,
+          scale: 0.94,
           y: '0vh',
-          width: '100%',
-          maxWidth: '80rem',
         },
         {
-          scale: 1.08,
-          y: '-28vh',
-          width: '94vw',
-          maxWidth: '94vw',
+          scale: 1.03,
+          y: '-18vh',
           ease: 'power2.inOut',
           duration: 0.85,
         },
@@ -502,6 +512,7 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
       <div className="absolute inset-0 z-0 pointer-events-none">
         {hasWebGL && !is2D ? (
           <Canvas
+            frameloop={isHeroInView ? 'always' : 'demand'}
             camera={{ position: [0, 0, 6.4], fov: 52 }}
             dpr={[1, 1.75]}
             gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
@@ -592,14 +603,16 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
             </div>
 
             {/* Interactive Severity Filter Pills inside the Portal */}
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="Filter telemetry stream by severity">
               {['ALL', 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].map((lvl) => (
                 <button
                   key={lvl}
                   type="button"
+                  role="tab"
+                  aria-selected={activeFilter === lvl}
                   data-filter-pill
                   onClick={() => setActiveFilter(lvl)}
-                  className={`px-2.5 py-1 rounded-md font-mono text-[10px] font-bold transition-all cursor-pointer border ${
+                  className={`px-2.5 py-1 rounded-md font-mono text-[10px] font-bold transition-all cursor-pointer border focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 ${
                     activeFilter === lvl
                       ? 'bg-primary text-surface-dim border-primary shadow-[0_0_12px_var(--color-border-glow)]'
                       : 'bg-surface border-border-muted text-text-muted hover:text-text-primary hover:border-primary/40'
@@ -702,24 +715,33 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
                 </span>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-surface-lowest border border-border-muted space-y-2.5 text-[11px]">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-text-dim shrink-0">OCSF_CLASS:</span>
-                  <span className="text-primary font-bold text-right truncate">{selectedEvent.ocsfClass}</span>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-text-dim shrink-0">CLASSIFICATION:</span>
-                  <span className="text-secondary font-bold text-right truncate">{selectedEvent.verdict}</span>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-text-dim shrink-0">ENDPOINT_TUPLE:</span>
-                  <span className="text-text-primary font-bold text-right truncate">{selectedEvent.src}</span>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-text-dim shrink-0">MERKLE_SEAL:</span>
-                  <span className="text-tertiary font-bold text-right truncate">{selectedEvent.hash}</span>
-                </div>
-              </div>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={selectedEvent.id}
+                  initial={is2D ? false : { opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={is2D ? undefined : { opacity: 0, y: -4 }}
+                  transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                  className="p-3.5 rounded-xl bg-surface-lowest border border-border-muted space-y-2.5 text-[11px]"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-text-dim shrink-0">OCSF_CLASS:</span>
+                    <span className="text-primary font-bold text-right truncate">{selectedEvent.ocsfClass}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-text-dim shrink-0">CLASSIFICATION:</span>
+                    <span className="text-secondary font-bold text-right truncate">{selectedEvent.verdict}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-text-dim shrink-0">ENDPOINT_TUPLE:</span>
+                    <span className="text-text-primary font-bold text-right truncate">{selectedEvent.src}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-text-dim shrink-0">MERKLE_SEAL:</span>
+                    <span className="text-tertiary font-bold text-right truncate">{selectedEvent.hash}</span>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
 
               <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
                 <span className="text-[10px] text-text-dim">

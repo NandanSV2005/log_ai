@@ -63,17 +63,14 @@ export function useLusionScrollEngine(disabled = false) {
       return setters;
     };
 
-    const getSkewTargets = () =>
-      Array.from(document.querySelectorAll('[data-velocity-skew]'));
+    const targets = Array.from(document.querySelectorAll('[data-velocity-skew]'));
 
     let resetTimer = null;
 
-    const applySkewAndStretch = (skewDeg, stretchY) => {
-      const targets = getSkewTargets();
+    const applySkew = (skewDeg) => {
       for (let i = 0; i < targets.length; i++) {
         const setters = getQuickSetters(targets[i]);
         setters.skewY(skewDeg);
-        setters.scaleY(stretchY);
       }
     };
 
@@ -82,14 +79,14 @@ export function useLusionScrollEngine(disabled = false) {
       const velocity = e?.velocity || 0;
       lusionMotionState.velocity = velocity;
 
-      const clampedSkew = Math.max(-3.5, Math.min(3.5, velocity * 0.11));
-      const stretchY = 1 + Math.min(Math.abs(velocity) * 0.0015, 0.04);
-      applySkewAndStretch(clampedSkew, stretchY);
+      // Subtle, legible velocity-proportional skew without vertical stretch distortion
+      const clampedSkew = Math.max(-1.25, Math.min(1.25, velocity * 0.045));
+      applySkew(clampedSkew);
 
       if (resetTimer) clearTimeout(resetTimer);
       resetTimer = setTimeout(() => {
         lusionMotionState.velocity = 0;
-        applySkewAndStretch(0, 1);
+        applySkew(0);
       }, 95);
     };
 
@@ -121,7 +118,6 @@ export function useLusionScrollEngine(disabled = false) {
       lenisRef.current = null;
       lusionMotionState.lenis = null;
       lusionMotionState.velocity = 0;
-      const targets = getSkewTargets();
       targets.forEach((el) => {
         gsap.set(el, { clearProps: 'transform' });
       });
@@ -139,6 +135,7 @@ export function useLusionScrollEngine(disabled = false) {
 export function MagneticCursor({ disabled = false }) {
   const outerRef = useRef(null);
   const innerRef = useRef(null);
+  const isHoveringRef = useRef(false);
   const [isHoveringInteractive, setIsHoveringInteractive] = useState(false);
   const [hoverLabel, setHoverLabel] = useState('');
   const [hasFinePointer, setHasFinePointer] = useState(false);
@@ -182,8 +179,12 @@ export function MagneticCursor({ disabled = false }) {
       );
 
       if (target) {
-        setIsHoveringInteractive(true);
-        setHoverLabel(target.getAttribute('data-cursor-label') || '');
+        if (!isHoveringRef.current) {
+          isHoveringRef.current = true;
+          setIsHoveringInteractive(true);
+        }
+        const nextLabel = target.getAttribute('data-cursor-label') || '';
+        setHoverLabel((prev) => (prev === nextLabel ? prev : nextLabel));
 
         const isMagneticTarget =
           target.hasAttribute('data-magnetic') ||
@@ -216,8 +217,11 @@ export function MagneticCursor({ disabled = false }) {
           releaseMagneticTarget(activeMagneticEl);
           activeMagneticEl = null;
         }
-        setIsHoveringInteractive(false);
-        setHoverLabel('');
+        if (isHoveringRef.current) {
+          isHoveringRef.current = false;
+          setIsHoveringInteractive(false);
+        }
+        setHoverLabel((prev) => (prev === '' ? prev : ''));
       }
     };
 
@@ -229,12 +233,14 @@ export function MagneticCursor({ disabled = false }) {
     };
 
     const animateRing = () => {
-      ring.x += (pos.x - ring.x) * 0.15;
-      ring.y += (pos.y - ring.y) * 0.15;
-      if (outerRef.current) {
-        outerRef.current.style.transform = `translate3d(${ring.x.toFixed(1)}px, ${ring.y.toFixed(1)}px, 0) translate(-50%, -50%) scale(${
-          isHoveringInteractive ? 1.55 : 1
-        })`;
+      if (!document.hidden) {
+        ring.x += (pos.x - ring.x) * 0.15;
+        ring.y += (pos.y - ring.y) * 0.15;
+        if (outerRef.current) {
+          outerRef.current.style.transform = `translate3d(${ring.x.toFixed(1)}px, ${ring.y.toFixed(1)}px, 0) translate(-50%, -50%) scale(${
+            isHoveringRef.current ? 1.55 : 1
+          })`;
+        }
       }
       rafId = requestAnimationFrame(animateRing);
     };
@@ -249,7 +255,7 @@ export function MagneticCursor({ disabled = false }) {
       if (rafId) cancelAnimationFrame(rafId);
       if (activeMagneticEl) releaseMagneticTarget(activeMagneticEl);
     };
-  }, [disabled, isHoveringInteractive]);
+  }, [disabled]);
 
   if (!hasFinePointer || disabled) return null;
 
@@ -440,7 +446,7 @@ export function StripeDiagonalDivider({ label = '', variant = 'dark' }) {
       {label && (
         <div className="relative z-10 h-full max-w-7xl mx-auto px-4 md:px-8 flex items-center justify-between font-mono text-[10px] tracking-widest uppercase text-text-dim">
           <span>{label}</span>
-          <span className="text-primary font-bold">STRIPE // STRUCTURAL SPINE</span>
+          <span className="text-primary font-bold">LOG_AI // OCSF TELEMETRY SPINE</span>
         </div>
       )}
     </div>

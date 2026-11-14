@@ -40,6 +40,11 @@
 
 :root, :root[data-theme="dark"] {
   color-scheme: dark;
+  /* Motion design tokens */
+  --motion-duration-fast: 150ms;
+  --motion-duration-base: 240ms;
+  --motion-duration-slow: 480ms;
+  --motion-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --color-bg-dim: #1B130F;
   --color-bg-surface: #251A15;
   --color-bg-card: #2E211B;
@@ -641,7 +646,11 @@ input[type="range"]:focus::-moz-range-thumb {
   .animate-node-ping,
   .animate-marquee-smooth,
   .animate-pulse,
-  .animate-flow-dash {
+  .animate-ping,
+  .animate-bounce,
+  .animate-flow-dash,
+  .scan-overlay,
+  .scan-line {
     animation: none !important;
     transition: none !important;
   }

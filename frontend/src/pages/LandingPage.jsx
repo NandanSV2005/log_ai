@@ -48,11 +48,11 @@ const CHAPTERS = [
     glowClass: 'shadow-[0_0_12px_var(--color-border-glow)]'
   },
   {
-    id: 'sources',
-    targets: ['sources'],
-    navLabel: '02 // Sources',
-    mobileLabel: '02 // Log Sources',
-    railLabel: 'SRC',
+    id: 'bento-architecture',
+    targets: ['bento-architecture'],
+    navLabel: '02 // Architecture',
+    mobileLabel: '02 // Modular Architecture',
+    railLabel: 'ARCH',
     num: '02',
     textClass: 'text-secondary',
     bgClass: 'bg-secondary',
@@ -61,7 +61,7 @@ const CHAPTERS = [
   },
   {
     id: 'topology',
-    targets: ['bento-architecture', 'topology'],
+    targets: ['topology'],
     navLabel: '03 // Topology',
     mobileLabel: '03 // Network Topology Radar',
     railLabel: 'TOPO',
@@ -102,11 +102,12 @@ export function LandingPage() {
   const { renderMode, is3D, is2D, setRenderMode } = useRenderMode();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [activeChapter, setActiveChapter] = useState('pipeline');
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   // Initialize Lusion Smooth Scroll (Lenis) + GSAP ScrollTrigger & Velocity Skew
   useLusionScrollEngine(is2D);
 
-  // Dynamic Viewport Scroll Tracker for Active Chapter Highlighting
+  // Dynamic Viewport Scroll Tracker for Active Chapter Highlighting & Header Progress Bar
   useEffect(() => {
     let ticking = false;
 
@@ -116,6 +117,8 @@ export function LandingPage() {
           const scrollY = window.scrollY || window.pageYOffset;
           const windowHeight = window.innerHeight;
           const docHeight = document.documentElement.scrollHeight;
+          const maxScroll = Math.max(1, docHeight - windowHeight);
+          setScrollProgress(Math.min(1, Math.max(0, scrollY / maxScroll)));
 
           // 1. Extreme boundary cases: top or bottom of page
           if (scrollY < 120) {
@@ -413,7 +416,12 @@ export function LandingPage() {
           
           {/* Brand Logo & Status Chip */}
           <div className="flex items-center gap-3 xl:gap-5 flex-shrink-0">
-            <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => scrollToSection('pipeline')}>
+            <button
+              type="button"
+              onClick={() => scrollToSection('pipeline')}
+              aria-label="LOG AI — scroll to top"
+              className="flex items-center gap-2.5 cursor-pointer rounded-lg focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
+            >
               <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shadow-[0_0_12px_var(--color-border-glow)]">
                 <StitchBrandMark className="w-5 h-5 text-primary" size={20} />
               </div>
@@ -422,7 +430,7 @@ export function LandingPage() {
                 <span className="font-mono text-primary text-sm md:text-base font-bold px-1.5">//</span>
                 <span>AI</span>
               </div>
-            </div>
+            </button>
 
             {/* Status Chip (Gracefully hidden on <2xl screens to preserve width budget) */}
             <div className="hidden 2xl:flex items-center gap-2 px-3 py-1 rounded-full bg-surface-bright/80 border border-border-muted whitespace-nowrap">
@@ -498,8 +506,10 @@ export function LandingPage() {
               <div className="w-[1px] h-3.5 bg-border-muted" />
 
               {/* Operations Theme Toggle */}
-              <div className="flex items-center">
+              <div className="flex items-center" role="group" aria-label="Operations color theme">
                 <button
+                  type="button"
+                  aria-pressed={theme === 'dark'}
                   onClick={() => setTheme('dark')}
                   className={`px-2 py-1 font-mono text-[10px] 2xl:text-[11px] font-bold rounded transition-all cursor-pointer ${
                     theme === 'dark' ? 'bg-primary text-surface-dim shadow-sm' : 'text-text-muted hover:text-text-primary'
@@ -508,6 +518,8 @@ export function LandingPage() {
                   MOCHA
                 </button>
                 <button
+                  type="button"
+                  aria-pressed={theme === 'sage'}
                   onClick={() => setTheme('sage')}
                   className={`px-2 py-1 font-mono text-[10px] 2xl:text-[11px] font-bold rounded transition-all cursor-pointer ${
                     theme === 'sage' ? 'bg-primary text-surface-dim shadow-sm' : 'text-text-muted hover:text-text-primary'
@@ -530,18 +542,32 @@ export function LandingPage() {
 
             {/* Mobile Menu Toggle Button */}
             <button
+              type="button"
               onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
-              className="xl:hidden p-2 rounded-lg bg-surface border border-border-muted text-text-primary cursor-pointer"
+              className="xl:hidden p-2 rounded-lg bg-surface border border-border-muted text-text-primary cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
               aria-label="Toggle Navigation Menu"
+              aria-expanded={isMobileNavOpen}
+              aria-controls="mobile-chapter-nav"
             >
               <span className="material-symbols-outlined text-xl">{isMobileNavOpen ? 'close' : 'menu'}</span>
             </button>
           </div>
         </div>
 
+        {/* Scroll Progress Indicator Bar */}
+        <div
+          aria-hidden="true"
+          className="h-[2px] w-full bg-border-muted/30 overflow-hidden"
+        >
+          <div
+            className="h-full w-full origin-left bg-gradient-to-r from-primary via-secondary to-tertiary transition-transform duration-75"
+            style={{ transform: `scaleX(${scrollProgress.toFixed(4)})` }}
+          />
+        </div>
+
         {/* Mobile Navigation Viewport */}
         {isMobileNavOpen && (
-          <div className="xl:hidden bg-surface-dim border-b border-border-muted px-4 py-4 space-y-2 font-mono text-xs animate-in slide-in-from-top duration-200">
+          <div id="mobile-chapter-nav" className="xl:hidden bg-surface-dim border-b border-border-muted px-4 py-4 space-y-2 font-mono text-xs animate-in slide-in-from-top duration-200">
             {CHAPTERS.map((ch) => {
               const isActive = activeChapter === ch.id;
               return (
@@ -1202,12 +1228,12 @@ export function LandingPage() {
             </div>
           </div>
 
-          <nav className="flex flex-wrap items-center gap-6 font-mono text-xs text-text-muted">
+          <nav className="flex flex-wrap items-center gap-6 font-mono text-xs text-text-muted" aria-label="Footer navigation">
             <Link to="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
-            <Link to="/security" className="hover:text-primary transition-colors">Security</Link>
-            <Link to="/compliance" className="hover:text-primary transition-colors">Compliance</Link>
             <Link to="/terms" className="hover:text-primary transition-colors">Terms</Link>
-            <Link to="/contact" className="hover:text-primary transition-colors">Contact</Link>
+            <Link to="/login" className="hover:text-primary transition-colors">SOC Sign In</Link>
+            <Link to="/dashboard" className="hover:text-primary transition-colors">Console</Link>
+            <a href="#demo" className="hover:text-primary transition-colors">Live Sandbox</a>
           </nav>
         </div>
 
