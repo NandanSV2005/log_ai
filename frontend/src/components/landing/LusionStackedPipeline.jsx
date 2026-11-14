@@ -184,12 +184,12 @@ export function LusionStackedPipeline({ is2D = false }) {
         cards[0],
         {
           scale: 0.92,
-          y: -28,
+          y: -36,
           z: -80,
-          opacity: 0.4,
-          filter: 'blur(3px)',
-          duration: 1,
-          ease: 'power2.inOut',
+          opacity: 0.15,
+          filter: 'blur(6px)',
+          duration: 0.72,
+          ease: 'power3.out',
         },
         0
       ).to(
@@ -215,12 +215,12 @@ export function LusionStackedPipeline({ is2D = false }) {
         cards[0],
         {
           scale: 0.85,
-          y: -52,
+          y: -64,
           z: -150,
-          opacity: 0.18,
-          filter: 'blur(5px)',
-          duration: 1,
-          ease: 'power2.inOut',
+          opacity: 0.05,
+          filter: 'blur(10px)',
+          duration: 0.72,
+          ease: 'power3.out',
         },
         1
       )
@@ -228,12 +228,12 @@ export function LusionStackedPipeline({ is2D = false }) {
           cards[1],
           {
             scale: 0.92,
-            y: -28,
+            y: -36,
             z: -80,
-            opacity: 0.4,
-            filter: 'blur(3px)',
-            duration: 1,
-            ease: 'power2.inOut',
+            opacity: 0.15,
+            filter: 'blur(6px)',
+            duration: 0.72,
+            ease: 'power3.out',
           },
           1
         )
@@ -260,12 +260,12 @@ export function LusionStackedPipeline({ is2D = false }) {
         cards[0],
         {
           scale: 0.78,
-          y: -74,
+          y: -88,
           z: -210,
-          opacity: 0.08,
-          filter: 'blur(7px)',
-          duration: 1,
-          ease: 'power2.inOut',
+          opacity: 0.02,
+          filter: 'blur(12px)',
+          duration: 0.72,
+          ease: 'power3.out',
         },
         2
       )
@@ -273,12 +273,12 @@ export function LusionStackedPipeline({ is2D = false }) {
           cards[1],
           {
             scale: 0.85,
-            y: -52,
+            y: -64,
             z: -150,
-            opacity: 0.18,
-            filter: 'blur(5px)',
-            duration: 1,
-            ease: 'power2.inOut',
+            opacity: 0.05,
+            filter: 'blur(10px)',
+            duration: 0.72,
+            ease: 'power3.out',
           },
           2
         )
@@ -286,12 +286,12 @@ export function LusionStackedPipeline({ is2D = false }) {
           cards[2],
           {
             scale: 0.92,
-            y: -28,
+            y: -36,
             z: -80,
-            opacity: 0.4,
-            filter: 'blur(3px)',
-            duration: 1,
-            ease: 'power2.inOut',
+            opacity: 0.15,
+            filter: 'blur(6px)',
+            duration: 0.72,
+            ease: 'power3.out',
           },
           2
         )
@@ -343,12 +343,12 @@ export function LusionStackedPipeline({ is2D = false }) {
         const depth = targetIdx - i;
         gsap.to(card, {
           yPercent: 0,
-          y: -28 * depth,
+          y: -36 * depth,
           scale: depth === 1 ? 0.92 : 0.85,
           z: -80 * depth,
           rotateX: 0,
-          opacity: depth === 1 ? 0.4 : 0.18,
-          filter: `blur(${depth * 3}px)`,
+          opacity: depth === 1 ? 0.15 : 0.05,
+          filter: `blur(${depth * 6}px)`,
           duration: 0.55,
           ease: 'power3.out',
         });
@@ -472,7 +472,7 @@ export function LusionStackedPipeline({ is2D = false }) {
               >
                 <SpotlightCard
                   spotlightColor="var(--color-border-glow)"
-                  className="w-full p-6 sm:p-8 rounded-3xl bg-surface-lowest/95 border-2 border-primary/40 shadow-[0_28px_70px_rgba(0,0,0,0.55),0_0_32px_var(--color-border-glow)] backdrop-blur-2xl"
+                  className="pipeline-stage-card w-full p-6 sm:p-8 rounded-3xl bg-surface-lowest border-2 border-primary/40 shadow-[0_28px_70px_rgba(0,0,0,0.65),0_0_32px_var(--color-border-glow)] backdrop-blur-2xl"
                 >
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
                     {/* Left 7 Columns: Stage Narrative & Source Chips */}

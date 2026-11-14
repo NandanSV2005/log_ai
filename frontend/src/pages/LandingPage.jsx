@@ -16,6 +16,7 @@ import {
   useLusionScrollEngine,
   MagneticCursor,
   StructuralGridSpine,
+  StripeDiagonalDivider,
   StripeSectionHeader,
   StripeCtaButton,
 } from '../components/landing/LusionMotionEngine';
@@ -642,12 +643,18 @@ export function LandingPage() {
         />
 
         {/* ========================================================================= */}
-        {/* CHAPTER 02 // LUSION PINNED 3D STACKED PIPELINE CARDS                     */}
+        {/* CHAPTER 01 // LUSION PINNED 3D STACKED PIPELINE CARDS                     */}
         {/* ========================================================================= */}
         <LusionStackedPipeline is2D={is2D} />
 
+        {/* Stripe Angled Section Divider: Chapter 01 -> Chapter 02 */}
+        <StripeDiagonalDivider
+          label="CHAPTER 01 → CHAPTER 02 // MODULAR BENTO ARCHITECTURE"
+          variant={theme === 'sage' ? 'light' : 'dark'}
+        />
+
         {/* ========================================================================= */}
-        {/* CHAPTER 03A // STRIPE ASYMMETRICAL 12-COLUMN BENTO ARCHITECTURE           */}
+        {/* CHAPTER 02 // STRIPE ASYMMETRICAL 12-COLUMN BENTO ARCHITECTURE            */}
         {/* ========================================================================= */}
         <StripeBentoArchitecture is2D={is2D} />
 
@@ -738,20 +745,29 @@ export function LandingPage() {
           </div>
         </section>
 
+        {/* Stripe Angled Section Divider: Chapter 03 -> Chapter 04 */}
+        <StripeDiagonalDivider
+          label="CHAPTER 03 → CHAPTER 04 // SIEM CAPITAL EFFICIENCY"
+          variant={theme === 'sage' ? 'light' : 'dark'}
+        />
+
         {/* ========================================================================= */}
         {/* CHAPTER 04 // CAPITAL EFFICIENCY // INTERACTIVE ROI ESTIMATOR              */}
         {/* ========================================================================= */}
         <section
           id="roi-engine"
-          className="w-full px-4 md:px-8 xl:px-14 py-24 relative scroll-mt-16 bg-gradient-to-b from-[var(--color-chapter4-from)] via-[var(--color-chapter4-via)] to-[var(--color-chapter4-to)] border-b border-tertiary/30 overflow-hidden"
+          className="section-obsidian-contrast w-full px-4 md:px-8 xl:px-14 py-24 relative scroll-mt-16 border-b border-[rgba(245,158,11,0.14)] overflow-hidden"
         >
-          {/* Stripe Angled Section Background Layer */}
+          {/* Stripe Angled Section Background Layer (transform: skewY(-3.5deg)) */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-10 bottom-10 -z-0 bg-surface-lowest/35 border-y border-primary/20"
-            style={{ transform: 'skewY(-3deg)', transformOrigin: 'center center' }}
+            className="pointer-events-none absolute inset-x-[-4%] top-10 bottom-10 -z-0 bg-surface-lowest/65 border-y border-[rgba(245,158,11,0.14)] shadow-[0_0_90px_var(--color-border-glow)]"
+            style={{ transform: 'skewY(-3.5deg)', transformOrigin: 'center center' }}
           />
-          <StructuralGridSpine />
+          <StructuralGridSpine
+            variant={theme === 'sage' ? 'light' : 'obsidian'}
+            obsidian={theme !== 'sage'}
+          />
           <div className="absolute top-10 left-1/3 w-[850px] h-[500px] bg-tertiary/15 rounded-full blur-[160px] pointer-events-none"></div>
           
           <div

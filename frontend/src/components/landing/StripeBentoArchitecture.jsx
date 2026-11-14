@@ -190,17 +190,20 @@ export function StripeBentoArchitecture({ is2D = false }) {
   return (
     <section
       id="bento-architecture"
-      className="relative w-full py-24 md:py-28 bg-gradient-to-b from-[var(--color-chapter3-from)] via-[var(--color-chapter3-via)] to-[var(--color-chapter3-to)] border-b border-border-muted overflow-hidden"
+      className="section-obsidian-contrast relative w-full py-24 md:py-28 border-b border-[rgba(245,158,11,0.14)] overflow-hidden"
     >
-      {/* Stripe Angled Section Background Layer (skewY -4deg while keeping interior content un-skewed) */}
+      {/* Stripe Angled Section Background Layer (transform: skewY(-3.5deg) while keeping interior content un-skewed) */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-12 bottom-12 -z-0 bg-surface-lowest/45 border-y border-primary/20 shadow-[0_0_90px_var(--color-border-glow)]"
-        style={{ transform: 'skewY(-4deg)', transformOrigin: 'center center' }}
+        className="pointer-events-none absolute inset-x-[-4%] top-10 bottom-10 -z-0 bg-surface-lowest/65 border-y border-[rgba(245,158,11,0.14)] shadow-[0_0_90px_var(--color-border-glow)]"
+        style={{ transform: 'skewY(-3.5deg)', transformOrigin: 'center center' }}
       />
 
-      {/* Structural 4-Column Vertical Grid Spine */}
-      <StructuralGridSpine variant={theme === 'sage' ? 'light' : 'dark'} />
+      {/* Structural 4-Column Vertical Grid Spine with crisp 1px solid rgba(245, 158, 11, 0.14) grid lines */}
+      <StructuralGridSpine
+        variant={theme === 'sage' ? 'light' : 'obsidian'}
+        obsidian={theme !== 'sage'}
+      />
 
       <div
         data-velocity-skew

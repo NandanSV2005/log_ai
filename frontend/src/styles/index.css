@@ -311,6 +311,26 @@ body {
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.18);
 }
 
+/* Solid high-opacity dark surface for Chapter 01 3D Stacked Pipeline cards so outgoing card text never collides */
+.pipeline-stage-card {
+  background: rgba(12, 11, 10, 0.96) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+:root[data-theme="sage"] .pipeline-stage-card {
+  background: rgba(255, 255, 255, 0.97) !important;
+}
+
+/* Elevated obsidian-slate contrast surface (#0D1017) for Chapter 02 & Chapter 04 architectural separation */
+.section-obsidian-contrast {
+  background-color: #0D1017;
+}
+
+:root[data-theme="sage"] .section-obsidian-contrast {
+  background-color: #EDF2F8;
+}
+
 .input-cyber {
   background-color: var(--color-bg-dim);
   border: 1px solid var(--color-border);

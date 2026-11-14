@@ -372,13 +372,20 @@ export function MaskedRevealText({
 
 /**
  * Stripe Structural 4-Column Vertical Grid Spine
- * Renders a subtle 1px structural outer border with 4 vertical dashed column guides inside max-w-7xl.
+ * Renders a subtle 1px structural outer border with 4 vertical column guides inside max-w-7xl.
+ * When variant="obsidian" (used in Chapter 02 & Chapter 04), renders crisp 1px solid rgba(245, 158, 11, 0.14) grid lines.
  */
-export function StructuralGridSpine({ variant = 'dark' }) {
+export function StructuralGridSpine({ variant = 'dark', obsidian = false }) {
+  const isObsidian = obsidian || variant === 'obsidian';
   const lineClass =
     variant === 'light'
-      ? 'border-[rgba(15,23,42,0.06)]'
-      : 'border-[rgba(255,255,255,0.06)]';
+      ? 'border-[rgba(15,23,42,0.08)]'
+      : isObsidian
+        ? 'border-[rgba(245,158,11,0.14)]'
+        : 'border-[rgba(255,255,255,0.06)]';
+  const dividerStyle = isObsidian && variant !== 'light'
+    ? { borderColor: 'rgba(245, 158, 11, 0.14)' }
+    : undefined;
 
   return (
     <div
@@ -386,13 +393,56 @@ export function StructuralGridSpine({ variant = 'dark' }) {
       aria-hidden="true"
     >
       <div
+        style={dividerStyle}
         className={`w-full max-w-7xl h-full grid grid-cols-2 md:grid-cols-4 border-x ${lineClass}`}
       >
-        <div className={`h-full border-r border-dashed ${lineClass}`} />
-        <div className={`h-full border-r border-dashed hidden md:block ${lineClass}`} />
-        <div className={`h-full border-r border-dashed hidden md:block ${lineClass}`} />
+        <div
+          style={dividerStyle}
+          className={`h-full border-r ${isObsidian ? 'border-solid' : 'border-dashed'} ${lineClass}`}
+        />
+        <div
+          style={dividerStyle}
+          className={`h-full border-r ${isObsidian ? 'border-solid' : 'border-dashed'} hidden md:block ${lineClass}`}
+        />
+        <div
+          style={dividerStyle}
+          className={`h-full border-r ${isObsidian ? 'border-solid' : 'border-dashed'} hidden md:block ${lineClass}`}
+        />
         <div className="h-full" />
       </div>
+    </div>
+  );
+}
+
+/**
+ * Stripe-Style Diagonal Section Divider (transform: skewY(-3.5deg) background separator layer)
+ * Used between Chapter 01 -> Chapter 02 and Chapter 03 -> Chapter 04 for crisp architectural separation.
+ */
+export function StripeDiagonalDivider({ label = '', variant = 'dark' }) {
+  const isLight = variant === 'light';
+  return (
+    <div
+      aria-hidden="true"
+      className="relative w-full h-16 md:h-20 overflow-hidden pointer-events-none select-none section-obsidian-contrast"
+    >
+      <StructuralGridSpine variant={isLight ? 'light' : 'obsidian'} obsidian={!isLight} />
+      <div
+        className="absolute inset-x-[-6%] top-2 bottom-2 border-y shadow-[0_0_50px_var(--color-border-glow)]"
+        style={{
+          transform: 'skewY(-3.5deg)',
+          transformOrigin: 'center center',
+          background: isLight
+            ? 'linear-gradient(90deg, rgba(55,109,140,0.08), rgba(113,95,159,0.12), rgba(55,109,140,0.08))'
+            : 'linear-gradient(90deg, rgba(13,16,23,0.96), rgba(30,22,16,0.92), rgba(13,16,23,0.96))',
+          borderColor: isLight ? 'rgba(55, 109, 140, 0.22)' : 'rgba(245, 158, 11, 0.18)',
+        }}
+      />
+      {label && (
+        <div className="relative z-10 h-full max-w-7xl mx-auto px-4 md:px-8 flex items-center justify-between font-mono text-[10px] tracking-widest uppercase text-text-dim">
+          <span>{label}</span>
+          <span className="text-primary font-bold">STRIPE // STRUCTURAL SPINE</span>
+        </div>
+      )}
     </div>
   );
 }

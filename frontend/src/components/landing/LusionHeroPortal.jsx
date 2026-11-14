@@ -373,7 +373,9 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
       gsap.set(portalEl, {
         scale: 1,
         opacity: 1,
-        y: 0,
+        y: '0vh',
+        width: '100%',
+        maxWidth: '80rem',
       });
       progressRef.current = 1;
       setPortalProgressPct(100);
@@ -383,11 +385,13 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
     const ctx = gsap.context(() => {
       gsap.set(backdropEl, {
         clipPath: 'inset(18% 12% 18% 12% round 20px)',
-        opacity: 0,
+        opacity: 0.2,
       });
       gsap.set(portalEl, {
-        scale: 0.9,
-        y: 0,
+        scale: 0.92,
+        y: '0vh',
+        width: '100%',
+        maxWidth: '80rem',
         transformOrigin: 'center center',
       });
 
@@ -424,39 +428,40 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
         0
       );
 
-      // 30% to 100% Scroll Progress: Portal clip-path expands from inset(18% 12% 18% 12% round 20px) to inset(0% 0% 0% 0% round 0px)
+      // Simultaneously expand Portal backdrop clip-path from inset(18% 12% 18% 12% round 20px) to inset(0% 0% 0% 0% round 0px)
       tl.fromTo(
         backdropEl,
         {
           clipPath: 'inset(18% 12% 18% 12% round 20px)',
-          opacity: 0.25,
+          opacity: 0.2,
         },
         {
           clipPath: 'inset(0% 0% 0% 0% round 0px)',
           opacity: 0.96,
           ease: 'power2.inOut',
-          duration: 0.7,
+          duration: 0.85,
         },
-        0.3
+        0
       );
 
-      // 30% to 100% Scroll Progress: Live SOC Terminal Preview Card rises to center of viewport and scales from 0.9 to 1.0
+      // Simultaneously animate LIVE SOC TELEMETRY PORTAL upward (y: "-28vh") and scale up (scale: 1.08, width: "94vw") to center stage
       tl.fromTo(
         portalEl,
         {
-          scale: 0.9,
-          y: 0,
+          scale: 0.92,
+          y: '0vh',
+          width: '100%',
+          maxWidth: '80rem',
         },
         {
-          scale: 1.0,
-          y: () => {
-            const h = headlineEl.offsetHeight || 220;
-            return -Math.min(h * 0.62, 185);
-          },
+          scale: 1.08,
+          y: '-28vh',
+          width: '94vw',
+          maxWidth: '94vw',
           ease: 'power2.inOut',
-          duration: 0.7,
+          duration: 0.85,
         },
-        0.3
+        0
       );
     }, sectionEl);
 
@@ -522,7 +527,7 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
       {/* Main Hero Container */}
       <div
         id="hero-pin-wrapper"
-        className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-8 flex-1 flex flex-col justify-between gap-4"
+        className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-8 flex-1 flex flex-col items-center justify-between gap-4"
       >
         {/* Top Hero Headline Stage (Scales down to 0.82, y: -60, blur: 10px & fades out from 0% to 45% scroll) */}
         <div
@@ -563,10 +568,10 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
           </div>
         </div>
 
-        {/* Live log_ai SOC Terminal Portal Card (Rises to center & scales 0.9 -> 1.0 as portal expands) */}
+        {/* Live log_ai SOC Terminal Portal Card (Rises to center y: "-28vh" & scales to 1.08 / 94vw as portal expands) */}
         <div
           ref={portalFrameRef}
-          className="w-full rounded-3xl bg-surface-lowest/95 border-2 border-primary/40 shadow-[0_24px_80px_rgba(0,0,0,0.55),0_0_40px_var(--color-border-glow)] backdrop-blur-2xl flex flex-col justify-between overflow-hidden will-change-transform"
+          className="w-full mx-auto rounded-3xl bg-surface-lowest/95 border-2 border-primary/40 shadow-[0_24px_80px_rgba(0,0,0,0.55),0_0_40px_var(--color-border-glow)] backdrop-blur-2xl flex flex-col justify-between overflow-hidden will-change-transform"
         >
           {/* Portal Top Window Chrome */}
           <div className="px-4 sm:px-6 py-2.5 bg-surface-dim/95 border-b border-border-muted flex flex-wrap items-center justify-between gap-3 font-mono text-xs">
