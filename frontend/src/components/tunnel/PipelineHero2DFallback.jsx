@@ -98,7 +98,7 @@ export function PipelineHero2DFallback({
                 }
               }}
             >
-              <SpotlightCard spotlightColor="rgba(167, 139, 250, 0.12)" className="p-3.5 bg-surface-lowest/80 border border-border-muted rounded-xl flex flex-col">
+              <SpotlightCard spotlightColor="var(--color-border-glow)" className="p-3.5 bg-surface-lowest/80 border border-border-muted rounded-xl flex flex-col">
                 <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Events Processed</span>
                 <span className="font-mono text-2xl lg:text-3xl text-primary font-extrabold tracking-tight mt-1">
                   {(stats.total_events_ingested || 48281).toLocaleString()}
@@ -106,7 +106,7 @@ export function PipelineHero2DFallback({
                 <span className="font-mono text-[10px] text-tertiary mt-0.5">Total Logs Received</span>
               </SpotlightCard>
 
-              <SpotlightCard spotlightColor="rgba(123, 208, 255, 0.12)" className="p-3.5 bg-surface-lowest/80 border border-border-muted rounded-xl flex flex-col">
+              <SpotlightCard spotlightColor="color-mix(in srgb, var(--color-secondary) 18%, transparent)" className="p-3.5 bg-surface-lowest/80 border border-border-muted rounded-xl flex flex-col">
                 <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Processing Latency</span>
                 <span className="font-mono text-2xl lg:text-3xl text-secondary font-extrabold tracking-tight mt-1">
                   {pipelineLatency}
@@ -114,7 +114,7 @@ export function PipelineHero2DFallback({
                 <span className="font-mono text-[10px] text-text-dim mt-0.5">Average Processing Speed</span>
               </SpotlightCard>
 
-              <SpotlightCard spotlightColor="rgba(78, 222, 163, 0.12)" className="p-3.5 bg-surface-lowest/80 border border-border-muted rounded-xl flex flex-col">
+              <SpotlightCard spotlightColor="color-mix(in srgb, var(--color-tertiary) 18%, transparent)" className="p-3.5 bg-surface-lowest/80 border border-border-muted rounded-xl flex flex-col">
                 <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">Log Verification</span>
                 <span className="font-mono text-2xl lg:text-3xl text-tertiary font-extrabold tracking-tight mt-1">
                   {merkleProofType}
@@ -245,37 +245,37 @@ export function PipelineHero2DFallback({
 
               <div className="grid grid-cols-2 md:grid-cols-6 gap-3 lg:gap-4 -mt-10 relative z-10">
                 <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-xl bg-surface-dim border-2 border-primary flex items-center justify-center text-primary shadow-[0_0_16px_rgba(167,139,250,0.4)] mb-2">
+                  <div className="w-12 h-12 rounded-xl bg-surface-dim border-2 border-primary flex items-center justify-center text-primary shadow-[0_0_16px_var(--color-border-glow)] mb-2">
                     <span className="font-mono font-black text-xs">01</span>
                   </div>
                   <span className="font-mono text-[11px] font-bold text-primary uppercase">RAW INGEST</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-xl bg-surface-dim border-2 border-secondary flex items-center justify-center text-secondary shadow-[0_0_16px_rgba(123,208,255,0.3)] mb-2">
+                  <div className="w-12 h-12 rounded-xl bg-surface-dim border-2 border-secondary flex items-center justify-center text-secondary shadow-[0_0_16px_var(--color-border-glow)] mb-2">
                     <span className="font-mono font-black text-xs">02</span>
                   </div>
                   <span className="font-mono text-[11px] font-bold text-secondary uppercase">TOKENIZE</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-xl bg-surface-dim border-2 border-tertiary flex items-center justify-center text-tertiary shadow-[0_0_16px_rgba(78,222,163,0.3)] mb-2">
+                  <div className="w-12 h-12 rounded-xl bg-surface-dim border-2 border-tertiary flex items-center justify-center text-tertiary shadow-[0_0_16px_var(--color-border-glow)] mb-2">
                     <span className="font-mono font-black text-xs">03</span>
                   </div>
                   <span className="font-mono text-[11px] font-bold text-tertiary uppercase">OCSF NORM</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-xl bg-surface-dim border-2 border-primary flex items-center justify-center text-primary shadow-[0_0_16px_rgba(167,139,250,0.4)] mb-2">
+                  <div className="w-12 h-12 rounded-xl bg-surface-dim border-2 border-primary flex items-center justify-center text-primary shadow-[0_0_16px_var(--color-border-glow)] mb-2">
                     <span className="font-mono font-black text-xs">04</span>
                   </div>
                   <span className="font-mono text-[11px] font-bold text-primary uppercase">SHA-256 SEAL</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-xl bg-surface-dim border-2 border-secondary flex items-center justify-center text-secondary shadow-[0_0_16px_rgba(123,208,255,0.3)] mb-2">
+                  <div className="w-12 h-12 rounded-xl bg-surface-dim border-2 border-secondary flex items-center justify-center text-secondary shadow-[0_0_16px_var(--color-border-glow)] mb-2">
                     <span className="font-mono font-black text-xs">05</span>
                   </div>
                   <span className="font-mono text-[11px] font-bold text-secondary uppercase">ANOMALY ML</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-xl bg-surface-dim border-2 border-tertiary flex items-center justify-center text-tertiary shadow-[0_0_16px_rgba(78,222,163,0.4)] mb-2">
+                  <div className="w-12 h-12 rounded-xl bg-surface-dim border-2 border-tertiary flex items-center justify-center text-tertiary shadow-[0_0_16px_var(--color-border-glow)] mb-2">
                     <span className="font-mono font-black text-xs">06</span>
                   </div>
                   <span className="font-mono text-[11px] font-bold text-tertiary uppercase">XAI VERDICT</span>

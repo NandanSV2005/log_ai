@@ -15,6 +15,10 @@ export function ThemeProvider({ children }) {
     } else {
       document.documentElement.classList.remove('dark');
     }
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', theme === 'dark' ? '#1C1512' : '#F7F4FB');
+    }
   }, [theme]);
 
   const toggleTheme = (newTheme) => {

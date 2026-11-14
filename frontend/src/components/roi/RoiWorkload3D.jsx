@@ -32,7 +32,7 @@ export function RoiStatCards({ calculatedSavings, calculatedHours, isFlat2D = fa
         }}
       >
         <SpotlightCard
-          spotlightColor="rgba(78, 222, 163, 0.15)"
+          spotlightColor="color-mix(in srgb, var(--color-tertiary) 18%, transparent)"
           className="p-5 bg-surface-bright/90 border border-tertiary/30 rounded-xl flex flex-col justify-between h-full shadow-lg backdrop-blur-md"
         >
           <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">
@@ -64,7 +64,7 @@ export function RoiStatCards({ calculatedSavings, calculatedHours, isFlat2D = fa
         }}
       >
         <SpotlightCard
-          spotlightColor="rgba(167, 139, 250, 0.15)"
+          spotlightColor="var(--color-border-glow)"
           className="p-5 bg-surface-bright/90 border border-primary/30 rounded-xl flex flex-col justify-between h-full shadow-lg backdrop-blur-md"
         >
           <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">
@@ -96,7 +96,7 @@ export function RoiStatCards({ calculatedSavings, calculatedHours, isFlat2D = fa
         }}
       >
         <SpotlightCard
-          spotlightColor="rgba(123, 208, 255, 0.15)"
+          spotlightColor="color-mix(in srgb, var(--color-secondary) 18%, transparent)"
           className="p-5 bg-surface-bright/90 border border-secondary/30 rounded-xl flex flex-col justify-between h-full shadow-lg backdrop-blur-md"
         >
           <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">
@@ -125,7 +125,7 @@ export function RoiStatCards({ calculatedSavings, calculatedHours, isFlat2D = fa
         }}
       >
         <SpotlightCard
-          spotlightColor="rgba(255, 255, 255, 0.08)"
+          spotlightColor="var(--color-border-glow)"
           className="p-5 bg-surface-bright/90 border border-border-muted rounded-xl flex flex-col justify-between h-full shadow-lg backdrop-blur-md"
         >
           <span className="font-mono text-[10px] font-bold text-text-dim uppercase tracking-wider">
@@ -181,7 +181,7 @@ export function RoiWorkload3D({
       {/* 3D Isometric Workload Visualization Hero Stage */}
       <div className="relative p-6 md:p-8 bg-surface-bright/90 border border-tertiary/35 rounded-2xl shadow-2xl backdrop-blur-md overflow-hidden flex flex-col justify-between h-full">
         {/* Background glow & subtle coordinate grid */}
-        <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#4edea3_1px,transparent_1px)] [background-size:24px_24px]" />
+        <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(var(--color-tertiary)_1px,transparent_1px)] [background-size:24px_24px]" />
         <div className="absolute -top-12 right-1/4 w-72 h-72 bg-tertiary/10 rounded-full blur-3xl pointer-events-none" />
 
         {/* Stage Header & Hero Savings Callout */}
@@ -201,7 +201,7 @@ export function RoiWorkload3D({
           </div>
 
           {/* Visual Hero Savings Badge */}
-          <div className="flex items-center gap-3 bg-tertiary/10 border border-tertiary/40 px-4 py-2 rounded-xl shadow-[0_0_20px_rgba(78,222,163,0.2)]">
+          <div className="flex items-center gap-3 bg-tertiary/10 border border-tertiary/40 px-4 py-2 rounded-xl shadow-[0_0_20px_var(--color-border-glow)]">
             <div className="flex flex-col items-end">
               <span className="font-mono text-[10px] text-text-dim uppercase font-bold tracking-wider">
                 NET RECLAIMED VALUE
@@ -272,7 +272,7 @@ export function RoiWorkload3D({
               </div>
 
               <div className="flex items-center justify-center pt-2">
-                <span className="px-3.5 py-1 rounded-full bg-tertiary/15 border border-tertiary/40 text-tertiary font-mono text-xs font-black shadow-[0_0_14px_rgba(78,222,163,0.3)]">
+                <span className="px-3.5 py-1 rounded-full bg-tertiary/15 border border-tertiary/40 text-tertiary font-mono text-xs font-black shadow-[0_0_14px_var(--color-border-glow)]">
                   78.4% DATA NOISE SHED PRE-INDEX
                 </span>
               </div>
@@ -389,7 +389,7 @@ export function RoiWorkload3D({
 
               {/* Dimensional Delta Arrow Banner */}
               <div className="flex flex-col items-center justify-center gap-1 z-20 pb-12">
-                <span className="px-3 py-1 rounded-full bg-tertiary/15 border border-tertiary/40 text-tertiary font-mono text-xs font-black shadow-[0_0_14px_rgba(78,222,163,0.3)] animate-pulse">
+                <span className="px-3 py-1 rounded-full bg-tertiary/15 border border-tertiary/40 text-tertiary font-mono text-xs font-black shadow-[0_0_14px_var(--color-border-glow)] animate-pulse">
                   -78.4%
                 </span>
                 <span className="material-symbols-outlined text-tertiary text-[24px]">
@@ -424,16 +424,16 @@ export function RoiWorkload3D({
                     <div
                       className="absolute inset-0 border shadow-lg flex flex-col justify-between p-2 font-mono text-[9px] font-bold"
                       style={{
-                        background: 'linear-gradient(to top, color-mix(in srgb, var(--color-tertiary) 25%, transparent), var(--color-tertiary))',
+                        background: 'linear-gradient(to top, color-mix(in srgb, var(--color-tertiary) 45%, var(--color-surface-dim)), var(--color-tertiary))',
                         borderColor: 'var(--color-tertiary)',
-                        color: '#ffffff',
+                        color: '#1C1512',
                         transform: 'translateZ(16px)',
                         backfaceVisibility: 'hidden',
                         boxShadow: '0 0 20px color-mix(in srgb, var(--color-tertiary) 35%, transparent)'
                       }}
                     >
                       <span className="tracking-wider">LOG AI</span>
-                      <span className="text-center font-mono font-bold text-[10px] text-white">
+                      <span className="text-center font-mono font-bold text-[10px]">
                         {Math.round(calculatedHours * 0.216)} hrs/wk
                       </span>
                     </div>
@@ -471,10 +471,7 @@ export function RoiWorkload3D({
 
                 {/* Stack Label */}
                 <div className="flex flex-col items-center text-center font-mono mt-[-10px] max-w-[130px]">
-                  <span
-                    className="font-bold text-xs uppercase tracking-wider flex items-center gap-1.5"
-                    style={{ color: 'var(--color-tertiary)' }}
-                  >
+                  <span className="font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 text-tertiary">
                     <span
                       className="w-1.5 h-1.5 rounded-full animate-pulse"
                       style={{ backgroundColor: 'var(--color-tertiary)' }}

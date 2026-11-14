@@ -160,7 +160,7 @@ function InteractiveCard({ card, activeCardId, setActiveCardId }) {
       iconBg: 'bg-primary/15 text-primary',
       footerText: 'text-primary',
       chevron: 'text-primary',
-      spotlight: 'rgba(167, 139, 250, 0.15)'
+      spotlight: 'var(--color-border-glow)'
     },
     secondary: {
       border: 'border-secondary/30 hover:border-secondary',
@@ -169,7 +169,7 @@ function InteractiveCard({ card, activeCardId, setActiveCardId }) {
       iconBg: 'bg-secondary/15 text-secondary',
       footerText: 'text-secondary',
       chevron: 'text-secondary',
-      spotlight: 'rgba(123, 208, 255, 0.15)'
+      spotlight: 'color-mix(in srgb, var(--color-secondary) 18%, transparent)'
     },
     tertiary: {
       border: 'border-tertiary/30 hover:border-tertiary',
@@ -178,7 +178,7 @@ function InteractiveCard({ card, activeCardId, setActiveCardId }) {
       iconBg: 'bg-tertiary/15 text-tertiary',
       footerText: 'text-tertiary',
       chevron: 'text-tertiary',
-      spotlight: 'rgba(78, 222, 163, 0.15)'
+      spotlight: 'color-mix(in srgb, var(--color-tertiary) 18%, transparent)'
     }
   };
 
@@ -310,7 +310,7 @@ function ZigZagSourceStream({ cards }) {
           >
             {/* Card Shell with Spotlight Hover Primitive */}
             <SpotlightCard
-              spotlightColor="rgba(123, 208, 255, 0.15)"
+              spotlightColor="color-mix(in srgb, var(--color-secondary) 18%, transparent)"
               className={`w-full md:w-[46%] p-5 rounded-2xl bg-surface/90 border transition-all duration-500 shadow-xl backdrop-blur-md group ${
                 isVisited
                   ? 'border-secondary shadow-[0_0_20px_var(--color-border-glow)]'
@@ -384,7 +384,7 @@ const CHAPTERS = [
     textClass: 'text-primary',
     bgClass: 'bg-primary',
     borderClass: 'border-primary/40',
-    glowClass: 'shadow-[0_0_12px_rgba(167,139,250,0.35)]'
+    glowClass: 'shadow-[0_0_12px_var(--color-border-glow)]'
   },
   {
     id: 'sources',
@@ -396,7 +396,7 @@ const CHAPTERS = [
     textClass: 'text-secondary',
     bgClass: 'bg-secondary',
     borderClass: 'border-secondary/40',
-    glowClass: 'shadow-[0_0_12px_rgba(123,208,255,0.35)]'
+    glowClass: 'shadow-[0_0_12px_var(--color-border-glow)]'
   },
   {
     id: 'topology',
@@ -408,7 +408,7 @@ const CHAPTERS = [
     textClass: 'text-tertiary',
     bgClass: 'bg-tertiary',
     borderClass: 'border-tertiary/40',
-    glowClass: 'shadow-[0_0_12px_rgba(78,222,163,0.35)]'
+    glowClass: 'shadow-[0_0_12px_var(--color-border-glow)]'
   },
   {
     id: 'roi-engine',
@@ -420,7 +420,7 @@ const CHAPTERS = [
     textClass: 'text-tertiary',
     bgClass: 'bg-tertiary',
     borderClass: 'border-tertiary/40',
-    glowClass: 'shadow-[0_0_12px_rgba(78,222,163,0.35)]'
+    glowClass: 'shadow-[0_0_12px_var(--color-border-glow)]'
   },
   {
     id: 'demo',
@@ -432,7 +432,7 @@ const CHAPTERS = [
     textClass: 'text-primary',
     bgClass: 'bg-primary',
     borderClass: 'border-primary/40',
-    glowClass: 'shadow-[0_0_12px_rgba(167,139,250,0.35)]'
+    glowClass: 'shadow-[0_0_12px_var(--color-border-glow)]'
   }
 ];
 
@@ -731,7 +731,7 @@ export function LandingPage() {
       sev: 'SEV 9.4',
       score: 9.4,
       level: 'CRITICAL',
-      colorHex: '#ef4444'
+      colorHex: '#FF4D94'
     },
     {
       id: 2,
@@ -743,7 +743,7 @@ export function LandingPage() {
       sev: 'SEV 6.2',
       score: 6.2,
       level: 'MEDIUM',
-      colorHex: '#38bdf8'
+      colorHex: '#F59E0B'
     },
     {
       id: 3,
@@ -755,7 +755,7 @@ export function LandingPage() {
       sev: 'SEV 0.2',
       score: 0.2,
       level: 'LOW',
-      colorHex: '#34d399'
+      colorHex: '#10B981'
     }
   ];
   const [selectedBlip, setSelectedBlip] = useState(RADAR_BLIPS[0]);
@@ -788,7 +788,7 @@ export function LandingPage() {
           {/* Brand Logo & Status Chip */}
           <div className="flex items-center gap-3 xl:gap-5 flex-shrink-0">
             <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => scrollToSection('pipeline')}>
-              <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shadow-[0_0_12px_rgba(167,139,250,0.35)]">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shadow-[0_0_12px_var(--color-border-glow)]">
                 <StitchBrandMark className="w-5 h-5 text-primary" size={20} />
               </div>
               <div className="flex items-baseline font-display font-black text-xl md:text-2xl tracking-tight text-text-primary whitespace-nowrap">
@@ -879,7 +879,7 @@ export function LandingPage() {
                     theme === 'dark' ? 'bg-primary text-surface-dim shadow-sm' : 'text-text-muted hover:text-text-primary'
                   }`}
                 >
-                  CYBERVOID
+                  MOCHA
                 </button>
                 <button
                   onClick={() => setTheme('sage')}
@@ -887,7 +887,7 @@ export function LandingPage() {
                     theme === 'sage' ? 'bg-primary text-surface-dim shadow-sm' : 'text-text-muted hover:text-text-primary'
                   }`}
                 >
-                  SAGE
+                  POWDER
                 </button>
               </div>
             </div>
@@ -962,7 +962,7 @@ export function LandingPage() {
                 onClick={() => setTheme(theme === 'dark' ? 'sage' : 'dark')}
                 className="px-3 py-1 rounded bg-primary text-surface-dim font-mono font-bold text-xs cursor-pointer"
               >
-                TOGGLE ({theme.toUpperCase()})
+                TOGGLE ({theme === 'dark' ? 'MOCHA' : 'POWDER'})
               </button>
             </div>
           </div>
@@ -1136,7 +1136,7 @@ export function LandingPage() {
 
               {/* CRYPTOGRAPHIC PROOF COMPANION WITH 3D LINKED CHAIN */}
               <InView className="xl:col-span-4">
-                <SpotlightCard spotlightColor="rgba(78, 222, 163, 0.15)" className="h-full bg-surface-bright/90 border border-tertiary/35 rounded-2xl p-5 md:p-6 flex flex-col justify-between gap-4 shadow-2xl backdrop-blur-md">
+                <SpotlightCard spotlightColor="color-mix(in srgb, var(--color-tertiary) 18%, transparent)" className="h-full bg-surface-bright/90 border border-tertiary/35 rounded-2xl p-5 md:p-6 flex flex-col justify-between gap-4 shadow-2xl backdrop-blur-md">
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center justify-between pb-2 border-b border-border-muted">
                       <div className="flex items-center gap-2">
@@ -1330,7 +1330,7 @@ export function LandingPage() {
               {/* Column 1: Raw Inbound Interactive Input */}
               <InView className="xl:col-span-4 h-full">
                 <TiltCard3D disabled={is2D}>
-                  <SpotlightCard spotlightColor="rgba(167, 139, 250, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-primary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
+                  <SpotlightCard spotlightColor="var(--color-border-glow)" className="h-full bg-surface-bright/90 rounded-2xl border border-primary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
                   <div className="flex flex-col gap-3 relative z-20">
                     <div className="flex items-center justify-between pb-3 border-b border-border-muted">
                       <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
@@ -1386,7 +1386,7 @@ export function LandingPage() {
                     type="button"
                     onClick={handleDemoSubmit}
                     disabled={demoLoading}
-                    className="relative z-20 pointer-events-auto w-full py-2.5 rounded-xl bg-primary text-surface-dim font-mono font-bold text-xs shadow-[0_0_16px_rgba(167,139,250,0.4)] hover:bg-primary-fixed transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-1"
+                    className="relative z-20 pointer-events-auto w-full py-2.5 rounded-xl bg-primary text-surface-dim font-mono font-bold text-xs shadow-[0_0_16px_var(--color-border-glow)] hover:bg-primary-fixed transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-1"
                     style={{
                       transform: !is2D ? 'translateZ(12px)' : 'none',
                       transformStyle: !is2D ? 'preserve-3d' : 'flat',
@@ -1416,7 +1416,7 @@ export function LandingPage() {
               {/* Column 2: ULPF Transform Engine Dynamic Output */}
               <InView className="xl:col-span-4 h-full">
                 <TiltCard3D disabled={is2D}>
-                  <SpotlightCard spotlightColor="rgba(123, 208, 255, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-secondary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
+                  <SpotlightCard spotlightColor="color-mix(in srgb, var(--color-secondary) 18%, transparent)" className="h-full bg-surface-bright/90 rounded-2xl border border-secondary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
                   <div className="flex items-center justify-between pb-3 border-b border-border-muted">
                     <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
                       <span className="w-2 h-2 rounded-full bg-secondary"></span>
@@ -1488,7 +1488,7 @@ export function LandingPage() {
               {/* Column 3: Enriched XAI Threat Verdict Dynamic Output */}
               <InView className="xl:col-span-4 h-full">
                 <TiltCard3D disabled={is2D}>
-                  <SpotlightCard spotlightColor="rgba(78, 222, 163, 0.15)" className="h-full bg-surface-bright/90 rounded-2xl border border-tertiary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
+                  <SpotlightCard spotlightColor="color-mix(in srgb, var(--color-tertiary) 18%, transparent)" className="h-full bg-surface-bright/90 rounded-2xl border border-tertiary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
                   <div className="flex items-center justify-between pb-3 border-b border-border-muted">
                     <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
                       <span className="w-2 h-2 rounded-full bg-tertiary"></span>
@@ -1574,7 +1574,7 @@ export function LandingPage() {
       <footer className="w-full px-4 md:px-8 xl:px-14 py-16 bg-surface-dim border-t border-border-muted">
         <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-border-muted">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shadow-[0_0_12px_rgba(167,139,250,0.35)]">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shadow-[0_0_12px_var(--color-border-glow)]">
               <StitchBrandMark className="w-5 h-5 text-primary" size={20} />
             </div>
             <div className="flex items-baseline font-display font-black text-xl tracking-tight text-text-primary uppercase whitespace-nowrap">

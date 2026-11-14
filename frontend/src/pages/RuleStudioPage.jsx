@@ -165,7 +165,7 @@ action:
 
             {ruleTestResult && (
               ruleTestResult.syntax_valid ? (
-                <div className="p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/40 font-mono text-xs space-y-2.5 animate-in fade-in duration-200">
+                <div className="p-4 rounded-xl bg-[var(--color-severity-low-bg)] border border-emerald-500/40 font-mono text-xs space-y-2.5 animate-in fade-in duration-200">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center text-[11px] gap-2 border-b border-emerald-500/20 pb-2">
                     <div className="flex items-center gap-2">
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
@@ -201,7 +201,7 @@ action:
                   )}
                 </div>
               ) : (
-                <div className="p-4 rounded-xl bg-rose-950/25 border border-rose-500/50 font-mono text-xs space-y-2 animate-in fade-in duration-200">
+                <div className="p-4 rounded-xl bg-[var(--color-severity-high-bg)] border border-rose-500/50 font-mono text-xs space-y-2 animate-in fade-in duration-200">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center text-[11px] gap-2 border-b border-rose-500/25 pb-2">
                     <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">
                       SYNTAX / VALIDATION ERROR

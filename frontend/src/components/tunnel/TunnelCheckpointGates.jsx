@@ -65,6 +65,8 @@ export function TunnelCheckpointGates({ colors, progress }) {
       {CHECKPOINTS.map((cp) => {
         const stageColor = colors[cp.colorKey] || colors.primary;
         const stageColorStr = colors[`${cp.colorKey}Str`] || colors.primaryStr;
+        const stageTextColorStr =
+          colors.isSage && cp.colorKey === 'tertiary' ? colors.primaryStr : stageColorStr;
 
         // Is this gate currently active or passed?
         const diff = Math.abs(progress - cp.targetProgress);
@@ -104,7 +106,7 @@ export function TunnelCheckpointGates({ colors, progress }) {
               <mesh position={[0, 0, 0]}>
                 <planeGeometry args={[3.1, 0.78]} />
                 <meshBasicMaterial
-                  color={colors.isSage ? '#ffffff' : '#07090e'}
+                  color={colors.surfaceLowestStr}
                   transparent
                   opacity={0.96}
                   side={THREE.DoubleSide}
@@ -142,7 +144,7 @@ export function TunnelCheckpointGates({ colors, progress }) {
                   position={[-1.12, 0.02, 0.03]}
                   fontSize={0.24}
                   letterSpacing={0.04}
-                  color={stageColorStr}
+                  color={stageTextColorStr}
                   anchorX="center"
                   anchorY="middle"
                 >
@@ -154,7 +156,7 @@ export function TunnelCheckpointGates({ colors, progress }) {
                   position={[-0.48, 0.11, 0.03]}
                   fontSize={0.16}
                   letterSpacing={0.08}
-                  color={colors.isSage ? '#121f14' : '#ffffff'}
+                  color={colors.textMainStr}
                   anchorX="left"
                   anchorY="middle"
                 >
@@ -166,7 +168,7 @@ export function TunnelCheckpointGates({ colors, progress }) {
                   position={[-0.48, -0.11, 0.03]}
                   fontSize={0.085}
                   letterSpacing={0.05}
-                  color={stageColorStr}
+                  color={stageTextColorStr}
                   anchorX="left"
                   anchorY="middle"
                 >

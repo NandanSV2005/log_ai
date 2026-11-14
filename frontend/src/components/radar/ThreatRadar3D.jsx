@@ -1,4 +1,4 @@
-import React, { useRef, useState, useMemo, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { checkWebGLSupport } from '../../utils/webgl';
@@ -16,7 +16,7 @@ export const DEFAULT_RADAR_BLIPS = [
     sev: 'SEV 9.4',
     score: 9.4,
     level: 'CRITICAL',
-    colorHex: '#ef4444'
+    colorHex: '#FF4D94'
   },
   {
     id: 2,
@@ -28,7 +28,7 @@ export const DEFAULT_RADAR_BLIPS = [
     sev: 'SEV 6.2',
     score: 6.2,
     level: 'MEDIUM',
-    colorHex: '#38bdf8'
+    colorHex: '#F59E0B'
   },
   {
     id: 3,
@@ -40,7 +40,7 @@ export const DEFAULT_RADAR_BLIPS = [
     sev: 'SEV 0.2',
     score: 0.2,
     level: 'LOW',
-    colorHex: '#34d399'
+    colorHex: '#10B981'
   }
 ];
 
@@ -52,7 +52,7 @@ function RadarScene({ blips, selectedBlip, onSelectBlip, themeColors }) {
 
   // Color tokens from theme
   const radarColor = themeColors.tertiaryStr;
-  const dimColor = themeColors.isSage ? '#2d4433' : '#141a29';
+  const dimColor = themeColors.surfaceDimStr;
 
   // Ring radiuses for concentric circles
   const rings = [0.8, 1.6, 2.4, 3.2];
@@ -137,7 +137,7 @@ function RadarScene({ blips, selectedBlip, onSelectBlip, themeColors }) {
         {/* Leading edge laser beam */}
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[1.7, 0, 0]}>
           <planeGeometry args={[3.4, 0.03]} />
-          <meshBasicMaterial color="#ffffff" opacity={0.8} transparent blending={THREE.AdditiveBlending} />
+          <meshBasicMaterial color={themeColors.textMainStr} opacity={0.8} transparent blending={THREE.AdditiveBlending} />
         </mesh>
       </group>
 
@@ -199,19 +199,20 @@ function RadarScene({ blips, selectedBlip, onSelectBlip, themeColors }) {
 
 // 2D Fallback: Responsive, true circular SVG radar with rotating sweep beam
 function FlatRadarFallback({ blips, selectedBlip, onSelectBlip, themeColors }) {
-  const dishBaseColor = themeColors?.isSage ? '#2d4433' : '#141a29';
+  const dishBaseColor = themeColors?.surfaceDimStr || 'var(--color-surface-dim)';
   const radarColor = themeColors?.tertiaryStr || 'var(--color-tertiary)';
+  const labelColor = themeColors?.isSage ? themeColors.primaryStr : radarColor;
 
   return (
     <div className="relative w-full h-full flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-hidden">
       {/* Background coordinate dot grid */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#4edea3_1px,transparent_1px)] [background-size:20px_20px]" />
+      <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(var(--color-tertiary)_1px,transparent_1px)] [background-size:20px_20px]" />
 
       {/* Scalable Circular Radar Vector Stage (Always a true circle, filling ~94% of min container dimension) */}
       <div className="relative w-full h-full max-w-[94%] max-h-[94%] aspect-square flex items-center justify-center">
         <svg
           viewBox="0 0 600 600"
-          className="w-full h-full max-w-full max-h-full drop-shadow-[0_0_24px_rgba(78,222,163,0.15)]"
+          className="w-full h-full max-w-full max-h-full drop-shadow-[0_0_24px_var(--color-border-glow)]"
         >
           <defs>
             <linearGradient id="sweepGrad2D" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -236,10 +237,10 @@ function FlatRadarFallback({ blips, selectedBlip, onSelectBlip, themeColors }) {
           <line x1="102" y1="498" x2="498" y2="102" stroke="var(--color-tertiary)" strokeWidth="1" strokeOpacity="0.15" strokeDasharray="4 4" />
 
           {/* Range Labels */}
-          <text x="306" y="228" fill="var(--color-tertiary)" fontSize="10" fontFamily="monospace" opacity="0.6">50km</text>
-          <text x="306" y="158" fill="var(--color-tertiary)" fontSize="10" fontFamily="monospace" opacity="0.6">100km</text>
-          <text x="306" y="88" fill="var(--color-tertiary)" fontSize="10" fontFamily="monospace" opacity="0.6">150km</text>
-          <text x="306" y="32" fill="var(--color-tertiary)" fontSize="10" fontFamily="monospace" opacity="0.75" fontWeight="bold">200km MAX</text>
+          <text x="306" y="228" fill={labelColor} fontSize="10" fontFamily="monospace" opacity="0.6">50km</text>
+          <text x="306" y="158" fill={labelColor} fontSize="10" fontFamily="monospace" opacity="0.6">100km</text>
+          <text x="306" y="88" fill={labelColor} fontSize="10" fontFamily="monospace" opacity="0.6">150km</text>
+          <text x="306" y="32" fill={labelColor} fontSize="10" fontFamily="monospace" opacity="0.75" fontWeight="bold">200km MAX</text>
 
           {/* Sweeping Beam Wedge for 2D Fallback */}
           <g className="origin-center animate-[spin_5s_linear_infinite]" style={{ transformOrigin: '300px 300px' }}>
@@ -321,7 +322,7 @@ export function ThreatRadar3D({
       {/* Responsive Viewport Container: Expands fluidly to fill container card height with zero dead space */}
       <div className="relative w-full flex-1 min-h-[460px] sm:min-h-[500px] md:min-h-[540px] xl:min-h-[580px] bg-surface-dim rounded-xl overflow-hidden border border-tertiary/30 shadow-inner flex items-center justify-center">
         {/* Subtle coordinate dot grid */}
-        <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#4edea3_1px,transparent_1px)] [background-size:24px_24px]" />
+        <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(var(--color-tertiary)_1px,transparent_1px)] [background-size:24px_24px]" />
 
         {hasWebGL && !reducedMotion && !force2D ? (
           <Canvas
@@ -432,7 +433,7 @@ export function ThreatRadar3D({
               onClick={() => onSelectBlip(b)}
               className={`px-3 py-1.5 rounded-lg border font-mono text-[11px] transition-all flex items-center gap-2 cursor-pointer ${
                 isActive
-                  ? 'border-tertiary bg-tertiary/20 text-tertiary font-bold shadow-[0_0_12px_rgba(78,222,163,0.3)]'
+                  ? 'border-tertiary bg-tertiary/20 text-tertiary font-bold shadow-[0_0_12px_var(--color-border-glow)]'
                   : 'border-border-muted bg-surface-dim text-text-muted hover:text-text-primary hover:border-tertiary/40'
               }`}
             >

@@ -5,7 +5,7 @@ import { cn } from '../../lib/utils';
 export function SpotlightCard({
   children,
   className,
-  spotlightColor = 'var(--color-primary-glow, rgba(167, 139, 250, 0.18))',
+  spotlightColor = 'var(--color-border-glow)',
   spotlightSize = 350,
   as = 'div',
   ...props

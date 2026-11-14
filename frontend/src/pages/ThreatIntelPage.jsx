@@ -203,14 +203,14 @@ export function ThreatIntelPage() {
         pulseBg = 'bg-[var(--color-severity-critical)]';
         markerBg = 'bg-[var(--color-severity-critical)]';
       } else if (level === 'HIGH') {
-        pulseBg = 'bg-orange-500';
-        markerBg = 'bg-orange-500';
+        pulseBg = 'bg-rose-500';
+        markerBg = 'bg-rose-500';
       } else if (level === 'MEDIUM') {
         pulseBg = 'bg-amber-400';
         markerBg = 'bg-amber-500';
       } else if (level === 'INFO') {
-        pulseBg = 'bg-cyan-400';
-        markerBg = 'bg-cyan-500';
+        pulseBg = 'bg-secondary';
+        markerBg = 'bg-secondary';
       }
 
       const isSelected = selectedCluster?.key === cluster.key;
@@ -220,7 +220,7 @@ export function ThreatIntelPage() {
         html: `
           <div class="relative flex items-center justify-center cursor-pointer group">
             <div class="w-7 h-7 rounded-full ${pulseBg} opacity-40 animate-ping absolute"></div>
-            <div class="w-6 h-6 rounded-full ${markerBg} text-white font-mono text-[10px] font-extrabold flex items-center justify-center ring-2 ring-slate-900 shadow-xl border border-white/80 transition-transform transform hover:scale-125">
+            <div class="w-6 h-6 rounded-full ${markerBg} text-white font-mono text-[10px] font-extrabold flex items-center justify-center ring-2 ring-surface-dim shadow-xl border border-white/80 transition-transform transform hover:scale-125">
               ${cluster.count > 1 ? cluster.count : ''}
             </div>
             ${
@@ -336,7 +336,7 @@ export function ThreatIntelPage() {
               <span className="text-text-primary">CRITICAL</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-orange-500"></span>
+              <span className="w-2 h-2 rounded-full bg-rose-500"></span>
               <span className="text-text-primary">HIGH</span>
             </div>
             <div className="flex items-center gap-1.5">
@@ -377,12 +377,12 @@ export function ThreatIntelPage() {
 
             <div>
               <div className="flex justify-between text-[11px] mb-1">
-                <span className="text-orange-400 font-bold">HIGH SEVERITY</span>
+                <span className="text-rose-400 font-bold">HIGH SEVERITY</span>
                 <span className="text-text-primary font-bold">{highCount} Nodes</span>
               </div>
               <div className="h-2.5 w-full bg-surface-dim rounded-full overflow-hidden border border-border-muted">
                 <div
-                  className="h-full bg-orange-500 rounded-full transition-all duration-300"
+                  className="h-full bg-rose-500 rounded-full transition-all duration-300"
                   style={{ width: `${clusters.length ? (highCount / clusters.length) * 100 : 0}%` }}
                 ></div>
               </div>
