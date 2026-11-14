@@ -43,7 +43,7 @@ export function SettingsPage({ pollingInterval, setPollingInterval, airGapped, s
           <h2 className="text-sm font-bold text-text-primary uppercase tracking-wider">Appearance & Visual Theme System</h2>
         </div>
         <p className="text-xs text-text-muted">
-          Select between Cyber Void (High-contrast Dark) and Sage Green design system variants.
+          Select between Mocha (High-contrast Dark) and Powder (Light) design system variants.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
@@ -57,13 +57,13 @@ export function SettingsPage({ pollingInterval, setPollingInterval, airGapped, s
           >
             <div className="flex items-center justify-between mb-3">
               <span className="font-bold text-sm text-text-primary flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-purple-500"></span>
-                Cyber Void (Dark Mode)
+                <span className="w-3 h-3 rounded-full bg-primary"></span>
+                Mocha (Dark Mode)
               </span>
               {theme === 'dark' && <span className="material-symbols-outlined text-primary">check_circle</span>}
             </div>
             <p className="text-xs text-text-muted">
-              Deep dark background (`#0f131c`) with violet accents (`#a78bfa`). Ideal for low-light SOC command centers.
+              Deep mocha background (`#1C1512`) with pale lavender accents (`#C9B8F0`). Ideal for low-light SOC command centers.
             </p>
           </div>
 
@@ -77,13 +77,13 @@ export function SettingsPage({ pollingInterval, setPollingInterval, airGapped, s
           >
             <div className="flex items-center justify-between mb-3">
               <span className="font-bold text-sm text-text-primary flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-emerald-600"></span>
-                Sage Green Mode
+                <span className="w-3 h-3 rounded-full bg-secondary"></span>
+                Powder (Light Mode)
               </span>
               {theme === 'sage' && <span className="material-symbols-outlined text-primary">check_circle</span>}
             </div>
             <p className="text-xs text-text-muted">
-              Stone-sage background (`#fafaf5`) with organic olive accents (`#718355`). Clean daylight visibility.
+              Soft lavender white background (`#F7F4FB`) with deepened powder blue accents (`#376D8C`). Clean daylight visibility.
             </p>
           </div>
         </div>
@@ -108,7 +108,7 @@ export function SettingsPage({ pollingInterval, setPollingInterval, airGapped, s
                 onClick={() => setPollingInterval && setPollingInterval(ms)}
                 className={`px-3.5 py-2 rounded-lg border font-bold touch-target ${
                   pollingInterval === ms
-                    ? 'bg-primary text-surface-lowest border-primary shadow'
+                    ? 'bg-primary text-surface-dim border-primary shadow'
                     : 'bg-surface-dim border-border-muted text-text-muted hover:border-primary/50'
                 }`}
               >

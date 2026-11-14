@@ -16,6 +16,7 @@ from app.services.queue import queue_manager, IngestionTask
 from app.services.ingest_service import process_raw_ingestion
 from app.audit.hash_chain import audit_merkle_tree
 from app.routers.auth import get_current_user
+from app.services.api_key_service import verify_api_key, touch_api_key, check_api_key_rate_limit
 
 from app.limiter import limiter
 
@@ -174,5 +175,117 @@ async def ingest_log_file(
         payload_hash=payload_hash,
         merkle_root=merkle_root,
         timestamp=now.isoformat(),
+    )
+
+
+class AgentIngestResponse(BaseModel):
+    ingestion_id: str = Field(..., description="Unique forensic identifier for this ingestion batch")
+    status: str = Field("accepted", description="Processing status")
+    lines_received: int = Field(..., description="Count of log lines processed in batch")
+    ingested_count: Optional[int] = Field(None, description="Alias for lines_received")
+    bytes_received: int = Field(..., description="Size of raw log payload in bytes")
+    timestamp: str = Field(..., description="UTC ISO-8601 ingestion timestamp")
+    format_detected: str = Field(..., description="Detected log format")
+    payload_hash: str = Field(..., description="SHA-256 hash of batch payload")
+    merkle_root: str = Field(..., description="Cryptographic Merkle tree root hash")
+    raw_storage_file: str = Field(..., description="Filename of stored raw compressed payload")
+
+
+@router.post(
+    "/ingest/agent",
+    status_code=status.HTTP_202_ACCEPTED,
+    response_model=AgentIngestResponse,
+    summary="Agent Syslog Ingest Endpoint",
+    description="Accepts batches of syslog lines from forwarders/simulators, authenticated exclusively via API Key.",
+)
+async def ingest_agent_logs(request: Request):
+    """
+    High-throughput agent ingest endpoint. Authenticated strictly by API key.
+    Enforces 1MB max body size, max line count per request, and per-key rate limiting.
+    Ingests under the API key owner's identity via shared process_raw_ingestion service.
+    """
+    # 1. Extract API key from Authorization: Bearer or X-API-Key header
+    auth_header = request.headers.get("authorization", "").strip()
+    x_api_key = request.headers.get("x-api-key", "").strip()
+
+    token = None
+    if auth_header:
+        if auth_header.lower().startswith("bearer "):
+            token = auth_header[7:].strip()
+        else:
+            token = auth_header
+    elif x_api_key:
+        token = x_api_key
+
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing API key in Authorization (Bearer) or X-API-Key header",
+        )
+
+    # 2. Verify API key in constant time
+    key_info = verify_api_key(token)
+    if not key_info or key_info.get("revoked"):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or revoked API key",
+        )
+
+    # 3. Enforce per-key rate limiting (120 req/minute)
+    if not check_api_key_rate_limit(key_info["id"], max_per_minute=120):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Rate limit exceeded for this API key. Maximum 120 requests/minute allowed.",
+        )
+
+    # 4. Extract and validate body payload
+    body_bytes = await request.body()
+    if not body_bytes or not body_bytes.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Empty log payload",
+        )
+
+    # Enforce 1 MB body size cap
+    MAX_AGENT_PAYLOAD_BYTES = 1024 * 1024  # 1 MB
+    if len(body_bytes) > MAX_AGENT_PAYLOAD_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=f"Payload exceeds maximum allowed size of {MAX_AGENT_PAYLOAD_BYTES} bytes (1MB)",
+        )
+
+    # Enforce max line count (500 lines per request)
+    raw_lines = [l for l in body_bytes.splitlines() if l.strip()]
+    if len(raw_lines) > 500:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Batch line count ({len(raw_lines)}) exceeds maximum allowed limit of 500 lines",
+        )
+
+    # 5. Update last_used_at timestamp
+    touch_api_key(key_info["id"])
+
+    # 6. Ingest under key owner's identity via shared process_raw_ingestion service
+    client_host = request.client.host if request.client else "agent_forwarder"
+    content_type = request.headers.get("content-type", "text/plain")
+
+    result = await process_raw_ingestion(
+        raw_payload_bytes=body_bytes,
+        owner_username=key_info["owner_username"],
+        client_host=client_host,
+        content_type=content_type,
+    )
+
+    return AgentIngestResponse(
+        ingestion_id=result["ingestion_id"],
+        status=result["status"],
+        lines_received=len(raw_lines),
+        ingested_count=len(raw_lines),
+        bytes_received=result["bytes_received"],
+        timestamp=result["timestamp"],
+        format_detected=result["format_detected"],
+        payload_hash=result["payload_hash"],
+        merkle_root=result["merkle_root"],
+        raw_storage_file=result["raw_storage_file"],
     )
 

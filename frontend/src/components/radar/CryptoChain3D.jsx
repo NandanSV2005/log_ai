@@ -93,7 +93,7 @@ export function CryptoChain3D({ fallbackBlock = '48281', force2D = false }) {
                 <div
                   className={`p-3.5 rounded-xl border font-mono text-xs transition-all relative z-10 backdrop-blur-md ${
                     isCurrent
-                      ? 'bg-surface-dim/95 border-tertiary shadow-[0_0_20px_rgba(78,222,163,0.2)]'
+                      ? 'bg-surface-dim/95 border-tertiary shadow-[0_0_20px_var(--color-border-glow)]'
                       : 'bg-surface-dim/80 border-border-muted hover:border-tertiary/50'
                   }`}
                   style={{
@@ -159,11 +159,11 @@ export function CryptoChain3D({ fallbackBlock = '48281', force2D = false }) {
                     transform: 'translateZ(0px)'
                   }}
                 >
-                  <div className="w-[3px] h-4 bg-gradient-to-b from-tertiary via-secondary to-tertiary rounded-full shadow-[0_0_8px_rgba(78,222,163,0.5)] animate-pulse" />
+                  <div className="w-[3px] h-4 bg-gradient-to-b from-tertiary via-secondary to-tertiary rounded-full shadow-[0_0_8px_var(--color-border-glow)] animate-pulse" />
                   <span className="material-symbols-outlined text-[14px] text-tertiary/70 my-[-5px]">
                     link
                   </span>
-                  <div className="w-[3px] h-4 bg-gradient-to-b from-tertiary via-secondary to-tertiary rounded-full shadow-[0_0_8px_rgba(78,222,163,0.5)] animate-pulse" />
+                  <div className="w-[3px] h-4 bg-gradient-to-b from-tertiary via-secondary to-tertiary rounded-full shadow-[0_0_8px_var(--color-border-glow)] animate-pulse" />
                 </div>
               )}
             </React.Fragment>

@@ -2,32 +2,34 @@ import { useState, useEffect } from 'react';
 import * as THREE from 'three';
 import { useTheme } from '../../contexts/ThemeContext';
 
-const DEFAULT_CYBERVOID = {
-  primary: '#a78bfa',
-  secondary: '#7bd0ff',
-  tertiary: '#4edea3',
-  surfaceLowest: '#090b10',
-  surfaceDim: '#0f131c',
-  tunnelHull: '#080a10',
-  tunnelWire: '#a78bfa',
-  borderGlow: '#a78bfa',
-  critical: '#d946ef',
-  ambient: '#22283a',
-  fog: '#07090e'
+const DEFAULT_MOCHA = {
+  primary: '#C9B8F0',
+  secondary: '#C5C9D0',
+  tertiary: '#D8C3B0',
+  surfaceLowest: '#140E0C',
+  surfaceDim: '#1C1512',
+  textMain: '#ECEAE6',
+  tunnelHull: '#18110E',
+  tunnelWire: '#C9B8F0',
+  borderGlow: '#C9B8F0',
+  critical: '#FF4D94',
+  ambient: '#3A2D27',
+  fog: '#140E0C'
 };
 
-const DEFAULT_SAGE = {
-  primary: '#2d6a4f',
-  secondary: '#d97706',
-  tertiary: '#0f766e',
-  surfaceLowest: '#162218',
-  surfaceDim: '#1f2e22',
-  tunnelHull: '#141d16',
-  tunnelWire: '#52b788',
-  borderGlow: '#d97706',
-  critical: '#be185d',
-  ambient: '#2a3a2d',
-  fog: '#111813'
+const DEFAULT_POWDER = {
+  primary: '#376D8C',
+  secondary: '#715F9F',
+  tertiary: '#F4A988',
+  surfaceLowest: '#FFFFFF',
+  surfaceDim: '#EFEAF6',
+  textMain: '#2B2A3A',
+  tunnelHull: '#EAE3F5',
+  tunnelWire: '#376D8C',
+  borderGlow: '#376D8C',
+  critical: '#BE185D',
+  ambient: '#EFEAF6',
+  fog: '#F7F4FB'
 };
 
 function readCssColor(varName, fallback) {
@@ -48,11 +50,15 @@ export function useThreeThemeColors() {
 
   const getColors = (currentTheme) => {
     const isSage = currentTheme === 'sage';
-    const fallback = isSage ? DEFAULT_SAGE : DEFAULT_CYBERVOID;
+    const fallback = isSage ? DEFAULT_POWDER : DEFAULT_MOCHA;
 
-    const primaryHex = isSage ? '#2d6a4f' : readCssColor('--color-primary', fallback.primary);
-    const secondaryHex = isSage ? '#d97706' : readCssColor('--color-secondary', fallback.secondary);
-    const tertiaryHex = isSage ? '#0f766e' : readCssColor('--color-tertiary', fallback.tertiary);
+    const primaryHex = readCssColor('--color-primary', fallback.primary);
+    const secondaryHex = readCssColor('--color-secondary', fallback.secondary);
+    const tertiaryHex = readCssColor('--color-tertiary', fallback.tertiary);
+    const surfaceLowestHex = readCssColor('--color-surface-lowest', fallback.surfaceLowest);
+    const surfaceDimHex = readCssColor('--color-surface-dim', fallback.surfaceDim);
+    const textMainHex = readCssColor('--color-text-main', fallback.textMain);
+    const criticalHex = readCssColor('--color-severity-critical', fallback.critical);
 
     return {
       isSage,
@@ -60,19 +66,20 @@ export function useThreeThemeColors() {
       primaryStr: primaryHex,
       secondaryStr: secondaryHex,
       tertiaryStr: tertiaryHex,
-      surfaceLowestStr: fallback.surfaceLowest,
-      surfaceDimStr: fallback.surfaceDim,
+      surfaceLowestStr: surfaceLowestHex,
+      surfaceDimStr: surfaceDimHex,
+      textMainStr: textMainHex,
       tunnelHullStr: fallback.tunnelHull,
-      tunnelWireStr: fallback.tunnelWire,
-      criticalStr: fallback.critical,
+      tunnelWireStr: primaryHex,
+      criticalStr: criticalHex,
       primary: new THREE.Color(primaryHex),
       secondary: new THREE.Color(secondaryHex),
       tertiary: new THREE.Color(tertiaryHex),
-      surfaceLowest: new THREE.Color(fallback.surfaceLowest),
-      surfaceDim: new THREE.Color(fallback.surfaceDim),
+      surfaceLowest: new THREE.Color(surfaceLowestHex),
+      surfaceDim: new THREE.Color(surfaceDimHex),
       tunnelHull: new THREE.Color(fallback.tunnelHull),
-      tunnelWire: new THREE.Color(fallback.tunnelWire),
-      critical: new THREE.Color(fallback.critical),
+      tunnelWire: new THREE.Color(primaryHex),
+      critical: new THREE.Color(criticalHex),
       ambient: new THREE.Color(fallback.ambient),
       fog: new THREE.Color(fallback.fog)
     };

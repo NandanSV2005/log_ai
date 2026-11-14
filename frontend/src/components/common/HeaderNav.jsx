@@ -48,7 +48,7 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
             <div className="font-mono text-base font-extrabold tracking-wider uppercase text-text-primary flex items-center gap-2">
               LOG <span className="text-primary">//</span> AI
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary-fixed-dim/20 text-primary border border-primary/30 uppercase font-mono font-bold">
-                {theme === 'sage' ? 'SAGE GREEN' : 'CYBER VOID'}
+                {theme === 'sage' ? 'POWDER' : 'MOCHA'}
               </span>
             </div>
             <div className="text-[10px] text-text-muted font-mono tracking-wider uppercase">SOC Intelligence Engine</div>
@@ -349,7 +349,7 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
                 className="px-3 py-2 rounded-lg border border-border-muted bg-surface-dim text-text-primary flex items-center gap-2 touch-target"
               >
                 <span className="material-symbols-outlined text-base">palette</span>
-                <span>{theme === 'dark' ? 'CYBER VOID' : 'SAGE GREEN'}</span>
+                <span>{theme === 'dark' ? 'MOCHA' : 'POWDER'}</span>
               </button>
 
               <div className="flex items-center gap-2">

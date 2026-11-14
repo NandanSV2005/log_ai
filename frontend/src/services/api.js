@@ -325,4 +325,32 @@ export const api = {
     });
     return await handleResponse(res);
   },
+
+  // Ingest API Keys
+  async getApiKeys() {
+    const res = await fetch(`${API_BASE_URL}/api/v1/api-keys`, {
+      headers: getAuthHeaders(),
+    });
+    return await handleResponse(res);
+  },
+
+  async createApiKey(name) {
+    const res = await fetch(`${API_BASE_URL}/api/v1/api-keys`, {
+      method: 'POST',
+      headers: {
+        ...getAuthHeaders(false),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name }),
+    });
+    return await handleResponse(res);
+  },
+
+  async revokeApiKey(keyId) {
+    const res = await fetch(`${API_BASE_URL}/api/v1/api-keys/${encodeURIComponent(keyId)}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    return await handleResponse(res);
+  },
 };

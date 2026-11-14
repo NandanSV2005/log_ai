@@ -84,7 +84,7 @@ export function SourceCardStack({ cards = [] }) {
           {cards.map((card) => (
             <SpotlightCard
               key={card.id}
-              spotlightColor="rgba(123, 208, 255, 0.15)"
+              spotlightColor="color-mix(in srgb, var(--color-secondary) 18%, transparent)"
               className="p-5 rounded-2xl bg-surface/90 border border-border-muted shadow-lg"
             >
               <div className="flex items-center justify-between pb-3 mb-3 border-b border-border-muted font-mono text-[11px] text-secondary font-bold">
@@ -137,7 +137,7 @@ export function SourceCardStack({ cards = [] }) {
 
         {/* Focused Card Display */}
         <SpotlightCard
-          spotlightColor="rgba(123, 208, 255, 0.18)"
+          spotlightColor="color-mix(in srgb, var(--color-secondary) 20%, transparent)"
           className="w-full p-5 rounded-2xl bg-surface-lowest/95 border-2 border-secondary shadow-2xl backdrop-blur-xl flex flex-col gap-4"
         >
           <div className="flex items-center justify-between pb-3 border-b border-border-muted font-mono text-xs">
@@ -284,7 +284,7 @@ export function SourceCardStack({ cards = [] }) {
               >
                 {/* 3D Focal Card Body */}
                 <SpotlightCard
-                  spotlightColor="rgba(123, 208, 255, 0.22)"
+                  spotlightColor="color-mix(in srgb, var(--color-secondary) 22%, transparent)"
                   className={`w-full p-6 md:p-8 rounded-2xl bg-surface-lowest/95 border-2 transition-all duration-300 shadow-2xl backdrop-blur-2xl ${
                     isCurrent
                       ? 'border-secondary shadow-[0_0_36px_var(--color-border-glow)]'
@@ -351,7 +351,7 @@ export function SourceCardStack({ cards = [] }) {
                   onClick={() => handleJumpToCard(idx)}
                   className={`px-3 py-1 rounded-full font-mono text-[11px] font-bold transition-all ${
                     isSelected
-                      ? 'bg-secondary text-surface-dim shadow-[0_0_14px_rgba(123,208,255,0.6)] scale-105'
+                      ? 'bg-secondary text-surface-dim shadow-[0_0_14px_var(--color-border-glow)] scale-105'
                       : 'text-text-dim hover:text-text-primary hover:bg-surface-hover'
                   }`}
                   role="tab"

@@ -25,8 +25,8 @@ export function DissectionConduitStream({
           <svg className="w-full h-full overflow-visible" viewBox="0 0 200 32" preserveAspectRatio="none">
             <defs>
               <linearGradient id="conduit-grad-1" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="var(--color-primary, #a78bfa)" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="var(--color-secondary, #7bd0ff)" stopOpacity="0.9" />
+                <stop offset="0%" stopColor="var(--color-primary)" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="var(--color-secondary)" stopOpacity="0.9" />
               </linearGradient>
               <filter id="glow-p1" x="-30%" y="-30%" width="160%" height="160%">
                 <feGaussianBlur stdDeviation="3" result="blur" />
@@ -43,7 +43,7 @@ export function DissectionConduitStream({
               y1="16"
               x2="200"
               y2="16"
-              stroke="var(--color-primary, #a78bfa)"
+              stroke="var(--color-primary)"
               strokeWidth="2"
               strokeDasharray="4 4"
               opacity={isActive ? 0.45 : 0.2}
@@ -64,7 +64,7 @@ export function DissectionConduitStream({
                 />
 
                 {/* Flowing packet photon 1 */}
-                <circle r="4.5" fill="#ffffff" filter="url(#glow-p1)">
+                <circle r="4.5" fill="var(--color-text-main)" filter="url(#glow-p1)">
                   <animate
                     attributeName="cx"
                     from="0"
@@ -81,7 +81,7 @@ export function DissectionConduitStream({
                 </circle>
 
                 {/* Flowing packet photon 2 */}
-                <circle r="3" fill="var(--color-secondary, #7bd0ff)" opacity="0.9">
+                <circle r="3" fill="var(--color-secondary)" opacity="0.9">
                   <animate
                     attributeName="cx"
                     from="0"
@@ -99,7 +99,7 @@ export function DissectionConduitStream({
                 </circle>
 
                 {/* Flowing packet photon 3 */}
-                <circle r="2.5" fill="var(--color-primary, #a78bfa)" opacity="0.8">
+                <circle r="2.5" fill="var(--color-primary)" opacity="0.8">
                   <animate
                     attributeName="cx"
                     from="0"
@@ -123,7 +123,7 @@ export function DissectionConduitStream({
           <div
             className={`absolute -top-3 px-2 py-0.5 rounded-full border font-mono text-[9px] font-bold tracking-widest uppercase transition-all duration-300 ${
               isFlowingToCol2
-                ? 'bg-primary/20 border-primary text-primary shadow-[0_0_12px_rgba(167,139,250,0.5)] scale-105'
+                ? 'bg-primary/20 border-primary text-primary shadow-[0_0_12px_var(--color-border-glow)] scale-105'
                 : 'bg-surface-dim/80 border-border-muted text-text-dim scale-95 opacity-60'
             }`}
           >
@@ -136,8 +136,8 @@ export function DissectionConduitStream({
           <svg className="w-full h-full overflow-visible" viewBox="0 0 200 32" preserveAspectRatio="none">
             <defs>
               <linearGradient id="conduit-grad-2" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="var(--color-secondary, #7bd0ff)" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="var(--color-tertiary, #4edea3)" stopOpacity="0.9" />
+                <stop offset="0%" stopColor="var(--color-secondary)" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="var(--color-tertiary)" stopOpacity="0.9" />
               </linearGradient>
               <filter id="glow-p2" x="-30%" y="-30%" width="160%" height="160%">
                 <feGaussianBlur stdDeviation="3" result="blur" />
@@ -154,7 +154,7 @@ export function DissectionConduitStream({
               y1="16"
               x2="200"
               y2="16"
-              stroke="var(--color-tertiary, #4edea3)"
+              stroke="var(--color-tertiary)"
               strokeWidth="2"
               strokeDasharray="4 4"
               opacity={isActive ? 0.45 : 0.2}
@@ -175,7 +175,7 @@ export function DissectionConduitStream({
                 />
 
                 {/* Flowing packet photon 1 */}
-                <circle r="4.5" fill="#ffffff" filter="url(#glow-p2)">
+                <circle r="4.5" fill="var(--color-text-main)" filter="url(#glow-p2)">
                   <animate
                     attributeName="cx"
                     from="0"
@@ -192,7 +192,7 @@ export function DissectionConduitStream({
                 </circle>
 
                 {/* Flowing packet photon 2 */}
-                <circle r="3" fill="var(--color-tertiary, #4edea3)" opacity="0.9">
+                <circle r="3" fill="var(--color-tertiary)" opacity="0.9">
                   <animate
                     attributeName="cx"
                     from="0"
@@ -210,7 +210,7 @@ export function DissectionConduitStream({
                 </circle>
 
                 {/* Flowing packet photon 3 */}
-                <circle r="2.5" fill="var(--color-secondary, #7bd0ff)" opacity="0.8">
+                <circle r="2.5" fill="var(--color-secondary)" opacity="0.8">
                   <animate
                     attributeName="cx"
                     from="0"
@@ -234,7 +234,7 @@ export function DissectionConduitStream({
           <div
             className={`absolute -top-3 px-2 py-0.5 rounded-full border font-mono text-[9px] font-bold tracking-widest uppercase transition-all duration-300 ${
               isFlowingToCol3
-                ? 'bg-tertiary/20 border-tertiary text-tertiary shadow-[0_0_12px_rgba(78,222,163,0.5)] scale-105'
+                ? 'bg-tertiary/20 border-tertiary text-tertiary shadow-[0_0_12px_var(--color-border-glow)] scale-105'
                 : 'bg-surface-dim/80 border-border-muted text-text-dim scale-95 opacity-60'
             }`}
           >

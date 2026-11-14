@@ -89,7 +89,7 @@ export function DissectionScanner({
             }}
           >
             {/* Primary glowing scan beam */}
-            <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-primary to-transparent shadow-[0_0_12px_var(--color-primary),0_0_24px_rgba(167,139,250,0.8)]" />
+            <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-primary to-transparent shadow-[0_0_12px_var(--color-primary),0_0_24px_var(--color-border-glow)]" />
             {/* Ambient vertical sweep trail */}
             <div className="h-8 -mt-8 w-full bg-gradient-to-t from-primary/25 via-primary/10 to-transparent blur-[2px]" />
             {/* Micro scanhead tracker */}
@@ -125,7 +125,7 @@ export function DissectionScanner({
                 : 'translateZ(14px) rotateX(-1deg) translateY(-2px)',
               boxShadow: disabled
                 ? 'none'
-                : '0 12px 24px -6px rgba(0,0,0,0.5), 0 0 16px rgba(167, 139, 250, 0.2)',
+                : '0 12px 24px -6px rgba(0,0,0,0.5), 0 0 16px var(--color-border-glow)',
             }}
           >
             {/* Header of dissected layer */}

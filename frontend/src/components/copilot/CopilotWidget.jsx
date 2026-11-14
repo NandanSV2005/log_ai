@@ -124,7 +124,7 @@ export function CopilotWidget({ airGapped }) {
                   <div className="mb-1 flex items-center gap-1.5">
                     <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold uppercase ${
                       msg.model?.includes('gemini')
-                        ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                        ? 'bg-primary/20 text-primary border border-primary/30'
                         : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                     }`}>
                       {msg.model?.includes('gemini') ? 'LIVE GEMINI 3.6' : 'LOCAL ENGINE (AIR-GAPPED SOC)'}

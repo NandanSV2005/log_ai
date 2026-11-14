@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: logai-app:latest
+    container_name: logai-core
+    ports:
+      - "8000:8000"
+      - "5514:5514/tcp"
+      - "5514:5514/udp"
+    environment:
+      - ENVIRONMENT=development
+      - SYSLOG_ENABLED=true
+      - SYSLOG_TCP_PORT=5514
+      - SYSLOG_UDP_PORT=5514
+      - DASHBOARD_USER=admin
+      - DASHBOARD_PASS=admin123
+    volumes:
+      - logai_data:/code/data
+    restart: unless-stopped
+
+  simulator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: logai-app:latest
+    container_name: logai-simulator
+    depends_on:
+      - app
+    command: ["python", "scripts/device_simulator.py", "--tcp", "app:5514", "--interval-min", "0.5", "--interval-max", "1.5"]
+    restart: unless-stopped
+
+volumes:
+  logai_data:

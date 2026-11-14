@@ -45,7 +45,7 @@ export function LoginPage() {
           className="px-3 py-1.5 rounded-lg border border-border-muted bg-surface-dim text-xs font-mono font-bold flex items-center gap-2 text-text-primary"
         >
           <span className="material-symbols-outlined text-sm">palette</span>
-          <span>{theme === 'dark' ? 'CYBER VOID' : 'SAGE GREEN'}</span>
+          <span>{theme === 'dark' ? 'MOCHA' : 'POWDER'}</span>
         </button>
       </header>
 
