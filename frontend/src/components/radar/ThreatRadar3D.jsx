@@ -58,10 +58,9 @@ function RadarScene({ blips, selectedBlip, onSelectBlip, themeColors }) {
   const rings = [0.8, 1.6, 2.4, 3.2];
 
   // Fluid responsive scaling:
-  // Calculate scale so the 6.8-diameter radar dish fills ~92% of the available container space
-  // On wider viewports, height limits size; on taller/narrower mobile viewports, width limits size.
-  const minViewportDim = Math.min(viewport.width, viewport.height * 1.35);
-  const dynamicScale = Math.max(0.85, Math.min(1.45, (minViewportDim * 0.94) / 5.2));
+  // Dish diameter is 6.8 units; fit within ~82% of the smaller viewport dimension so rings never clip or stretch.
+  const fitSize = Math.min(viewport.width, viewport.height);
+  const dynamicScale = Math.max(0.58, Math.min(1.05, (fitSize * 0.82) / 6.8));
 
   // 360-degree sweep animation + subtle mouse parallax
   useFrame((state, delta) => {
@@ -70,9 +69,9 @@ function RadarScene({ blips, selectedBlip, onSelectBlip, themeColors }) {
     }
 
     if (groupRef.current) {
-      // Subtle mouse parallax tilt
-      const targetRotX = 0.52 + state.pointer.y * 0.08;
-      const targetRotY = state.pointer.x * 0.12;
+      // Subtle mouse parallax tilt around a balanced isometric angle
+      const targetRotX = 0.22 + state.pointer.y * 0.06;
+      const targetRotY = state.pointer.x * 0.1;
       groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, targetRotX, delta * 3);
       groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, targetRotY, delta * 3);
     }
@@ -81,8 +80,8 @@ function RadarScene({ blips, selectedBlip, onSelectBlip, themeColors }) {
   return (
     <group
       ref={groupRef}
-      position={[0, -0.1, 0]}
-      rotation={[0.52, 0, 0]}
+      position={[0, -0.05, 0]}
+      rotation={[0.22, 0, 0]}
       scale={[dynamicScale, dynamicScale, dynamicScale]}
     >
       {/* Radar Dish Base Geometry */}
@@ -302,6 +301,8 @@ export function ThreatRadar3D({
 }) {
   const [hasWebGL, setHasWebGL] = useState(true);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [isRadarInView, setIsRadarInView] = useState(false);
+  const radarContainerRef = useRef(null);
   const themeColors = useThreeThemeColors();
 
   useEffect(() => {
@@ -315,31 +316,52 @@ export function ThreatRadar3D({
     return () => mql.removeEventListener('change', handler);
   }, []);
 
+  useEffect(() => {
+    const el = radarContainerRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setIsRadarInView(true);
+      return undefined;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsRadarInView(entry.isIntersecting),
+      { threshold: 0.02 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const activeBlip = selectedBlip || blips[0];
 
   return (
     <div className="flex flex-col flex-1 justify-between gap-3 sm:gap-4 relative w-full h-full">
       {/* Responsive Viewport Container: Expands fluidly to fill container card height with zero dead space */}
-      <div className="relative w-full flex-1 min-h-[460px] sm:min-h-[500px] md:min-h-[540px] xl:min-h-[580px] bg-surface-dim rounded-xl overflow-hidden border border-tertiary/30 shadow-inner flex items-center justify-center">
+      <div
+        ref={radarContainerRef}
+        className="relative w-full flex-1 min-h-[420px] sm:min-h-[460px] md:min-h-[500px] xl:min-h-[540px] bg-surface-dim rounded-xl overflow-hidden border border-tertiary/30 shadow-inner flex items-center justify-center"
+      >
         {/* Subtle coordinate dot grid */}
         <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(var(--color-tertiary)_1px,transparent_1px)] [background-size:24px_24px]" />
 
         {hasWebGL && !reducedMotion && !force2D ? (
-          <Canvas
-            camera={{ position: [0, 2.9, 4.0], fov: 42 }}
-            gl={{ antialias: true, alpha: true }}
-            className="w-full h-full cursor-grab active:cursor-grabbing"
-          >
-            <ambientLight intensity={0.85} />
-            <pointLight position={[5, 6, 5]} intensity={1.5} color={themeColors.tertiaryStr} />
-            <pointLight position={[-5, 4, -4]} intensity={0.9} color={themeColors.secondaryStr} />
-            <RadarScene
-              blips={blips}
-              selectedBlip={activeBlip}
-              onSelectBlip={onSelectBlip}
-              themeColors={themeColors}
-            />
-          </Canvas>
+          <div className="absolute inset-0">
+            <Canvas
+              frameloop={isRadarInView ? 'always' : 'demand'}
+              camera={{ position: [0, 5.2, 6.8], fov: 40 }}
+              dpr={[1, 1.5]}
+              gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+              className="w-full h-full cursor-grab active:cursor-grabbing"
+            >
+              <ambientLight intensity={0.85} />
+              <pointLight position={[5, 6, 5]} intensity={1.5} color={themeColors.tertiaryStr} />
+              <pointLight position={[-5, 4, -4]} intensity={0.9} color={themeColors.secondaryStr} />
+              <RadarScene
+                blips={blips}
+                selectedBlip={activeBlip}
+                onSelectBlip={onSelectBlip}
+                themeColors={themeColors}
+              />
+            </Canvas>
+          </div>
         ) : (
           <FlatRadarFallback
             blips={blips}

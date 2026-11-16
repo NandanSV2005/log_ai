@@ -39,10 +39,10 @@ export function useLusionScrollEngine(disabled = false) {
     }
 
     const lenis = new Lenis({
-      lerp: 0.075,
-      duration: 1.2,
+      lerp: 0.14,
+      duration: 0.85,
       smoothWheel: true,
-      wheelMultiplier: 1.0,
+      wheelMultiplier: 1.05,
       touchMultiplier: 1.5,
     });
     lenisRef.current = lenis;

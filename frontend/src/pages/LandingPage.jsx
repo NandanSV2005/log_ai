@@ -102,7 +102,7 @@ export function LandingPage() {
   const { renderMode, is3D, is2D, setRenderMode } = useRenderMode();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [activeChapter, setActiveChapter] = useState('pipeline');
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const scrollProgressBarRef = useRef(null);
 
   // Initialize Lusion Smooth Scroll (Lenis) + GSAP ScrollTrigger & Velocity Skew
   useLusionScrollEngine(is2D);
@@ -118,7 +118,10 @@ export function LandingPage() {
           const windowHeight = window.innerHeight;
           const docHeight = document.documentElement.scrollHeight;
           const maxScroll = Math.max(1, docHeight - windowHeight);
-          setScrollProgress(Math.min(1, Math.max(0, scrollY / maxScroll)));
+          const progress = Math.min(1, Math.max(0, scrollY / maxScroll));
+          if (scrollProgressBarRef.current) {
+            scrollProgressBarRef.current.style.transform = `scaleX(${progress.toFixed(4)})`;
+          }
 
           // 1. Extreme boundary cases: top or bottom of page
           if (scrollY < 120) {
@@ -560,8 +563,9 @@ export function LandingPage() {
           className="h-[2px] w-full bg-border-muted/30 overflow-hidden"
         >
           <div
-            className="h-full w-full origin-left bg-gradient-to-r from-primary via-secondary to-tertiary transition-transform duration-75"
-            style={{ transform: `scaleX(${scrollProgress.toFixed(4)})` }}
+            ref={scrollProgressBarRef}
+            className="h-full w-full origin-left bg-gradient-to-r from-primary via-secondary to-tertiary will-change-transform"
+            style={{ transform: 'scaleX(0)' }}
           />
         </div>
 
@@ -692,7 +696,13 @@ export function LandingPage() {
           className="w-full px-4 md:px-8 xl:px-14 py-20 relative scroll-mt-16 bg-gradient-to-b from-[var(--color-chapter3-from)] via-[var(--color-chapter3-via)] to-[var(--color-chapter3-to)] border-b border-tertiary/20 overflow-hidden"
         >
           <StructuralGridSpine />
-          <div className="absolute top-10 left-1/4 w-[850px] h-[550px] bg-tertiary/10 rounded-full blur-[170px] pointer-events-none"></div>
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 pointer-events-none opacity-45"
+            style={{
+              background: 'radial-gradient(ellipse 65% 45% at 45% 25%, color-mix(in srgb, var(--color-tertiary) 18%, transparent), transparent 70%)'
+            }}
+          />
           
           <div
             data-velocity-skew
@@ -794,7 +804,13 @@ export function LandingPage() {
             variant={theme === 'sage' ? 'light' : 'obsidian'}
             obsidian={theme !== 'sage'}
           />
-          <div className="absolute top-10 left-1/3 w-[850px] h-[500px] bg-tertiary/15 rounded-full blur-[160px] pointer-events-none"></div>
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 pointer-events-none opacity-45"
+            style={{
+              background: 'radial-gradient(ellipse 65% 45% at 50% 25%, color-mix(in srgb, var(--color-tertiary) 20%, transparent), transparent 70%)'
+            }}
+          />
           
           <div
             data-velocity-skew
