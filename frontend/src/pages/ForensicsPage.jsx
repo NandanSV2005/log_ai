@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import { useToast } from '../contexts/ToastContext';
 
 export function ForensicsPage() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [activeCases, setActiveCases] = useState([]);
   const [recentEvents, setRecentEvents] = useState([]);
   const [selectedCase, setSelectedCase] = useState(null);
@@ -64,8 +66,16 @@ export function ForensicsPage() {
         </div>
 
         <button
-          onClick={() => api.exportCsv()}
-          className="btn-secondary px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm"
+          type="button"
+          onClick={async () => {
+            try {
+              await api.exportCsv();
+              showToast({ variant: 'success', title: 'Audit Report Exported', message: 'Forensic CSV downloaded.' });
+            } catch (err) {
+              showToast({ variant: 'error', title: 'Export Failed', message: err.message || 'Unable to export CSV.' });
+            }
+          }}
+          className="btn-secondary px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer"
         >
           <span className="material-symbols-outlined text-sm">download</span>
           <span>Export Forensic Audit Report</span>
@@ -130,8 +140,16 @@ export function ForensicsPage() {
                 return (
                   <div
                     key={incident.incident_id || idx}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => setSelectedCase(incident)}
-                    className={`p-3.5 rounded-xl border transition-all cursor-pointer space-y-3 ${
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSelectedCase(incident);
+                      }
+                    }}
+                    className={`p-3.5 rounded-xl border transition-all cursor-pointer space-y-3 focus-visible:outline-2 focus-visible:outline-primary ${
                       isSelected
                         ? 'bg-rose-500/15 border-rose-500/60 ring-1 ring-rose-500/30'
                         : 'bg-surface border-border-muted hover:border-primary/40'

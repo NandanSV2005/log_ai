@@ -1238,8 +1238,8 @@ export function LandingPage() {
         </div>
 
         <div className="max-w-[1600px] mx-auto pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-text-dim font-sans">
-          <p>&copy; 2025 LOG AI. Open Cybersecurity Schema log pre-processing framework.</p>
-          <p className="font-mono text-[11px] text-tertiary">OCSF v1.1.0 ALIGNED</p>
+          <p>&copy; 2026 LOG AI. Enterprise Security. Explainable Intelligence. Zero-Loss Forensics.</p>
+          <p className="font-mono text-[11px] text-tertiary">PUBLIC PREVIEW USES SIMULATED SAMPLES // LIVE TELEMETRY IN AUTHENTICATED SOC</p>
         </div>
       </footer>
 

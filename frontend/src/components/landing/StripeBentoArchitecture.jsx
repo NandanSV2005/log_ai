@@ -239,7 +239,7 @@ export function StripeBentoArchitecture({ is2D = false }) {
                 <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-xs">
                   <span className="text-primary font-bold uppercase tracking-wider flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-primary animate-ping" />
-                    01 // LIVE AI LOG STREAM &amp; CLASSIFIER SIMULATOR
+                    01 // SIMULATED LOG STREAM &amp; CLASSIFIER DEMO
                   </span>
 
                   {/* Interactive Filter Pills (All, Critical, SQLi, Normal) */}

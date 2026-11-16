@@ -1,10 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import { useToast } from '../contexts/ToastContext';
+import { SocThreatCharts } from '../components/dashboard/SocThreatCharts';
 
 export function DashboardPage({ pollingInterval }) {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [activeSubTab, setActiveSubTab] = useState('overview'); // 'overview' | 'add-log' | 'reports'
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [syncLatencyMs, setSyncLatencyMs] = useState(null);
+  const [streamSearch, setStreamSearch] = useState('');
+  const [streamSeverityFilter, setStreamSeverityFilter] = useState('ALL');
+  const [inspectedEvent, setInspectedEvent] = useState(null);
   const [stats, setStats] = useState({
     total_events_ingested: 0,
     threat_level_counts: { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 },
@@ -56,6 +65,7 @@ export function DashboardPage({ pollingInterval }) {
   };
 
   const fetchDashboardData = async () => {
+    const t0 = typeof performance !== 'undefined' ? performance.now() : Date.now();
     try {
       const [statsData, incidentsData, eventsData, reportsData, sourcesData, receiverData, apiKeysData] = await Promise.all([
         api.getStats().catch(() => null),
@@ -66,6 +76,15 @@ export function DashboardPage({ pollingInterval }) {
         api.getReceiverStatus().catch(() => null),
         api.getApiKeys().catch(() => []),
       ]);
+      const t1 = typeof performance !== 'undefined' ? performance.now() : Date.now();
+      setSyncLatencyMs(Math.max(1, Math.round(t1 - t0)));
+
+      if (!statsData && !eventsData && !incidentsData) {
+        setLoadError('Unable to reach SOC telemetry endpoints. Retrying automatically.');
+      } else {
+        setLoadError('');
+      }
+
       if (statsData) setStats(statsData);
       if (incidentsData?.incidents) setIncidents(incidentsData.incidents);
       if (eventsData?.events) setRecentEvents(eventsData.events);
@@ -75,6 +94,9 @@ export function DashboardPage({ pollingInterval }) {
       if (Array.isArray(apiKeysData)) setApiKeys(apiKeysData);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
+      setLoadError(err.message || 'Telemetry sync failed.');
+    } finally {
+      setIsInitialLoading(false);
     }
   };
 
@@ -97,7 +119,11 @@ export function DashboardPage({ pollingInterval }) {
         setSelectedIncident((prev) => ({ ...prev, status: newStatus }));
       }
     } catch (err) {
-      alert(`Failed to update status: ${err.message}`);
+      showToast({
+        variant: 'error',
+        title: 'Status Update Failed',
+        message: err.message || 'Could not update incident status.',
+      });
     }
   };
 
@@ -227,8 +253,39 @@ export function DashboardPage({ pollingInterval }) {
 
   const isElevated = critThreats > 0 || highThreats > 0 || activeIncidentCount > 0;
 
+  const filteredRecentEvents = useMemo(() => {
+    const q = streamSearch.trim().toLowerCase();
+    return recentEvents.filter((evt) => {
+      const lvl = (evt.threat_level || 'LOW').toUpperCase();
+      if (streamSeverityFilter !== 'ALL' && lvl !== streamSeverityFilter) return false;
+      if (!q) return true;
+      return (
+        (evt.source_ip || '').toLowerCase().includes(q) ||
+        (evt.event_type || '').toLowerCase().includes(q) ||
+        (evt.mitre_tactic || '').toLowerCase().includes(q) ||
+        (evt.raw_event_hash || '').toLowerCase().includes(q) ||
+        (evt.original_event || '').toLowerCase().includes(q)
+      );
+    });
+  }, [recentEvents, streamSearch, streamSeverityFilter]);
+
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
+      {loadError && (
+        <div className="p-3.5 rounded-xl bg-[var(--color-severity-high-bg)] border border-[var(--color-severity-high-border)] text-[var(--color-severity-high)] font-mono text-xs flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-base">warning</span>
+            <span>{loadError}</span>
+          </div>
+          <button
+            type="button"
+            onClick={fetchDashboardData}
+            className="px-3 py-1 rounded-lg bg-surface border border-[var(--color-severity-high-border)] font-bold hover:bg-surface-hover cursor-pointer"
+          >
+            Retry Now
+          </button>
+        </div>
+      )}
       
       {/* Navigation SubTabs */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border-muted pb-4">
@@ -290,9 +347,9 @@ export function DashboardPage({ pollingInterval }) {
               {/* Posture Badge & System State (Span 7) */}
               <div className="lg:col-span-7 space-y-4">
                 <div className="inline-flex items-center gap-2 bg-surface-dim px-3.5 py-1.5 rounded-full border border-border-muted font-mono text-xs">
-                  <div className={`w-2.5 h-2.5 rounded-full ${isElevated ? 'bg-rose-500 animate-ping' : 'bg-emerald-400 animate-pulse'}`}></div>
+                  <div className={`w-2.5 h-2.5 rounded-full ${isElevated ? 'bg-[var(--color-severity-high)] animate-ping' : 'bg-[var(--color-severity-low)] animate-pulse'}`}></div>
                   <span className="font-bold text-text-primary uppercase">
-                    SYSTEM STATUS: {isElevated ? 'ELEVATED THREAT DETECTED' : 'NORMAL OPERATION'}
+                    SYSTEM STATUS: {isInitialLoading ? 'SYNCING TELEMETRY...' : isElevated ? 'ELEVATED THREAT DETECTED' : 'NORMAL OPERATION'}
                   </span>
                 </div>
 
@@ -305,19 +362,23 @@ export function DashboardPage({ pollingInterval }) {
                 </p>
 
                 <div className="flex flex-wrap gap-4 font-mono text-xs pt-2">
-                  <div className="p-3 rounded-xl bg-surface-dim border border-border-muted">
+                  <div className="p-3 rounded-xl bg-surface-dim border border-border-muted min-w-[140px]">
                     <span className="text-text-dim block text-[10px] uppercase">Total Ingested Events</span>
-                    <span className="text-lg font-bold text-text-primary">{totalIngested.toLocaleString()}</span>
-                  </div>
-                  <div className="p-3 rounded-xl bg-surface-dim border border-border-muted">
-                    <span className="text-text-dim block text-[10px] uppercase">Active Threat Clusters</span>
-                    <span className={`text-lg font-bold ${activeIncidentCount > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
-                      {activeIncidentCount}
+                    <span className="text-lg font-bold text-text-primary">
+                      {isInitialLoading ? '—' : totalIngested.toLocaleString()}
                     </span>
                   </div>
-                  <div className="p-3 rounded-xl bg-surface-dim border border-border-muted">
-                    <span className="text-text-dim block text-[10px] uppercase">Pipeline Latency</span>
-                    <span className="text-lg font-bold text-primary">11.4 ms</span>
+                  <div className="p-3 rounded-xl bg-surface-dim border border-border-muted min-w-[140px]">
+                    <span className="text-text-dim block text-[10px] uppercase">Active Threat Clusters</span>
+                    <span className={`text-lg font-bold ${activeIncidentCount > 0 ? 'text-[var(--color-severity-high)]' : 'text-[var(--color-severity-low)]'}`}>
+                      {isInitialLoading ? '—' : activeIncidentCount}
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-surface-dim border border-border-muted min-w-[140px]">
+                    <span className="text-text-dim block text-[10px] uppercase">API Sync RTT</span>
+                    <span className="text-lg font-bold text-primary">
+                      {syncLatencyMs != null ? `${syncLatencyMs} ms` : '—'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -336,17 +397,17 @@ export function DashboardPage({ pollingInterval }) {
                       <span className="text-text-primary font-bold">{critThreats}</span>
                     </div>
                     <div className="h-2 w-full bg-surface rounded-full overflow-hidden">
-                      <div className="h-full bg-[var(--color-severity-critical)] rounded-full" style={{ width: `${totalIngested ? (critThreats / totalIngested) * 100 : 0}%` }}></div>
+                      <div className="h-full bg-[var(--color-severity-critical)] rounded-full transition-all duration-300" style={{ width: `${totalIngested ? (critThreats / totalIngested) * 100 : 0}%` }}></div>
                     </div>
                   </div>
 
                   <div>
                     <div className="flex justify-between text-[11px] mb-1">
-                      <span className="text-rose-400 font-bold">HIGH SEVERITY</span>
+                      <span className="text-[var(--color-severity-high)] font-bold">HIGH SEVERITY</span>
                       <span className="text-text-primary font-bold">{highThreats}</span>
                     </div>
                     <div className="h-2 w-full bg-surface rounded-full overflow-hidden">
-                      <div className="h-full bg-rose-500 rounded-full" style={{ width: `${totalIngested ? (highThreats / totalIngested) * 100 : 0}%` }}></div>
+                      <div className="h-full bg-[var(--color-severity-high)] rounded-full transition-all duration-300" style={{ width: `${totalIngested ? (highThreats / totalIngested) * 100 : 0}%` }}></div>
                     </div>
                   </div>
 
@@ -356,17 +417,17 @@ export function DashboardPage({ pollingInterval }) {
                       <span className="text-text-primary font-bold">{medThreats}</span>
                     </div>
                     <div className="h-2 w-full bg-surface rounded-full overflow-hidden">
-                      <div className="h-full bg-[var(--color-severity-medium)] rounded-full" style={{ width: `${totalIngested ? (medThreats / totalIngested) * 100 : 0}%` }}></div>
+                      <div className="h-full bg-[var(--color-severity-medium)] rounded-full transition-all duration-300" style={{ width: `${totalIngested ? (medThreats / totalIngested) * 100 : 0}%` }}></div>
                     </div>
                   </div>
 
                   <div>
                     <div className="flex justify-between text-[11px] mb-1">
-                      <span className="text-emerald-400 font-bold">LOW SEVERITY</span>
+                      <span className="text-[var(--color-severity-low)] font-bold">LOW SEVERITY</span>
                       <span className="text-text-primary font-bold">{lowThreats}</span>
                     </div>
                     <div className="h-2 w-full bg-surface rounded-full overflow-hidden">
-                      <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${totalIngested ? (lowThreats / totalIngested) * 100 : 0}%` }}></div>
+                      <div className="h-full bg-[var(--color-severity-low)] rounded-full transition-all duration-300" style={{ width: `${totalIngested ? (lowThreats / totalIngested) * 100 : 0}%` }}></div>
                     </div>
                   </div>
                 </div>
@@ -374,6 +435,13 @@ export function DashboardPage({ pollingInterval }) {
 
             </div>
           </div>
+
+          {/* SECTION A.2: TELEMETRY SEVERITY VELOCITY & PARSER MIX CHARTS */}
+          <SocThreatCharts
+            recentEvents={recentEvents}
+            vendorCounts={stats?.vendor_parser_counts}
+            isLoading={isInitialLoading}
+          />
 
           {/* SECTION B: REAL-TIME TELEMETRY STREAM PIPELINE DIAGRAM */}
           <div className="glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-lg">
@@ -808,22 +876,55 @@ export function DashboardPage({ pollingInterval }) {
 
           {/* SECTION D: RECENT TELEMETRY TABLE */}
           <div className="glass-panel rounded-2xl border border-border-muted shadow-xl overflow-hidden space-y-4">
-            <div className="p-4 sm:p-5 border-b border-border-muted bg-surface-dim flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div className="p-4 sm:p-5 border-b border-border-muted bg-surface-dim flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
               <div>
                 <h3 className="text-sm font-extrabold text-text-primary uppercase tracking-wider">Perimeter Telemetry Stream</h3>
-                <p className="text-xs text-text-muted mt-0.5">Live real-time edge network log ingestion stream across firewall, IDS/IPS, and router interfaces.</p>
+                <p className="text-xs text-text-muted mt-0.5">Live edge network log ingestion stream. Click any row to inspect XAI attribution and SHA-256 Merkle proof inline.</p>
               </div>
-              <button
-                onClick={() => navigate('/log-explorer')}
-                className="btn-secondary px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1 self-start sm:self-auto touch-target"
-              >
-                <span>Open Log Explorer</span>
-                <span className="material-symbols-outlined text-sm">arrow_forward</span>
-              </button>
+              <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+                <input
+                  type="text"
+                  value={streamSearch}
+                  onChange={(e) => setStreamSearch(e.target.value)}
+                  placeholder="Filter IP, vendor, MITRE..."
+                  aria-label="Filter telemetry stream"
+                  className="flex-1 sm:w-52 px-3 py-1.5 rounded-xl bg-surface border border-border-muted font-mono text-xs text-text-primary focus:outline-none focus:border-primary"
+                />
+                <div className="flex items-center gap-1 font-mono text-[10px]" role="group" aria-label="Filter stream by severity">
+                  {['ALL', 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].map((lvl) => (
+                    <button
+                      key={lvl}
+                      type="button"
+                      onClick={() => setStreamSeverityFilter(lvl)}
+                      className={`px-2 py-1.5 rounded-lg font-bold border transition-colors cursor-pointer ${
+                        streamSeverityFilter === lvl
+                          ? 'bg-primary text-surface-lowest border-primary'
+                          : 'bg-surface border-border-muted text-text-muted hover:text-text-primary'
+                      }`}
+                    >
+                      {lvl}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('/log-explorer')}
+                  className="btn-secondary px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 touch-target"
+                >
+                  <span>Log Explorer</span>
+                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                </button>
+              </div>
             </div>
 
             <div className="p-3 sm:p-5 overflow-x-auto custom-scrollbar-touch">
-              {recentEvents.length > 0 ? (
+              {isInitialLoading ? (
+                <div className="space-y-2.5 animate-pulse">
+                  {[1, 2, 3, 4].map((n) => (
+                    <div key={n} className="h-10 rounded-xl bg-surface-dim border border-border-muted" />
+                  ))}
+                </div>
+              ) : filteredRecentEvents.length > 0 ? (
                 <table className="w-full text-left font-mono text-xs border-collapse min-w-[650px]">
                   <thead>
                     <tr className="border-b border-border-muted text-text-muted text-[10px] uppercase">
@@ -837,61 +938,137 @@ export function DashboardPage({ pollingInterval }) {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border-muted">
-                    {recentEvents.slice(0, 10).map((evt, idx) => {
-                      const deviceVendor = evt.event_type ? evt.event_type.split(':')[0].toUpperCase() : 'CISCO_ASA';
+                    {filteredRecentEvents.slice(0, 12).map((evt, idx) => {
+                      const deviceVendor = evt.event_type ? evt.event_type.split(':')[0].toUpperCase() : 'UNKNOWN';
                       const actionTag = (evt.event_type || '').includes('permit') || (evt.event_type || '').includes('pass') ? 'PERMIT' : 'DENY';
+                      const isInspected = inspectedEvent && (inspectedEvent.raw_event_hash || inspectedEvent.id) === (evt.raw_event_hash || evt.id);
+                      const evtLevel = (evt.threat_level || 'LOW').toUpperCase();
                       return (
-                        <tr key={`${evt.raw_event_hash || 'evt'}_${idx}`} className="hover:bg-surface-hover transition-colors">
-                          <td className="py-2.5 px-3 text-text-muted text-[11px] whitespace-nowrap">
-                            {evt.timestamp || '2026-09-08 16:10:43'}
-                          </td>
-                          <td className="py-2.5 px-3 font-bold text-text-primary whitespace-nowrap">
-                            <span className="px-2 py-0.5 rounded bg-surface border border-border-muted text-[10px] text-primary">
-                              {deviceVendor}
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-3 font-bold text-text-primary whitespace-nowrap">
-                            {evt.source_ip || 'Local Host'}
-                          </td>
-                          <td className="py-2.5 px-3 whitespace-nowrap">
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                              actionTag === 'DENY' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                            }`}>
-                              {actionTag}
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-3 whitespace-nowrap">
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                              evt.threat_level === 'CRITICAL' ? 'bg-[var(--color-severity-critical-bg)] text-[var(--color-severity-critical)] border border-[var(--color-severity-critical-border)]' :
-                              evt.threat_level === 'HIGH' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
-                              evt.threat_level === 'MEDIUM' ? 'bg-[var(--color-severity-medium-bg)] text-[var(--color-severity-medium)] border border-[var(--color-severity-medium-border)]' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                            }`}>
-                              {evt.threat_level || 'LOW'}
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-3 font-bold text-text-primary whitespace-nowrap">
-                            {(evt.threat_score || 12.0).toFixed(1)}
-                          </td>
-                          <td className="py-2.5 px-3 text-right whitespace-nowrap">
-                            <button
-                              onClick={() => {
-                                const streamId = evt.id || evt.raw_event_hash || evt.source_ip || `stream_${idx}`;
-                                navigate(`/stream/${encodeURIComponent(streamId)}`, { state: { event: evt } });
-                              }}
-                              className="btn-secondary px-3 py-1.5 rounded text-[10px] font-bold touch-target flex items-center gap-1 ml-auto"
-                            >
-                              <span>Inspect Stream</span>
-                              <span className="material-symbols-outlined text-xs">arrow_forward</span>
-                            </button>
-                          </td>
-                        </tr>
+                        <React.Fragment key={`${evt.raw_event_hash || 'evt'}_${idx}`}>
+                          <tr
+                            onClick={() => setInspectedEvent(isInspected ? null : evt)}
+                            className={`transition-colors cursor-pointer ${
+                              isInspected ? 'bg-primary/10' : 'hover:bg-surface-hover'
+                            }`}
+                          >
+                            <td className="py-2.5 px-3 text-text-muted text-[11px] whitespace-nowrap">
+                              {evt.timestamp || '—'}
+                            </td>
+                            <td className="py-2.5 px-3 font-bold text-text-primary whitespace-nowrap">
+                              <span className="px-2 py-0.5 rounded bg-surface border border-border-muted text-[10px] text-primary">
+                                {deviceVendor}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3 font-bold text-text-primary whitespace-nowrap">
+                              {evt.source_ip || 'Local Host'}
+                            </td>
+                            <td className="py-2.5 px-3 whitespace-nowrap">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                                actionTag === 'DENY'
+                                  ? 'bg-[var(--color-severity-high-bg)] text-[var(--color-severity-high)] border-[var(--color-severity-high-border)]'
+                                  : 'bg-[var(--color-severity-low-bg)] text-[var(--color-severity-low)] border-[var(--color-severity-low-border)]'
+                              }`}>
+                                {actionTag}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3 whitespace-nowrap">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                                evtLevel === 'CRITICAL' ? 'bg-[var(--color-severity-critical-bg)] text-[var(--color-severity-critical)] border-[var(--color-severity-critical-border)]' :
+                                evtLevel === 'HIGH' ? 'bg-[var(--color-severity-high-bg)] text-[var(--color-severity-high)] border-[var(--color-severity-high-border)]' :
+                                evtLevel === 'MEDIUM' ? 'bg-[var(--color-severity-medium-bg)] text-[var(--color-severity-medium)] border-[var(--color-severity-medium-border)]' :
+                                'bg-[var(--color-severity-low-bg)] text-[var(--color-severity-low)] border-[var(--color-severity-low-border)]'
+                              }`}>
+                                {evtLevel}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3 font-bold text-text-primary whitespace-nowrap">
+                              {Number(evt.threat_score ?? 0).toFixed(1)}
+                            </td>
+                            <td className="py-2.5 px-3 text-right whitespace-nowrap">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const streamId = evt.id || evt.raw_event_hash || evt.source_ip || `stream_${idx}`;
+                                  navigate(`/stream/${encodeURIComponent(streamId)}`, { state: { event: evt } });
+                                }}
+                                className="btn-secondary px-3 py-1.5 rounded text-[10px] font-bold touch-target inline-flex items-center gap-1"
+                              >
+                                <span>Inspect Stream</span>
+                                <span className="material-symbols-outlined text-xs">arrow_forward</span>
+                              </button>
+                            </td>
+                          </tr>
+                          {isInspected && (
+                            <tr className="bg-surface-dim">
+                              <td colSpan={7} className="p-4 border-t border-primary/30">
+                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 text-xs font-mono">
+                                  <div className="lg:col-span-6 space-y-2">
+                                    <div className="text-[10px] font-bold uppercase text-primary">
+                                      XAI Threat Attribution &amp; Reasoning
+                                    </div>
+                                    <p className="font-sans text-xs text-text-primary leading-relaxed bg-surface p-3 rounded-xl border border-border-muted">
+                                      {evt.explanation || evt.xai_explanation || 'Evaluated against baseline normal telemetry features (ip_freq, ip_deny, action_code, sev_code, hour).'}
+                                    </p>
+                                    {evt.raw_event_hash && (
+                                      <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-surface border border-border-muted text-[11px]">
+                                        <span className="text-text-dim shrink-0">SHA-256 MERKLE:</span>
+                                        <span className="text-tertiary truncate">{evt.raw_event_hash}</span>
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            navigator.clipboard?.writeText(evt.raw_event_hash);
+                                            showToast({ variant: 'success', title: 'Copied', message: 'Merkle leaf hash copied.' });
+                                          }}
+                                          className="px-2 py-0.5 rounded bg-surface-dim border border-border-muted text-primary font-bold shrink-0 cursor-pointer"
+                                        >
+                                          Copy
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="lg:col-span-6 space-y-2">
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-[10px] font-bold uppercase text-secondary">Raw Forensic Payload</span>
+                                      <div className="flex items-center gap-2">
+                                        {evt.source_ip && (
+                                          <button
+                                            type="button"
+                                            onClick={() => setStreamSearch(evt.source_ip)}
+                                            className="text-[10px] text-primary hover:underline cursor-pointer"
+                                          >
+                                            Filter IP: {evt.source_ip}
+                                          </button>
+                                        )}
+                                        {evt.raw_event_hash && (
+                                          <button
+                                            type="button"
+                                            onClick={() => navigate(`/events/${encodeURIComponent(evt.raw_event_hash)}`, { state: { event: evt } })}
+                                            className="text-[10px] px-2 py-0.5 rounded bg-primary text-surface-lowest font-bold cursor-pointer"
+                                          >
+                                            Full Event Detail &rarr;
+                                          </button>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <pre className="p-3 rounded-xl bg-surface border border-border-muted text-[11px] text-text-muted overflow-x-auto whitespace-pre-wrap break-all max-h-32">
+                                      {evt.original_event || JSON.stringify(evt, null, 2)}
+                                    </pre>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
                       );
                     })}
                   </tbody>
                 </table>
               ) : (
-                <div className="p-8 text-center text-text-muted font-mono text-xs">
-                  Awaiting telemetry stream events...
+                <div className="p-8 text-center text-text-muted font-mono text-xs border border-dashed border-border-muted rounded-xl">
+                  {recentEvents.length > 0
+                    ? 'No telemetry events match your current search or severity filter.'
+                    : 'Awaiting telemetry stream events...'}
                 </div>
               )}
             </div>

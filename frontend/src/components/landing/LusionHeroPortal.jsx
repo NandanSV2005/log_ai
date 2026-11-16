@@ -594,7 +594,7 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
               </div>
               <span className="text-text-dim">|</span>
               <span className="font-bold text-primary tracking-wider uppercase">
-                LOG_AI // LIVE SOC TELEMETRY PORTAL
+                LOG_AI // SIMULATED TELEMETRY PREVIEW
               </span>
               <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[var(--color-status-info-bg)] text-[var(--color-status-info)] border border-[var(--color-status-info-border)] text-[10px] font-bold">
                 <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-status-info)] animate-pulse" />

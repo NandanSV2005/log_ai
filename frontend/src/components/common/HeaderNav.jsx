@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { StitchBrandMark } from './StitchBrandMark';
+import { CommandPalette } from './CommandPalette';
 
 export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
   const { username, role, isAdmin, logoutUser } = useAuth();
@@ -10,6 +11,19 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
   const navigate = useNavigate();
   const [istTime, setIstTime] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+
+  // Global Ctrl+K / Cmd+K shortcut for SOC Command Palette
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   useEffect(() => {
     const updateTime = () => {
@@ -40,7 +54,12 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
       {/* Top Navbar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Brand Logo */}
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => { closeMobileMenu(); navigate('/dashboard'); }}>
+        <button
+          type="button"
+          onClick={() => { closeMobileMenu(); navigate('/dashboard'); }}
+          className="flex items-center gap-3 cursor-pointer text-left rounded-lg focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
+          aria-label="LOG AI — go to SOC Dashboard"
+        >
           <div className="w-9 h-9 rounded-lg bg-surface-container border border-border-muted flex items-center justify-center text-primary shadow-sm">
             <StitchBrandMark size={24} />
           </div>
@@ -53,14 +72,29 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
             </div>
             <div className="text-[10px] text-text-muted font-mono tracking-wider uppercase">SOC Intelligence Engine</div>
           </div>
-        </div>
+        </button>
 
         {/* Desktop Global Controls & Status */}
-        <div className="hidden md:flex items-center gap-3 text-xs font-mono">
+        <div className="hidden md:flex items-center gap-2.5 text-xs font-mono">
+          {/* Command Palette Trigger */}
+          <button
+            type="button"
+            onClick={() => setIsPaletteOpen(true)}
+            className="flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-surface-dim border border-border-muted text-text-muted hover:text-text-primary hover:border-primary/40 transition-colors cursor-pointer"
+            title="Open SOC Command Palette (Ctrl+K)"
+            aria-label="Open Command Palette"
+          >
+            <span className="material-symbols-outlined text-sm">search</span>
+            <span className="hidden lg:inline text-[11px]">Search</span>
+            <kbd className="px-1.5 py-0.5 rounded bg-surface border border-border-muted text-[9px] font-bold text-text-dim">
+              ⌘K
+            </kbd>
+          </button>
+
           {/* Admin Role Indicator Badge */}
           <div className={`flex items-center gap-1 px-2.5 py-1 rounded-md border font-bold ${
             isAdmin
-              ? 'bg-rose-500/15 text-rose-400 border-rose-500/40'
+              ? 'bg-[var(--color-severity-high-bg)] text-[var(--color-severity-high)] border-[var(--color-severity-high-border)]'
               : 'bg-surface-container text-text-muted border-border-muted'
           }`}>
             <span className="material-symbols-outlined text-xs">
@@ -71,15 +105,27 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
 
           {/* Polling Badge */}
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-container border border-border-muted text-text-muted">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="w-2 h-2 rounded-full bg-[var(--color-severity-low)] animate-pulse"></span>
             <span>LIVE {pollingInterval}MS</span>
           </div>
 
           {/* IST Clock */}
-          <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-container border border-border-muted text-text-primary">
+          <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-container border border-border-muted text-text-primary">
             <span className="material-symbols-outlined text-sm text-text-muted">schedule</span>
             <span>{istTime}</span>
           </div>
+
+          {/* Quick Theme Switcher */}
+          <button
+            type="button"
+            onClick={() => setTheme(theme === 'dark' ? 'sage' : 'dark')}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-surface-container border border-border-muted text-text-primary hover:border-primary/40 transition-colors cursor-pointer touch-target"
+            title={`Switch to ${theme === 'dark' ? 'Powder (Light)' : 'Mocha (Dark)'} theme`}
+            aria-label="Toggle color theme"
+          >
+            <span className="material-symbols-outlined text-sm text-primary">palette</span>
+            <span className="hidden xl:inline text-[11px] font-bold">{theme === 'sage' ? 'POWDER' : 'MOCHA'}</span>
+          </button>
 
           {/* Air-Gapped Toggle */}
           <button
@@ -376,6 +422,13 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
           </div>
         </div>
       )}
+
+      <CommandPalette
+        isOpen={isPaletteOpen}
+        onClose={() => setIsPaletteOpen(false)}
+        airGapped={airGapped}
+        setAirGapped={setAirGapped}
+      />
     </header>
   );
 }

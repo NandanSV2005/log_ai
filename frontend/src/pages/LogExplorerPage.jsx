@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import { useToast } from '../contexts/ToastContext';
 import { getOcsfClassInfo } from './EventDetailPage';
 
 export function LogExplorerPage() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [events, setEvents] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSeverities, setSelectedSeverities] = useState({
@@ -37,13 +39,23 @@ export function LogExplorerPage() {
 
   const handleSeverityToggle = (level) => {
     setSelectedSeverities((prev) => ({ ...prev, [level]: !prev[level] }));
+    setCurrentPage(1);
   };
 
   const handleExportCsv = async () => {
     try {
       await api.exportCsv();
+      showToast({
+        variant: 'success',
+        title: 'Export Complete',
+        message: 'Forensic CSV report downloaded.',
+      });
     } catch (err) {
-      alert(`Export Failed: ${err.message}`);
+      showToast({
+        variant: 'error',
+        title: 'Export Failed',
+        message: err.message || 'Unable to export CSV.',
+      });
     }
   };
 
@@ -126,7 +138,10 @@ export function LogExplorerPage() {
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
               placeholder='Filter by source_ip, event_type, MITRE tactic (e.g. "192.168.1.100", "cisco_asa", "T1110")...'
               className="w-full bg-surface-dim border border-border-muted rounded-xl py-3 pl-9 pr-24 font-mono text-xs text-text-primary focus:outline-none focus:border-primary"
             />
