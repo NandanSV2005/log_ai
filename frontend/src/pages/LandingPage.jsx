@@ -412,11 +412,11 @@ export function LandingPage() {
       {/* ========================================================================= */}
       {/* 1. FIXED NAVIGATION HEADER                                                */}
       {/* ========================================================================= */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-surface-dim/90 backdrop-blur-xl border-b border-border-muted shadow-2xl">
-        <div className="h-16 w-full max-w-[1600px] mx-auto px-4 md:px-6 lg:px-8 flex items-center justify-between gap-3 md:gap-4 lg:gap-6">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-surface-dim/95 backdrop-blur-md border-b border-border-muted shadow-2xl">
+        <div className="h-16 w-full max-w-[1440px] mx-auto px-3 sm:px-5 lg:px-8 flex items-center justify-between gap-2 sm:gap-4">
           
-          {/* Brand Logo & Status Chip */}
-          <div className="flex items-center gap-3 xl:gap-5 flex-shrink-0">
+          {/* Brand Logo */}
+          <div className="flex items-center gap-3 flex-shrink-0">
             <button
               type="button"
               onClick={() => scrollToSection('pipeline')}
@@ -426,25 +426,16 @@ export function LandingPage() {
               <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shadow-[0_0_12px_var(--color-border-glow)]">
                 <StitchBrandMark className="w-5 h-5 text-primary" size={20} />
               </div>
-              <div className="flex items-baseline font-display font-black text-xl md:text-2xl tracking-tight text-text-primary whitespace-nowrap">
+              <div className="flex items-baseline font-display font-black text-lg sm:text-xl md:text-2xl tracking-tight text-text-primary whitespace-nowrap">
                 <span>LOG</span>
-                <span className="font-mono text-primary text-sm md:text-base font-bold px-1.5">//</span>
+                <span className="font-mono text-primary text-xs sm:text-sm md:text-base font-bold px-1 sm:px-1.5">//</span>
                 <span>AI</span>
               </div>
             </button>
-
-            {/* Status Chip (Gracefully hidden on <2xl screens to preserve width budget) */}
-            <div className="hidden 2xl:inline-flex soc-tag whitespace-nowrap">
-              <span className="w-2 h-2 rounded-full bg-tertiary animate-ping"></span>
-              <span className="font-mono text-[11px] font-bold text-tertiary tracking-wider uppercase">ULPF v2.4 // ONLINE</span>
-              <span className="font-mono text-[11px] text-text-muted">
-                [{(stats.total_events_ingested || 48281).toLocaleString()} events]
-              </span>
-            </div>
           </div>
 
           {/* Chapter Nav Links */}
-          <nav className="hidden xl:flex items-center gap-1 2xl:gap-1.5 font-mono text-[11px] 2xl:text-[12px] tracking-wide">
+          <nav className="hidden xl:flex items-center gap-1 font-mono text-[11px] tracking-wide min-w-0">
             {CHAPTERS.map((ch) => {
               const isActive = activeChapter === ch.id;
               return (
@@ -452,7 +443,7 @@ export function LandingPage() {
                   key={ch.id}
                   type="button"
                   onClick={() => scrollToSection(ch.id)}
-                  className={`relative px-3 2xl:px-3.5 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap cursor-pointer ${
+                  className={`relative px-2.5 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap cursor-pointer ${
                     isActive
                       ? `bg-surface-lowest/90 border ${ch.borderClass} ${ch.textClass} shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]`
                       : 'text-text-muted hover:text-text-primary hover:bg-surface-hover/70 border border-transparent'
@@ -465,7 +456,7 @@ export function LandingPage() {
           </nav>
 
           {/* Controls Cluster & Open SOC Console CTA */}
-          <div className="flex items-center gap-2.5 sm:gap-3 lg:gap-4 flex-shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             {/* Operations Theme Segmented Switch */}
             <div className="hidden sm:inline-flex soc-segmented" role="group" aria-label="Operations color theme">
               <button
@@ -473,7 +464,7 @@ export function LandingPage() {
                 aria-pressed={theme === 'dark'}
                 data-active={theme === 'dark'}
                 onClick={() => setTheme('dark')}
-                className="soc-segmented-item text-[10px] 2xl:text-[11px]"
+                className="soc-segmented-item !px-2.5 !py-1 !text-[10px]"
               >
                 <span className="material-symbols-outlined text-[13px]">dark_mode</span>
                 <span>MOCHA</span>
@@ -483,22 +474,22 @@ export function LandingPage() {
                 aria-pressed={theme === 'sage'}
                 data-active={theme === 'sage'}
                 onClick={() => setTheme('sage')}
-                className="soc-segmented-item text-[10px] 2xl:text-[11px]"
+                className="soc-segmented-item !px-2.5 !py-1 !text-[10px]"
               >
                 <span className="material-symbols-outlined text-[13px]">light_mode</span>
                 <span>POWDER</span>
               </button>
             </div>
 
-            {/* Primary CTA: Stripe-Style Morphing CTA Button */}
+            {/* Primary CTA */}
             <StripeCtaButton
               to="/dashboard"
               variant="primary"
-              className="!px-3 sm:!px-3.5 2xl:!px-4 !py-2 !text-[11px] sm:!text-xs 2xl:!text-sm flex-shrink-0"
+              className="!px-3 sm:!px-3.5 !py-2 !text-[11px] sm:!text-xs flex-shrink-0 whitespace-nowrap"
               cursorLabel="CONSOLE"
             >
-              <span className="sm:hidden">Console</span>
-              <span className="hidden sm:inline">Open SOC Console</span>
+              <span className="2xl:hidden">SOC Console</span>
+              <span className="hidden 2xl:inline">Open SOC Console</span>
             </StripeCtaButton>
 
             {/* Mobile Menu Toggle Button */}
