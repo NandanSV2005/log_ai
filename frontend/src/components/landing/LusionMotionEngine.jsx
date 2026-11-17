@@ -39,8 +39,8 @@ export function useLusionScrollEngine(disabled = false) {
     }
 
     const lenis = new Lenis({
-      lerp: 0.14,
-      duration: 0.85,
+      lerp: 0.16,
+      duration: 0.75,
       smoothWheel: true,
       wheelMultiplier: 1.05,
       touchMultiplier: 1.5,
@@ -48,45 +48,15 @@ export function useLusionScrollEngine(disabled = false) {
     lenisRef.current = lenis;
     lusionMotionState.lenis = lenis;
 
-    // Cache gsap.quickTo setters per [data-velocity-skew] element
-    const quickToMap = new WeakMap();
-    const getQuickSetters = (el) => {
-      let setters = quickToMap.get(el);
-      if (!setters) {
-        gsap.set(el, { transformOrigin: 'center center' });
-        setters = {
-          skewY: gsap.quickTo(el, 'skewY', { duration: 0.25, ease: 'power3.out' }),
-          scaleY: gsap.quickTo(el, 'scaleY', { duration: 0.25, ease: 'power3.out' }),
-        };
-        quickToMap.set(el, setters);
-      }
-      return setters;
-    };
-
-    const targets = Array.from(document.querySelectorAll('[data-velocity-skew]'));
-
     let resetTimer = null;
-
-    const applySkew = (skewDeg) => {
-      for (let i = 0; i < targets.length; i++) {
-        const setters = getQuickSetters(targets[i]);
-        setters.skewY(skewDeg);
-      }
-    };
 
     const onLenisScroll = (e) => {
       ScrollTrigger.update();
-      const velocity = e?.velocity || 0;
-      lusionMotionState.velocity = velocity;
-
-      // Subtle, legible velocity-proportional skew without vertical stretch distortion
-      const clampedSkew = Math.max(-1.25, Math.min(1.25, velocity * 0.045));
-      applySkew(clampedSkew);
+      lusionMotionState.velocity = e?.velocity || 0;
 
       if (resetTimer) clearTimeout(resetTimer);
       resetTimer = setTimeout(() => {
         lusionMotionState.velocity = 0;
-        applySkew(0);
       }, 95);
     };
 
@@ -118,9 +88,6 @@ export function useLusionScrollEngine(disabled = false) {
       lenisRef.current = null;
       lusionMotionState.lenis = null;
       lusionMotionState.velocity = 0;
-      targets.forEach((el) => {
-        gsap.set(el, { clearProps: 'transform' });
-      });
     };
   }, [disabled]);
 
@@ -233,24 +200,42 @@ export function MagneticCursor({ disabled = false }) {
     };
 
     const animateRing = () => {
-      if (!document.hidden) {
-        ring.x += (pos.x - ring.x) * 0.15;
-        ring.y += (pos.y - ring.y) * 0.15;
-        if (outerRef.current) {
-          outerRef.current.style.transform = `translate3d(${ring.x.toFixed(1)}px, ${ring.y.toFixed(1)}px, 0) translate(-50%, -50%) scale(${
-            isHoveringRef.current ? 1.55 : 1
-          })`;
-        }
+      rafId = null;
+      if (document.hidden) return;
+
+      const dx = pos.x - ring.x;
+      const dy = pos.y - ring.y;
+      ring.x += dx * 0.18;
+      ring.y += dy * 0.18;
+
+      if (outerRef.current) {
+        outerRef.current.style.transform = `translate3d(${ring.x.toFixed(1)}px, ${ring.y.toFixed(1)}px, 0) translate(-50%, -50%) scale(${
+          isHoveringRef.current ? 1.55 : 1
+        })`;
       }
-      rafId = requestAnimationFrame(animateRing);
+
+      // Stop RAF loop once ring converges on cursor to avoid idle CPU/GPU wakeups
+      if (Math.abs(dx) > 0.15 || Math.abs(dy) > 0.15) {
+        rafId = requestAnimationFrame(animateRing);
+      }
     };
 
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    const wakeRing = () => {
+      if (!rafId) {
+        rafId = requestAnimationFrame(animateRing);
+      }
+    };
+
+    const onMouseMoveWithWake = (e) => {
+      handleMouseMove(e);
+      wakeRing();
+    };
+
+    window.addEventListener('mousemove', onMouseMoveWithWake, { passive: true });
     window.addEventListener('mouseout', handleMouseOut, { passive: true });
-    rafId = requestAnimationFrame(animateRing);
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mousemove', onMouseMoveWithWake);
       window.removeEventListener('mouseout', handleMouseOut);
       if (rafId) cancelAnimationFrame(rafId);
       if (activeMagneticEl) releaseMagneticTarget(activeMagneticEl);

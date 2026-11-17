@@ -27,7 +27,7 @@ function DataStreamTunnel3D({ colors, mouseRef, progressRef }) {
   const warpOffsetRef = useRef(0);
   const smoothMouseRef = useRef({ x: 0, y: 0 });
 
-  const particleCount = 3000;
+  const particleCount = 900;
 
   const { positions, phases, speeds, colorWeights, filamentPositions } = useMemo(() => {
     const pos = new Float32Array(particleCount * 3);
@@ -36,8 +36,8 @@ function DataStreamTunnel3D({ colors, mouseRef, progressRef }) {
     const cw = new Float32Array(particleCount);
 
     for (let i = 0; i < particleCount; i++) {
-      const ringIdx = i % 60;
-      const angle = (i / particleCount) * Math.PI * 28 + ringIdx * 0.21;
+      const ringIdx = i % 45;
+      const angle = (i / particleCount) * Math.PI * 24 + ringIdx * 0.21;
       const radius = 0.75 + ((i * 79) % 100) * 0.062;
       const z = -22 + ((i * 43) % 100) * 0.28;
 
@@ -51,7 +51,7 @@ function DataStreamTunnel3D({ colors, mouseRef, progressRef }) {
     }
 
     // Build subtle connecting filaments along the data-stream tunnel
-    const filamentSegments = 220;
+    const filamentSegments = 90;
     const filPos = new Float32Array(filamentSegments * 6);
     for (let j = 0; j < filamentSegments; j++) {
       const idxA = (j * 13) % particleCount;
@@ -428,13 +428,12 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
         },
       });
 
-      // 0% to 45% Scroll Progress: Headline scales down (0.82), translates up (y: -60), blurs (10px), fades out
+      // 0% to 45% Scroll Progress: Headline scales down (0.86), translates up (y: -50), fades out (GPU-only transform/opacity)
       tl.to(
         headlineEl,
         {
-          scale: 0.82,
-          y: -60,
-          filter: 'blur(10px)',
+          scale: 0.86,
+          y: -50,
           opacity: 0,
           ease: 'power2.inOut',
           duration: 0.45,
@@ -514,8 +513,8 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
           <Canvas
             frameloop={isHeroInView ? 'always' : 'demand'}
             camera={{ position: [0, 0, 6.4], fov: 52 }}
-            dpr={[1, 1.75]}
-            gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+            dpr={[1, 1.25]}
+            gl={{ antialias: false, alpha: true, powerPreference: 'high-performance' }}
           >
             <DataStreamTunnel3D
               colors={colors}
@@ -528,11 +527,11 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
         )}
       </div>
 
-      {/* Full-Viewport Expanding Portal Backdrop (clip-path: inset(18% 12% 18% 12% round 20px) -> inset(0% 0% 0% 0% round 0px)) */}
+      {/* Full-Viewport Expanding Portal Backdrop (no heavy backdrop-blur over WebGL) */}
       <div
         ref={portalBackdropRef}
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[5] bg-surface-lowest/90 border border-primary/30 shadow-[inset_0_0_80px_var(--color-border-glow)] backdrop-blur-xl will-change-[clip-path,opacity]"
+        className="pointer-events-none absolute inset-0 z-[5] bg-surface-lowest/94 border border-primary/30 shadow-[inset_0_0_80px_var(--color-border-glow)] will-change-[clip-path,opacity]"
       />
 
       {/* Main Hero Container */}
@@ -579,10 +578,10 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
           </div>
         </div>
 
-        {/* Live log_ai SOC Terminal Portal Card (Rises to center y: "-28vh" & scales to 1.08 / 94vw as portal expands) */}
+        {/* Live log_ai SOC Terminal Portal Card */}
         <div
           ref={portalFrameRef}
-          className="w-full mx-auto rounded-3xl bg-surface-lowest/95 border-2 border-primary/40 shadow-[0_24px_80px_rgba(0,0,0,0.55),0_0_40px_var(--color-border-glow)] backdrop-blur-2xl flex flex-col justify-between overflow-hidden will-change-transform"
+          className="w-full mx-auto rounded-3xl bg-surface-lowest/98 border-2 border-primary/40 shadow-[0_24px_80px_rgba(0,0,0,0.55),0_0_40px_var(--color-border-glow)] flex flex-col justify-between overflow-hidden will-change-transform"
         >
           {/* Portal Top Window Chrome */}
           <div className="px-4 sm:px-6 py-2.5 bg-surface-dim/95 border-b border-border-muted flex flex-wrap items-center justify-between gap-3 font-mono text-xs">

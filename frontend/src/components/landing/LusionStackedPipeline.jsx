@@ -455,7 +455,7 @@ export function LusionStackedPipeline({ is2D = false }) {
               >
                 <SpotlightCard
                   spotlightColor="var(--color-border-glow)"
-                  className="pipeline-stage-card w-full p-6 sm:p-8 rounded-3xl bg-surface-lowest border-2 border-primary/40 shadow-[0_28px_70px_rgba(0,0,0,0.65),0_0_32px_var(--color-border-glow)] backdrop-blur-2xl"
+                  className="pipeline-stage-card w-full p-6 sm:p-8 rounded-3xl bg-surface-lowest border-2 border-primary/40 shadow-[0_28px_70px_rgba(0,0,0,0.65),0_0_32px_var(--color-border-glow)]"
                 >
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
                     {/* Left 7 Columns: Stage Narrative & Source Chips */}

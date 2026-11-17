@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { SpotlightCard } from '../motion-primitives';
 import { StripeCtaButton, StripeSectionHeader, StructuralGridSpine } from './LusionMotionEngine';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -110,6 +110,8 @@ const STREAMED_AUDIT_ROWS = [
  */
 export function StripeBentoArchitecture({ is2D = false }) {
   const { theme } = useTheme();
+  const sectionRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   // Card 1 State: Live AI Log Stream & Classifier Simulator (1.8s cycle + Tokenizing shimmer + filter pills)
   const [activeClassifierIdx, setActiveClassifierIdx] = useState(0);
@@ -138,7 +140,21 @@ export function StripeBentoArchitecture({ is2D = false }) {
         });
 
   useEffect(() => {
-    if (is2D) return undefined;
+    const el = sectionRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setIsVisible(true);
+      return undefined;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.05 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (is2D || !isVisible) return undefined;
     let shimmerTimeout = null;
     const timer = setInterval(() => {
       setIsTokenizing(true);
@@ -151,7 +167,7 @@ export function StripeBentoArchitecture({ is2D = false }) {
       clearInterval(timer);
       if (shimmerTimeout) clearTimeout(shimmerTimeout);
     };
-  }, [is2D]);
+  }, [is2D, isVisible]);
 
   const currentSample =
     filteredClassifierSamples[activeClassifierIdx % Math.max(1, filteredClassifierSamples.length)] ||
@@ -189,6 +205,7 @@ export function StripeBentoArchitecture({ is2D = false }) {
 
   return (
     <section
+      ref={sectionRef}
       id="bento-architecture"
       className="section-obsidian-contrast relative w-full py-24 md:py-28 border-b border-[rgba(245,158,11,0.14)] overflow-hidden"
     >

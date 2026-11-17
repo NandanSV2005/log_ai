@@ -1,5 +1,5 @@
 import { motion, useMotionTemplate, useMotionValue } from 'motion/react';
-import React, { useState } from 'react';
+import React, { useRef } from 'react';
 import { cn } from '../../lib/utils';
 
 export function SpotlightCard({
@@ -15,9 +15,9 @@ export function SpotlightCard({
   style: externalStyle,
   ...props
 }) {
+  const cardRef = useRef(null);
   const mouseX = useMotionValue(-spotlightSize);
   const mouseY = useMotionValue(-spotlightSize);
-  const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0, active: false });
 
   function handleMouseMove(e) {
     const { currentTarget, clientX, clientY } = e;
@@ -30,14 +30,13 @@ export function SpotlightCard({
     currentTarget.style.setProperty('--mouse-x', `${x}px`);
     currentTarget.style.setProperty('--mouse-y', `${y}px`);
 
-    if (!disableTilt && rect.width > 0 && rect.height > 0) {
-      const normX = (x / rect.width - 0.5) * 2; // -1 to 1
-      const normY = (y / rect.height - 0.5) * 2; // -1 to 1
-      setTilt({
-        rotateX: Number((-normY * maxTilt).toFixed(2)),
-        rotateY: Number((normX * maxTilt).toFixed(2)),
-        active: true,
-      });
+    if (!disableTilt && rect.width > 0 && rect.height > 0 && cardRef.current) {
+      const normX = (x / rect.width - 0.5) * 2;
+      const normY = (y / rect.height - 0.5) * 2;
+      const rx = (-normY * maxTilt).toFixed(2);
+      const ry = (normX * maxTilt).toFixed(2);
+      cardRef.current.style.transition = 'transform 0.12s cubic-bezier(0.22, 1, 0.36, 1)';
+      cardRef.current.style.transform = `perspective(1100px) rotateX(${rx}deg) rotateY(${ry}deg) scale3d(1.006, 1.006, 1.006)`;
     }
 
     if (externalMouseMove) externalMouseMove(e);
@@ -46,7 +45,10 @@ export function SpotlightCard({
   function handleMouseLeave(e) {
     mouseX.set(-spotlightSize);
     mouseY.set(-spotlightSize);
-    setTilt({ rotateX: 0, rotateY: 0, active: false });
+    if (!disableTilt && cardRef.current) {
+      cardRef.current.style.transition = 'transform 0.45s cubic-bezier(0.22, 1, 0.36, 1)';
+      cardRef.current.style.transform = 'perspective(1100px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+    }
     if (externalMouseLeave) externalMouseLeave(e);
   }
 
@@ -54,19 +56,14 @@ export function SpotlightCard({
 
   const tiltStyle = !disableTilt
     ? {
-        transform: tilt.active
-          ? `perspective(1100px) rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) scale3d(1.006, 1.006, 1.006)`
-          : 'perspective(1100px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
-        transition: tilt.active
-          ? 'transform 0.12s cubic-bezier(0.22, 1, 0.36, 1)'
-          : 'transform 0.45s cubic-bezier(0.22, 1, 0.36, 1)',
-        willChange: 'transform',
+        transform: 'perspective(1100px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
         ...externalStyle,
       }
     : externalStyle;
 
   return (
     <Component
+      ref={cardRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={tiltStyle}
