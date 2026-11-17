@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { StitchBrandMark } from '../components/common/StitchBrandMark';
+import { ThemeSwitch } from '../components/common/ThemeSwitch';
 import { api } from '../services/api';
 import { InView, SpotlightCard } from '../components/motion-primitives';
 import { ThreatRadar3D } from '../components/radar/ThreatRadar3D';
@@ -457,28 +458,9 @@ export function LandingPage() {
 
           {/* Controls Cluster & Open SOC Console CTA */}
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            {/* Operations Theme Segmented Switch */}
-            <div className="hidden sm:inline-flex soc-segmented" role="group" aria-label="Operations color theme">
-              <button
-                type="button"
-                aria-pressed={theme === 'dark'}
-                data-active={theme === 'dark'}
-                onClick={() => setTheme('dark')}
-                className="soc-segmented-item !px-2.5 !py-1 !text-[10px]"
-              >
-                <span className="material-symbols-outlined text-[13px]">dark_mode</span>
-                <span>MOCHA</span>
-              </button>
-              <button
-                type="button"
-                aria-pressed={theme === 'sage'}
-                data-active={theme === 'sage'}
-                onClick={() => setTheme('sage')}
-                className="soc-segmented-item !px-2.5 !py-1 !text-[10px]"
-              >
-                <span className="material-symbols-outlined text-[13px]">light_mode</span>
-                <span>POWDER</span>
-              </button>
+            {/* Tactile Sliding Theme Switch */}
+            <div className="hidden sm:inline-flex">
+              <ThemeSwitch />
             </div>
 
             {/* Primary CTA */}
@@ -540,24 +522,7 @@ export function LandingPage() {
 
             <div className="pt-2 flex items-center justify-between font-sans border-t border-border-muted/40">
               <span className="text-text-muted">Operations Theme:</span>
-              <div className="soc-segmented" role="group" aria-label="Operations color theme">
-                <button
-                  type="button"
-                  data-active={theme === 'dark'}
-                  onClick={() => setTheme('dark')}
-                  className="soc-segmented-item text-[11px]"
-                >
-                  MOCHA
-                </button>
-                <button
-                  type="button"
-                  data-active={theme === 'sage'}
-                  onClick={() => setTheme('sage')}
-                  className="soc-segmented-item text-[11px]"
-                >
-                  POWDER
-                </button>
-              </div>
+              <ThemeSwitch />
             </div>
           </div>
         )}

@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { StitchBrandMark } from './StitchBrandMark';
 import { CommandPalette } from './CommandPalette';
+import { ThemeSwitch } from './ThemeSwitch';
 
 export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
   const { username, role, isAdmin, logoutUser } = useAuth();
@@ -115,17 +116,8 @@ export function HeaderNav({ airGapped, setAirGapped, pollingInterval }) {
             <span>{istTime}</span>
           </div>
 
-          {/* Quick Theme Switcher */}
-          <button
-            type="button"
-            onClick={() => setTheme(theme === 'dark' ? 'sage' : 'dark')}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-surface-container border border-border-muted text-text-primary hover:border-primary/40 transition-colors cursor-pointer touch-target"
-            title={`Switch to ${theme === 'dark' ? 'Powder (Light)' : 'Mocha (Dark)'} theme`}
-            aria-label="Toggle color theme"
-          >
-            <span className="material-symbols-outlined text-sm text-primary">palette</span>
-            <span className="hidden xl:inline text-[11px] font-bold">{theme === 'sage' ? 'POWDER' : 'MOCHA'}</span>
-          </button>
+          {/* Quick Sliding Theme Switcher */}
+          <ThemeSwitch compact />
 
           {/* Air-Gapped Toggle */}
           <button

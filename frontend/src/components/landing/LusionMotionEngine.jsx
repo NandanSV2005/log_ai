@@ -557,7 +557,7 @@ export function StripeCtaButton({
     </>
   );
 
-  const combinedClass = `group inline-flex items-center justify-center px-6 py-3 rounded-xl font-mono text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer ${baseClasses} ${className}`;
+  const combinedClass = `group inline-flex items-center justify-center px-6 py-3 rounded-xl font-mono text-xs font-bold uppercase tracking-wider cursor-pointer ${baseClasses} ${className}`;
 
   if (to) {
     return (
