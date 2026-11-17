@@ -279,10 +279,10 @@ export function RoiWorkload3D({
             </div>
           </div>
         ) : (
-          <div className="relative w-full min-h-[270px] flex items-center justify-center py-2 my-auto">
+          <div className="relative w-full min-h-[250px] sm:min-h-[270px] flex items-center justify-center py-2 my-auto overflow-hidden">
             {/* Isometric Perspective Scene */}
             <div
-              className="relative flex items-end justify-center gap-8 sm:gap-12 md:gap-16 pt-6 pb-2"
+              className="relative flex items-end justify-center gap-6 sm:gap-12 md:gap-16 pt-6 pb-2 scale-[0.82] sm:scale-100 origin-center"
               style={{
                 perspective: '1000px',
                 perspectiveOrigin: '50% 50%'

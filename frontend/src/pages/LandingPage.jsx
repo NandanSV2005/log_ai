@@ -494,10 +494,11 @@ export function LandingPage() {
             <StripeCtaButton
               to="/dashboard"
               variant="primary"
-              className="!px-3.5 2xl:!px-4 !py-2 !text-xs 2xl:!text-sm flex-shrink-0"
+              className="!px-3 sm:!px-3.5 2xl:!px-4 !py-2 !text-[11px] sm:!text-xs 2xl:!text-sm flex-shrink-0"
               cursorLabel="CONSOLE"
             >
-              Open SOC Console
+              <span className="sm:hidden">Console</span>
+              <span className="hidden sm:inline">Open SOC Console</span>
             </StripeCtaButton>
 
             {/* Mobile Menu Toggle Button */}
@@ -1166,7 +1167,7 @@ export function LandingPage() {
       {/* ========================================================================= */}
       {/* FOOTER SECTION                                                           */}
       {/* ========================================================================= */}
-      <footer className="w-full px-4 md:px-8 xl:px-14 py-16 bg-surface-dim border-t border-border-muted">
+      <footer className="w-full px-4 md:px-8 xl:px-14 pt-14 pb-20 bg-surface-dim border-t border-border-muted">
         <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-border-muted">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shadow-[0_0_12px_var(--color-border-glow)]">
@@ -1198,34 +1199,34 @@ export function LandingPage() {
       {/* FIXED BOTTOM SOC STATUS TICKER STRIP                                     */}
       {/* ========================================================================= */}
       <footer className="fixed bottom-0 left-0 right-0 z-50 h-10 bg-surface-dim/95 backdrop-blur-md border-t border-border-muted">
-        <div className="h-full w-full max-w-[1600px] mx-auto px-4 md:px-8 flex items-center justify-between font-mono text-[11px] text-text-muted overflow-x-auto gap-4">
-          <div className="flex items-center gap-6 whitespace-nowrap">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+        <div className="h-full w-full max-w-[1600px] mx-auto px-3 sm:px-4 md:px-8 flex items-center justify-between font-mono text-[10px] sm:text-[11px] text-text-muted gap-3 overflow-hidden">
+          <div className="flex items-center gap-4 sm:gap-6 whitespace-nowrap min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-tertiary animate-pulse shrink-0"></span>
               <span className="text-text-dim">INGEST:</span>
               <span className="text-text-primary font-bold">142.8 GB/hr</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-secondary"></span>
               <span className="text-text-dim">LOG VERIFICATION:</span>
               <span className="text-secondary font-bold">SHA-256 HASH CHAIN</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="hidden lg:flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-primary"></span>
               <span className="text-text-dim">ML ANOMALY THRESHOLD:</span>
               <span className="text-primary font-bold">{FALLBACK_ANOMALY_THRESHOLD}</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-tertiary"></span>
               <span className="text-text-dim">PIPELINE LATENCY:</span>
               <span className="text-tertiary font-bold">{FALLBACK_PIPELINE_LATENCY}</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 whitespace-nowrap">
-            <span className="font-mono text-[10px] text-text-dim font-bold">STATUS: STEADY</span>
-            <span className="text-text-dim">//</span>
-            <span className="font-mono text-[10px] text-primary font-bold">OCSF_v1.1.0_ALIGNED</span>
+          <div className="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap shrink-0">
+            <span className="hidden sm:inline font-mono text-[10px] text-text-dim font-bold">STATUS: STEADY</span>
+            <span className="hidden sm:inline text-text-dim">//</span>
+            <span className="font-mono text-[10px] text-primary font-bold">OCSF_v1.1.0</span>
           </div>
         </div>
       </footer>

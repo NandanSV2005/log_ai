@@ -673,7 +673,7 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
               </div>
 
               {/* 6-Stage Pipeline Progress Strip */}
-              <div className="pt-2 border-t border-border-muted/60 grid grid-cols-3 sm:grid-cols-6 gap-1.5 font-mono text-[10px]">
+              <div className="pt-2 border-t border-border-muted/60 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1.5 font-mono text-[10px]">
                 {[
                   '01 RAW INGEST',
                   '02 TOKENIZE',

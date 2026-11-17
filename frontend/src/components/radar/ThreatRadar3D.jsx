@@ -337,7 +337,7 @@ export function ThreatRadar3D({
       {/* Responsive Viewport Container: Expands fluidly to fill container card height with zero dead space */}
       <div
         ref={radarContainerRef}
-        className="relative w-full flex-1 min-h-[420px] sm:min-h-[460px] md:min-h-[500px] xl:min-h-[540px] bg-surface-dim rounded-xl overflow-hidden border border-tertiary/30 shadow-inner flex items-center justify-center"
+        className="relative w-full flex-1 min-h-[300px] sm:min-h-[460px] md:min-h-[500px] xl:min-h-[540px] bg-surface-dim rounded-xl overflow-hidden border border-tertiary/30 shadow-inner flex items-center justify-center"
       >
         {/* Subtle coordinate dot grid */}
         <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(var(--color-tertiary)_1px,transparent_1px)] [background-size:24px_24px]" />
@@ -380,9 +380,9 @@ export function ThreatRadar3D({
               ? 'var(--color-severity-medium)'
               : 'var(--color-severity-low)';
           return (
-          <div className="absolute top-4 left-4 z-30 pointer-events-auto max-w-[280px] sm:max-w-xs">
+          <div className="hidden sm:block absolute top-4 left-4 z-30 pointer-events-auto max-w-[280px] sm:max-w-xs">
             <div
-              className="bg-surface-dim/95 border border-border-muted rounded-xl p-3 sm:p-3.5 shadow-2xl backdrop-blur-xl font-mono text-xs flex flex-col gap-2 transition-all duration-200"
+              className="bg-surface-dim/95 border border-border-muted rounded-xl p-3 sm:p-3.5 shadow-2xl font-mono text-xs flex flex-col gap-2 transition-all duration-200"
               style={{
                 boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--color-border-muted)'
               }}
@@ -442,14 +442,28 @@ export function ThreatRadar3D({
         })()}
 
         {/* Radar Metrics Overlay Footer */}
-        <div className="absolute bottom-3 left-4 font-mono text-[11px] text-tertiary/90 font-bold bg-surface-dim/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-tertiary/25 flex items-center gap-2 shadow-lg">
-          <span className="w-2 h-2 rounded-full bg-tertiary animate-pulse" />
-          <span>FOV: 3D TOPOLOGY DISH // 3 TARGETS IN DEPTH</span>
+        <div className="absolute bottom-3 left-3 sm:left-4 font-mono text-[10px] sm:text-[11px] text-tertiary/90 font-bold bg-surface-dim/95 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-tertiary/25 flex items-center gap-2 shadow-lg">
+          <span className="w-2 h-2 rounded-full bg-tertiary animate-pulse shrink-0" />
+          <span className="truncate">3D TOPOLOGY DISH // 3 TARGETS</span>
         </div>
-        <div className="absolute top-3 right-4 font-mono text-[10px] text-text-dim bg-surface-dim/85 backdrop-blur-md px-2.5 py-1 rounded-lg border border-border-muted hidden sm:block shadow-sm">
+        <div className="absolute top-3 right-4 font-mono text-[10px] text-text-dim bg-surface-dim/90 px-2.5 py-1 rounded-lg border border-border-muted hidden sm:block shadow-sm">
           POLAR GRID: &plusmn;45&deg; ELEVATION
         </div>
       </div>
+
+      {/* Mobile-only Docked Target HUD (prevents overlapping the 3D radar on narrow screens) */}
+      {activeBlip && (
+        <div className="sm:hidden bg-surface-dim border border-border-muted rounded-xl p-3 font-mono text-xs flex flex-col gap-1.5">
+          <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-border-muted">
+            <span className="font-bold text-[11px] text-primary uppercase">TARGET // {activeBlip.sev}</span>
+            <span className="px-2 py-0.5 rounded bg-surface border border-border-muted text-[10px] font-bold text-text-primary">
+              {activeBlip.level}
+            </span>
+          </div>
+          <div className="font-display font-bold text-sm text-text-primary">{activeBlip.host}</div>
+          <div className="text-text-muted text-[11px] font-sans">{activeBlip.rule}</div>
+        </div>
+      )}
 
       {/* Target Quick-Selector Pills (Cleanly separated from radar dish with top border) */}
       <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-border-muted/30 font-mono text-xs">

@@ -165,7 +165,7 @@ export function LogExplorerPage() {
             <span className="text-text-muted">{filteredEvents.length} Matched Events</span>
           </div>
 
-          <div className="flex flex-wrap gap-3 font-mono text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
             <button
               onClick={() => handleSeverityToggle('CRITICAL')}
               className={`flex-1 p-3 rounded-xl border flex justify-between items-center transition-all ${

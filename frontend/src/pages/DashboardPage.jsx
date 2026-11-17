@@ -914,15 +914,93 @@ export function DashboardPage({ pollingInterval }) {
               </div>
             </div>
 
-            <div className="p-3 sm:p-5 overflow-x-auto custom-scrollbar-touch">
+            <div className="p-3 sm:p-5">
               {isInitialLoading ? (
                 <div className="space-y-2.5 animate-pulse">
                   {[1, 2, 3, 4].map((n) => (
-                    <div key={n} className="h-10 rounded-xl bg-surface-dim border border-border-muted" />
+                    <div key={n} className="h-12 rounded-xl bg-surface-dim border border-border-muted" />
                   ))}
                 </div>
               ) : filteredRecentEvents.length > 0 ? (
-                <table className="w-full text-left font-mono text-xs border-collapse min-w-[650px]">
+                <>
+                  {/* Mobile Card Layout (No Horizontal Table Scroll) */}
+                  <div className="md:hidden space-y-3 font-mono text-xs">
+                    {filteredRecentEvents.slice(0, 12).map((evt, idx) => {
+                      const deviceVendor = evt.event_type ? evt.event_type.split(':')[0].toUpperCase() : 'UNKNOWN';
+                      const actionTag = (evt.event_type || '').includes('permit') || (evt.event_type || '').includes('pass') ? 'PERMIT' : 'DENY';
+                      const isInspected = inspectedEvent && (inspectedEvent.raw_event_hash || inspectedEvent.id) === (evt.raw_event_hash || evt.id);
+                      const evtLevel = (evt.threat_level || 'LOW').toUpperCase();
+                      return (
+                        <div
+                          key={`m_${evt.raw_event_hash || 'evt'}_${idx}`}
+                          className={`p-3.5 rounded-xl border transition-colors space-y-2.5 ${
+                            isInspected ? 'bg-primary/10 border-primary/50' : 'bg-surface-dim border-border-muted'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="px-2 py-0.5 rounded bg-surface border border-border-muted text-[10px] text-primary font-bold truncate">
+                              {deviceVendor}
+                            </span>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                                evtLevel === 'CRITICAL' ? 'bg-[var(--color-severity-critical-bg)] text-[var(--color-severity-critical)] border-[var(--color-severity-critical-border)]' :
+                                evtLevel === 'HIGH' ? 'bg-[var(--color-severity-high-bg)] text-[var(--color-severity-high)] border-[var(--color-severity-high-border)]' :
+                                evtLevel === 'MEDIUM' ? 'bg-[var(--color-severity-medium-bg)] text-[var(--color-severity-medium)] border-[var(--color-severity-medium-border)]' :
+                                'bg-[var(--color-severity-low-bg)] text-[var(--color-severity-low)] border-[var(--color-severity-low-border)]'
+                              }`}>
+                                {evtLevel}
+                              </span>
+                              <span className="text-[11px] font-bold text-text-primary">
+                                {Number(evt.threat_score ?? 0).toFixed(1)}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between gap-2 text-[11px]">
+                            <span className="font-bold text-text-primary truncate">{evt.source_ip || 'Local Host'}</span>
+                            <span className="text-text-dim shrink-0">{actionTag}</span>
+                          </div>
+
+                          <div className="text-[10px] text-text-muted truncate">{evt.timestamp || '—'}</div>
+
+                          <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-border-muted/60">
+                            <button
+                              type="button"
+                              onClick={() => setInspectedEvent(isInspected ? null : evt)}
+                              className="text-[11px] font-bold text-primary hover:underline cursor-pointer"
+                            >
+                              {isInspected ? 'Hide XAI ▲' : 'Inspect XAI ▼'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const streamId = evt.id || evt.raw_event_hash || evt.source_ip || `stream_${idx}`;
+                                navigate(`/stream/${encodeURIComponent(streamId)}`, { state: { event: evt } });
+                              }}
+                              className="btn-secondary px-2.5 py-1 rounded text-[10px] font-bold"
+                            >
+                              Stream &rarr;
+                            </button>
+                          </div>
+
+                          {isInspected && (
+                            <div className="pt-2 border-t border-primary/30 space-y-2 text-[11px]">
+                              <p className="font-sans text-xs text-text-primary leading-relaxed bg-surface p-2.5 rounded-lg border border-border-muted break-words">
+                                {evt.explanation || evt.xai_explanation || 'Evaluated against baseline normal telemetry features.'}
+                              </p>
+                              <pre className="p-2.5 rounded-lg bg-surface border border-border-muted text-[10px] text-text-muted overflow-x-auto whitespace-pre-wrap break-all max-h-28">
+                                {evt.original_event || JSON.stringify(evt, null, 2)}
+                              </pre>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Desktop Table Layout */}
+                  <div className="hidden md:block overflow-x-auto custom-scrollbar-touch">
+                    <table className="w-full text-left font-mono text-xs border-collapse min-w-[650px]">
                   <thead>
                     <tr className="border-b border-border-muted text-text-muted text-[10px] uppercase">
                       <th className="py-2.5 px-3">Timestamp</th>
@@ -1060,7 +1138,9 @@ export function DashboardPage({ pollingInterval }) {
                       );
                     })}
                   </tbody>
-                </table>
+                    </table>
+                  </div>
+                </>
               ) : (
                 <div className="p-8 text-center text-text-muted font-mono text-xs border border-dashed border-border-muted rounded-xl">
                   {recentEvents.length > 0
