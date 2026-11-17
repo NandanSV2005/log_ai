@@ -242,22 +242,19 @@ export function StripeBentoArchitecture({ is2D = false }) {
                     01 // SIMULATED LOG STREAM &amp; CLASSIFIER DEMO
                   </span>
 
-                  {/* Interactive Filter Pills (All, Critical, SQLi, Normal) */}
-                  <div className="flex items-center gap-1">
+                  {/* Interactive Filter Segmented Control (All, Critical, SQLi, Normal) */}
+                  <div className="soc-segmented">
                     {['All', 'Critical', 'SQLi', 'Normal'].map((pill) => (
                       <button
                         key={pill}
                         type="button"
                         data-filter-pill
+                        data-active={classifierFilter === pill}
                         onClick={() => {
                           setClassifierFilter(pill);
                           setActiveClassifierIdx(0);
                         }}
-                        className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold border transition-all cursor-pointer ${
-                          classifierFilter === pill
-                            ? 'bg-primary text-surface-dim border-primary shadow-[0_0_10px_var(--color-border-glow)]'
-                            : 'bg-surface border-border-muted text-text-muted hover:text-text-primary'
-                        }`}
+                        className="soc-segmented-item text-[10px] !py-1 !px-2.5"
                       >
                         {pill}
                       </button>

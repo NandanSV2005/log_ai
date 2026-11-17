@@ -545,9 +545,9 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
           ref={headlineWrapRef}
           className="w-full pt-1 md:pt-2 flex flex-col items-center text-center gap-3 will-change-transform"
         >
-          {/* Eyebrow Pill Badge */}
-          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-surface-lowest/90 border border-primary/35 shadow-[0_0_24px_var(--color-border-glow)] backdrop-blur-md">
-            <span className="w-2 h-2 rounded-full bg-primary animate-ping" />
+          {/* Eyebrow Telemetry Tag */}
+          <div className="soc-tag">
+            <span className="w-2 h-2 rounded-sm bg-primary animate-ping" />
             <span className="font-mono text-xs font-bold uppercase tracking-widest text-primary">
               CHAPTER 01 // REAL-TIME LOG INTELLIGENCE ENGINE
             </span>
@@ -602,21 +602,18 @@ export function LusionHeroPortal({ is2D = false, totalIngested = 48281 }) {
               </span>
             </div>
 
-            {/* Interactive Severity Filter Pills inside the Portal */}
-            <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="Filter telemetry stream by severity">
+            {/* Interactive Severity Filter Segmented Control inside the Portal */}
+            <div className="soc-segmented flex-wrap" role="tablist" aria-label="Filter telemetry stream by severity">
               {['ALL', 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].map((lvl) => (
                 <button
                   key={lvl}
                   type="button"
                   role="tab"
                   aria-selected={activeFilter === lvl}
+                  data-active={activeFilter === lvl}
                   data-filter-pill
                   onClick={() => setActiveFilter(lvl)}
-                  className={`px-2.5 py-1 rounded-md font-mono text-[10px] font-bold transition-all cursor-pointer border focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 ${
-                    activeFilter === lvl
-                      ? 'bg-primary text-surface-dim border-primary shadow-[0_0_12px_var(--color-border-glow)]'
-                      : 'bg-surface border-border-muted text-text-muted hover:text-text-primary hover:border-primary/40'
-                  }`}
+                  className="soc-segmented-item text-[10px] focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
                 >
                   {lvl}
                 </button>

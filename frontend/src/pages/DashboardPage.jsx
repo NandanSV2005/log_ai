@@ -289,34 +289,34 @@ export function DashboardPage({ pollingInterval }) {
       
       {/* Navigation SubTabs */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border-muted pb-4">
-        <div className="flex items-center gap-2 font-mono text-xs">
+        <div className="soc-segmented flex-wrap" role="tablist" aria-label="SOC Command Center Views">
           <button
+            type="button"
+            role="tab"
+            aria-selected={activeSubTab === 'overview'}
+            data-active={activeSubTab === 'overview'}
             onClick={() => setActiveSubTab('overview')}
-            className={`px-4 py-2 rounded-xl font-bold transition-all ${
-              activeSubTab === 'overview'
-                ? 'bg-primary text-surface-lowest shadow-md'
-                : 'bg-surface-dim border border-border-muted text-text-muted hover:text-text-primary'
-            }`}
+            className="soc-segmented-item text-xs px-4 py-2"
           >
             COMMAND OVERVIEW
           </button>
           <button
+            type="button"
+            role="tab"
+            aria-selected={activeSubTab === 'add-log'}
+            data-active={activeSubTab === 'add-log'}
             onClick={() => setActiveSubTab('add-log')}
-            className={`px-4 py-2 rounded-xl font-bold transition-all ${
-              activeSubTab === 'add-log'
-                ? 'bg-primary text-surface-lowest shadow-md'
-                : 'bg-surface-dim border border-border-muted text-text-muted hover:text-text-primary'
-            }`}
+            className="soc-segmented-item text-xs px-4 py-2"
           >
             INGEST TELEMETRY
           </button>
           <button
+            type="button"
+            role="tab"
+            aria-selected={activeSubTab === 'reports'}
+            data-active={activeSubTab === 'reports'}
             onClick={() => setActiveSubTab('reports')}
-            className={`px-4 py-2 rounded-xl font-bold transition-all ${
-              activeSubTab === 'reports'
-                ? 'bg-primary text-surface-lowest shadow-md'
-                : 'bg-surface-dim border border-border-muted text-text-muted hover:text-text-primary'
-            }`}
+            className="soc-segmented-item text-xs px-4 py-2"
           >
             SAVED REPORTS ({savedReports.length})
           </button>
@@ -890,17 +890,14 @@ export function DashboardPage({ pollingInterval }) {
                   aria-label="Filter telemetry stream"
                   className="flex-1 sm:w-52 px-3 py-1.5 rounded-xl bg-surface border border-border-muted font-mono text-xs text-text-primary focus:outline-none focus:border-primary"
                 />
-                <div className="flex items-center gap-1 font-mono text-[10px]" role="group" aria-label="Filter stream by severity">
+                <div className="soc-segmented" role="group" aria-label="Filter stream by severity">
                   {['ALL', 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].map((lvl) => (
                     <button
                       key={lvl}
                       type="button"
+                      data-active={streamSeverityFilter === lvl}
                       onClick={() => setStreamSeverityFilter(lvl)}
-                      className={`px-2 py-1.5 rounded-lg font-bold border transition-colors cursor-pointer ${
-                        streamSeverityFilter === lvl
-                          ? 'bg-primary text-surface-lowest border-primary'
-                          : 'bg-surface border-border-muted text-text-muted hover:text-text-primary'
-                      }`}
+                      className="soc-segmented-item text-[10px] !py-1 !px-2.5"
                     >
                       {lvl}
                     </button>

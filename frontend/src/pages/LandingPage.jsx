@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { useRenderMode } from '../contexts/RenderModeContext';
 import { StitchBrandMark } from '../components/common/StitchBrandMark';
 import { api } from '../services/api';
 import { InView, SpotlightCard } from '../components/motion-primitives';
@@ -99,13 +98,12 @@ const CHAPTERS = [
 
 export function LandingPage() {
   const { theme, setTheme } = useTheme();
-  const { renderMode, is3D, is2D, setRenderMode } = useRenderMode();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [activeChapter, setActiveChapter] = useState('pipeline');
   const scrollProgressBarRef = useRef(null);
 
   // Initialize Lusion Smooth Scroll (Lenis) + GSAP ScrollTrigger & Velocity Skew
-  useLusionScrollEngine(is2D);
+  useLusionScrollEngine(false);
 
   // Dynamic Viewport Scroll Tracker for Active Chapter Highlighting & Header Progress Bar
   useEffect(() => {
@@ -187,7 +185,7 @@ export function LandingPage() {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleScroll);
     };
-  }, [renderMode]);
+  }, []);
 
   // Interactive Forensic Dissection Demo State (Chapter 05)
   const DEMO_PRESETS = [
@@ -408,8 +406,8 @@ export function LandingPage() {
 
   return (
     <div className="min-h-screen bg-surface-dim font-sans text-text-primary antialiased selection:bg-primary/30 selection:text-text-primary">
-      {/* Lusion Dual-Layer Magnetic Cursor (Desktop 3D mode) */}
-      <MagneticCursor disabled={is2D} />
+      {/* Lusion Dual-Layer Magnetic Cursor (Desktop) */}
+      <MagneticCursor />
 
       {/* ========================================================================= */}
       {/* 1. FIXED NAVIGATION HEADER                                                */}
@@ -436,7 +434,7 @@ export function LandingPage() {
             </button>
 
             {/* Status Chip (Gracefully hidden on <2xl screens to preserve width budget) */}
-            <div className="hidden 2xl:flex items-center gap-2 px-3 py-1 rounded-full bg-surface-bright/80 border border-border-muted whitespace-nowrap">
+            <div className="hidden 2xl:inline-flex soc-tag whitespace-nowrap">
               <span className="w-2 h-2 rounded-full bg-tertiary animate-ping"></span>
               <span className="font-mono text-[11px] font-bold text-tertiary tracking-wider uppercase">ULPF v2.4 // ONLINE</span>
               <span className="font-mono text-[11px] text-text-muted">
@@ -446,17 +444,18 @@ export function LandingPage() {
           </div>
 
           {/* Chapter Nav Links */}
-          <nav className="hidden xl:flex items-center gap-1.5 2xl:gap-2 font-mono text-[11px] 2xl:text-[12px] tracking-wide">
+          <nav className="hidden xl:flex items-center gap-1 2xl:gap-1.5 font-mono text-[11px] 2xl:text-[12px] tracking-wide">
             {CHAPTERS.map((ch) => {
               const isActive = activeChapter === ch.id;
               return (
                 <button
                   key={ch.id}
+                  type="button"
                   onClick={() => scrollToSection(ch.id)}
-                  className={`px-2.5 2xl:px-3.5 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap cursor-pointer ${
+                  className={`relative px-3 2xl:px-3.5 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap cursor-pointer ${
                     isActive
-                      ? `bg-surface border ${ch.borderClass} ${ch.textClass} ${ch.glowClass}`
-                      : 'text-text-muted hover:text-text-primary hover:bg-surface-hover border border-transparent'
+                      ? `bg-surface-lowest/90 border ${ch.borderClass} ${ch.textClass} shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]`
+                      : 'text-text-muted hover:text-text-primary hover:bg-surface-hover/70 border border-transparent'
                   }`}
                 >
                   {ch.navLabel}
@@ -466,71 +465,29 @@ export function LandingPage() {
           </nav>
 
           {/* Controls Cluster & Open SOC Console CTA */}
-          <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 flex-shrink-0">
-            {/* Unified Render Mode & Theme Control Cluster */}
-            <div className="hidden sm:flex items-center bg-surface-dim rounded-lg p-1 border border-border-muted gap-1.5">
-              {/* 3D / 2D Experience Toggle */}
-              <div
-                className="flex items-center"
-                role="group"
-                aria-label="Experience rendering mode"
+          <div className="flex items-center gap-2.5 sm:gap-3 lg:gap-4 flex-shrink-0">
+            {/* Operations Theme Segmented Switch */}
+            <div className="hidden sm:inline-flex soc-segmented" role="group" aria-label="Operations color theme">
+              <button
+                type="button"
+                aria-pressed={theme === 'dark'}
+                data-active={theme === 'dark'}
+                onClick={() => setTheme('dark')}
+                className="soc-segmented-item text-[10px] 2xl:text-[11px]"
               >
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={is3D}
-                  onClick={() => setRenderMode('3d')}
-                  className={`px-2 py-1 font-mono text-[10px] 2xl:text-[11px] font-bold rounded transition-all cursor-pointer ${
-                    is3D
-                      ? 'bg-primary text-surface-dim shadow-sm'
-                      : 'text-text-muted hover:text-text-primary'
-                  }`}
-                  title="Enable immersive 3D flythroughs and spatial models"
-                >
-                  3D
-                </button>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={is2D}
-                  onClick={() => setRenderMode('2d')}
-                  className={`px-2 py-1 font-mono text-[10px] 2xl:text-[11px] font-bold rounded transition-all cursor-pointer ${
-                    is2D
-                      ? 'bg-primary text-surface-dim shadow-sm'
-                      : 'text-text-muted hover:text-text-primary'
-                  }`}
-                  title="Enable 2D high-efficiency reduced rendering mode"
-                >
-                  2D
-                </button>
-              </div>
-
-              {/* Vertical subtle divider between matched controls */}
-              <div className="w-[1px] h-3.5 bg-border-muted" />
-
-              {/* Operations Theme Toggle */}
-              <div className="flex items-center" role="group" aria-label="Operations color theme">
-                <button
-                  type="button"
-                  aria-pressed={theme === 'dark'}
-                  onClick={() => setTheme('dark')}
-                  className={`px-2 py-1 font-mono text-[10px] 2xl:text-[11px] font-bold rounded transition-all cursor-pointer ${
-                    theme === 'dark' ? 'bg-primary text-surface-dim shadow-sm' : 'text-text-muted hover:text-text-primary'
-                  }`}
-                >
-                  MOCHA
-                </button>
-                <button
-                  type="button"
-                  aria-pressed={theme === 'sage'}
-                  onClick={() => setTheme('sage')}
-                  className={`px-2 py-1 font-mono text-[10px] 2xl:text-[11px] font-bold rounded transition-all cursor-pointer ${
-                    theme === 'sage' ? 'bg-primary text-surface-dim shadow-sm' : 'text-text-muted hover:text-text-primary'
-                  }`}
-                >
-                  POWDER
-                </button>
-              </div>
+                <span className="material-symbols-outlined text-[13px]">dark_mode</span>
+                <span>MOCHA</span>
+              </button>
+              <button
+                type="button"
+                aria-pressed={theme === 'sage'}
+                data-active={theme === 'sage'}
+                onClick={() => setTheme('sage')}
+                className="soc-segmented-item text-[10px] 2xl:text-[11px]"
+              >
+                <span className="material-symbols-outlined text-[13px]">light_mode</span>
+                <span>POWDER</span>
+              </button>
             </div>
 
             {/* Primary CTA: Stripe-Style Morphing CTA Button */}
@@ -589,39 +546,26 @@ export function LandingPage() {
               );
             })}
 
-            {/* Mobile Experience Render Mode */}
             <div className="pt-2 flex items-center justify-between font-sans border-t border-border-muted/40">
-              <span className="text-text-muted">Render Mode:</span>
-              <div className="flex items-center bg-surface rounded-lg p-0.5 border border-border-muted">
+              <span className="text-text-muted">Operations Theme:</span>
+              <div className="soc-segmented" role="group" aria-label="Operations color theme">
                 <button
                   type="button"
-                  onClick={() => setRenderMode('3d')}
-                  className={`px-2.5 py-1 font-mono text-xs font-bold rounded transition-all cursor-pointer ${
-                    is3D ? 'bg-primary text-surface-dim' : 'text-text-muted'
-                  }`}
+                  data-active={theme === 'dark'}
+                  onClick={() => setTheme('dark')}
+                  className="soc-segmented-item text-[11px]"
                 >
-                  3D
+                  MOCHA
                 </button>
                 <button
                   type="button"
-                  onClick={() => setRenderMode('2d')}
-                  className={`px-2.5 py-1 font-mono text-xs font-bold rounded transition-all cursor-pointer ${
-                    is2D ? 'bg-primary text-surface-dim' : 'text-text-muted'
-                  }`}
+                  data-active={theme === 'sage'}
+                  onClick={() => setTheme('sage')}
+                  className="soc-segmented-item text-[11px]"
                 >
-                  2D
+                  POWDER
                 </button>
               </div>
-            </div>
-
-            <div className="pt-1 flex items-center justify-between font-sans">
-              <span className="text-text-muted">Operations Theme:</span>
-              <button
-                onClick={() => setTheme(theme === 'dark' ? 'sage' : 'dark')}
-                className="px-3 py-1 rounded bg-primary text-surface-dim font-mono font-bold text-xs cursor-pointer"
-              >
-                TOGGLE ({theme === 'dark' ? 'MOCHA' : 'POWDER'})
-              </button>
             </div>
           </div>
         )}
@@ -668,14 +612,13 @@ export function LandingPage() {
         {/* CHAPTER 01 // LUSION PINNED HERO-TO-SOC PORTAL TRANSITION                 */}
         {/* ========================================================================= */}
         <LusionHeroPortal
-          is2D={is2D}
           totalIngested={stats.total_events_ingested || 48281}
         />
 
         {/* ========================================================================= */}
         {/* CHAPTER 01 // LUSION PINNED 3D STACKED PIPELINE CARDS                     */}
         {/* ========================================================================= */}
-        <LusionStackedPipeline is2D={is2D} />
+        <LusionStackedPipeline />
 
         {/* Stripe Angled Section Divider: Chapter 01 -> Chapter 02 */}
         <StripeDiagonalDivider
@@ -686,7 +629,7 @@ export function LandingPage() {
         {/* ========================================================================= */}
         {/* CHAPTER 02 // STRIPE ASYMMETRICAL 12-COLUMN BENTO ARCHITECTURE            */}
         {/* ========================================================================= */}
-        <StripeBentoArchitecture is2D={is2D} />
+        <StripeBentoArchitecture />
 
         {/* ========================================================================= */}
         {/* CHAPTER 03B // 3D RADAR TOPOLOGY & CRYPTOGRAPHIC MERKLE PROOF             */}
@@ -714,7 +657,6 @@ export function LandingPage() {
               title="Network Threat Radar & Cryptographic Proof"
               accentWords={['Threat', 'Radar', 'Cryptographic']}
               subtitle="Inspect suspicious network activity on a live 3D spatial radar sweep while verifying log immutability with SHA-256 Merkle hash chains."
-              disabled={is2D}
               metrics={[
                 { label: 'ACTIVE TARGETS', value: '3 NODES' },
                 { label: 'MERKLE BLOCK', value: FALLBACK_LEDGER_BLOCK },
@@ -744,7 +686,6 @@ export function LandingPage() {
                   blips={RADAR_BLIPS}
                   selectedBlip={selectedBlip}
                   onSelectBlip={setSelectedBlip}
-                  force2D={is2D}
                 />
               </InView>
 
@@ -764,7 +705,7 @@ export function LandingPage() {
                     </p>
 
                     {/* 3D Cryptographic Chain Links */}
-                    <CryptoChain3D fallbackBlock={FALLBACK_LEDGER_BLOCK} force2D={is2D} />
+                    <CryptoChain3D fallbackBlock={FALLBACK_LEDGER_BLOCK} />
                   </div>
 
                   <div className="p-3 bg-surface-dim border border-tertiary/20 rounded-xl flex items-center gap-3">
@@ -822,7 +763,6 @@ export function LandingPage() {
               title="ROI & Noise Reduction Estimator"
               accentWords={['ROI', 'Noise', 'Reduction']}
               subtitle="Estimate how much SIEM storage budget and analyst triage time you reclaim by pre-filtering and normalizing logs with log_ai."
-              disabled={is2D}
               metrics={[
                 { label: 'EST. MONTHLY SAVINGS', value: `$${calculatedSavings.toLocaleString()}` },
                 { label: 'ANALYST HOURS SAVED', value: `${calculatedHours} hrs/mo` },
@@ -913,7 +853,6 @@ export function LandingPage() {
                     roiDevices={roiDevices}
                     calculatedSavings={calculatedSavings}
                     calculatedHours={calculatedHours}
-                    force2D={is2D}
                     showStatCards={false}
                   />
                 </InView>
@@ -923,7 +862,6 @@ export function LandingPage() {
               <RoiStatCards
                 calculatedSavings={calculatedSavings}
                 calculatedHours={calculatedHours}
-                isFlat2D={is2D}
               />
             </div>
           </div>
@@ -947,7 +885,6 @@ export function LandingPage() {
               title="Forensic Dissection: Raw Log to Explained Verdict"
               accentWords={['Forensic', 'Dissection:', 'Explained', 'Verdict']}
               subtitle="Test how a raw firewall log is parsed, normalized to OCSF v1.1 schema, cryptographically hashed, and explained by our AI engine."
-              disabled={is2D}
               metrics={[
                 { label: 'SANDBOX ENDPOINT', value: 'POST /demo/analyze' },
                 { label: 'DWELL LATENCY', value: FALLBACK_PIPELINE_LATENCY },
@@ -958,7 +895,6 @@ export function LandingPage() {
             <DissectionConduitStream
               isActive={demoLoading || (revealStep > 0 && revealStep < 7)}
               revealStep={revealStep}
-              forceDisable={is2D}
             />
 
             {/* 3-Column Dissection Workspace */}
@@ -966,7 +902,7 @@ export function LandingPage() {
               
               {/* Column 1: Raw Inbound Interactive Input */}
               <InView className="xl:col-span-4 h-full">
-                <TiltCard3D disabled={is2D}>
+                <TiltCard3D>
                   <SpotlightCard spotlightColor="var(--color-border-glow)" className="h-full bg-surface-bright/90 rounded-2xl border border-primary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
                   <div className="flex flex-col gap-3 relative z-20">
                     <div className="flex items-center justify-between pb-3 border-b border-border-muted">
@@ -1005,7 +941,6 @@ export function LandingPage() {
                         isAnalyzing={demoLoading}
                         demoResult={demoResult}
                         revealStep={revealStep}
-                        disabled={is2D}
                       >
                         <textarea
                           value={demoInput}
@@ -1023,10 +958,10 @@ export function LandingPage() {
                     type="button"
                     onClick={handleDemoSubmit}
                     disabled={demoLoading}
-                    className="relative z-20 pointer-events-auto w-full py-2.5 rounded-xl bg-primary text-surface-dim font-mono font-bold text-xs shadow-[0_0_16px_var(--color-border-glow)] hover:bg-primary-fixed transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-1"
+                    className="btn-primary relative z-20 pointer-events-auto w-full py-2.5 rounded-xl font-mono font-bold text-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-1"
                     style={{
-                      transform: !is2D ? 'translateZ(12px)' : 'none',
-                      transformStyle: !is2D ? 'preserve-3d' : 'flat',
+                      transform: 'translateZ(12px)',
+                      transformStyle: 'preserve-3d',
                     }}
                   >
                     {demoLoading ? (
@@ -1052,7 +987,7 @@ export function LandingPage() {
 
               {/* Column 2: ULPF Transform Engine Dynamic Output */}
               <InView className="xl:col-span-4 h-full">
-                <TiltCard3D disabled={is2D}>
+                <TiltCard3D>
                   <SpotlightCard spotlightColor="color-mix(in srgb, var(--color-secondary) 18%, transparent)" className="h-full bg-surface-bright/90 rounded-2xl border border-secondary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
                   <div className="flex items-center justify-between pb-3 border-b border-border-muted">
                     <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">
@@ -1124,7 +1059,7 @@ export function LandingPage() {
 
               {/* Column 3: Enriched XAI Threat Verdict Dynamic Output */}
               <InView className="xl:col-span-4 h-full">
-                <TiltCard3D disabled={is2D}>
+                <TiltCard3D>
                   <SpotlightCard spotlightColor="color-mix(in srgb, var(--color-tertiary) 18%, transparent)" className="h-full bg-surface-bright/90 rounded-2xl border border-tertiary/30 p-5 flex flex-col justify-between gap-4 shadow-xl">
                   <div className="flex items-center justify-between pb-3 border-b border-border-muted">
                     <div className="flex items-center gap-2 font-mono text-xs font-bold text-text-primary">

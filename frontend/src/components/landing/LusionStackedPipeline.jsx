@@ -397,7 +397,7 @@ export function LusionStackedPipeline({ is2D = false }) {
             role="tablist"
             aria-label="AI Classification Pipeline Stages"
           >
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="soc-segmented flex-wrap">
               {PIPELINE_STAGES_3D.map((st, idx) => {
                 const isCurrent = idx === activeStageIdx;
                 return (
@@ -407,12 +407,9 @@ export function LusionStackedPipeline({ is2D = false }) {
                     role="tab"
                     data-magnetic
                     aria-selected={isCurrent}
+                    data-active={isCurrent}
                     onClick={() => handleSelectStage(idx)}
-                    className={`px-3.5 py-1.5 rounded-full font-mono text-xs font-bold transition-all border cursor-pointer ${
-                      isCurrent
-                        ? 'bg-primary text-surface-dim border-primary shadow-[0_0_16px_var(--color-border-glow)]'
-                        : 'bg-surface-lowest/80 border-border-muted text-text-muted hover:text-text-primary hover:border-primary/40'
-                    }`}
+                    className="soc-segmented-item text-[11px]"
                   >
                     {st.pillLabel}
                   </button>
@@ -424,7 +421,7 @@ export function LusionStackedPipeline({ is2D = false }) {
               <span className="text-text-dim hidden sm:inline">
                 SCROLL TO SCRUB 3D STACK &darr;
               </span>
-              <span className="px-3 py-1 rounded-full bg-surface-lowest border border-primary/35 text-text-muted">
+              <span className="soc-tag text-text-muted text-[11px]">
                 ACTIVE STAGE: <strong className="text-primary">0{activeStageIdx + 1} / 04</strong>
               </span>
             </div>

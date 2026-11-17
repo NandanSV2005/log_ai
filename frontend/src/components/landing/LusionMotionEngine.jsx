@@ -471,8 +471,8 @@ export function StripeSectionHeader({
   return (
     <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-end justify-between gap-6 relative z-10">
       <div className="flex flex-col gap-3.5 max-w-3xl">
-        <div className="inline-flex items-center gap-2.5 self-start px-3.5 py-1.5 rounded-full bg-surface-bright/90 border border-primary/30 shadow-[0_0_20px_var(--color-border-glow)]">
-          <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+        <div className="soc-tag self-start">
+          <span className="w-2 h-2 rounded-sm bg-primary animate-pulse" />
           {resolvedChapter && (
             <>
               <span className="font-mono text-xs font-bold uppercase tracking-widest text-primary">
