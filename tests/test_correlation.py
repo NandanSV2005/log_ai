@@ -245,3 +245,241 @@ def test_api_incidents_endpoints_success(auth_headers):
         headers=auth_headers
     )
     assert res_404.status_code == 404
+
+
+# =============================================================================
+# PHASE 2 WEEK 6 — CORRELATION V2 UPGRADE TESTS
+# =============================================================================
+
+EIGHT_LINE_TEST_PAYLOAD = [
+    'Aug 28 2026 09:15:03: %ASA-4-106023: Deny tcp src outside:203.0.113.45/51422 dst inside:10.0.0.10/22 by access-group "outside_acl" [Auth Probe]',
+    'Aug 28 2026 09:15:11: %ASA-4-106023: Deny tcp src outside:203.0.113.45/51423 dst inside:10.0.0.10/22 by access-group "outside_acl" [Auth Probe]',
+    'Aug 28 2026 09:15:19: %ASA-4-106023: Deny tcp src outside:203.0.113.45/51424 dst inside:10.0.0.10/22 by access-group "outside_acl" [Auth Probe]',
+    'Aug 28 2026 09:15:27: %ASA-4-106023: Deny tcp src outside:203.0.113.45/51425 dst inside:10.0.0.10/22 by access-group "outside_acl" [Auth Probe]',
+    'Aug 28 2026 09:16:02: %ASA-4-106023: Deny tcp src outside:203.0.113.45/51430 dst inside:10.0.0.15/3389 by access-group "outside_acl" [RDP Brute Force]',
+    'Aug 28 2026 09:16:14: %ASA-4-106023: Deny tcp src outside:203.0.113.45/51431 dst inside:10.0.0.15/3389 by access-group "outside_acl" [RDP Brute Force]',
+    'Aug 28 2026 09:17:40: %ASA-6-302013: Built inbound TCP connection for outside:203.0.113.45/51500 to inside:10.0.0.10/22 [Auth Success After Spray]',
+    'Aug 26 14:06:10 server-main sudo[10305]: admin : TTY=pts/0 ; PWD=/home/admin ; USER=root ; COMMAND=/bin/cat /var/log/auth.log',
+]
+
+
+def test_standard_8_line_sample_produces_single_source_incident():
+    """
+    (a) Verifies the standard 8-line sample produces the same single-source incident as before,
+    with no fan-in incident triggered, while grouping repeated connection tuples into activities.
+    """
+    from app.parsers.vendor_parsers import CiscoASAParser
+    from app.parsers.dynamic_parser import DynamicParser
+
+    asa_parser = CiscoASAParser()
+    dynamic_parser = DynamicParser()
+    engine = IncidentEngine(window_seconds=900, activity_window_seconds=60)
+
+    events = []
+    for line in EIGHT_LINE_TEST_PAYLOAD:
+        if asa_parser.matches(line):
+            parsed = asa_parser.parse(line)
+            parsed_list = [parsed] if isinstance(parsed, UnifiedEvent) else parsed
+        else:
+            parsed_list = dynamic_parser.parse(line)
+
+        for evt in parsed_list:
+            evt.owner_username = "test_analyst_8line"
+            events.append(evt)
+
+    incidents = [engine.process_event(evt) for evt in events]
+
+    # Check 203.0.113.45 incident
+    asa_inc = next((inc for inc in engine.incidents.values() if inc.source_ip == "203.0.113.45"), None)
+    assert asa_inc is not None
+    assert asa_inc.event_count == 7
+    assert asa_inc.is_distributed is False
+    assert len(asa_inc.event_hashes) == 7
+
+    # Check Local Host incident
+    local_inc = next((inc for inc in engine.incidents.values() if inc.source_ip == "Local Host"), None)
+    assert local_inc is not None
+    assert local_inc.event_count == 1
+
+    # Ensure NO fan-in incident was triggered (only 1 source IP targeted 10.0.0.10:22)
+    distributed_incs = [inc for inc in engine.incidents.values() if inc.is_distributed]
+    assert len(distributed_incs) == 0
+
+    # Ensure connection activities exist on the single-source incident:
+    # 5 events against 10.0.0.10:22 group into 1 activity, 2 against 10.0.0.15:3389 into another
+    assert asa_inc.activity_count == 2
+    act_probe = next(
+        (a for a in asa_inc.activities if a.get("destination_ip") == "10.0.0.10" and a.get("destination_port") == 22),
+        None
+    )
+    assert act_probe is not None
+    assert act_probe["count"] == 5
+
+    act_rdp = next(
+        (a for a in asa_inc.activities if a.get("destination_ip") == "10.0.0.15" and a.get("destination_port") == 3389),
+        None
+    )
+    assert act_rdp is not None
+    assert act_rdp["count"] == 2
+
+
+def test_fan_in_detection_within_window_vs_spread():
+    """
+    (b) Verifies a fixture of 6+ distinct source IPs hitting 10.0.0.10:22 within 5 minutes
+    creates a fan-in incident, and the same fixture spread over an hour does not.
+    """
+    distinct_sources = [
+        "198.51.100.101",
+        "198.51.100.102",
+        "198.51.100.103",
+        "198.51.100.104",
+        "198.51.100.105",
+        "198.51.100.106",
+    ]
+
+    base_time = datetime.datetime(2026, 9, 1, 10, 0, 0, tzinfo=datetime.timezone.utc)
+
+    # 1. SCENARIO A: Within 5 minutes (events 30s apart -> total 2.5 minutes <= 5 mins)
+    engine_active = IncidentEngine(fan_in_threshold=5, fan_in_window_seconds=300)
+    for idx, src in enumerate(distinct_sources):
+        ts = base_time + datetime.timedelta(seconds=idx * 30)
+        evt = UnifiedEvent(
+            timestamp=ts.isoformat(),
+            source_ip=src,
+            destination_ip="10.0.0.10",
+            dst_port=22,
+            protocol="TCP",
+            raw_event_hash=f"hash_fanin_{idx}",
+            threat_score=60.0,
+            original_event=f"Deny tcp src {src} dst 10.0.0.10:22",
+            owner_username="fanin_test_user",
+        )
+        engine_active.process_event(evt)
+
+    # Fan-in incident MUST be created
+    fan_in_inc = next((inc for inc in engine_active.incidents.values() if inc.is_distributed), None)
+    assert fan_in_inc is not None
+    assert "Distributed attack on 10.0.0.10:22" in fan_in_inc.incident_type
+    assert fan_in_inc.distinct_source_count == 6
+    assert fan_in_inc.event_count == 6
+    assert "6 sources targeted 10.0.0.10:22" in fan_in_inc.summary
+    assert fan_in_inc.max_threat_score >= 75.0  # Modest elevation above base 60.0
+    assert fan_in_inc.is_distributed is True
+
+    # Per-source incidents must also be preserved (an event belongs to both)
+    per_source_incs = [inc for inc in engine_active.incidents.values() if not inc.is_distributed]
+    assert len(per_source_incs) == 6
+
+    # 2. SCENARIO B: Spread over an hour (events 12 minutes apart -> 60 mins total)
+    engine_spread = IncidentEngine(fan_in_threshold=5, fan_in_window_seconds=300)
+    for idx, src in enumerate(distinct_sources):
+        ts = base_time + datetime.timedelta(minutes=idx * 12)
+        evt = UnifiedEvent(
+            timestamp=ts.isoformat(),
+            source_ip=src,
+            destination_ip="10.0.0.10",
+            dst_port=22,
+            protocol="TCP",
+            raw_event_hash=f"hash_spread_{idx}",
+            threat_score=60.0,
+            original_event=f"Deny tcp src {src} dst 10.0.0.10:22",
+            owner_username="fanin_test_user",
+        )
+        engine_spread.process_event(evt)
+
+    # Fan-in incident MUST NOT be created when spread over an hour
+    fan_in_spread = next((inc for inc in engine_spread.incidents.values() if inc.is_distributed), None)
+    assert fan_in_spread is None
+
+
+def test_connection_tuple_repeated_forms_one_activity():
+    """
+    (c) Verifies the same connection tuple repeated 3 times forms one activity.
+    """
+    engine = IncidentEngine(activity_window_seconds=60)
+    base_time = datetime.datetime(2026, 9, 1, 14, 0, 0, tzinfo=datetime.timezone.utc)
+
+    for i in range(3):
+        ts = base_time + datetime.timedelta(seconds=i * 15)  # 0s, 15s, 30s <= 60s window
+        evt = UnifiedEvent(
+            timestamp=ts.isoformat(),
+            source_ip="198.51.100.77",
+            destination_ip="10.0.0.80",
+            dst_port=443,
+            protocol="TCP",
+            raw_event_hash=f"act_hash_{i}",
+            threat_score=50.0,
+            original_event=f"Deny tcp src 198.51.100.77 dst 10.0.0.80:443 ({i})",
+            owner_username="activity_test_user",
+        )
+        inc = engine.process_event(evt)
+
+    assert inc.event_count == 3
+    assert inc.activity_count == 1
+    assert len(inc.activities) == 1
+
+    activity = inc.activities[0]
+    assert activity["count"] == 3
+    assert activity["event_count"] == 3
+    assert activity["source_ip"] == "198.51.100.77"
+    assert activity["destination_ip"] == "10.0.0.80"
+    assert activity["destination_port"] == 443
+    assert activity["protocol"] == "TCP"
+    assert len(activity["event_hashes"]) == 3
+    assert "act_hash_0" in activity["event_hashes"]
+    assert "act_hash_1" in activity["event_hashes"]
+    assert "act_hash_2" in activity["event_hashes"]
+
+
+def test_tenant_isolation_never_shares_incidents():
+    """
+    (d) Verifies two different users sending identical events never share an incident.
+    """
+    engine = IncidentEngine()
+    ts = datetime.datetime(2026, 9, 1, 15, 0, 0, tzinfo=datetime.timezone.utc).isoformat()
+
+    event_user_alpha = UnifiedEvent(
+        timestamp=ts,
+        source_ip="185.220.101.5",
+        destination_ip="10.0.0.10",
+        dst_port=22,
+        protocol="TCP",
+        raw_event_hash="hash_tenant_alpha",
+        threat_score=70.0,
+        original_event="Deny tcp src 185.220.101.5 dst 10.0.0.10:22",
+        owner_username="tenant_alpha",
+    )
+
+    event_user_beta = UnifiedEvent(
+        timestamp=ts,
+        source_ip="185.220.101.5",
+        destination_ip="10.0.0.10",
+        dst_port=22,
+        protocol="TCP",
+        raw_event_hash="hash_tenant_beta",
+        threat_score=70.0,
+        original_event="Deny tcp src 185.220.101.5 dst 10.0.0.10:22",
+        owner_username="tenant_beta",
+    )
+
+    inc_alpha = engine.process_event(event_user_alpha)
+    inc_beta = engine.process_event(event_user_beta)
+
+    # Must be completely separate incidents
+    assert inc_alpha.incident_id != inc_beta.incident_id
+    assert inc_alpha.owner_username == "tenant_alpha"
+    assert inc_beta.owner_username == "tenant_beta"
+    assert inc_alpha.event_count == 1
+    assert inc_beta.event_count == 1
+
+    # Query filtered by tenant
+    list_alpha = engine.get_incidents(owner_username="tenant_alpha")
+    list_beta = engine.get_incidents(owner_username="tenant_beta")
+
+    assert len(list_alpha) == 1
+    assert list_alpha[0]["incident_id"] == inc_alpha.incident_id
+    assert list_alpha[0]["owner_username"] == "tenant_alpha"
+
+    assert len(list_beta) == 1
+    assert list_beta[0]["incident_id"] == inc_beta.incident_id
+    assert list_beta[0]["owner_username"] == "tenant_beta"

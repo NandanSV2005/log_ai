@@ -17,6 +17,8 @@ export function InvestigationReportPage() {
   const [copiedJson, setCopiedJson] = useState(false);
   const [isOcsfExpanded, setIsOcsfExpanded] = useState(true);
   const [status, setStatus] = useState(incidentData?.status || 'Active');
+  const [activities, setActivities] = useState(location.state?.incident?.activities || []);
+  const [selectedActivityId, setSelectedActivityId] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -35,6 +37,11 @@ export function InvestigationReportPage() {
               setEvents(res.events);
               setSelectedEventIndex(0);
               setSelectedEvent(res.events[0]);
+            }
+            if (Array.isArray(res.activities) && res.activities.length > 0) {
+              setActivities(res.activities);
+            } else if (Array.isArray(res.incident?.activities) && res.incident.activities.length > 0) {
+              setActivities(res.incident.activities);
             }
           }
         }
@@ -115,7 +122,49 @@ export function InvestigationReportPage() {
     mitre_tactics: selectedEvent?.mitre_tactic || 'T1110 (Brute Force)'
   };
 
-  const activeEvt = selectedEvent || events[0] || {
+  const effectiveActivities = activities.length > 0 ? activities : (() => {
+    if (!events || events.length === 0) return [];
+    const groups = [];
+    events.forEach(evt => {
+      const src = evt.source_ip || 'Local Host';
+      const dst = evt.destination_ip || '10.0.0.10';
+      const port = evt.dst_port || evt.destination_port || 22;
+      const proto = (evt.protocol || 'TCP').toUpperCase();
+      let match = groups.find(g => g.source_ip === src && g.destination_ip === dst && g.destination_port === port && g.protocol === proto);
+      if (match) {
+        match.count += 1;
+        match.event_count += 1;
+        match.last_seen = evt.timestamp;
+        if (evt.raw_event_hash) match.event_hashes.push(evt.raw_event_hash);
+        match.events.push(evt);
+      } else {
+        groups.push({
+          activity_id: `act_${groups.length + 1}`,
+          source_ip: src,
+          destination_ip: dst,
+          destination_port: port,
+          protocol: proto,
+          count: 1,
+          event_count: 1,
+          first_seen: evt.timestamp,
+          last_seen: evt.timestamp,
+          action: evt.action || evt.event_type || 'DENY',
+          event_hashes: evt.raw_event_hash ? [evt.raw_event_hash] : [],
+          events: [evt],
+        });
+      }
+    });
+    return groups;
+  })();
+
+  const activeActivity = selectedActivityId ? effectiveActivities.find(a => a.activity_id === selectedActivityId) : null;
+  const displayedEvents = activeActivity?.events && activeActivity.events.length > 0
+    ? activeActivity.events
+    : (activeActivity?.event_hashes?.length > 0
+        ? events.filter(e => activeActivity.event_hashes.includes(e.raw_event_hash || e.payload_hash))
+        : events);
+
+  const activeEvt = selectedEvent || displayedEvents[0] || events[0] || {
     raw: 'No raw wire telemetry payload available.',
     source_ip: displayIncident.source_ip || 'Local Host',
     destination_ip: 'Local Interface',
@@ -205,6 +254,18 @@ export function InvestigationReportPage() {
               }`}>
                 {status}
               </span>
+              {(displayIncident.is_distributed || displayIncident.distinct_source_count > 1 || displayIncident.incident_type?.toLowerCase().includes('distributed')) && (
+                <span className="px-2.5 py-1 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40 text-xs font-mono font-bold flex items-center gap-1.5 shadow-sm">
+                  <span className="material-symbols-outlined text-xs">hub</span>
+                  <span>DISTRIBUTED ({displayIncident.distinct_source_count || displayIncident.distinct_sources?.length || 5} SOURCES)</span>
+                </span>
+              )}
+              {displayIncident.is_scan && (
+                <span className="px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-mono font-bold flex items-center gap-1.5 shadow-sm">
+                  <span className="material-symbols-outlined text-xs">radar</span>
+                  <span>PORT SCAN</span>
+                </span>
+              )}
               <span className="px-2.5 py-1 rounded bg-surface border border-border-muted text-text-muted font-mono text-xs">
                 {events.length} CORRELATED EVENTS
               </span>
@@ -258,11 +319,35 @@ export function InvestigationReportPage() {
                 <span>EXECUTIVE FORENSIC FINDING</span>
               </div>
               <h2 className="text-base sm:text-lg font-bold text-text-primary font-mono">
-                Automated Incident Correlation: {displayIncident.mitre_tactics || 'Multi-Vector Traffic Anomaly'}
+                Automated Incident Correlation: {displayIncident.incident_type || displayIncident.mitre_tactics || 'Multi-Vector Traffic Anomaly'}
               </h2>
               <p className="text-xs sm:text-sm text-text-muted leading-relaxed font-sans">
                 Isolation Forest ML engine identified anomalous network connection velocity originating from source entity <strong className="text-text-primary font-mono">{displayIncident.source_ip}</strong>. The incident contains {events.length} correlated syslog &amp; IDS events spanning perimeter edge firewalls.
               </p>
+              {displayIncident.summary && (
+                <div className="p-3.5 rounded-xl bg-purple-500/10 border border-purple-500/30 text-xs font-mono text-purple-200 flex items-start gap-2.5">
+                  <span className="material-symbols-outlined text-sm text-purple-400 mt-0.5">insights</span>
+                  <div>
+                    <div className="font-bold text-text-primary uppercase tracking-wider text-[10px]">Correlation Analysis &amp; Rationale</div>
+                    <div className="mt-0.5 leading-relaxed">{displayIncident.summary}</div>
+                  </div>
+                </div>
+              )}
+              {displayIncident.distinct_sources && displayIncident.distinct_sources.length > 0 && (
+                <div className="p-3.5 rounded-xl bg-surface-dim border border-purple-500/30 font-mono text-xs space-y-2">
+                  <div className="text-[10px] font-bold text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-xs">groups</span>
+                    <span>Distinct Attacking Sources ({displayIncident.distinct_sources.length})</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {displayIncident.distinct_sources.map((ip, i) => (
+                      <span key={i} className="px-2 py-0.5 rounded bg-surface border border-purple-500/30 text-text-primary text-[11px]">
+                        {ip}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Severity & Threat Gauge */}
@@ -324,16 +409,110 @@ export function InvestigationReportPage() {
             </div>
           </div>
 
+          {/* 3B. AGGREGATED CONNECTION ACTIVITIES */}
+          {effectiveActivities.length > 0 && (
+            <div className="glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-xl font-mono text-xs">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-border-muted pb-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-text-primary uppercase tracking-wider">Aggregated Connection Activities</span>
+                    <span className="px-2 py-0.5 rounded bg-primary/20 text-primary font-bold text-[10px]">
+                      {effectiveActivities.length} {effectiveActivities.length === 1 ? 'ACTIVITY' : 'ACTIVITIES'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-text-muted mt-0.5 font-sans">
+                    Repeated socket connections sharing (Source, Destination, Port, Protocol) within 60s windows are grouped into unified activities.
+                  </p>
+                </div>
+
+                {selectedActivityId && (
+                  <button
+                    onClick={() => setSelectedActivityId(null)}
+                    className="btn-secondary px-2.5 py-1 rounded text-[11px] font-bold flex items-center gap-1"
+                  >
+                    <span className="material-symbols-outlined text-xs">close</span>
+                    <span>Show All Activities ({events.length} events)</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {effectiveActivities.map((act, actIdx) => {
+                  const isSelected = selectedActivityId === act.activity_id;
+                  const actCount = act.count || act.event_count || 1;
+                  return (
+                    <div
+                      key={act.activity_id || actIdx}
+                      onClick={() => {
+                        if (isSelected) {
+                          setSelectedActivityId(null);
+                        } else {
+                          setSelectedActivityId(act.activity_id);
+                          if (act.events && act.events.length > 0) {
+                            setSelectedEvent(act.events[0]);
+                            setSelectedEventIndex(0);
+                          }
+                        }
+                      }}
+                      className={`p-4 rounded-xl border text-left space-y-2.5 transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-primary/15 border-primary ring-1 ring-primary shadow-lg'
+                          : 'bg-surface-dim border-border-muted hover:border-primary/50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-primary text-[11px]">
+                          ACTIVITY #{actIdx + 1}
+                        </span>
+                        <span className="px-2 py-0.5 rounded bg-surface border border-border-muted text-emerald-400 font-bold text-[10px]">
+                          {actCount} {actCount === 1 ? 'EVENT' : 'EVENTS'}
+                        </span>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="text-[10px] text-text-dim uppercase tracking-wider">SOCKET TUPLE</div>
+                        <div className="font-bold text-text-primary text-xs truncate">
+                          {act.source_ip || 'Local Host'} &rarr; {act.destination_ip || 'Target'}:{act.destination_port || 'any'}
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] text-text-muted">
+                          <span className="px-1.5 py-0.2 rounded bg-surface border border-border-muted text-primary uppercase font-bold">
+                            {act.protocol || 'TCP'}
+                          </span>
+                          <span className="truncate">{act.action || 'DENY'}</span>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-border-muted/40 pt-2 flex items-center justify-between text-[10px] text-text-dim">
+                        <span>Window:</span>
+                        <span className="text-text-muted truncate">
+                          {(act.first_seen || '').substring(11, 19)} - {(act.last_seen || '').substring(11, 19)}
+                        </span>
+                      </div>
+
+                      <div className="text-right">
+                        <span className="text-[10px] font-bold text-primary hover:underline">
+                          {isSelected ? '✓ Showing member events' : 'Click to inspect events →'}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* 4. ATTACK / CORRELATION TIMELINE */}
-          {events.length > 0 && (
+          {displayedEvents.length > 0 && (
             <div className="glass-panel p-6 rounded-2xl border border-border-muted space-y-4 shadow-xl font-mono text-xs">
               <div className="flex items-center justify-between border-b border-border-muted pb-3">
                 <span className="font-bold text-text-primary uppercase tracking-wider">Correlated Incident Attack Chain Timeline</span>
-                <span className="text-text-muted text-[11px]">Select step to inspect evidence</span>
+                <span className="text-text-muted text-[11px]">
+                  {selectedActivityId ? `Filtered to Activity (${displayedEvents.length} events)` : 'Select step to inspect evidence'}
+                </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {events.map((evt, idx) => {
+                {displayedEvents.map((evt, idx) => {
                   const isSelected = selectedEventIndex === idx;
                   return (
                     <button
@@ -368,7 +547,7 @@ export function InvestigationReportPage() {
             <div>
               <span className="text-[10px] text-text-dim uppercase tracking-wider block font-bold">ACTIVE CORRELATED EVIDENCE STEP</span>
               <span className="text-sm font-bold text-text-primary mt-0.5 block">
-                Evidence Step {events.length > 0 ? selectedEventIndex + 1 : 1} of {events.length || 1} ({activeEvt.event_type || 'cisco_asa'})
+                Evidence Step {displayedEvents.length > 0 ? selectedEventIndex + 1 : 1} of {displayedEvents.length || 1} ({activeEvt.event_type || 'cisco_asa'})
               </span>
             </div>
 
@@ -383,11 +562,11 @@ export function InvestigationReportPage() {
               </button>
 
               <span className="px-3 py-1 rounded-lg bg-surface-dim border border-border-muted text-primary font-bold text-xs">
-                {events.length > 0 ? selectedEventIndex + 1 : 1} / {events.length || 1}
+                {displayedEvents.length > 0 ? selectedEventIndex + 1 : 1} / {displayedEvents.length || 1}
               </span>
 
               <button
-                disabled={events.length === 0 || selectedEventIndex >= events.length - 1}
+                disabled={displayedEvents.length === 0 || selectedEventIndex >= displayedEvents.length - 1}
                 onClick={handleNextEvent}
                 className="btn-secondary px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1 disabled:opacity-40 disabled:cursor-not-allowed touch-target"
               >
