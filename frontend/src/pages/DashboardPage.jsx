@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { useToast } from '../contexts/ToastContext';
 import { SocThreatCharts } from '../components/dashboard/SocThreatCharts';
+import { ForensicProcessOverlay } from '../components/common/SocLoaders';
 
 export function DashboardPage({ pollingInterval }) {
   const navigate = useNavigate();
@@ -271,6 +272,16 @@ export function DashboardPage({ pollingInterval }) {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
+      <ForensicProcessOverlay
+        isOpen={isSubmitting}
+        title="FORENSIC LOG INGESTION"
+        steps={[
+          '01. RAW WIRE CAPTURE & BUFFER',
+          '02. SHA-256 MERKLE LEAF SEAL',
+          '03. OCSF NORMALIZATION & XAI SCORE',
+        ]}
+        activeStepIndex={1}
+      />
       {loadError && (
         <div className="p-3.5 rounded-xl bg-[var(--color-severity-high-bg)] border border-[var(--color-severity-high-border)] text-[var(--color-severity-high)] font-mono text-xs flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">

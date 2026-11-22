@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { StitchBrandMark } from '../components/common/StitchBrandMark';
+import { OrbitalBootLoader } from '../components/common/SocLoaders';
 
 export function LoginPage() {
   const [usernameInput, setUsernameInput] = useState('');
@@ -32,6 +33,11 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background text-text-primary flex flex-col justify-between font-sans relative overflow-hidden">
+      <OrbitalBootLoader
+        isVisible={isLoading}
+        progress={84}
+        statusText="AUTHENTICATING & SYNCING SOC WORKSPACE"
+      />
       {/* Brand Header Nav */}
       <header className="w-full h-16 flex items-center justify-between px-6 max-w-7xl mx-auto z-10">
         <Link to="/" className="flex items-center space-x-2 focus:outline-none rounded px-1 py-0.5">

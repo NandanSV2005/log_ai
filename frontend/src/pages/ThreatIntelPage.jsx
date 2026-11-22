@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { api } from '../services/api';
+import { RadarPreloader } from '../components/common/SocLoaders';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -326,6 +327,9 @@ export function ThreatIntelPage() {
 
         {/* Real Leaflet World Map Container */}
         <div className="relative w-full h-[320px] sm:h-[480px] bg-surface-dim z-0">
+          {isLoading && clusters.length === 0 && (
+            <RadarPreloader label="RESOLVING GEO-IP THREAT VECTORS" progress={74} />
+          )}
           <div ref={mapContainerRef} className="w-full h-full z-10" />
 
           {/* Severity Map Legend Overlay */}

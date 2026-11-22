@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { StitchBrandMark } from '../components/common/StitchBrandMark';
 import { ThemeSwitch } from '../components/common/ThemeSwitch';
+import { InlineDissectionStepper } from '../components/common/SocLoaders';
 import { api } from '../services/api';
 import { InView, SpotlightCard } from '../components/motion-primitives';
 import { ThreatRadar3D } from '../components/radar/ThreatRadar3D';
@@ -957,15 +958,14 @@ export function LandingPage() {
                   </div>
 
                   {demoLoading ? (
-                    <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-secondary min-h-[175px] flex-1 flex flex-col justify-center gap-3 border border-border-muted animate-pulse">
-                      <div className="flex items-center gap-2 text-text-muted text-[11px]">
+                    <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-secondary min-h-[175px] flex-1 flex flex-col justify-center gap-3 border border-border-muted">
+                      <InlineDissectionStepper activeStep={1} />
+                      <div className="flex items-center gap-2 text-text-muted text-[11px] pt-1">
                         <span className="w-2 h-2 rounded-full bg-secondary animate-ping"></span>
-                        <span>PARSING &amp; MAPPING FIELDS...</span>
+                        <span>PARSING &amp; MAPPING OCSF FIELDS...</span>
                       </div>
-                      <div className="h-3.5 bg-secondary/20 rounded w-2/3"></div>
-                      <div className="h-3 bg-secondary/15 rounded w-5/6"></div>
-                      <div className="h-3 bg-secondary/15 rounded w-4/5"></div>
-                      <div className="h-3 bg-secondary/10 rounded w-2/3"></div>
+                      <div className="h-3 bg-secondary/15 rounded w-5/6 animate-pulse"></div>
+                      <div className="h-3 bg-secondary/15 rounded w-4/5 animate-pulse"></div>
                     </div>
                   ) : demoError ? (
                     <div className="bg-surface-dim p-4 rounded-xl font-mono text-xs text-[var(--color-severity-critical)] min-h-[175px] flex-1 flex flex-col justify-center items-center text-center gap-2 border border-[var(--color-severity-critical-border)]">

@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { HeaderNav } from './components/common/HeaderNav';
 import { Footer } from './components/common/Footer';
 import { CopilotWidget } from './components/copilot/CopilotWidget';
+import { OrbitalBootLoader } from './components/common/SocLoaders';
 
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
@@ -29,13 +30,52 @@ function ProtectedRoute({ children }) {
 export default function App() {
   const [airGapped, setAirGapped] = useState(true);
   const [pollingInterval, setPollingInterval] = useState(2000);
+  const [isBooting, setIsBooting] = useState(() => {
+    if (typeof sessionStorage === 'undefined') return false;
+    return !sessionStorage.getItem('logai_booted');
+  });
+  const [bootProgress, setBootProgress] = useState(32);
   const location = useLocation();
+
+  useEffect(() => {
+    if (!isBooting) return undefined;
+    const t1 = setTimeout(() => setBootProgress(78), 220);
+    const t2 = setTimeout(() => setBootProgress(100), 460);
+    const t3 = setTimeout(() => {
+      setIsBooting(false);
+      try {
+        sessionStorage.setItem('logai_booted', '1');
+      } catch {
+        // ignore storage restrictions
+      }
+    }, 680);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
+  }, [isBooting]);
+
+  const handleSkipBoot = () => {
+    setIsBooting(false);
+    try {
+      sessionStorage.setItem('logai_booted', '1');
+    } catch {
+      // ignore
+    }
+  };
 
   // Check if current route is a public standalone page (Landing, Login, Register, Signin)
   const isPublicRoute = ['/', '/login', '/signin', '/register'].includes(location.pathname);
 
   return (
     <div className="min-h-screen bg-background text-text-primary flex flex-col font-sans transition-colors duration-200">
+      <OrbitalBootLoader
+        isVisible={isBooting}
+        progress={bootProgress}
+        statusText="INITIALIZING OCSF v1.1 ENGINE"
+        onSkip={handleSkipBoot}
+      />
       {!isPublicRoute && (
         <HeaderNav
           airGapped={airGapped}

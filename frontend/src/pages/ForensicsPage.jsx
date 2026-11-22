@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { useToast } from '../contexts/ToastContext';
+import { ForensicProcessOverlay } from '../components/common/SocLoaders';
 
 export function ForensicsPage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const [isExporting, setIsExporting] = useState(false);
   const [activeCases, setActiveCases] = useState([]);
   const [recentEvents, setRecentEvents] = useState([]);
   const [selectedCase, setSelectedCase] = useState(null);
@@ -53,6 +55,16 @@ export function ForensicsPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
+      <ForensicProcessOverlay
+        isOpen={isExporting}
+        title="FORENSIC AUDIT CSV EXPORT"
+        steps={[
+          '01. COLLECT VERIFIED EVENTS',
+          '02. ATTACH MERKLE PROOF DIGESTS',
+          '03. SERIALIZE AUDIT CSV REPORT',
+        ]}
+        activeStepIndex={1}
+      />
       
       {/* Header */}
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border-muted pb-4">
@@ -67,15 +79,19 @@ export function ForensicsPage() {
 
         <button
           type="button"
+          disabled={isExporting}
           onClick={async () => {
+            setIsExporting(true);
             try {
               await api.exportCsv();
               showToast({ variant: 'success', title: 'Audit Report Exported', message: 'Forensic CSV downloaded.' });
             } catch (err) {
               showToast({ variant: 'error', title: 'Export Failed', message: err.message || 'Unable to export CSV.' });
+            } finally {
+              setIsExporting(false);
             }
           }}
-          className="btn-secondary px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer"
+          className="btn-secondary px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer disabled:opacity-60"
         >
           <span className="material-symbols-outlined text-sm">download</span>
           <span>Export Forensic Audit Report</span>

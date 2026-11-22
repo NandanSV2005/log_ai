@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { api } from '../services/api';
+import { ForensicProcessOverlay } from '../components/common/SocLoaders';
 
 export function RuleStudioPage() {
   const [merkleInputHash, setMerkleInputHash] = useState('demo_hash_9f7fe12c98001dcace31357795d410458710a892bfecdac00aee45bce0a96915');
@@ -81,6 +82,24 @@ action:
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
+      <ForensicProcessOverlay
+        isOpen={isTestingRule || isTampering}
+        title={isTampering ? 'MERKLE INTEGRITY VERIFICATION' : 'DETECTION RULE COMPILER'}
+        steps={
+          isTampering
+            ? [
+                '01. LOCATE MERKLE LEAF',
+                '02. RECOMPUTE SHA-256 DIGEST',
+                '03. VERIFY CHAIN INTEGRITY',
+              ]
+            : [
+                '01. PARSE YAML / SIGMA AST',
+                '02. EVALUATE AGAINST LOG STORE',
+                '03. COMPILE MATCH TELEMETRY',
+              ]
+        }
+        activeStepIndex={1}
+      />
       
       {/* Header */}
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border-muted pb-4">

@@ -3,6 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { checkWebGLSupport } from '../../utils/webgl';
 import { useThreeThemeColors } from '../tunnel/useThreeThemeColors';
+import { RadarPreloader } from '../common/SocLoaders';
 
 // 3D Blips Definition mapping 2D percentage positions to 3D radar space (x, y, z)
 export const DEFAULT_RADAR_BLIPS = [
@@ -302,6 +303,7 @@ export function ThreatRadar3D({
   const [hasWebGL, setHasWebGL] = useState(true);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [isRadarInView, setIsRadarInView] = useState(false);
+  const [isCanvasReady, setIsCanvasReady] = useState(false);
   const radarContainerRef = useRef(null);
   const themeColors = useThreeThemeColors();
 
@@ -344,11 +346,15 @@ export function ThreatRadar3D({
 
         {hasWebGL && !reducedMotion && !force2D ? (
           <div className="absolute inset-0">
+            {!isCanvasReady && (
+              <RadarPreloader label="CALIBRATING 3D TOPOLOGY DISH" progress={82} />
+            )}
             <Canvas
               frameloop={isRadarInView ? 'always' : 'demand'}
               camera={{ position: [0, 5.2, 6.8], fov: 40 }}
               dpr={[1, 1.5]}
               gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+              onCreated={() => setIsCanvasReady(true)}
               className="w-full h-full cursor-grab active:cursor-grabbing"
             >
               <ambientLight intensity={0.85} />
